@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>squircle.cpp Example File | Qt Quick 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-scenegraph-openglunderqml-example.html">Scene Graph - OpenGL Under QML</a></td><td >squircle.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">squircle.cpp Example File</h1>
+<span class="subtitle">scenegraph/openglunderqml/squircle.cpp</span>
+<!-- $$$scenegraph/openglunderqml/squircle.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;squircle.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtQuick/qquickwindow.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QOpenGLShaderProgram&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QOpenGLContext&gt;</span>
+
+  Squircle<span class="operator">::</span>Squircle()
+      : m_t(<span class="number">0</span>)
+      <span class="operator">,</span> m_renderer(<span class="number">0</span>)
+  {
+      connect(<span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qquickitem.html">QQuickItem</a></span><span class="operator">::</span>windowChanged<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>Squircle<span class="operator">::</span>handleWindowChanged);
+  }
+
+  <span class="type">void</span> Squircle<span class="operator">::</span>setT(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> t)
+  {
+      <span class="keyword">if</span> (t <span class="operator">=</span><span class="operator">=</span> m_t)
+          <span class="keyword">return</span>;
+      m_t <span class="operator">=</span> t;
+      <span class="keyword">emit</span> tChanged();
+      <span class="keyword">if</span> (window())
+          window()<span class="operator">-</span><span class="operator">&gt;</span>update();
+  }
+
+  <span class="type">void</span> Squircle<span class="operator">::</span>handleWindowChanged(<span class="type"><a href="qquickwindow.html">QQuickWindow</a></span> <span class="operator">*</span>win)
+  {
+      <span class="keyword">if</span> (win) {
+          connect(win<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qquickwindow.html">QQuickWindow</a></span><span class="operator">::</span>beforeSynchronizing<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>Squircle<span class="operator">::</span>sync<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DirectConnection);
+          connect(win<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qquickwindow.html">QQuickWindow</a></span><span class="operator">::</span>sceneGraphInvalidated<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>Squircle<span class="operator">::</span>cleanup<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DirectConnection);
+          <span class="comment">// If we allow QML to do the clearing, they would clear what we paint</span>
+          <span class="comment">// and nothing would show.</span>
+          win<span class="operator">-</span><span class="operator">&gt;</span>setClearBeforeRendering(<span class="keyword">false</span>);
+      }
+  }
+
+  <span class="type">void</span> Squircle<span class="operator">::</span>cleanup()
+  {
+      <span class="keyword">if</span> (m_renderer) {
+          <span class="keyword">delete</span> m_renderer;
+          m_renderer <span class="operator">=</span> <span class="number">0</span>;
+      }
+  }
+
+  SquircleRenderer<span class="operator">::</span><span class="operator">~</span>SquircleRenderer()
+  {
+      <span class="keyword">delete</span> m_program;
+  }
+
+  <span class="type">void</span> Squircle<span class="operator">::</span>sync()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_renderer) {
+          m_renderer <span class="operator">=</span> <span class="keyword">new</span> SquircleRenderer();
+          connect(window()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qquickwindow.html">QQuickWindow</a></span><span class="operator">::</span>beforeRendering<span class="operator">,</span> m_renderer<span class="operator">,</span> <span class="operator">&amp;</span>SquircleRenderer<span class="operator">::</span>paint<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DirectConnection);
+      }
+      m_renderer<span class="operator">-</span><span class="operator">&gt;</span>setViewportSize(window()<span class="operator">-</span><span class="operator">&gt;</span>size() <span class="operator">*</span> window()<span class="operator">-</span><span class="operator">&gt;</span>devicePixelRatio());
+      m_renderer<span class="operator">-</span><span class="operator">&gt;</span>setT(m_t);
+      m_renderer<span class="operator">-</span><span class="operator">&gt;</span>setWindow(window());
+  }
+
+  <span class="type">void</span> SquircleRenderer<span class="operator">::</span>paint()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_program) {
+          initializeOpenGLFunctions();
+
+          m_program <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtgui/qopenglshaderprogram.html">QOpenGLShaderProgram</a></span>();
+          m_program<span class="operator">-</span><span class="operator">&gt;</span>addShaderFromSourceCode(<span class="type"><a href="../qtgui/qopenglshader.html">QOpenGLShader</a></span><span class="operator">::</span>Vertex<span class="operator">,</span>
+                                             <span class="string">&quot;attribute highp vec4 vertices;&quot;</span>
+                                             <span class="string">&quot;varying highp vec2 coords;&quot;</span>
+                                             <span class="string">&quot;void main() {&quot;</span>
+                                             <span class="string">&quot;    gl_Position = vertices;&quot;</span>
+                                             <span class="string">&quot;    coords = vertices.xy;&quot;</span>
+                                             <span class="string">&quot;}&quot;</span>);
+          m_program<span class="operator">-</span><span class="operator">&gt;</span>addShaderFromSourceCode(<span class="type"><a href="../qtgui/qopenglshader.html">QOpenGLShader</a></span><span class="operator">::</span>Fragment<span class="operator">,</span>
+                                             <span class="string">&quot;uniform lowp float t;&quot;</span>
+                                             <span class="string">&quot;varying highp vec2 coords;&quot;</span>
+                                             <span class="string">&quot;void main() {&quot;</span>
+                                             <span class="string">&quot;    lowp float i = 1. - (pow(abs(coords.x), 4.) + pow(abs(coords.y), 4.));&quot;</span>
+                                             <span class="string">&quot;    i = smoothstep(t - 0.8, t + 0.8, i);&quot;</span>
+                                             <span class="string">&quot;    i = floor(i * 20.) / 20.;&quot;</span>
+                                             <span class="string">&quot;    gl_FragColor = vec4(coords * .5 + .5, i, i);&quot;</span>
+                                             <span class="string">&quot;}&quot;</span>);
+
+          m_program<span class="operator">-</span><span class="operator">&gt;</span>bindAttributeLocation(<span class="string">&quot;vertices&quot;</span><span class="operator">,</span> <span class="number">0</span>);
+          m_program<span class="operator">-</span><span class="operator">&gt;</span>link();
+
+      }
+      m_program<span class="operator">-</span><span class="operator">&gt;</span>bind();
+
+      m_program<span class="operator">-</span><span class="operator">&gt;</span>enableAttributeArray(<span class="number">0</span>);
+
+      <span class="type">float</span> values<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> {
+          <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span>
+          <span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span>
+          <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span>
+          <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>
+      };
+      m_program<span class="operator">-</span><span class="operator">&gt;</span>setAttributeArray(<span class="number">0</span><span class="operator">,</span> GL_FLOAT<span class="operator">,</span> values<span class="operator">,</span> <span class="number">2</span>);
+      m_program<span class="operator">-</span><span class="operator">&gt;</span>setUniformValue(<span class="string">&quot;t&quot;</span><span class="operator">,</span> (<span class="type">float</span>) m_t);
+
+      glViewport(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> m_viewportSize<span class="operator">.</span>width()<span class="operator">,</span> m_viewportSize<span class="operator">.</span>height());
+
+      glDisable(GL_DEPTH_TEST);
+
+      glClearColor(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+      glClear(GL_COLOR_BUFFER_BIT);
+
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA<span class="operator">,</span> GL_ONE);
+
+      glDrawArrays(GL_TRIANGLE_STRIP<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">4</span>);
+
+      m_program<span class="operator">-</span><span class="operator">&gt;</span>disableAttributeArray(<span class="number">0</span>);
+      m_program<span class="operator">-</span><span class="operator">&gt;</span>release();
+
+      <span class="comment">// Not strictly needed for this example, but generally useful for when</span>
+      <span class="comment">// mixing with raw OpenGL.</span>
+      m_window<span class="operator">-</span><span class="operator">&gt;</span>resetOpenGLState();
+  }
+
+</pre>
+</div>
+<!-- @@@scenegraph/openglunderqml/squircle.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

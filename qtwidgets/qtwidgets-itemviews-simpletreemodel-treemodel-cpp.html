@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>treemodel.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-itemviews-simpletreemodel-example.html">Simple Tree Model Example</a></td><td >treemodel.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">treemodel.cpp Example File</h1>
+<span class="subtitle">itemviews/simpletreemodel/treemodel.cpp</span>
+<!-- $$$itemviews/simpletreemodel/treemodel.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="comment">/*
+      treemodel.cpp
+
+      Provides a simple tree model to show how to create and use hierarchical
+      models.
+  */</span>
+
+  <span class="preprocessor">#include &quot;treeitem.h&quot;</span>
+  <span class="preprocessor">#include &quot;treemodel.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QStringList&gt;</span>
+
+  TreeModel<span class="operator">::</span>TreeModel(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>data<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span>(parent)
+  {
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">&gt;</span> rootData;
+      rootData <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Title&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Summary&quot;</span>;
+      rootItem <span class="operator">=</span> <span class="keyword">new</span> TreeItem(rootData);
+      setupModelData(data<span class="operator">.</span>split(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;\n&quot;</span>))<span class="operator">,</span> rootItem);
+  }
+
+  TreeModel<span class="operator">::</span><span class="operator">~</span>TreeModel()
+  {
+      <span class="keyword">delete</span> rootItem;
+  }
+
+  <span class="type">int</span> TreeModel<span class="operator">::</span>columnCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (parent<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>TreeItem<span class="operator">*</span><span class="operator">&gt;</span>(parent<span class="operator">.</span>internalPointer())<span class="operator">-</span><span class="operator">&gt;</span>columnCount();
+      <span class="keyword">else</span>
+          <span class="keyword">return</span> rootItem<span class="operator">-</span><span class="operator">&gt;</span>columnCount();
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> TreeModel<span class="operator">::</span>data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+      <span class="keyword">if</span> (role <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+      TreeItem <span class="operator">*</span>item <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>TreeItem<span class="operator">*</span><span class="operator">&gt;</span>(index<span class="operator">.</span>internalPointer());
+
+      <span class="keyword">return</span> item<span class="operator">-</span><span class="operator">&gt;</span>data(index<span class="operator">.</span>column());
+  }
+
+  <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemFlags TreeModel<span class="operator">::</span>flags(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="number">0</span>;
+
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span><span class="operator">::</span>flags(index);
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> TreeModel<span class="operator">::</span>headerData(<span class="type">int</span> section<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Orientation orientation<span class="operator">,</span>
+                                 <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (orientation <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal <span class="operator">&amp;</span><span class="operator">&amp;</span> role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole)
+          <span class="keyword">return</span> rootItem<span class="operator">-</span><span class="operator">&gt;</span>data(section);
+
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> TreeModel<span class="operator">::</span>index(<span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> column<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent)
+              <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>hasIndex(row<span class="operator">,</span> column<span class="operator">,</span> parent))
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      TreeItem <span class="operator">*</span>parentItem;
+
+      <span class="keyword">if</span> (<span class="operator">!</span>parent<span class="operator">.</span>isValid())
+          parentItem <span class="operator">=</span> rootItem;
+      <span class="keyword">else</span>
+          parentItem <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>TreeItem<span class="operator">*</span><span class="operator">&gt;</span>(parent<span class="operator">.</span>internalPointer());
+
+      TreeItem <span class="operator">*</span>childItem <span class="operator">=</span> parentItem<span class="operator">-</span><span class="operator">&gt;</span>child(row);
+      <span class="keyword">if</span> (childItem)
+          <span class="keyword">return</span> createIndex(row<span class="operator">,</span> column<span class="operator">,</span> childItem);
+      <span class="keyword">else</span>
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> TreeModel<span class="operator">::</span>parent(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      TreeItem <span class="operator">*</span>childItem <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>TreeItem<span class="operator">*</span><span class="operator">&gt;</span>(index<span class="operator">.</span>internalPointer());
+      TreeItem <span class="operator">*</span>parentItem <span class="operator">=</span> childItem<span class="operator">-</span><span class="operator">&gt;</span>parentItem();
+
+      <span class="keyword">if</span> (parentItem <span class="operator">=</span><span class="operator">=</span> rootItem)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      <span class="keyword">return</span> createIndex(parentItem<span class="operator">-</span><span class="operator">&gt;</span>row()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> parentItem);
+  }
+
+  <span class="type">int</span> TreeModel<span class="operator">::</span>rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      TreeItem <span class="operator">*</span>parentItem;
+      <span class="keyword">if</span> (parent<span class="operator">.</span>column() <span class="operator">&gt;</span> <span class="number">0</span>)
+          <span class="keyword">return</span> <span class="number">0</span>;
+
+      <span class="keyword">if</span> (<span class="operator">!</span>parent<span class="operator">.</span>isValid())
+          parentItem <span class="operator">=</span> rootItem;
+      <span class="keyword">else</span>
+          parentItem <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>TreeItem<span class="operator">*</span><span class="operator">&gt;</span>(parent<span class="operator">.</span>internalPointer());
+
+      <span class="keyword">return</span> parentItem<span class="operator">-</span><span class="operator">&gt;</span>childCount();
+  }
+
+  <span class="type">void</span> TreeModel<span class="operator">::</span>setupModelData(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> <span class="operator">&amp;</span>lines<span class="operator">,</span> TreeItem <span class="operator">*</span>parent)
+  {
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>TreeItem<span class="operator">*</span><span class="operator">&gt;</span> parents;
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span> indentations;
+      parents <span class="operator">&lt;</span><span class="operator">&lt;</span> parent;
+      indentations <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">0</span>;
+
+      <span class="type">int</span> number <span class="operator">=</span> <span class="number">0</span>;
+
+      <span class="keyword">while</span> (number <span class="operator">&lt;</span> lines<span class="operator">.</span>count()) {
+          <span class="type">int</span> position <span class="operator">=</span> <span class="number">0</span>;
+          <span class="keyword">while</span> (position <span class="operator">&lt;</span> lines<span class="operator">[</span>number<span class="operator">]</span><span class="operator">.</span>length()) {
+              <span class="keyword">if</span> (lines<span class="operator">[</span>number<span class="operator">]</span><span class="operator">.</span>at(position) <span class="operator">!</span><span class="operator">=</span> <span class="char">' '</span>)
+                  <span class="keyword">break</span>;
+              position<span class="operator">+</span><span class="operator">+</span>;
+          }
+
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> lineData <span class="operator">=</span> lines<span class="operator">[</span>number<span class="operator">]</span><span class="operator">.</span>mid(position)<span class="operator">.</span>trimmed();
+
+          <span class="keyword">if</span> (<span class="operator">!</span>lineData<span class="operator">.</span>isEmpty()) {
+              <span class="comment">// Read the column data from the rest of the line.</span>
+              <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> columnStrings <span class="operator">=</span> lineData<span class="operator">.</span>split(<span class="string">&quot;\t&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>SkipEmptyParts);
+              <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">&gt;</span> columnData;
+              <span class="keyword">for</span> (<span class="type">int</span> column <span class="operator">=</span> <span class="number">0</span>; column <span class="operator">&lt;</span> columnStrings<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>column)
+                  columnData <span class="operator">&lt;</span><span class="operator">&lt;</span> columnStrings<span class="operator">[</span>column<span class="operator">]</span>;
+
+              <span class="keyword">if</span> (position <span class="operator">&gt;</span> indentations<span class="operator">.</span>last()) {
+                  <span class="comment">// The last child of the current parent is now the new parent</span>
+                  <span class="comment">// unless the current parent has no children.</span>
+
+                  <span class="keyword">if</span> (parents<span class="operator">.</span>last()<span class="operator">-</span><span class="operator">&gt;</span>childCount() <span class="operator">&gt;</span> <span class="number">0</span>) {
+                      parents <span class="operator">&lt;</span><span class="operator">&lt;</span> parents<span class="operator">.</span>last()<span class="operator">-</span><span class="operator">&gt;</span>child(parents<span class="operator">.</span>last()<span class="operator">-</span><span class="operator">&gt;</span>childCount()<span class="operator">-</span><span class="number">1</span>);
+                      indentations <span class="operator">&lt;</span><span class="operator">&lt;</span> position;
+                  }
+              } <span class="keyword">else</span> {
+                  <span class="keyword">while</span> (position <span class="operator">&lt;</span> indentations<span class="operator">.</span>last() <span class="operator">&amp;</span><span class="operator">&amp;</span> parents<span class="operator">.</span>count() <span class="operator">&gt;</span> <span class="number">0</span>) {
+                      parents<span class="operator">.</span>pop_back();
+                      indentations<span class="operator">.</span>pop_back();
+                  }
+              }
+
+              <span class="comment">// Append a new item to the current parent's list of children.</span>
+              parents<span class="operator">.</span>last()<span class="operator">-</span><span class="operator">&gt;</span>appendChild(<span class="keyword">new</span> TreeItem(columnData<span class="operator">,</span> parents<span class="operator">.</span>last()));
+          }
+
+          <span class="operator">+</span><span class="operator">+</span>number;
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@itemviews/simpletreemodel/treemodel.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

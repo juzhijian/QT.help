@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>glwidget.cpp Example File | Qt OpenGL</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtopengl-index.html">Qt OpenGL</a></td><td ><a href="qtopengl-textures-example.html">Textures Example</a></td><td >glwidget.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">glwidget.cpp Example File</h1>
+<span class="subtitle">textures/glwidget.cpp</span>
+<!-- $$$textures/glwidget.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;glwidget.h&quot;</span>
+  <span class="preprocessor">#include &lt;QOpenGLShaderProgram&gt;</span>
+  <span class="preprocessor">#include &lt;QOpenGLTexture&gt;</span>
+  <span class="preprocessor">#include &lt;QMouseEvent&gt;</span>
+
+  GLWidget<span class="operator">::</span>GLWidget(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtwidgets/qopenglwidget.html">QOpenGLWidget</a></span>(parent)<span class="operator">,</span>
+        clearColor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black)<span class="operator">,</span>
+        xRot(<span class="number">0</span>)<span class="operator">,</span>
+        yRot(<span class="number">0</span>)<span class="operator">,</span>
+        zRot(<span class="number">0</span>)<span class="operator">,</span>
+        program(<span class="number">0</span>)
+  {
+      memset(textures<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="keyword">sizeof</span>(textures));
+  }
+
+  GLWidget<span class="operator">::</span><span class="operator">~</span>GLWidget()
+  {
+      makeCurrent();
+      vbo<span class="operator">.</span>destroy();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> <span class="number">6</span>; <span class="operator">+</span><span class="operator">+</span>i)
+          <span class="keyword">delete</span> textures<span class="operator">[</span>i<span class="operator">]</span>;
+      <span class="keyword">delete</span> program;
+      doneCurrent();
+  }
+
+  <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> GLWidget<span class="operator">::</span>minimumSizeHint() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">50</span><span class="operator">,</span> <span class="number">50</span>);
+  }
+
+  <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> GLWidget<span class="operator">::</span>sizeHint() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">200</span><span class="operator">,</span> <span class="number">200</span>);
+  }
+
+  <span class="type">void</span> GLWidget<span class="operator">::</span>rotateBy(<span class="type">int</span> xAngle<span class="operator">,</span> <span class="type">int</span> yAngle<span class="operator">,</span> <span class="type">int</span> zAngle)
+  {
+      xRot <span class="operator">+</span><span class="operator">=</span> xAngle;
+      yRot <span class="operator">+</span><span class="operator">=</span> yAngle;
+      zRot <span class="operator">+</span><span class="operator">=</span> zAngle;
+      update();
+  }
+
+  <span class="type">void</span> GLWidget<span class="operator">::</span>setClearColor(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>color)
+  {
+      clearColor <span class="operator">=</span> color;
+      update();
+  }
+
+  <span class="type">void</span> GLWidget<span class="operator">::</span>initializeGL()
+  {
+      initializeOpenGLFunctions();
+
+      makeObject();
+
+      glEnable(GL_DEPTH_TEST);
+      glEnable(GL_CULL_FACE);
+
+  <span class="preprocessor">#define PROGRAM_VERTEX_ATTRIBUTE 0</span>
+  <span class="preprocessor">#define PROGRAM_TEXCOORD_ATTRIBUTE 1</span>
+
+      <span class="type"><a href="../qtgui/qopenglshader.html">QOpenGLShader</a></span> <span class="operator">*</span>vshader <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtgui/qopenglshader.html">QOpenGLShader</a></span>(<span class="type"><a href="../qtgui/qopenglshader.html">QOpenGLShader</a></span><span class="operator">::</span>Vertex<span class="operator">,</span> <span class="keyword">this</span>);
+      <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>vsrc <span class="operator">=</span>
+          <span class="string">&quot;attribute highp vec4 vertex;\n&quot;</span>
+          <span class="string">&quot;attribute mediump vec4 texCoord;\n&quot;</span>
+          <span class="string">&quot;varying mediump vec4 texc;\n&quot;</span>
+          <span class="string">&quot;uniform mediump mat4 matrix;\n&quot;</span>
+          <span class="string">&quot;void main(void)\n&quot;</span>
+          <span class="string">&quot;{\n&quot;</span>
+          <span class="string">&quot;    gl_Position = matrix * vertex;\n&quot;</span>
+          <span class="string">&quot;    texc = texCoord;\n&quot;</span>
+          <span class="string">&quot;}\n&quot;</span>;
+      vshader<span class="operator">-</span><span class="operator">&gt;</span>compileSourceCode(vsrc);
+
+      <span class="type"><a href="../qtgui/qopenglshader.html">QOpenGLShader</a></span> <span class="operator">*</span>fshader <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtgui/qopenglshader.html">QOpenGLShader</a></span>(<span class="type"><a href="../qtgui/qopenglshader.html">QOpenGLShader</a></span><span class="operator">::</span>Fragment<span class="operator">,</span> <span class="keyword">this</span>);
+      <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>fsrc <span class="operator">=</span>
+          <span class="string">&quot;uniform sampler2D texture;\n&quot;</span>
+          <span class="string">&quot;varying mediump vec4 texc;\n&quot;</span>
+          <span class="string">&quot;void main(void)\n&quot;</span>
+          <span class="string">&quot;{\n&quot;</span>
+          <span class="string">&quot;    gl_FragColor = texture2D(texture, texc.st);\n&quot;</span>
+          <span class="string">&quot;}\n&quot;</span>;
+      fshader<span class="operator">-</span><span class="operator">&gt;</span>compileSourceCode(fsrc);
+
+      program <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtgui/qopenglshaderprogram.html">QOpenGLShaderProgram</a></span>;
+      program<span class="operator">-</span><span class="operator">&gt;</span>addShader(vshader);
+      program<span class="operator">-</span><span class="operator">&gt;</span>addShader(fshader);
+      program<span class="operator">-</span><span class="operator">&gt;</span>bindAttributeLocation(<span class="string">&quot;vertex&quot;</span><span class="operator">,</span> PROGRAM_VERTEX_ATTRIBUTE);
+      program<span class="operator">-</span><span class="operator">&gt;</span>bindAttributeLocation(<span class="string">&quot;texCoord&quot;</span><span class="operator">,</span> PROGRAM_TEXCOORD_ATTRIBUTE);
+      program<span class="operator">-</span><span class="operator">&gt;</span>link();
+
+      program<span class="operator">-</span><span class="operator">&gt;</span>bind();
+      program<span class="operator">-</span><span class="operator">&gt;</span>setUniformValue(<span class="string">&quot;texture&quot;</span><span class="operator">,</span> <span class="number">0</span>);
+  }
+
+  <span class="type">void</span> GLWidget<span class="operator">::</span>paintGL()
+  {
+      glClearColor(clearColor<span class="operator">.</span>redF()<span class="operator">,</span> clearColor<span class="operator">.</span>greenF()<span class="operator">,</span> clearColor<span class="operator">.</span>blueF()<span class="operator">,</span> clearColor<span class="operator">.</span>alphaF());
+      glClear(GL_COLOR_BUFFER_BIT <span class="operator">|</span> GL_DEPTH_BUFFER_BIT);
+
+      QMatrix4x4 m;
+      m<span class="operator">.</span>ortho(<span class="operator">-</span><span class="number">0.5f</span><span class="operator">,</span> <span class="operator">+</span><span class="number">0.5f</span><span class="operator">,</span> <span class="operator">+</span><span class="number">0.5f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">0.5f</span><span class="operator">,</span> <span class="number">4.0f</span><span class="operator">,</span> <span class="number">15.0f</span>);
+      m<span class="operator">.</span>translate(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">10.0f</span>);
+      m<span class="operator">.</span>rotate(xRot <span class="operator">/</span> <span class="number">16.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span>);
+      m<span class="operator">.</span>rotate(yRot <span class="operator">/</span> <span class="number">16.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span>);
+      m<span class="operator">.</span>rotate(zRot <span class="operator">/</span> <span class="number">16.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span>);
+
+      program<span class="operator">-</span><span class="operator">&gt;</span>setUniformValue(<span class="string">&quot;matrix&quot;</span><span class="operator">,</span> m);
+      program<span class="operator">-</span><span class="operator">&gt;</span>enableAttributeArray(PROGRAM_VERTEX_ATTRIBUTE);
+      program<span class="operator">-</span><span class="operator">&gt;</span>enableAttributeArray(PROGRAM_TEXCOORD_ATTRIBUTE);
+      program<span class="operator">-</span><span class="operator">&gt;</span>setAttributeBuffer(PROGRAM_VERTEX_ATTRIBUTE<span class="operator">,</span> GL_FLOAT<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">5</span> <span class="operator">*</span> <span class="keyword">sizeof</span>(GLfloat));
+      program<span class="operator">-</span><span class="operator">&gt;</span>setAttributeBuffer(PROGRAM_TEXCOORD_ATTRIBUTE<span class="operator">,</span> GL_FLOAT<span class="operator">,</span> <span class="number">3</span> <span class="operator">*</span> <span class="keyword">sizeof</span>(GLfloat)<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">5</span> <span class="operator">*</span> <span class="keyword">sizeof</span>(GLfloat));
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> <span class="number">6</span>; <span class="operator">+</span><span class="operator">+</span>i) {
+          textures<span class="operator">[</span>i<span class="operator">]</span><span class="operator">-</span><span class="operator">&gt;</span>bind();
+          glDrawArrays(GL_TRIANGLE_FAN<span class="operator">,</span> i <span class="operator">*</span> <span class="number">4</span><span class="operator">,</span> <span class="number">4</span>);
+      }
+  }
+  <span class="type">void</span> GLWidget<span class="operator">::</span>resizeGL(<span class="type">int</span> width<span class="operator">,</span> <span class="type">int</span> height)
+  {
+      <span class="type">int</span> side <span class="operator">=</span> <a href="../qtcore/qtglobal.html#qMin">qMin</a>(width<span class="operator">,</span> height);
+      glViewport((width <span class="operator">-</span> side) <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> (height <span class="operator">-</span> side) <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> side<span class="operator">,</span> side);
+  }
+
+  <span class="type">void</span> GLWidget<span class="operator">::</span>mousePressEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      lastPos <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>pos();
+  }
+
+  <span class="type">void</span> GLWidget<span class="operator">::</span>mouseMoveEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="type">int</span> dx <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>x() <span class="operator">-</span> lastPos<span class="operator">.</span>x();
+      <span class="type">int</span> dy <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>y() <span class="operator">-</span> lastPos<span class="operator">.</span>y();
+
+      <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>buttons() <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftButton) {
+          rotateBy(<span class="number">8</span> <span class="operator">*</span> dy<span class="operator">,</span> <span class="number">8</span> <span class="operator">*</span> dx<span class="operator">,</span> <span class="number">0</span>);
+      } <span class="keyword">else</span> <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>buttons() <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightButton) {
+          rotateBy(<span class="number">8</span> <span class="operator">*</span> dy<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">8</span> <span class="operator">*</span> dx);
+      }
+      lastPos <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>pos();
+  }
+
+  <span class="type">void</span> GLWidget<span class="operator">::</span>mouseReleaseEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span> <span class="comment">/* event */</span>)
+  {
+      <span class="keyword">emit</span> clicked();
+  }
+
+  <span class="type">void</span> GLWidget<span class="operator">::</span>makeObject()
+  {
+      <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">int</span> coords<span class="operator">[</span><span class="number">6</span><span class="operator">]</span><span class="operator">[</span><span class="number">4</span><span class="operator">]</span><span class="operator">[</span><span class="number">3</span><span class="operator">]</span> <span class="operator">=</span> {
+          { { <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span> }<span class="operator">,</span> { <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span> }<span class="operator">,</span> { <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span> }<span class="operator">,</span> { <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span> } }<span class="operator">,</span>
+          { { <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span> }<span class="operator">,</span> { <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span> }<span class="operator">,</span> { <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span> }<span class="operator">,</span> { <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span> } }<span class="operator">,</span>
+          { { <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span> }<span class="operator">,</span> { <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span> }<span class="operator">,</span> { <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span> }<span class="operator">,</span> { <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span> } }<span class="operator">,</span>
+          { { <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span> }<span class="operator">,</span> { <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span> }<span class="operator">,</span> { <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span> }<span class="operator">,</span> { <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span> } }<span class="operator">,</span>
+          { { <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span> }<span class="operator">,</span> { <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span> }<span class="operator">,</span> { <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span> }<span class="operator">,</span> { <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span> } }<span class="operator">,</span>
+          { { <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span> }<span class="operator">,</span> { <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span> }<span class="operator">,</span> { <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span> }<span class="operator">,</span> { <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1</span> } }
+      };
+
+      <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> <span class="number">6</span>; <span class="operator">+</span><span class="operator">+</span>j)
+          textures<span class="operator">[</span>j<span class="operator">]</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtgui/qopengltexture.html">QOpenGLTexture</a></span>(<span class="type"><a href="../qtgui/qimage.html">QImage</a></span>(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;:/images/side%1.png&quot;</span>)<span class="operator">.</span>arg(j <span class="operator">+</span> <span class="number">1</span>))<span class="operator">.</span>mirrored());
+
+      <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span>GLfloat<span class="operator">&gt;</span> vertData;
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> <span class="number">6</span>; <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> <span class="number">4</span>; <span class="operator">+</span><span class="operator">+</span>j) {
+              <span class="comment">// vertex position</span>
+              vertData<span class="operator">.</span>append(<span class="number">0.2</span> <span class="operator">*</span> coords<span class="operator">[</span>i<span class="operator">]</span><span class="operator">[</span>j<span class="operator">]</span><span class="operator">[</span><span class="number">0</span><span class="operator">]</span>);
+              vertData<span class="operator">.</span>append(<span class="number">0.2</span> <span class="operator">*</span> coords<span class="operator">[</span>i<span class="operator">]</span><span class="operator">[</span>j<span class="operator">]</span><span class="operator">[</span><span class="number">1</span><span class="operator">]</span>);
+              vertData<span class="operator">.</span>append(<span class="number">0.2</span> <span class="operator">*</span> coords<span class="operator">[</span>i<span class="operator">]</span><span class="operator">[</span>j<span class="operator">]</span><span class="operator">[</span><span class="number">2</span><span class="operator">]</span>);
+              <span class="comment">// texture coordinate</span>
+              vertData<span class="operator">.</span>append(j <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> j <span class="operator">=</span><span class="operator">=</span> <span class="number">3</span>);
+              vertData<span class="operator">.</span>append(j <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> j <span class="operator">=</span><span class="operator">=</span> <span class="number">1</span>);
+          }
+      }
+
+      vbo<span class="operator">.</span>create();
+      vbo<span class="operator">.</span>bind();
+      vbo<span class="operator">.</span>allocate(vertData<span class="operator">.</span>constData()<span class="operator">,</span> vertData<span class="operator">.</span>count() <span class="operator">*</span> <span class="keyword">sizeof</span>(GLfloat));
+  }
+
+</pre>
+</div>
+<!-- @@@textures/glwidget.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

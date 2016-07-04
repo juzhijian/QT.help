@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qml-extending.qdoc -->
+  <title>Extending QML - Inheritance and Coercion Example | Qt QML 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtqml-index.html">Qt QML</a></td><td >Extending QML - Inheritance and Coercion Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#declare-boy-and-girl">Declare Boy and Girl</a></li>
+<li class="level2"><a href="#define-people-as-a-base-class">Define People as a base class</a></li>
+<li class="level2"><a href="#define-boy-and-girl">Define Boy and Girl</a></li>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Extending QML - Inheritance and Coercion Example</h1>
+<span class="subtitle"></span>
+<!-- $$$referenceexamples/coercion-description -->
+<div class="descr"> <a name="details"></a>
+<p>This example builds on:</p>
+<ul>
+<li><a href="qtqml-referenceexamples-properties-example.html">Extending QML - Object and List Property Types Example</a></li>
+<li><a href="qtqml-referenceexamples-adding-example.html">Extending QML - Adding Types Example</a></li>
+</ul>
+<p>The Inheritance and Coercion Example shows how to use base classes to assign types of more than one type to a property. It specializes the Person type developed in the previous examples into two types - a <code>Boy</code> and a <code>Girl</code>.</p>
+<pre class="qml">
+
+  <span class="type">BirthdayParty</span> {
+      <span class="name">host</span>: <span class="name">Boy</span> {
+          <span class="name">name</span>: <span class="string">&quot;Bob Jones&quot;</span>
+          <span class="name">shoeSize</span>: <span class="number">12</span>
+      }
+      <span class="name">guests</span>: [
+          <span class="type">Boy</span> { <span class="name">name</span>: <span class="string">&quot;Leo Hodges&quot;</span> },
+          <span class="type">Boy</span> { <span class="name">name</span>: <span class="string">&quot;Jack Smith&quot;</span> },
+          <span class="type">Girl</span> { <span class="name">name</span>: <span class="string">&quot;Anne Brown&quot;</span> }
+      ]
+  }
+
+</pre>
+<a name="declare-boy-and-girl"></a>
+<h2 id="declare-boy-and-girl">Declare Boy and Girl</h2>
+<pre class="cpp">
+
+  <span class="keyword">class</span> Boy : <span class="keyword">public</span> Person
+  {
+      Q_OBJECT
+  <span class="keyword">public</span>:
+      Boy(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span> parent <span class="operator">=</span> <span class="number">0</span>);
+  };
+
+  <span class="keyword">class</span> Girl : <span class="keyword">public</span> Person
+  {
+      Q_OBJECT
+  <span class="keyword">public</span>:
+      Girl(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span> parent <span class="operator">=</span> <span class="number">0</span>);
+  };
+
+</pre>
+<p>The Person class remains unaltered in this example and the Boy and Girl C++ classes are trivial extensions of it. As an example, the inheritance used here is a little contrived, but in real applications it is likely that the two extensions would add additional properties or modify the Person classes behavior.</p>
+<a name="define-people-as-a-base-class"></a>
+<h3 >Define People as a base class</h3>
+<p>The implementation of the People class itself has not changed since the previous example. However, as we have repurposed the People class as a common base for Boy and Girl, we want to prevent it from being instantiated from QML directly - an explicit Boy or Girl should be instantiated instead.</p>
+<pre class="cpp">
+
+  qmlRegisterType<span class="operator">&lt;</span>Person<span class="operator">&gt;</span>();
+
+</pre>
+<p>While we want to disallow instantiating Person from within QML, it still needs to be registered with the QML engine, so that it can be used as a property type and other types can be coerced to it.</p>
+<a name="define-boy-and-girl"></a>
+<h3 >Define Boy and Girl</h3>
+<p>The implementation of Boy and Girl are trivial.</p>
+<pre class="cpp">
+
+  Boy<span class="operator">::</span>Boy(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span> parent)
+  : Person(parent)
+  {
+  }
+
+  Girl<span class="operator">::</span>Girl(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span> parent)
+  : Person(parent)
+  {
+  }
+
+</pre>
+<p>All that is necessary is to implement the constructor, and to register the types and their QML name with the QML engine.</p>
+<a name="running-the-example"></a>
+<h2 id="running-the-example">Running the Example</h2>
+<p>The BirthdayParty type has not changed since the previous example. The celebrant and guests property still use the People type.</p>
+<pre class="cpp">
+
+      Q_PROPERTY(Person <span class="operator">*</span>host READ host WRITE setHost)
+      Q_PROPERTY(<span class="type"><a href="qqmllistproperty.html">QQmlListProperty</a></span><span class="operator">&lt;</span>Person<span class="operator">&gt;</span> guests READ guests)
+
+</pre>
+<p>However, as all three types, Person, Boy and Girl, have been registered with the QML system, on assignment QML automatically (and type-safely) converts the Boy and Girl objects into a Person.</p>
+<p>The main.cpp file in the example includes a simple shell application that loads and runs the QML snippet shown at the beginning of this page.</p>
+<p>Files:</p>
+<ul>
+<li><a href="qtqml-referenceexamples-coercion-birthdayparty-cpp.html">referenceexamples/coercion/birthdayparty.cpp</a></li>
+<li><a href="qtqml-referenceexamples-coercion-birthdayparty-h.html">referenceexamples/coercion/birthdayparty.h</a></li>
+<li><a href="qtqml-referenceexamples-coercion-example-qml.html">referenceexamples/coercion/example.qml</a></li>
+<li><a href="qtqml-referenceexamples-coercion-person-cpp.html">referenceexamples/coercion/person.cpp</a></li>
+<li><a href="qtqml-referenceexamples-coercion-person-h.html">referenceexamples/coercion/person.h</a></li>
+<li><a href="qtqml-referenceexamples-coercion-main-cpp.html">referenceexamples/coercion/main.cpp</a></li>
+<li><a href="qtqml-referenceexamples-coercion-coercion-pro.html">referenceexamples/coercion/coercion.pro</a></li>
+<li><a href="qtqml-referenceexamples-coercion-coercion-qrc.html">referenceexamples/coercion/coercion.qrc</a></li>
+</ul>
+</div>
+<!-- @@@referenceexamples/coercion -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

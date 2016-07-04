@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>qtbox.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-graphicsview-boxes-example.html">Boxes</a></td><td >qtbox.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">qtbox.cpp Example File</h1>
+<span class="subtitle">graphicsview/boxes/qtbox.cpp</span>
+<!-- $$$graphicsview/boxes/qtbox.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;qtbox.h&quot;</span>
+
+  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> ROTATE_SPEED_X <span class="operator">=</span> <span class="number">30.0</span> <span class="operator">/</span> <span class="number">1000.0</span>;
+  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> ROTATE_SPEED_Y <span class="operator">=</span> <span class="number">20.0</span> <span class="operator">/</span> <span class="number">1000.0</span>;
+  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> ROTATE_SPEED_Z <span class="operator">=</span> <span class="number">40.0</span> <span class="operator">/</span> <span class="number">1000.0</span>;
+  <span class="keyword">const</span> <span class="type">int</span> MAX_ITEM_SIZE <span class="operator">=</span> <span class="number">512</span>;
+  <span class="keyword">const</span> <span class="type">int</span> MIN_ITEM_SIZE <span class="operator">=</span> <span class="number">16</span>;
+
+  <span class="comment">//============================================================================//</span>
+  <span class="comment">//                                  ItemBase                                  //</span>
+  <span class="comment">//============================================================================//</span>
+
+  ItemBase<span class="operator">::</span>ItemBase(<span class="type">int</span> size<span class="operator">,</span> <span class="type">int</span> x<span class="operator">,</span> <span class="type">int</span> y) : m_size(size)<span class="operator">,</span> m_isResizing(<span class="keyword">false</span>)
+  {
+      setFlag(<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span><span class="operator">::</span>ItemIsMovable<span class="operator">,</span> <span class="keyword">true</span>);
+      setFlag(<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span><span class="operator">::</span>ItemIsSelectable<span class="operator">,</span> <span class="keyword">true</span>);
+      setFlag(<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span><span class="operator">::</span>ItemIsFocusable<span class="operator">,</span> <span class="keyword">true</span>);
+      setAcceptHoverEvents(<span class="keyword">true</span>);
+      setPos(x<span class="operator">,</span> y);
+      m_startTime <span class="operator">=</span> <span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime();
+  }
+
+  ItemBase<span class="operator">::</span><span class="operator">~</span>ItemBase()
+  {
+  }
+
+  <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> ItemBase<span class="operator">::</span>boundingRect() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span>(<span class="operator">-</span>m_size <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> <span class="operator">-</span>m_size <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> m_size<span class="operator">,</span> m_size);
+  }
+
+  <span class="type">void</span> ItemBase<span class="operator">::</span>paint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span>painter<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></span> <span class="operator">*</span>option<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>)
+  {
+      <span class="keyword">if</span> (option<span class="operator">-</span><span class="operator">&gt;</span>state <span class="operator">&amp;</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>State_Selected) {
+          painter<span class="operator">-</span><span class="operator">&gt;</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing<span class="operator">,</span> <span class="keyword">true</span>);
+          <span class="keyword">if</span> (option<span class="operator">-</span><span class="operator">&gt;</span>state <span class="operator">&amp;</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>State_HasFocus)
+              painter<span class="operator">-</span><span class="operator">&gt;</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>yellow);
+          <span class="keyword">else</span>
+              painter<span class="operator">-</span><span class="operator">&gt;</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white);
+          painter<span class="operator">-</span><span class="operator">&gt;</span>drawRect(boundingRect());
+
+          painter<span class="operator">-</span><span class="operator">&gt;</span>drawLine(m_size <span class="operator">/</span> <span class="number">2</span> <span class="operator">-</span> <span class="number">9</span><span class="operator">,</span> m_size <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> m_size <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> m_size <span class="operator">/</span> <span class="number">2</span> <span class="operator">-</span> <span class="number">9</span>);
+          painter<span class="operator">-</span><span class="operator">&gt;</span>drawLine(m_size <span class="operator">/</span> <span class="number">2</span> <span class="operator">-</span> <span class="number">6</span><span class="operator">,</span> m_size <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> m_size <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> m_size <span class="operator">/</span> <span class="number">2</span> <span class="operator">-</span> <span class="number">6</span>);
+          painter<span class="operator">-</span><span class="operator">&gt;</span>drawLine(m_size <span class="operator">/</span> <span class="number">2</span> <span class="operator">-</span> <span class="number">3</span><span class="operator">,</span> m_size <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> m_size <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> m_size <span class="operator">/</span> <span class="number">2</span> <span class="operator">-</span> <span class="number">3</span>);
+
+          painter<span class="operator">-</span><span class="operator">&gt;</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing<span class="operator">,</span> <span class="keyword">false</span>);
+      }
+  }
+
+  <span class="type">void</span> ItemBase<span class="operator">::</span>contextMenuEvent(<span class="type"><a href="qgraphicsscenecontextmenuevent.html">QGraphicsSceneContextMenuEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>isSelected() <span class="operator">&amp;</span><span class="operator">&amp;</span> scene()) {
+          scene()<span class="operator">-</span><span class="operator">&gt;</span>clearSelection();
+          setSelected(<span class="keyword">true</span>);
+      }
+
+      <span class="type"><a href="qmenu.html">QMenu</a></span> menu;
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>delAction <span class="operator">=</span> menu<span class="operator">.</span>addAction(<span class="string">&quot;Delete&quot;</span>);
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>newAction <span class="operator">=</span> menu<span class="operator">.</span>addAction(<span class="string">&quot;New&quot;</span>);
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>growAction <span class="operator">=</span> menu<span class="operator">.</span>addAction(<span class="string">&quot;Grow&quot;</span>);
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>shrinkAction <span class="operator">=</span> menu<span class="operator">.</span>addAction(<span class="string">&quot;Shrink&quot;</span>);
+
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>selectedAction <span class="operator">=</span> menu<span class="operator">.</span>exec(event<span class="operator">-</span><span class="operator">&gt;</span>screenPos());
+
+      <span class="keyword">if</span> (selectedAction <span class="operator">=</span><span class="operator">=</span> delAction)
+          deleteSelectedItems(scene());
+      <span class="keyword">else</span> <span class="keyword">if</span> (selectedAction <span class="operator">=</span><span class="operator">=</span> newAction)
+          duplicateSelectedItems(scene());
+      <span class="keyword">else</span> <span class="keyword">if</span> (selectedAction <span class="operator">=</span><span class="operator">=</span> growAction)
+          growSelectedItems(scene());
+      <span class="keyword">else</span> <span class="keyword">if</span> (selectedAction <span class="operator">=</span><span class="operator">=</span> shrinkAction)
+          shrinkSelectedItems(scene());
+  }
+
+  <span class="type">void</span> ItemBase<span class="operator">::</span>duplicateSelectedItems(<span class="type"><a href="qgraphicsscene.html">QGraphicsScene</a></span> <span class="operator">*</span>scene)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>scene)
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span><span class="operator">&gt;</span> selected;
+      selected <span class="operator">=</span> scene<span class="operator">-</span><span class="operator">&gt;</span>selectedItems();
+
+      foreach (<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span>item<span class="operator">,</span> selected) {
+          ItemBase <span class="operator">*</span>itemBase <span class="operator">=</span> qgraphicsitem_cast<span class="operator">&lt;</span>ItemBase <span class="operator">*</span><span class="operator">&gt;</span>(item);
+          <span class="keyword">if</span> (itemBase)
+              scene<span class="operator">-</span><span class="operator">&gt;</span>addItem(itemBase<span class="operator">-</span><span class="operator">&gt;</span>createNew(itemBase<span class="operator">-</span><span class="operator">&gt;</span>m_size<span class="operator">,</span> itemBase<span class="operator">-</span><span class="operator">&gt;</span>pos()<span class="operator">.</span>x() <span class="operator">+</span> itemBase<span class="operator">-</span><span class="operator">&gt;</span>m_size<span class="operator">,</span> itemBase<span class="operator">-</span><span class="operator">&gt;</span>pos()<span class="operator">.</span>y()));
+      }
+  }
+
+  <span class="type">void</span> ItemBase<span class="operator">::</span>deleteSelectedItems(<span class="type"><a href="qgraphicsscene.html">QGraphicsScene</a></span> <span class="operator">*</span>scene)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>scene)
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span><span class="operator">&gt;</span> selected;
+      selected <span class="operator">=</span> scene<span class="operator">-</span><span class="operator">&gt;</span>selectedItems();
+
+      foreach (<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span>item<span class="operator">,</span> selected) {
+          ItemBase <span class="operator">*</span>itemBase <span class="operator">=</span> qgraphicsitem_cast<span class="operator">&lt;</span>ItemBase <span class="operator">*</span><span class="operator">&gt;</span>(item);
+          <span class="keyword">if</span> (itemBase)
+              <span class="keyword">delete</span> itemBase;
+      }
+  }
+
+  <span class="type">void</span> ItemBase<span class="operator">::</span>growSelectedItems(<span class="type"><a href="qgraphicsscene.html">QGraphicsScene</a></span> <span class="operator">*</span>scene)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>scene)
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span><span class="operator">&gt;</span> selected;
+      selected <span class="operator">=</span> scene<span class="operator">-</span><span class="operator">&gt;</span>selectedItems();
+
+      foreach (<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span>item<span class="operator">,</span> selected) {
+          ItemBase <span class="operator">*</span>itemBase <span class="operator">=</span> qgraphicsitem_cast<span class="operator">&lt;</span>ItemBase <span class="operator">*</span><span class="operator">&gt;</span>(item);
+          <span class="keyword">if</span> (itemBase) {
+              itemBase<span class="operator">-</span><span class="operator">&gt;</span>prepareGeometryChange();
+              itemBase<span class="operator">-</span><span class="operator">&gt;</span>m_size <span class="operator">*</span><span class="operator">=</span> <span class="number">2</span>;
+              <span class="keyword">if</span> (itemBase<span class="operator">-</span><span class="operator">&gt;</span>m_size <span class="operator">&gt;</span> MAX_ITEM_SIZE)
+                  itemBase<span class="operator">-</span><span class="operator">&gt;</span>m_size <span class="operator">=</span> MAX_ITEM_SIZE;
+          }
+      }
+  }
+
+  <span class="type">void</span> ItemBase<span class="operator">::</span>shrinkSelectedItems(<span class="type"><a href="qgraphicsscene.html">QGraphicsScene</a></span> <span class="operator">*</span>scene)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>scene)
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span><span class="operator">&gt;</span> selected;
+      selected <span class="operator">=</span> scene<span class="operator">-</span><span class="operator">&gt;</span>selectedItems();
+
+      foreach (<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span>item<span class="operator">,</span> selected) {
+          ItemBase <span class="operator">*</span>itemBase <span class="operator">=</span> qgraphicsitem_cast<span class="operator">&lt;</span>ItemBase <span class="operator">*</span><span class="operator">&gt;</span>(item);
+          <span class="keyword">if</span> (itemBase) {
+              itemBase<span class="operator">-</span><span class="operator">&gt;</span>prepareGeometryChange();
+              itemBase<span class="operator">-</span><span class="operator">&gt;</span>m_size <span class="operator">/</span><span class="operator">=</span> <span class="number">2</span>;
+              <span class="keyword">if</span> (itemBase<span class="operator">-</span><span class="operator">&gt;</span>m_size <span class="operator">&lt;</span> MIN_ITEM_SIZE)
+                  itemBase<span class="operator">-</span><span class="operator">&gt;</span>m_size <span class="operator">=</span> MIN_ITEM_SIZE;
+          }
+      }
+  }
+
+  <span class="type">void</span> ItemBase<span class="operator">::</span>mouseMoveEvent(<span class="type"><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (m_isResizing) {
+          <span class="type">int</span> dx <span class="operator">=</span> <span class="type">int</span>(<span class="number">2.0</span> <span class="operator">*</span> event<span class="operator">-</span><span class="operator">&gt;</span>pos()<span class="operator">.</span>x());
+          <span class="type">int</span> dy <span class="operator">=</span> <span class="type">int</span>(<span class="number">2.0</span> <span class="operator">*</span> event<span class="operator">-</span><span class="operator">&gt;</span>pos()<span class="operator">.</span>y());
+          prepareGeometryChange();
+          m_size <span class="operator">=</span> (dx <span class="operator">&gt;</span> dy <span class="operator">?</span> dx : dy);
+          <span class="keyword">if</span> (m_size <span class="operator">&lt;</span> MIN_ITEM_SIZE)
+              m_size <span class="operator">=</span> MIN_ITEM_SIZE;
+          <span class="keyword">else</span> <span class="keyword">if</span> (m_size <span class="operator">&gt;</span> MAX_ITEM_SIZE)
+              m_size <span class="operator">=</span> MAX_ITEM_SIZE;
+      } <span class="keyword">else</span> {
+          <span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span><span class="operator">::</span>mouseMoveEvent(event);
+      }
+  }
+
+  <span class="type">void</span> ItemBase<span class="operator">::</span>hoverMoveEvent(<span class="type"><a href="qgraphicsscenehoverevent.html">QGraphicsSceneHoverEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (m_isResizing <span class="operator">|</span><span class="operator">|</span> (isInResizeArea(event<span class="operator">-</span><span class="operator">&gt;</span>pos()) <span class="operator">&amp;</span><span class="operator">&amp;</span> isSelected()))
+          setCursor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>SizeFDiagCursor);
+      <span class="keyword">else</span>
+          setCursor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ArrowCursor);
+      <span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span><span class="operator">::</span>hoverMoveEvent(event);
+  }
+
+  <span class="type">void</span> ItemBase<span class="operator">::</span>mousePressEvent(<span class="type"><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">static</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> z <span class="operator">=</span> <span class="number">0.0</span>;
+      setZValue(z <span class="operator">+</span><span class="operator">=</span> <span class="number">1.0</span>);
+      <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>button() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftButton <span class="operator">&amp;</span><span class="operator">&amp;</span> isInResizeArea(event<span class="operator">-</span><span class="operator">&gt;</span>pos())) {
+          m_isResizing <span class="operator">=</span> <span class="keyword">true</span>;
+      } <span class="keyword">else</span> {
+          <span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span><span class="operator">::</span>mousePressEvent(event);
+      }
+  }
+
+  <span class="type">void</span> ItemBase<span class="operator">::</span>mouseReleaseEvent(<span class="type"><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>button() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftButton <span class="operator">&amp;</span><span class="operator">&amp;</span> m_isResizing) {
+          m_isResizing <span class="operator">=</span> <span class="keyword">false</span>;
+      } <span class="keyword">else</span> {
+          <span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span><span class="operator">::</span>mouseReleaseEvent(event);
+      }
+  }
+
+  <span class="type">void</span> ItemBase<span class="operator">::</span>keyPressEvent(<span class="type"><a href="../qtgui/qkeyevent.html">QKeyEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">switch</span> (event<span class="operator">-</span><span class="operator">&gt;</span>key()) {
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Delete:
+          deleteSelectedItems(scene());
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Insert:
+          duplicateSelectedItems(scene());
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Plus:
+          growSelectedItems(scene());
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Minus:
+          shrinkSelectedItems(scene());
+          <span class="keyword">break</span>;
+      <span class="keyword">default</span>:
+          <span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span><span class="operator">::</span>keyPressEvent(event);
+          <span class="keyword">break</span>;
+      }
+  }
+
+  <span class="type">void</span> ItemBase<span class="operator">::</span>wheelEvent(<span class="type"><a href="qgraphicsscenewheelevent.html">QGraphicsSceneWheelEvent</a></span> <span class="operator">*</span>event)
+  {
+      prepareGeometryChange();
+      m_size <span class="operator">=</span> <span class="type">int</span>(m_size <span class="operator">*</span> <a href="../qtcore/qtmath.html#qExp">qExp</a>(<span class="operator">-</span>event<span class="operator">-</span><span class="operator">&gt;</span>delta() <span class="operator">/</span> <span class="number">600.0</span>));
+      <span class="keyword">if</span> (m_size <span class="operator">&gt;</span> MAX_ITEM_SIZE)
+          m_size <span class="operator">=</span> MAX_ITEM_SIZE;
+      <span class="keyword">else</span> <span class="keyword">if</span> (m_size <span class="operator">&lt;</span> MIN_ITEM_SIZE)
+          m_size <span class="operator">=</span> MIN_ITEM_SIZE;
+  }
+
+  <span class="type">int</span> ItemBase<span class="operator">::</span>type() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> Type;
+  }
+
+  bool ItemBase<span class="operator">::</span>isInResizeArea(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> <span class="operator">&amp;</span>pos)
+  {
+      <span class="keyword">return</span> (<span class="operator">-</span>pos<span class="operator">.</span>y() <span class="operator">&lt;</span> pos<span class="operator">.</span>x() <span class="operator">-</span> m_size <span class="operator">+</span> <span class="number">9</span>);
+  }
+
+  <span class="comment">//============================================================================//</span>
+  <span class="comment">//                                    QtBox                                   //</span>
+  <span class="comment">//============================================================================//</span>
+
+  <span class="type">QtBox</span><span class="operator">::</span><span class="type">QtBox</span>(<span class="type">int</span> size<span class="operator">,</span> <span class="type">int</span> x<span class="operator">,</span> <span class="type">int</span> y) : ItemBase(size<span class="operator">,</span> x<span class="operator">,</span> y)<span class="operator">,</span> m_texture(<span class="number">0</span>)
+  {
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> <span class="number">8</span>; <span class="operator">+</span><span class="operator">+</span>i) {
+          m_vertices<span class="operator">[</span>i<span class="operator">]</span><span class="operator">.</span>setX(i <span class="operator">&amp;</span> <span class="number">1</span> <span class="operator">?</span> <span class="number">0.5f</span> : <span class="operator">-</span><span class="number">0.5f</span>);
+          m_vertices<span class="operator">[</span>i<span class="operator">]</span><span class="operator">.</span>setY(i <span class="operator">&amp;</span> <span class="number">2</span> <span class="operator">?</span> <span class="number">0.5f</span> : <span class="operator">-</span><span class="number">0.5f</span>);
+          m_vertices<span class="operator">[</span>i<span class="operator">]</span><span class="operator">.</span>setZ(i <span class="operator">&amp;</span> <span class="number">4</span> <span class="operator">?</span> <span class="number">0.5f</span> : <span class="operator">-</span><span class="number">0.5f</span>);
+      }
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> <span class="number">4</span>; <span class="operator">+</span><span class="operator">+</span>i) {
+          m_texCoords<span class="operator">[</span>i<span class="operator">]</span><span class="operator">.</span>setX(i <span class="operator">&amp;</span> <span class="number">1</span> <span class="operator">?</span> <span class="number">1.0f</span> : <span class="number">0.0f</span>);
+          m_texCoords<span class="operator">[</span>i<span class="operator">]</span><span class="operator">.</span>setY(i <span class="operator">&amp;</span> <span class="number">2</span> <span class="operator">?</span> <span class="number">1.0f</span> : <span class="number">0.0f</span>);
+      }
+      m_normals<span class="operator">[</span><span class="number">0</span><span class="operator">]</span> <span class="operator">=</span> QVector3D(<span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span>);
+      m_normals<span class="operator">[</span><span class="number">1</span><span class="operator">]</span> <span class="operator">=</span> QVector3D(<span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span>);
+      m_normals<span class="operator">[</span><span class="number">2</span><span class="operator">]</span> <span class="operator">=</span> QVector3D(<span class="number">0.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span>);
+      m_normals<span class="operator">[</span><span class="number">3</span><span class="operator">]</span> <span class="operator">=</span> QVector3D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span>);
+      m_normals<span class="operator">[</span><span class="number">4</span><span class="operator">]</span> <span class="operator">=</span> QVector3D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span>);
+      m_normals<span class="operator">[</span><span class="number">5</span><span class="operator">]</span> <span class="operator">=</span> QVector3D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span>);
+  }
+
+  <span class="type">QtBox</span><span class="operator">::</span><span class="operator">~</span><span class="type">QtBox</span>()
+  {
+      <span class="keyword">if</span> (m_texture)
+          <span class="keyword">delete</span> m_texture;
+  }
+
+  ItemBase <span class="operator">*</span><span class="type">QtBox</span><span class="operator">::</span>createNew(<span class="type">int</span> size<span class="operator">,</span> <span class="type">int</span> x<span class="operator">,</span> <span class="type">int</span> y)
+  {
+      <span class="keyword">return</span> <span class="keyword">new</span> <span class="type">QtBox</span>(size<span class="operator">,</span> x<span class="operator">,</span> y);
+  }
+
+  <span class="type">void</span> <span class="type">QtBox</span><span class="operator">::</span>paint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span>painter<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></span> <span class="operator">*</span>option<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>widget)
+  {
+      <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> rect <span class="operator">=</span> boundingRect()<span class="operator">.</span>translated(pos());
+      <span class="type">float</span> width <span class="operator">=</span> <span class="type">float</span>(painter<span class="operator">-</span><span class="operator">&gt;</span>device()<span class="operator">-</span><span class="operator">&gt;</span>width());
+      <span class="type">float</span> height <span class="operator">=</span> <span class="type">float</span>(painter<span class="operator">-</span><span class="operator">&gt;</span>device()<span class="operator">-</span><span class="operator">&gt;</span>height());
+
+      <span class="type">float</span> left <span class="operator">=</span> <span class="number">2.0f</span> <span class="operator">*</span> <span class="type">float</span>(rect<span class="operator">.</span>left()) <span class="operator">/</span> width <span class="operator">-</span> <span class="number">1.0f</span>;
+      <span class="type">float</span> right <span class="operator">=</span> <span class="number">2.0f</span> <span class="operator">*</span> <span class="type">float</span>(rect<span class="operator">.</span>right()) <span class="operator">/</span> width <span class="operator">-</span> <span class="number">1.0f</span>;
+      <span class="type">float</span> top <span class="operator">=</span> <span class="number">1.0f</span> <span class="operator">-</span> <span class="number">2.0f</span> <span class="operator">*</span> <span class="type">float</span>(rect<span class="operator">.</span>top()) <span class="operator">/</span> height;
+      <span class="type">float</span> bottom <span class="operator">=</span> <span class="number">1.0f</span> <span class="operator">-</span> <span class="number">2.0f</span> <span class="operator">*</span> <span class="type">float</span>(rect<span class="operator">.</span>bottom()) <span class="operator">/</span> height;
+      <span class="type">float</span> moveToRectMatrix<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> {
+          <span class="number">0.5f</span> <span class="operator">*</span> (right <span class="operator">-</span> left)<span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span>
+          <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.5f</span> <span class="operator">*</span> (bottom <span class="operator">-</span> top)<span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span>
+          <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span>
+          <span class="number">0.5f</span> <span class="operator">*</span> (right <span class="operator">+</span> left)<span class="operator">,</span> <span class="number">0.5f</span> <span class="operator">*</span> (bottom <span class="operator">+</span> top)<span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span>
+      };
+
+      painter<span class="operator">-</span><span class="operator">&gt;</span>beginNativePainting();
+
+      glMatrixMode(GL_PROJECTION);
+      glPushMatrix();
+      glLoadMatrixf(moveToRectMatrix);
+      qgluPerspective(<span class="number">60.0</span><span class="operator">,</span> <span class="number">1.0</span><span class="operator">,</span> <span class="number">0.01</span><span class="operator">,</span> <span class="number">10.0</span>);
+
+      glMatrixMode(GL_MODELVIEW);
+      glPushMatrix();
+      glLoadIdentity();
+
+      <span class="comment">//glEnable(GL_DEPTH_TEST);</span>
+      glEnable(GL_CULL_FACE);
+      glEnable(GL_LIGHTING);
+      glEnable(GL_COLOR_MATERIAL);
+      glEnable(GL_NORMALIZE);
+
+      <span class="keyword">if</span>(m_texture <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+          m_texture <span class="operator">=</span> <span class="keyword">new</span> GLTexture2D(<span class="string">&quot;:/res/boxes/qt-logo.jpg&quot;</span><span class="operator">,</span> <span class="number">64</span><span class="operator">,</span> <span class="number">64</span>);
+      m_texture<span class="operator">-</span><span class="operator">&gt;</span>bind();
+      glEnable(GL_TEXTURE_2D);
+
+      glColorMaterial(GL_FRONT_AND_BACK<span class="operator">,</span> GL_AMBIENT_AND_DIFFUSE);
+      <span class="type">float</span> lightColour<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> {<span class="number">1.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">1.0f</span>};
+      <span class="type">float</span> lightDir<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> {<span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span>};
+      glLightfv(GL_LIGHT0<span class="operator">,</span> GL_DIFFUSE<span class="operator">,</span> lightColour);
+      glLightfv(GL_LIGHT0<span class="operator">,</span> GL_POSITION<span class="operator">,</span> lightDir);
+      glEnable(GL_LIGHT0);
+
+      glTranslatef(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.5f</span>);
+      glRotatef(ROTATE_SPEED_X <span class="operator">*</span> m_startTime<span class="operator">.</span>msecsTo(<span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime())<span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span>);
+      glRotatef(ROTATE_SPEED_Y <span class="operator">*</span> m_startTime<span class="operator">.</span>msecsTo(<span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime())<span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span>);
+      glRotatef(ROTATE_SPEED_Z <span class="operator">*</span> m_startTime<span class="operator">.</span>msecsTo(<span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime())<span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span>);
+      <span class="type">int</span> dt <span class="operator">=</span> m_startTime<span class="operator">.</span>msecsTo(<span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime());
+      <span class="keyword">if</span> (dt <span class="operator">&lt;</span> <span class="number">500</span>)
+          glScalef(dt <span class="operator">/</span> <span class="number">500.0f</span><span class="operator">,</span> dt <span class="operator">/</span> <span class="number">500.0f</span><span class="operator">,</span> dt <span class="operator">/</span> <span class="number">500.0f</span>);
+
+      <span class="keyword">for</span> (<span class="type">int</span> dir <span class="operator">=</span> <span class="number">0</span>; dir <span class="operator">&lt;</span> <span class="number">3</span>; <span class="operator">+</span><span class="operator">+</span>dir) {
+          glColor4f(<span class="number">1.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">1.0</span>);
+
+          glBegin(GL_TRIANGLE_STRIP);
+          glNormal3fv(<span class="keyword">reinterpret_cast</span><span class="operator">&lt;</span><span class="type">float</span> <span class="operator">*</span><span class="operator">&gt;</span>(<span class="operator">&amp;</span>m_normals<span class="operator">[</span><span class="number">2</span> <span class="operator">*</span> dir <span class="operator">+</span> <span class="number">0</span><span class="operator">]</span>));
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> <span class="number">2</span>; <span class="operator">+</span><span class="operator">+</span>i) {
+              <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> <span class="number">2</span>; <span class="operator">+</span><span class="operator">+</span>j) {
+                  glTexCoord2fv(<span class="keyword">reinterpret_cast</span><span class="operator">&lt;</span><span class="type">float</span> <span class="operator">*</span><span class="operator">&gt;</span>(<span class="operator">&amp;</span>m_texCoords<span class="operator">[</span>(j <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">1</span>) <span class="operator">|</span> i<span class="operator">]</span>));
+                  glVertex3fv(<span class="keyword">reinterpret_cast</span><span class="operator">&lt;</span><span class="type">float</span> <span class="operator">*</span><span class="operator">&gt;</span>(<span class="operator">&amp;</span>m_vertices<span class="operator">[</span>(i <span class="operator">&lt;</span><span class="operator">&lt;</span> ((dir <span class="operator">+</span> <span class="number">2</span>) <span class="operator">%</span> <span class="number">3</span>)) <span class="operator">|</span> (j <span class="operator">&lt;</span><span class="operator">&lt;</span> ((dir <span class="operator">+</span> <span class="number">1</span>) <span class="operator">%</span> <span class="number">3</span>))<span class="operator">]</span>));
+              }
+          }
+          glEnd();
+
+          glBegin(GL_TRIANGLE_STRIP);
+          glNormal3fv(<span class="keyword">reinterpret_cast</span><span class="operator">&lt;</span><span class="type">float</span> <span class="operator">*</span><span class="operator">&gt;</span>(<span class="operator">&amp;</span>m_normals<span class="operator">[</span><span class="number">2</span> <span class="operator">*</span> dir <span class="operator">+</span> <span class="number">1</span><span class="operator">]</span>));
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> <span class="number">2</span>; <span class="operator">+</span><span class="operator">+</span>i) {
+              <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> <span class="number">2</span>; <span class="operator">+</span><span class="operator">+</span>j) {
+                  glTexCoord2fv(<span class="keyword">reinterpret_cast</span><span class="operator">&lt;</span><span class="type">float</span> <span class="operator">*</span><span class="operator">&gt;</span>(<span class="operator">&amp;</span>m_texCoords<span class="operator">[</span>(j <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">1</span>) <span class="operator">|</span> i<span class="operator">]</span>));
+                  glVertex3fv(<span class="keyword">reinterpret_cast</span><span class="operator">&lt;</span><span class="type">float</span> <span class="operator">*</span><span class="operator">&gt;</span>(<span class="operator">&amp;</span>m_vertices<span class="operator">[</span>(<span class="number">1</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> dir) <span class="operator">|</span> (i <span class="operator">&lt;</span><span class="operator">&lt;</span> ((dir <span class="operator">+</span> <span class="number">1</span>) <span class="operator">%</span> <span class="number">3</span>)) <span class="operator">|</span> (j <span class="operator">&lt;</span><span class="operator">&lt;</span> ((dir <span class="operator">+</span> <span class="number">2</span>) <span class="operator">%</span> <span class="number">3</span>))<span class="operator">]</span>));
+              }
+          }
+          glEnd();
+      }
+      m_texture<span class="operator">-</span><span class="operator">&gt;</span>unbind();
+
+      <span class="comment">//glDisable(GL_DEPTH_TEST);</span>
+      glDisable(GL_CULL_FACE);
+      glDisable(GL_LIGHTING);
+      glDisable(GL_COLOR_MATERIAL);
+      glDisable(GL_TEXTURE_2D);
+      glDisable(GL_LIGHT0);
+      glDisable(GL_NORMALIZE);
+
+      glPopMatrix();
+
+      glMatrixMode(GL_PROJECTION);
+      glPopMatrix();
+
+      painter<span class="operator">-</span><span class="operator">&gt;</span>endNativePainting();
+
+      ItemBase<span class="operator">::</span>paint(painter<span class="operator">,</span> option<span class="operator">,</span> widget);
+  }
+
+  <span class="comment">//============================================================================//</span>
+  <span class="comment">//                                 CircleItem                                 //</span>
+  <span class="comment">//============================================================================//</span>
+
+  CircleItem<span class="operator">::</span>CircleItem(<span class="type">int</span> size<span class="operator">,</span> <span class="type">int</span> x<span class="operator">,</span> <span class="type">int</span> y) : ItemBase(size<span class="operator">,</span> x<span class="operator">,</span> y)
+  {
+       m_color <span class="operator">=</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span><span class="operator">::</span>fromHsv(rand() <span class="operator">%</span> <span class="number">360</span><span class="operator">,</span> <span class="number">255</span><span class="operator">,</span> <span class="number">255</span>);
+  }
+
+  <span class="type">void</span> CircleItem<span class="operator">::</span>paint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span>painter<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></span> <span class="operator">*</span>option<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>widget)
+  {
+      <span class="type">int</span> dt <span class="operator">=</span> m_startTime<span class="operator">.</span>msecsTo(<span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime());
+
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> r0 <span class="operator">=</span> <span class="number">0.5</span> <span class="operator">*</span> m_size <span class="operator">*</span> (<span class="number">1.0</span> <span class="operator">-</span> <a href="../qtcore/qtmath.html#qExp">qExp</a>(<span class="operator">-</span><span class="number">0.001</span> <span class="operator">*</span> ((dt <span class="operator">+</span> <span class="number">3800</span>) <span class="operator">%</span> <span class="number">4000</span>)));
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> r1 <span class="operator">=</span> <span class="number">0.5</span> <span class="operator">*</span> m_size <span class="operator">*</span> (<span class="number">1.0</span> <span class="operator">-</span> <a href="../qtcore/qtmath.html#qExp">qExp</a>(<span class="operator">-</span><span class="number">0.001</span> <span class="operator">*</span> ((dt <span class="operator">+</span> <span class="number">0</span>) <span class="operator">%</span> <span class="number">4000</span>)));
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> r2 <span class="operator">=</span> <span class="number">0.5</span> <span class="operator">*</span> m_size <span class="operator">*</span> (<span class="number">1.0</span> <span class="operator">-</span> <a href="../qtcore/qtmath.html#qExp">qExp</a>(<span class="operator">-</span><span class="number">0.001</span> <span class="operator">*</span> ((dt <span class="operator">+</span> <span class="number">1800</span>) <span class="operator">%</span> <span class="number">4000</span>)));
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> r3 <span class="operator">=</span> <span class="number">0.5</span> <span class="operator">*</span> m_size <span class="operator">*</span> (<span class="number">1.0</span> <span class="operator">-</span> <a href="../qtcore/qtmath.html#qExp">qExp</a>(<span class="operator">-</span><span class="number">0.001</span> <span class="operator">*</span> ((dt <span class="operator">+</span> <span class="number">2000</span>) <span class="operator">%</span> <span class="number">4000</span>)));
+
+      <span class="keyword">if</span> (r0 <span class="operator">&gt;</span> r1)
+          r0 <span class="operator">=</span> <span class="number">0.0</span>;
+      <span class="keyword">if</span> (r2 <span class="operator">&gt;</span> r3)
+          r2 <span class="operator">=</span> <span class="number">0.0</span>;
+
+      <span class="type"><a href="../qtgui/qpainterpath.html">QPainterPath</a></span> path;
+      path<span class="operator">.</span>moveTo(r1<span class="operator">,</span> <span class="number">0.0</span>);
+      path<span class="operator">.</span>arcTo(<span class="operator">-</span>r1<span class="operator">,</span> <span class="operator">-</span>r1<span class="operator">,</span> <span class="number">2</span> <span class="operator">*</span> r1<span class="operator">,</span> <span class="number">2</span> <span class="operator">*</span> r1<span class="operator">,</span> <span class="number">0.0</span><span class="operator">,</span> <span class="number">360.0</span>);
+      path<span class="operator">.</span>lineTo(r0<span class="operator">,</span> <span class="number">0.0</span>);
+      path<span class="operator">.</span>arcTo(<span class="operator">-</span>r0<span class="operator">,</span> <span class="operator">-</span>r0<span class="operator">,</span> <span class="number">2</span> <span class="operator">*</span> r0<span class="operator">,</span> <span class="number">2</span> <span class="operator">*</span> r0<span class="operator">,</span> <span class="number">0.0</span><span class="operator">,</span> <span class="operator">-</span><span class="number">360.0</span>);
+      path<span class="operator">.</span>closeSubpath();
+      path<span class="operator">.</span>moveTo(r3<span class="operator">,</span> <span class="number">0.0</span>);
+      path<span class="operator">.</span>arcTo(<span class="operator">-</span>r3<span class="operator">,</span> <span class="operator">-</span>r3<span class="operator">,</span> <span class="number">2</span> <span class="operator">*</span> r3<span class="operator">,</span> <span class="number">2</span> <span class="operator">*</span> r3<span class="operator">,</span> <span class="number">0.0</span><span class="operator">,</span> <span class="number">360.0</span>);
+      path<span class="operator">.</span>lineTo(r0<span class="operator">,</span> <span class="number">0.0</span>);
+      path<span class="operator">.</span>arcTo(<span class="operator">-</span>r2<span class="operator">,</span> <span class="operator">-</span>r2<span class="operator">,</span> <span class="number">2</span> <span class="operator">*</span> r2<span class="operator">,</span> <span class="number">2</span> <span class="operator">*</span> r2<span class="operator">,</span> <span class="number">0.0</span><span class="operator">,</span> <span class="operator">-</span><span class="number">360.0</span>);
+      path<span class="operator">.</span>closeSubpath();
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing<span class="operator">,</span> <span class="keyword">true</span>);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(<span class="type"><a href="../qtgui/qbrush.html">QBrush</a></span>(m_color));
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoPen);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawPath(path);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoBrush);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>SolidLine);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing<span class="operator">,</span> <span class="keyword">false</span>);
+
+      ItemBase<span class="operator">::</span>paint(painter<span class="operator">,</span> option<span class="operator">,</span> widget);
+  }
+
+  ItemBase <span class="operator">*</span>CircleItem<span class="operator">::</span>createNew(<span class="type">int</span> size<span class="operator">,</span> <span class="type">int</span> x<span class="operator">,</span> <span class="type">int</span> y)
+  {
+      <span class="keyword">return</span> <span class="keyword">new</span> CircleItem(size<span class="operator">,</span> x<span class="operator">,</span> y);
+  }
+
+  <span class="comment">//============================================================================//</span>
+  <span class="comment">//                                 SquareItem                                 //</span>
+  <span class="comment">//============================================================================//</span>
+
+  SquareItem<span class="operator">::</span>SquareItem(<span class="type">int</span> size<span class="operator">,</span> <span class="type">int</span> x<span class="operator">,</span> <span class="type">int</span> y) : ItemBase(size<span class="operator">,</span> x<span class="operator">,</span> y)
+  {
+      m_image <span class="operator">=</span> <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>(<span class="string">&quot;:/res/boxes/square.jpg&quot;</span>);
+  }
+
+  <span class="type">void</span> SquareItem<span class="operator">::</span>paint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span>painter<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></span> <span class="operator">*</span>option<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>widget)
+  {
+      <span class="type">int</span> dt <span class="operator">=</span> m_startTime<span class="operator">.</span>msecsTo(<span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime());
+      <span class="type"><a href="../qtgui/qtransform.html">QTransform</a></span> oldTransform <span class="operator">=</span> painter<span class="operator">-</span><span class="operator">&gt;</span>worldTransform();
+      <span class="type">int</span> dtMod <span class="operator">=</span> dt <span class="operator">%</span> <span class="number">2000</span>;
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> amp <span class="operator">=</span> <span class="number">0.002</span> <span class="operator">*</span> (dtMod <span class="operator">&lt;</span> <span class="number">1000</span> <span class="operator">?</span> dtMod : <span class="number">2000</span> <span class="operator">-</span> dtMod) <span class="operator">-</span> <span class="number">1.0</span>;
+
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> scale <span class="operator">=</span> <span class="number">0.6</span> <span class="operator">+</span> <span class="number">0.2</span> <span class="operator">*</span> amp <span class="operator">*</span> amp;
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setWorldTransform(<span class="type"><a href="../qtgui/qtransform.html">QTransform</a></span>()<span class="operator">.</span>rotate(<span class="number">15.0</span> <span class="operator">*</span> amp)<span class="operator">.</span>scale(scale<span class="operator">,</span> scale)<span class="operator">,</span> <span class="keyword">true</span>);
+
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawPixmap(<span class="operator">-</span>m_size <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> <span class="operator">-</span>m_size <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> m_size<span class="operator">,</span> m_size<span class="operator">,</span> m_image);
+
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setWorldTransform(oldTransform<span class="operator">,</span> <span class="keyword">false</span>);
+      ItemBase<span class="operator">::</span>paint(painter<span class="operator">,</span> option<span class="operator">,</span> widget);
+  }
+
+  ItemBase <span class="operator">*</span>SquareItem<span class="operator">::</span>createNew(<span class="type">int</span> size<span class="operator">,</span> <span class="type">int</span> x<span class="operator">,</span> <span class="type">int</span> y)
+  {
+      <span class="keyword">return</span> <span class="keyword">new</span> SquareItem(size<span class="operator">,</span> x<span class="operator">,</span> y);
+  }
+
+</pre>
+</div>
+<!-- @@@graphicsview/boxes/qtbox.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

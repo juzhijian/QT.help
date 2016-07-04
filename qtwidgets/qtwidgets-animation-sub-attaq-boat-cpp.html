@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>boat.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-animation-sub-attaq-example.html">Sub-Attaq</a></td><td >boat.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">boat.cpp Example File</h1>
+<span class="subtitle">animation/sub-attaq/boat.cpp</span>
+<!-- $$$animation/sub-attaq/boat.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the QtCore module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="comment">//Own</span>
+  <span class="preprocessor">#include &quot;boat.h&quot;</span>
+  <span class="preprocessor">#include &quot;boat_p.h&quot;</span>
+  <span class="preprocessor">#include &quot;bomb.h&quot;</span>
+  <span class="preprocessor">#include &quot;pixmapitem.h&quot;</span>
+  <span class="preprocessor">#include &quot;graphicsscene.h&quot;</span>
+  <span class="preprocessor">#include &quot;animationmanager.h&quot;</span>
+  <span class="preprocessor">#include &quot;qanimationstate.h&quot;</span>
+
+  <span class="comment">//Qt</span>
+  <span class="preprocessor">#include &lt;QtCore/QPropertyAnimation&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QStateMachine&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QHistoryState&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QFinalState&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QState&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QSequentialAnimationGroup&gt;</span>
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtcore/qabstractanimation.html">QAbstractAnimation</a></span> <span class="operator">*</span>setupDestroyAnimation(Boat <span class="operator">*</span>boat)
+  {
+      <span class="type"><a href="../qtcore/qsequentialanimationgroup.html">QSequentialAnimationGroup</a></span> <span class="operator">*</span>group <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qsequentialanimationgroup.html">QSequentialAnimationGroup</a></span>(boat);
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">1</span>; i <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">4</span>; i<span class="operator">+</span><span class="operator">+</span>) {
+          PixmapItem <span class="operator">*</span>step <span class="operator">=</span> <span class="keyword">new</span> PixmapItem(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;explosion/boat/step%1&quot;</span>)<span class="operator">.</span>arg(i)<span class="operator">,</span>GraphicsScene<span class="operator">::</span>Big<span class="operator">,</span> boat);
+          step<span class="operator">-</span><span class="operator">&gt;</span>setZValue(<span class="number">6</span>);
+          step<span class="operator">-</span><span class="operator">&gt;</span>setOpacity(<span class="number">0</span>);
+
+          <span class="comment">//fade-in</span>
+          <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span> <span class="operator">*</span>anim <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span>(step<span class="operator">,</span> <span class="string">&quot;opacity&quot;</span>);
+          anim<span class="operator">-</span><span class="operator">&gt;</span>setEndValue(<span class="number">1</span>);
+          anim<span class="operator">-</span><span class="operator">&gt;</span>setDuration(<span class="number">100</span>);
+          group<span class="operator">-</span><span class="operator">&gt;</span>insertAnimation(i<span class="operator">-</span><span class="number">1</span><span class="operator">,</span> anim);
+
+          <span class="comment">//and then fade-out</span>
+          <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span> <span class="operator">*</span>anim2 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span>(step<span class="operator">,</span> <span class="string">&quot;opacity&quot;</span>);
+          anim2<span class="operator">-</span><span class="operator">&gt;</span>setEndValue(<span class="number">0</span>);
+          anim2<span class="operator">-</span><span class="operator">&gt;</span>setDuration(<span class="number">100</span>);
+          group<span class="operator">-</span><span class="operator">&gt;</span>addAnimation(anim2);
+      }
+
+      AnimationManager<span class="operator">::</span>self()<span class="operator">-</span><span class="operator">&gt;</span>registerAnimation(group);
+      <span class="keyword">return</span> group;
+  }
+
+  Boat<span class="operator">::</span>Boat() : PixmapItem(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;boat&quot;</span>)<span class="operator">,</span> GraphicsScene<span class="operator">::</span>Big)<span class="operator">,</span>
+      speed(<span class="number">0</span>)<span class="operator">,</span> bombsAlreadyLaunched(<span class="number">0</span>)<span class="operator">,</span> direction(Boat<span class="operator">::</span>None)<span class="operator">,</span> movementAnimation(<span class="number">0</span>)
+  {
+      setZValue(<span class="number">4</span>);
+      setFlags(<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span><span class="operator">::</span>ItemIsFocusable);
+
+      <span class="comment">//The movement animation used to animate the boat</span>
+      movementAnimation <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span>(<span class="keyword">this</span><span class="operator">,</span> <span class="string">&quot;pos&quot;</span>);
+
+      <span class="comment">//The destroy animation used to explode the boat</span>
+      destroyAnimation <span class="operator">=</span> setupDestroyAnimation(<span class="keyword">this</span>);
+
+      <span class="comment">//We setup the state machine of the boat</span>
+      machine <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstatemachine.html">QStateMachine</a></span>(<span class="keyword">this</span>);
+      <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>moving <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span>(machine);
+      StopState <span class="operator">*</span>stopState <span class="operator">=</span> <span class="keyword">new</span> StopState(<span class="keyword">this</span><span class="operator">,</span> moving);
+      machine<span class="operator">-</span><span class="operator">&gt;</span>setInitialState(moving);
+      moving<span class="operator">-</span><span class="operator">&gt;</span>setInitialState(stopState);
+      MoveStateRight <span class="operator">*</span>moveStateRight <span class="operator">=</span> <span class="keyword">new</span> MoveStateRight(<span class="keyword">this</span><span class="operator">,</span> moving);
+      MoveStateLeft <span class="operator">*</span>moveStateLeft <span class="operator">=</span> <span class="keyword">new</span> MoveStateLeft(<span class="keyword">this</span><span class="operator">,</span> moving);
+      LaunchStateRight <span class="operator">*</span>launchStateRight <span class="operator">=</span> <span class="keyword">new</span> LaunchStateRight(<span class="keyword">this</span><span class="operator">,</span> machine);
+      LaunchStateLeft <span class="operator">*</span>launchStateLeft <span class="operator">=</span> <span class="keyword">new</span> LaunchStateLeft(<span class="keyword">this</span><span class="operator">,</span> machine);
+
+      <span class="comment">//then setup the transitions for the rightMove state</span>
+      KeyStopTransition <span class="operator">*</span>leftStopRight <span class="operator">=</span> <span class="keyword">new</span> KeyStopTransition(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Left);
+      leftStopRight<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(stopState);
+      KeyMoveTransition <span class="operator">*</span>leftMoveRight <span class="operator">=</span> <span class="keyword">new</span> KeyMoveTransition(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Left);
+      leftMoveRight<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(moveStateRight);
+      KeyMoveTransition <span class="operator">*</span>rightMoveRight <span class="operator">=</span> <span class="keyword">new</span> KeyMoveTransition(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Right);
+      rightMoveRight<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(moveStateRight);
+      KeyMoveTransition <span class="operator">*</span>rightMoveStop <span class="operator">=</span> <span class="keyword">new</span> KeyMoveTransition(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Right);
+      rightMoveStop<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(moveStateRight);
+
+      <span class="comment">//then setup the transitions for the leftMove state</span>
+      KeyStopTransition <span class="operator">*</span>rightStopLeft <span class="operator">=</span> <span class="keyword">new</span> KeyStopTransition(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Right);
+      rightStopLeft<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(stopState);
+      KeyMoveTransition <span class="operator">*</span>rightMoveLeft <span class="operator">=</span> <span class="keyword">new</span> KeyMoveTransition(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Right);
+      rightMoveLeft<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(moveStateLeft);
+      KeyMoveTransition <span class="operator">*</span>leftMoveLeft <span class="operator">=</span> <span class="keyword">new</span> KeyMoveTransition(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Left);
+      leftMoveLeft<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(moveStateLeft);
+      KeyMoveTransition <span class="operator">*</span>leftMoveStop <span class="operator">=</span> <span class="keyword">new</span> KeyMoveTransition(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Left);
+      leftMoveStop<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(moveStateLeft);
+
+      <span class="comment">//We set up the right move state</span>
+      moveStateRight<span class="operator">-</span><span class="operator">&gt;</span>addTransition(leftStopRight);
+      moveStateRight<span class="operator">-</span><span class="operator">&gt;</span>addTransition(leftMoveRight);
+      moveStateRight<span class="operator">-</span><span class="operator">&gt;</span>addTransition(rightMoveRight);
+      stopState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(rightMoveStop);
+
+      <span class="comment">//We set up the left move state</span>
+      moveStateLeft<span class="operator">-</span><span class="operator">&gt;</span>addTransition(rightStopLeft);
+      moveStateLeft<span class="operator">-</span><span class="operator">&gt;</span>addTransition(leftMoveLeft);
+      moveStateLeft<span class="operator">-</span><span class="operator">&gt;</span>addTransition(rightMoveLeft);
+      stopState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(leftMoveStop);
+
+      <span class="comment">//The animation is finished, it means we reached the border of the screen, the boat is stopped so we move to the stop state</span>
+      moveStateLeft<span class="operator">-</span><span class="operator">&gt;</span>addTransition(movementAnimation<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> stopState);
+      moveStateRight<span class="operator">-</span><span class="operator">&gt;</span>addTransition(movementAnimation<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> stopState);
+
+      <span class="comment">//We set up the keys for dropping bombs</span>
+      KeyLaunchTransition <span class="operator">*</span>upFireLeft <span class="operator">=</span> <span class="keyword">new</span> KeyLaunchTransition(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Up);
+      upFireLeft<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(launchStateRight);
+      KeyLaunchTransition <span class="operator">*</span>upFireRight <span class="operator">=</span> <span class="keyword">new</span> KeyLaunchTransition(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Up);
+      upFireRight<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(launchStateRight);
+      KeyLaunchTransition <span class="operator">*</span>upFireStop <span class="operator">=</span> <span class="keyword">new</span> KeyLaunchTransition(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Up);
+      upFireStop<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(launchStateRight);
+      KeyLaunchTransition <span class="operator">*</span>downFireLeft <span class="operator">=</span> <span class="keyword">new</span> KeyLaunchTransition(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Down);
+      downFireLeft<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(launchStateLeft);
+      KeyLaunchTransition <span class="operator">*</span>downFireRight <span class="operator">=</span> <span class="keyword">new</span> KeyLaunchTransition(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Down);
+      downFireRight<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(launchStateLeft);
+      KeyLaunchTransition <span class="operator">*</span>downFireMove <span class="operator">=</span> <span class="keyword">new</span> KeyLaunchTransition(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Down);
+      downFireMove<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(launchStateLeft);
+
+      <span class="comment">//We set up transitions for fire up</span>
+      moveStateRight<span class="operator">-</span><span class="operator">&gt;</span>addTransition(upFireRight);
+      moveStateLeft<span class="operator">-</span><span class="operator">&gt;</span>addTransition(upFireLeft);
+      stopState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(upFireStop);
+
+      <span class="comment">//We set up transitions for fire down</span>
+      moveStateRight<span class="operator">-</span><span class="operator">&gt;</span>addTransition(downFireRight);
+      moveStateLeft<span class="operator">-</span><span class="operator">&gt;</span>addTransition(downFireLeft);
+      stopState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(downFireMove);
+
+      <span class="comment">//Finally the launch state should come back to its original state</span>
+      <span class="type"><a href="../qtcore/qhistorystate.html">QHistoryState</a></span> <span class="operator">*</span>historyState <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qhistorystate.html">QHistoryState</a></span>(moving);
+      launchStateLeft<span class="operator">-</span><span class="operator">&gt;</span>addTransition(historyState);
+      launchStateRight<span class="operator">-</span><span class="operator">&gt;</span>addTransition(historyState);
+
+      <span class="type"><a href="../qtcore/qfinalstate.html">QFinalState</a></span> <span class="operator">*</span>final <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qfinalstate.html">QFinalState</a></span>(machine);
+
+      <span class="comment">//This state play the destroyed animation</span>
+      <span class="type">QAnimationState</span> <span class="operator">*</span>destroyedState <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QAnimationState</span>(machine);
+      destroyedState<span class="operator">-</span><span class="operator">&gt;</span>setAnimation(destroyAnimation);
+
+      <span class="comment">//Play a nice animation when the boat is destroyed</span>
+      moving<span class="operator">-</span><span class="operator">&gt;</span>addTransition(<span class="keyword">this</span><span class="operator">,</span> SIGNAL(boatDestroyed())<span class="operator">,</span> destroyedState);
+
+      <span class="comment">//Transition to final state when the destroyed animation is finished</span>
+      destroyedState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(destroyedState<span class="operator">,</span> SIGNAL(animationFinished())<span class="operator">,</span> final);
+
+      <span class="comment">//The machine has finished to be executed, then the boat is dead</span>
+      connect(machine<span class="operator">,</span>SIGNAL(finished())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SIGNAL(boatExecutionFinished()));
+
+  }
+
+  <span class="type">void</span> Boat<span class="operator">::</span>run()
+  {
+      <span class="comment">//We register animations</span>
+      AnimationManager<span class="operator">::</span>self()<span class="operator">-</span><span class="operator">&gt;</span>registerAnimation(movementAnimation);
+      AnimationManager<span class="operator">::</span>self()<span class="operator">-</span><span class="operator">&gt;</span>registerAnimation(destroyAnimation);
+      machine<span class="operator">-</span><span class="operator">&gt;</span>start();
+  }
+
+  <span class="type">void</span> Boat<span class="operator">::</span>stop()
+  {
+      movementAnimation<span class="operator">-</span><span class="operator">&gt;</span>stop();
+      machine<span class="operator">-</span><span class="operator">&gt;</span>stop();
+  }
+
+  <span class="type">void</span> Boat<span class="operator">::</span>updateBoatMovement()
+  {
+      <span class="keyword">if</span> (speed <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> direction <span class="operator">=</span><span class="operator">=</span> Boat<span class="operator">::</span>None) {
+          movementAnimation<span class="operator">-</span><span class="operator">&gt;</span>stop();
+          <span class="keyword">return</span>;
+      }
+
+      movementAnimation<span class="operator">-</span><span class="operator">&gt;</span>stop();
+
+      <span class="keyword">if</span> (direction <span class="operator">=</span><span class="operator">=</span> Boat<span class="operator">::</span>Left) {
+          movementAnimation<span class="operator">-</span><span class="operator">&gt;</span>setEndValue(<span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>(<span class="number">0</span><span class="operator">,</span>y()));
+          movementAnimation<span class="operator">-</span><span class="operator">&gt;</span>setDuration(x()<span class="operator">/</span>speed<span class="operator">*</span><span class="number">15</span>);
+      }
+      <span class="keyword">else</span> <span class="comment">/*if (direction == Boat::Right)*/</span> {
+          movementAnimation<span class="operator">-</span><span class="operator">&gt;</span>setEndValue(<span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>(scene()<span class="operator">-</span><span class="operator">&gt;</span>width()<span class="operator">-</span>size()<span class="operator">.</span>width()<span class="operator">,</span>y()));
+          movementAnimation<span class="operator">-</span><span class="operator">&gt;</span>setDuration((scene()<span class="operator">-</span><span class="operator">&gt;</span>width()<span class="operator">-</span>size()<span class="operator">.</span>width()<span class="operator">-</span>x())<span class="operator">/</span>speed<span class="operator">*</span><span class="number">15</span>);
+      }
+      movementAnimation<span class="operator">-</span><span class="operator">&gt;</span>start();
+  }
+
+  <span class="type">void</span> Boat<span class="operator">::</span>destroy()
+  {
+      movementAnimation<span class="operator">-</span><span class="operator">&gt;</span>stop();
+      <span class="keyword">emit</span> boatDestroyed();
+  }
+
+  <span class="type">int</span> Boat<span class="operator">::</span>bombsLaunched() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> bombsAlreadyLaunched;
+  }
+
+  <span class="type">void</span> Boat<span class="operator">::</span>setBombsLaunched(<span class="type">int</span> number)
+  {
+      <span class="keyword">if</span> (number <span class="operator">&gt;</span> MAX_BOMB) {
+          <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>(<span class="string">&quot;Boat::setBombsLaunched : It impossible to launch that number of bombs&quot;</span>);
+          <span class="keyword">return</span>;
+      }
+      bombsAlreadyLaunched <span class="operator">=</span> number;
+  }
+
+  <span class="type">int</span> Boat<span class="operator">::</span>currentSpeed() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> speed;
+  }
+
+  <span class="type">void</span> Boat<span class="operator">::</span>setCurrentSpeed(<span class="type">int</span> speed)
+  {
+      <span class="keyword">if</span> (speed <span class="operator">&gt;</span> <span class="number">3</span> <span class="operator">|</span><span class="operator">|</span> speed <span class="operator">&lt;</span> <span class="number">0</span>) {
+          <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>(<span class="string">&quot;Boat::setCurrentSpeed: The boat can't run on that speed&quot;</span>);
+          <span class="keyword">return</span>;
+      }
+      <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>speed <span class="operator">=</span> speed;
+  }
+
+  <span class="keyword">enum</span> Boat<span class="operator">::</span>Movement Boat<span class="operator">::</span>currentDirection() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> direction;
+  }
+
+  <span class="type">void</span> Boat<span class="operator">::</span>setCurrentDirection(Movement direction)
+  {
+      <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>direction <span class="operator">=</span> direction;
+  }
+
+  <span class="type">int</span> Boat<span class="operator">::</span>type() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> Type;
+  }
+
+</pre>
+</div>
+<!-- @@@animation/sub-attaq/boat.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

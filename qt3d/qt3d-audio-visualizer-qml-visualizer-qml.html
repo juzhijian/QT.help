@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>Visualizer.qml Example File | Qt 3D 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-audio-visualizer-qml-example.html">Qt 3D: Audio Visualizer Example</a></td><td >Visualizer.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Visualizer.qml Example File</h1>
+<span class="subtitle">audio-visualizer-qml/Visualizer.qml</span>
+<!-- $$$audio-visualizer-qml/Visualizer.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt3D module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:LGPL3$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see http://www.qt.io/terms-conditions. For further
+  ** information use the contact form at http://www.qt.io/contact-us.
+  **
+  ** GNU Lesser General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU Lesser
+  ** General Public License version 3 as published by the Free Software
+  ** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+  ** packaging of this file. Please review the following information to
+  ** ensure the GNU Lesser General Public License version 3 requirements
+  ** will be met: https://www.gnu.org/licenses/lgpl.html.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 2.0 or later as published by the Free
+  ** Software Foundation and appearing in the file LICENSE.GPL included in
+  ** the packaging of this file. Please review the following information to
+  ** ensure the GNU General Public License version 2.0 requirements will be
+  ** met: http://www.gnu.org/licenses/gpl-2.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import Qt3D.Core 2.0
+  import Qt3D.Render 2.0
+  import Qt3D.Extras 2.0
+  import QtQuick 2.2 as QQ2
+
+  <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+      <span class="name">id</span>: <span class="name">sceneRoot</span>
+      property <span class="type">int</span> <span class="name">barRotationTimeMs</span>: <span class="number">1</span>
+      property <span class="type">int</span> <span class="name">numberOfBars</span>: <span class="number">1</span>
+      property <span class="type">string</span> <span class="name">animationState</span>: <span class="string">&quot;stopped&quot;</span>
+      property <span class="type">real</span> <span class="name">titleStartAngle</span>: <span class="number">95</span>
+      property <span class="type">real</span> <span class="name">titleStopAngle</span>: <span class="number">5</span>
+
+      <span class="name">onAnimationStateChanged</span>: {
+          <span class="keyword">if</span> (<span class="name">animationState</span> <span class="operator">==</span> <span class="string">&quot;playing&quot;</span>) {
+              <span class="name">mediaPlayer</span>.<span class="name">play</span>()
+              <span class="keyword">if</span> (<span class="name">progressTransformAnimation</span>.<span class="name">paused</span>)
+                  <span class="name">progressTransformAnimation</span>.<span class="name">resume</span>()
+              <span class="keyword">else</span>
+                  <span class="name">progressTransformAnimation</span>.<span class="name">start</span>()
+          } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">animationState</span> <span class="operator">==</span> <span class="string">&quot;paused&quot;</span>) {
+              <span class="name">mediaPlayer</span>.<span class="name">pause</span>()
+              <span class="keyword">if</span> (<span class="name">progressTransformAnimation</span>.<span class="name">running</span>)
+                  <span class="name">progressTransformAnimation</span>.<span class="name">pause</span>()
+          } <span class="keyword">else</span> {
+              <span class="name">mediaPlayer</span>.<span class="name">stop</span>()
+              <span class="name">progressTransformAnimation</span>.<span class="name">stop</span>()
+              <span class="name">progressTransform</span>.<span class="name">progressAngle</span> <span class="operator">=</span> <span class="name">progressTransform</span>.<span class="name">defaultStartAngle</span>
+          }
+      }
+
+      <span class="type">QQ2</span>.Item {
+          <span class="name">id</span>: <span class="name">stateItem</span>
+
+          <span class="name">state</span>: <span class="name">animationState</span>
+          <span class="name">states</span>: [
+              <span class="type">QQ2</span>.State {
+                  <span class="name">name</span>: <span class="string">&quot;playing&quot;</span>
+                  <span class="type">QQ2</span>.PropertyChanges {
+                      <span class="name">target</span>: <span class="name">titlePrism</span>
+                      <span class="name">titleAngle</span>: <span class="name">titleStopAngle</span>
+                  }
+              },
+              <span class="type">QQ2</span>.State {
+                  <span class="name">name</span>: <span class="string">&quot;paused&quot;</span>
+                  <span class="type">QQ2</span>.PropertyChanges {
+                      <span class="name">target</span>: <span class="name">titlePrism</span>
+                      <span class="name">titleAngle</span>: <span class="name">titleStopAngle</span>
+                  }
+              },
+              <span class="type">QQ2</span>.State {
+                  <span class="name">name</span>: <span class="string">&quot;stopped&quot;</span>
+                  <span class="type">QQ2</span>.PropertyChanges {
+                      <span class="name">target</span>: <span class="name">titlePrism</span>
+                      <span class="name">titleAngle</span>: <span class="name">titleStartAngle</span>
+                  }
+              }
+          ]
+
+          <span class="name">transitions</span>: <span class="name">QQ2</span>.Transition {
+              <span class="type">QQ2</span>.NumberAnimation {
+                  <span class="name">property</span>: <span class="string">&quot;titleAngle&quot;</span>
+                  <span class="name">duration</span>: <span class="number">2000</span>
+                  <span class="name">running</span>: <span class="number">false</span>
+              }
+          }
+      }
+
+      <span class="keyword">function</span> <span class="name">startVisualization</span>() {
+          <span class="name">progressTransformAnimation</span>.<span class="name">duration</span> <span class="operator">=</span> <span class="name">mediaPlayer</span>.<span class="name">duration</span>
+          <span class="name">mainview</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;playing&quot;</span>
+          <span class="name">progressTransformAnimation</span>.<span class="name">start</span>()
+      }
+
+      <span class="type"><a href="qml-qt3d-render-camera.html">Camera</a></span> {
+          <span class="name">id</span>: <span class="name">camera</span>
+          <span class="name">projectionType</span>: <span class="name">CameraLens</span>.<span class="name">PerspectiveProjection</span>
+          <span class="name">fieldOfView</span>: <span class="number">45</span>
+          <span class="name">aspectRatio</span>: <span class="number">1820</span> <span class="operator">/</span> <span class="number">1080</span>
+          <span class="name">nearPlane</span>: <span class="number">0.1</span>
+          <span class="name">farPlane</span>: <span class="number">1000.0</span>
+          <span class="name">position</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">0.014</span>, <span class="number">0.956</span>, <span class="number">2.178</span>)
+          <span class="name">upVector</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">0.0</span>)
+          <span class="name">viewCenter</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">0.0</span>, <span class="number">0.7</span>, <span class="number">0.0</span>)
+      }
+
+      <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+          <span class="name">components</span>: [
+              <span class="type"><a href="qml-qt3d-render-directionallight.html">DirectionalLight</a></span> {
+                  <span class="name">intensity</span>: <span class="number">0.9</span>
+                  <span class="name">worldDirection</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">0</span>, <span class="number">0.6</span>, -<span class="number">1</span>)
+              }
+          ]
+      }
+
+      <span class="type">RenderSettings</span> {
+          <span class="name">id</span>: <span class="name">external_forward_renderer</span>
+          <span class="name">activeFrameGraph</span>: <span class="name">ForwardRenderer</span> {
+              <span class="name">camera</span>: <span class="name">camera</span>
+              <span class="name">clearColor</span>: <span class="string">&quot;transparent&quot;</span>
+          }
+      }
+
+      <span class="name">components</span>: [<span class="name">external_forward_renderer</span>]
+
+      <span class="comment">// Bars</span>
+      <span class="type">CuboidMesh</span> {
+          <span class="name">id</span>: <span class="name">barMesh</span>
+          <span class="name">xExtent</span>: <span class="number">0.1</span>
+          <span class="name">yExtent</span>: <span class="number">0.1</span>
+          <span class="name">zExtent</span>: <span class="number">0.1</span>
+      }
+
+      <span class="type"><a href="qml-qt3d-core-nodeinstantiator.html">NodeInstantiator</a></span> {
+          <span class="name">id</span>: <span class="name">collection</span>
+          property <span class="type">int</span> <span class="name">maxCount</span>: <span class="name">parent</span>.<span class="name">numberOfBars</span>
+          <span class="name">model</span>: <span class="name">maxCount</span>
+
+          <span class="name">delegate</span>: <span class="name">BarEntity</span> {
+              <span class="name">id</span>: <span class="name">cubicEntity</span>
+              <span class="name">entityMesh</span>: <span class="name">barMesh</span>
+              <span class="name">rotationTimeMs</span>: <span class="name">sceneRoot</span>.<span class="name">barRotationTimeMs</span>
+              <span class="name">entityIndex</span>: <span class="name">index</span>
+              <span class="name">entityCount</span>: <span class="name">sceneRoot</span>.<span class="name">numberOfBars</span>
+              <span class="name">entityAnimationsState</span>: <span class="name">animationState</span>
+              <span class="name">magnitude</span>: <span class="number">0</span>
+          }
+      }
+
+      <span class="comment">// TitlePrism</span>
+      <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+          <span class="name">id</span>: <span class="name">titlePrism</span>
+          property <span class="type">real</span> <span class="name">titleAngle</span>: <span class="name">titleStartAngle</span>
+
+          <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+              <span class="name">id</span>: <span class="name">titlePlane</span>
+
+              <span class="type">PlaneMesh</span> {
+                  <span class="name">id</span>: <span class="name">titlePlaneMesh</span>
+                  <span class="name">width</span>: <span class="number">550</span>
+                  <span class="name">height</span>: <span class="number">100</span>
+              }
+
+              <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> {
+                  <span class="name">id</span>: <span class="name">titlePlaneTransform</span>
+                  <span class="name">scale</span>: <span class="number">0.003</span>
+                  <span class="name">translation</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">0</span>, <span class="number">0.11</span>, <span class="number">0</span>)
+              }
+
+              <span class="type">NormalDiffuseMapAlphaMaterial</span> {
+                  <span class="name">id</span>: <span class="name">titlePlaneMaterial</span>
+                  <span class="name">diffuse</span>: <span class="string">&quot;qrc:/images/demotitle.png&quot;</span>
+                  <span class="name">normal</span>: <span class="string">&quot;qrc:/images/normalmap.png&quot;</span>
+                  <span class="name">shininess</span>: <span class="number">1.0</span>
+              }
+
+              <span class="name">components</span>: [<span class="name">titlePlaneMesh</span>, <span class="name">titlePlaneMaterial</span>, <span class="name">titlePlaneTransform</span>]
+          }
+
+          <span class="comment">// Song title</span>
+          <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+              <span class="name">id</span>: <span class="name">songTitlePlane</span>
+
+              <span class="type">PlaneMesh</span> {
+                  <span class="name">id</span>: <span class="name">songPlaneMesh</span>
+                  <span class="name">width</span>: <span class="number">550</span>
+                  <span class="name">height</span>: <span class="number">100</span>
+              }
+
+              <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> {
+                  <span class="name">id</span>: <span class="name">songPlaneTransform</span>
+                  <span class="name">scale</span>: <span class="number">0.003</span>
+                  <span class="name">rotationX</span>: <span class="number">90</span>
+                  <span class="name">translation</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">0</span>, -<span class="number">0.03</span>, <span class="number">0.13</span>)
+              }
+
+              property <span class="type"><a href="qml-qt3d-render-material.html">Material</a></span> <span class="name">songPlaneMaterial</span>: <span class="name">NormalDiffuseMapAlphaMaterial</span> {
+                  <span class="name">diffuse</span>: <span class="string">&quot;qrc:/images/songtitle.png&quot;</span>
+                  <span class="name">normal</span>: <span class="string">&quot;qrc:/images/normalmap.png&quot;</span>
+                  <span class="name">shininess</span>: <span class="number">1.0</span>
+              }
+
+              <span class="name">components</span>: [<span class="name">songPlaneMesh</span>, <span class="name">songPlaneMaterial</span>, <span class="name">songPlaneTransform</span>]
+          }
+
+          property <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> <span class="name">titlePrismPlaneTransform</span>: <span class="name">Transform</span> {
+              <span class="name">matrix</span>: {
+                  var <span class="name">m</span> = <span class="name">Qt</span>.<span class="name">matrix4x4</span>()
+                  <span class="name">m</span>.<span class="name">translate</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(-<span class="number">0.5</span>, <span class="number">1.3</span>, -<span class="number">0.4</span>))
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">titlePrism</span>.<span class="name">titleAngle</span>, <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>))
+                  <span class="keyword">return</span> <span class="name">m</span>;
+              }
+          }
+
+          <span class="name">components</span>: [<span class="name">titlePlane</span>, <span class="name">songTitlePlane</span>, <span class="name">titlePrismPlaneTransform</span>]
+      }
+
+      <span class="comment">// Circle to create the reflection effect</span>
+      <span class="type"><a href="qml-qt3d-render-mesh.html">Mesh</a></span> {
+          <span class="name">id</span>: <span class="name">circleMesh</span>
+          <span class="name">source</span>: <span class="string">&quot;qrc:/meshes/circle.obj&quot;</span>
+      }
+
+      <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+          <span class="name">id</span>: <span class="name">circleEntity</span>
+          property <span class="type"><a href="qml-qt3d-render-material.html">Material</a></span> <span class="name">circleMaterial</span>: <span class="name">PhongAlphaMaterial</span> {
+              <span class="name">alpha</span>: <span class="number">0.4</span>
+              <span class="name">ambient</span>: <span class="string">&quot;black&quot;</span>
+              <span class="name">diffuse</span>: <span class="string">&quot;black&quot;</span>
+              <span class="name">specular</span>: <span class="string">&quot;black&quot;</span>
+              <span class="name">shininess</span>: <span class="number">10000</span>
+          }
+
+          <span class="name">components</span>: [<span class="name">circleMesh</span>, <span class="name">circleMaterial</span>]
+      }
+
+      <span class="comment">// Progress</span>
+      <span class="type"><a href="qml-qt3d-render-mesh.html">Mesh</a></span> {
+          <span class="name">id</span>: <span class="name">progressMesh</span>
+          <span class="name">source</span>: <span class="string">&quot;qrc:/meshes/progressbar.obj&quot;</span>
+      }
+
+      <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> {
+          <span class="name">id</span>: <span class="name">progressTransform</span>
+          property <span class="type">real</span> <span class="name">defaultStartAngle</span>: -<span class="number">90</span>
+          property <span class="type">real</span> <span class="name">progressAngle</span>: <span class="name">defaultStartAngle</span>
+          <span class="name">rotationY</span>: <span class="name">progressAngle</span>
+      }
+
+      <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+          property <span class="type"><a href="qml-qt3d-render-material.html">Material</a></span> <span class="name">progressMaterial</span>: <span class="name">PhongMaterial</span> {
+              <span class="name">ambient</span>: <span class="string">&quot;#80C342&quot;</span>
+              <span class="name">diffuse</span>: <span class="string">&quot;black&quot;</span>
+          }
+
+          <span class="name">components</span>: [<span class="name">progressMesh</span>, <span class="name">progressMaterial</span>, <span class="name">progressTransform</span>]
+      }
+
+      <span class="type">QQ2</span>.NumberAnimation {
+          <span class="name">id</span>: <span class="name">progressTransformAnimation</span>
+          <span class="name">target</span>: <span class="name">progressTransform</span>
+          <span class="name">property</span>: <span class="string">&quot;progressAngle&quot;</span>
+          <span class="name">duration</span>: <span class="number">0</span>
+          <span class="name">running</span>: <span class="number">false</span>
+          <span class="name">from</span>: <span class="name">progressTransform</span>.<span class="name">defaultStartAngle</span>
+          <span class="name">to</span>: -<span class="number">270</span>
+          <span class="name">onStopped</span>: <span class="keyword">if</span> (<span class="name">animationState</span> <span class="operator">!=</span> <span class="string">&quot;stopped&quot;</span>) <span class="name">animationState</span> <span class="operator">=</span> <span class="string">&quot;stopped&quot;</span>
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@audio-visualizer-qml/Visualizer.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- quickitemtexture.qdoc -->
+  <title>Qt Quick Item as Texture Example | Qt Canvas 3D 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcanvas3d-index.html">Qt Canvas 3D</a></td><td >Qt Quick Item as Texture Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#using-qt-quick-item-as-a-texture">Using Qt Quick Item as a Texture</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Quick Item as Texture Example</h1>
+<span class="subtitle"></span>
+<!-- $$$quickitemtexture-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Qt Quick Item as Texture example shows how to use other Qt Quick items as a texture source for Qt <a href="qml-qtcanvas3d-canvas3d.html">Canvas3D</a> textures.</p>
+<p class="centerAlign"><img src="images/quickitemtexture-example.png" alt="" /></p><a name="using-qt-quick-item-as-a-texture"></a>
+<h2 id="using-qt-quick-item-as-a-texture">Using Qt Quick Item as a Texture</h2>
+<p>First we create a <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> with a label that displays the current frame rate and rotation values of the cube:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">textureSource</span>
+      <span class="name">color</span>: <span class="string">&quot;lightgreen&quot;</span>
+      <span class="name">width</span>: <span class="number">256</span>
+      <span class="name">height</span>: <span class="number">256</span>
+      <span class="name">border</span>.color: <span class="string">&quot;blue&quot;</span>
+      <span class="name">border</span>.width: <span class="number">4</span>
+      <span class="name">layer</span>.enabled: <span class="number">true</span>
+      <span class="name">layer</span>.smooth: <span class="number">true</span>
+      <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls-label.html">Label</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">anchors</span>.margins: <span class="number">16</span>
+          <span class="name">text</span>: <span class="string">&quot;X Rot:&quot;</span> <span class="operator">+</span> (<span class="name">canvas3d</span>.<span class="name">xRotAnim</span> <span class="operator">|</span> <span class="number">0</span>) <span class="operator">+</span> <span class="string">&quot;\n&quot;</span>
+              <span class="operator">+</span> <span class="string">&quot;Y Rot:&quot;</span> <span class="operator">+</span> (<span class="name">canvas3d</span>.<span class="name">yRotAnim</span> <span class="operator">|</span> <span class="number">0</span>) <span class="operator">+</span> <span class="string">&quot;\n&quot;</span>
+              <span class="operator">+</span> <span class="string">&quot;Z Rot:&quot;</span> <span class="operator">+</span> (<span class="name">canvas3d</span>.<span class="name">zRotAnim</span> <span class="operator">|</span> <span class="number">0</span>) <span class="operator">+</span> <span class="string">&quot;\n&quot;</span>
+              <span class="operator">+</span> <span class="string">&quot;FPS:&quot;</span> <span class="operator">+</span> <span class="name">canvas3d</span>.<span class="name">fps</span>
+          <span class="name">color</span>: <span class="string">&quot;red&quot;</span>
+          <span class="name">font</span>.pointSize: <span class="number">26</span>
+          <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignLeft</span>
+          <span class="name">verticalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignVCenter</span>
+      }
+  }
+
+</pre>
+<p>We want to use the above <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> as the texture on our 3D cube. As a <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a> item doesn't implement <a href="../qtquick/qquickitem.html#textureProvider">QQuickItem::textureProvider</a>() by itself, we make it layered by setting the <code>layer.enabled</code> property to <code>true</code>.</p>
+<p>To create a <a href="qml-qtcanvas3d-canvas3dtexture.html">Canvas3DTexture</a> out of our layered <a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a>, we create a <a href="qml-qtcanvas3d-canvas3dtextureprovider.html">QTCANVAS3D_texture_provider</a> extension and the texture in the <code>initializeGL()</code> function in our JavaScript implementation:</p>
+<pre class="js">
+
+  <span class="name">canvasTextureProvider</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">getExtension</span>(<span class="string">&quot;QTCANVAS3D_texture_provider&quot;</span>);
+  <span class="name">cubeTexture</span> <span class="operator">=</span> <span class="name">canvasTextureProvider</span>.<span class="name">createTextureFromSource</span>(<span class="name">textureSourceItem</span>);
+
+</pre>
+<p>Once the <code>cubeTexture</code> item is created, it can be used like any other texture item in the JavaScript.</p>
+<p><b>Note: </b>The method of creating the texture from a Qt Quick item differs from how one would create texture from an HTML item in WebGL API. Textures created with <a href="qml-qtcanvas3d-canvas3dtextureprovider.html">QTCANVAS3D_texture_provider</a> extension support automatic live updates, without having to call textureImage2D each frame to re-upload fresh texture data from the item.</p><p>Files:</p>
+<ul>
+<li><a href="qtcanvas3d-quickitemtexture-qml-quickitemtexture-main-qml.html">quickitemtexture/qml/quickitemtexture/main.qml</a></li>
+<li><a href="qtcanvas3d-quickitemtexture-qml-quickitemtexture-quickitemtexture-js.html">quickitemtexture/qml/quickitemtexture/quickitemtexture.js</a></li>
+<li><a href="qtcanvas3d-quickitemtexture-main-cpp.html">quickitemtexture/main.cpp</a></li>
+<li><a href="qtcanvas3d-quickitemtexture-quickitemtexture-pro.html">quickitemtexture/quickitemtexture.pro</a></li>
+<li><a href="qtcanvas3d-quickitemtexture-quickitemtexture-qrc.html">quickitemtexture/quickitemtexture.qrc</a></li>
+</ul>
+</div>
+<!-- @@@quickitemtexture -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

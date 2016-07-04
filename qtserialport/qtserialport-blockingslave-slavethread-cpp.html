@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>slavethread.cpp Example File | Qt Serial Port 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtserialport-index.html">Qt Serial Port</a></td><td ><a href="qtserialport-blockingslave-example.html">Blocking Slave Example</a></td><td >slavethread.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">slavethread.cpp Example File</h1>
+<span class="subtitle">blockingslave/slavethread.cpp</span>
+<!-- $$$blockingslave/slavethread.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2012 Denis Shienkov &lt;denis.shienkov@gmail.com&gt;
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the QtSerialPort module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;slavethread.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtSerialPort/QSerialPort&gt;</span>
+
+  <span class="preprocessor">#include &lt;QTime&gt;</span>
+
+  QT_USE_NAMESPACE
+
+  SlaveThread<span class="operator">::</span>SlaveThread(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qthread.html">QThread</a></span>(parent)<span class="operator">,</span> waitTimeout(<span class="number">0</span>)<span class="operator">,</span> quit(<span class="keyword">false</span>)
+  {
+  }
+  SlaveThread<span class="operator">::</span><span class="operator">~</span>SlaveThread()
+  {
+      mutex<span class="operator">.</span>lock();
+      quit <span class="operator">=</span> <span class="keyword">true</span>;
+      mutex<span class="operator">.</span>unlock();
+      wait();
+  }
+
+  <span class="type">void</span> SlaveThread<span class="operator">::</span>startSlave(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>portName<span class="operator">,</span> <span class="type">int</span> waitTimeout<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>response)
+  {
+      <span class="type"><a href="../qtcore/qmutexlocker.html">QMutexLocker</a></span> locker(<span class="operator">&amp;</span>mutex);
+      <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>portName <span class="operator">=</span> portName;
+      <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>waitTimeout <span class="operator">=</span> waitTimeout;
+      <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>response <span class="operator">=</span> response;
+      <span class="keyword">if</span> (<span class="operator">!</span>isRunning())
+          start();
+  }
+
+  <span class="type">void</span> SlaveThread<span class="operator">::</span>run()
+  {
+      bool currentPortNameChanged <span class="operator">=</span> <span class="keyword">false</span>;
+
+      mutex<span class="operator">.</span>lock();
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> currentPortName;
+      <span class="keyword">if</span> (currentPortName <span class="operator">!</span><span class="operator">=</span> portName) {
+          currentPortName <span class="operator">=</span> portName;
+          currentPortNameChanged <span class="operator">=</span> <span class="keyword">true</span>;
+      }
+
+      <span class="type">int</span> currentWaitTimeout <span class="operator">=</span> waitTimeout;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> currentRespone <span class="operator">=</span> response;
+      mutex<span class="operator">.</span>unlock();
+      <span class="type"><a href="qserialport.html">QSerialPort</a></span> serial;
+
+      <span class="keyword">while</span> (<span class="operator">!</span>quit) {
+          <span class="keyword">if</span> (currentPortNameChanged) {
+              serial<span class="operator">.</span>close();
+              serial<span class="operator">.</span>setPortName(currentPortName);
+
+              <span class="keyword">if</span> (<span class="operator">!</span>serial<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadWrite)) {
+                  <span class="keyword">emit</span> error(tr(<span class="string">&quot;Can't open %1, error code %2&quot;</span>)
+                             <span class="operator">.</span>arg(portName)<span class="operator">.</span>arg(serial<span class="operator">.</span>error()));
+                  <span class="keyword">return</span>;
+              }
+          }
+
+          <span class="keyword">if</span> (serial<span class="operator">.</span>waitForReadyRead(currentWaitTimeout)) {
+              <span class="comment">// read request</span>
+              <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> requestData <span class="operator">=</span> serial<span class="operator">.</span>readAll();
+              <span class="keyword">while</span> (serial<span class="operator">.</span>waitForReadyRead(<span class="number">10</span>))
+                  requestData <span class="operator">+</span><span class="operator">=</span> serial<span class="operator">.</span>readAll();
+              <span class="comment">// write response</span>
+              <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> responseData <span class="operator">=</span> currentRespone<span class="operator">.</span>toLocal8Bit();
+              serial<span class="operator">.</span>write(responseData);
+              <span class="keyword">if</span> (serial<span class="operator">.</span>waitForBytesWritten(waitTimeout)) {
+                  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> request(requestData);
+                  <span class="keyword">emit</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>request(request);
+              } <span class="keyword">else</span> {
+                  <span class="keyword">emit</span> timeout(tr(<span class="string">&quot;Wait write response timeout %1&quot;</span>)
+                               <span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime()<span class="operator">.</span>toString()));
+              }
+          } <span class="keyword">else</span> {
+              <span class="keyword">emit</span> timeout(tr(<span class="string">&quot;Wait read request timeout %1&quot;</span>)
+                           <span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime()<span class="operator">.</span>toString()));
+          }
+          mutex<span class="operator">.</span>lock();
+          <span class="keyword">if</span> (currentPortName <span class="operator">!</span><span class="operator">=</span> portName) {
+              currentPortName <span class="operator">=</span> portName;
+              currentPortNameChanged <span class="operator">=</span> <span class="keyword">true</span>;
+          } <span class="keyword">else</span> {
+              currentPortNameChanged <span class="operator">=</span> <span class="keyword">false</span>;
+          }
+          currentWaitTimeout <span class="operator">=</span> waitTimeout;
+          currentRespone <span class="operator">=</span> response;
+          mutex<span class="operator">.</span>unlock();
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@blockingslave/slavethread.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

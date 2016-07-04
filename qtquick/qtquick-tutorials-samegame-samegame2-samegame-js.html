@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>samegame.js Example File | Qt Quick 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-tutorials-samegame-samegame2-example.html">QML Advanced Tutorial 2 - Populating the Game Canvas</a></td><td >samegame.js Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">samegame.js Example File</h1>
+<span class="subtitle">tutorials/samegame/samegame2/samegame.js</span>
+<!-- $$$tutorials/samegame/samegame2/samegame.js-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="js">
+
+  var <span class="name">blockSize</span> = <span class="number">40</span>;
+  var <span class="name">maxColumn</span> = <span class="number">10</span>;
+  var <span class="name">maxRow</span> = <span class="number">15</span>;
+  var <span class="name">maxIndex</span> = <span class="name">maxColumn</span> <span class="operator">*</span> <span class="name">maxRow</span>;
+  var <span class="name">board</span> = new <span class="name">Array</span>(<span class="name">maxIndex</span>);
+  var <span class="name">component</span>;
+
+  <span class="comment">//Index function used instead of a 2D array</span>
+  <span class="keyword">function</span> <span class="name">index</span>(<span class="name">column</span>, row) {
+      <span class="keyword">return</span> <span class="name">column</span> <span class="operator">+</span> (<span class="name">row</span> <span class="operator">*</span> <span class="name">maxColumn</span>);
+  }
+
+  <span class="keyword">function</span> <span class="name">startNewGame</span>() {
+      <span class="comment">//Delete blocks from previous game</span>
+      <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">maxIndex</span>; i++) {
+          <span class="keyword">if</span> (<span class="name">board</span>[<span class="name">i</span>] <span class="operator">!=</span> <span class="number">null</span>)
+              <span class="name">board</span>[<span class="name">i</span>].<span class="name">destroy</span>();
+      }
+
+      <span class="comment">//Calculate board size</span>
+      <span class="name">maxColumn</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">floor</span>(<span class="name">background</span>.<span class="name">width</span> <span class="operator">/</span> <span class="name">blockSize</span>);
+      <span class="name">maxRow</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">floor</span>(<span class="name">background</span>.<span class="name">height</span> <span class="operator">/</span> <span class="name">blockSize</span>);
+      <span class="name">maxIndex</span> <span class="operator">=</span> <span class="name">maxRow</span> <span class="operator">*</span> <span class="name">maxColumn</span>;
+
+      <span class="comment">//Initialize Board</span>
+      <span class="name">board</span> <span class="operator">=</span> new <span class="name">Array</span>(<span class="name">maxIndex</span>);
+      <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">column</span> = <span class="number">0</span>; <span class="name">column</span> <span class="operator">&lt;</span> <span class="name">maxColumn</span>; column++) {
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">row</span> = <span class="number">0</span>; <span class="name">row</span> <span class="operator">&lt;</span> <span class="name">maxRow</span>; row++) {
+              <span class="name">board</span>[<span class="name">index</span>(<span class="name">column</span>, <span class="name">row</span>)] <span class="operator">=</span> <span class="number">null</span>;
+              <span class="name">createBlock</span>(<span class="name">column</span>, <span class="name">row</span>);
+          }
+      }
+  }
+
+  <span class="keyword">function</span> <span class="name">createBlock</span>(<span class="name">column</span>, row) {
+      <span class="keyword">if</span> (<span class="name">component</span> <span class="operator">==</span> <span class="number">null</span>)
+          <span class="name">component</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">createComponent</span>(<span class="string">&quot;Block.qml&quot;</span>);
+
+      <span class="comment">// Note that if Block.qml was not a local file, component.status would be</span>
+      <span class="comment">// Loading and we should wait for the component's statusChanged() signal to</span>
+      <span class="comment">// know when the file is downloaded and ready before calling createObject().</span>
+      <span class="keyword">if</span> (<span class="name">component</span>.<span class="name">status</span> <span class="operator">==</span> <span class="name">Component</span>.<span class="name">Ready</span>) {
+          var <span class="name">dynamicObject</span> = <span class="name">component</span>.<span class="name">createObject</span>(<span class="name">background</span>);
+          <span class="keyword">if</span> (<span class="name">dynamicObject</span> <span class="operator">==</span> <span class="number">null</span>) {
+              <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;error creating block&quot;</span>);
+              <span class="name">console</span>.<span class="name">log</span>(<span class="name">component</span>.<span class="name">errorString</span>());
+              <span class="keyword">return</span> <span class="number">false</span>;
+          }
+          <span class="name">dynamicObject</span>.<span class="name">x</span> <span class="operator">=</span> <span class="name">column</span> <span class="operator">*</span> <span class="name">blockSize</span>;
+          <span class="name">dynamicObject</span>.<span class="name">y</span> <span class="operator">=</span> <span class="name">row</span> <span class="operator">*</span> <span class="name">blockSize</span>;
+          <span class="name">dynamicObject</span>.<span class="name">width</span> <span class="operator">=</span> <span class="name">blockSize</span>;
+          <span class="name">dynamicObject</span>.<span class="name">height</span> <span class="operator">=</span> <span class="name">blockSize</span>;
+          <span class="name">board</span>[<span class="name">index</span>(<span class="name">column</span>, <span class="name">row</span>)] <span class="operator">=</span> <span class="name">dynamicObject</span>;
+      } <span class="keyword">else</span> {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;error loading block component&quot;</span>);
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">component</span>.<span class="name">errorString</span>());
+          <span class="keyword">return</span> <span class="number">false</span>;
+      }
+      <span class="keyword">return</span> <span class="number">true</span>;
+  }
+
+</pre>
+</div>
+<!-- @@@tutorials/samegame/samegame2/samegame.js -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

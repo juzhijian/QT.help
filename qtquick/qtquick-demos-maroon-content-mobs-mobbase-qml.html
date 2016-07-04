@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>MobBase.qml Example File | Qt Quick 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-demos-maroon-example.html">Qt Quick Demo - Maroon in Trouble</a></td><td >MobBase.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">MobBase.qml Example File</h1>
+<span class="subtitle">demos/maroon/content/mobs/MobBase.qml</span>
+<!-- $$$demos/maroon/content/mobs/MobBase.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.0
+  import &quot;../logic.js&quot; as Logic
+  import &quot;..&quot;
+
+  <span class="type"><a href="qml-qtquick-item.html">Item</a></span>  {
+      <span class="name">id</span>: <span class="name">container</span>
+      property <span class="type">string</span> <span class="name">name</span>: <span class="string">&quot;Fish&quot;</span>
+      property <span class="type">int</span> <span class="name">col</span>: <span class="number">0</span>
+      property <span class="type">real</span> <span class="name">hp</span>: <span class="number">3</span>
+      property <span class="type">real</span> <span class="name">damage</span>: <span class="number">1</span>
+      property <span class="type">real</span> <span class="name">speed</span>: <span class="number">0.25</span>
+      property <span class="type">int</span> <span class="name">rof</span>: <span class="number">30</span> <span class="comment">//In ticks</span>
+      property <span class="type">int</span> <span class="name">fireCounter</span>: <span class="number">0</span>
+      property <span class="type">bool</span> <span class="name">dying</span>: <span class="number">false</span>
+      <span class="name">width</span>: <span class="name">parent</span> ? <span class="name">parent</span>.<span class="name">squareSize</span> : <span class="number">0</span>
+      <span class="name">height</span>: <span class="name">parent</span> ? <span class="name">parent</span>.<span class="name">squareSize</span> : <span class="number">0</span>
+      <span class="name">x</span>: <span class="name">col</span> <span class="operator">*</span> <span class="name">width</span>
+      <span class="name">z</span>: <span class="number">1001</span>
+      <span class="keyword">function</span> <span class="name">fire</span>() { }
+
+      <span class="keyword">function</span> <span class="name">die</span>() {
+          <span class="keyword">if</span> (<span class="name">dying</span>)
+              <span class="keyword">return</span>;
+          <span class="name">dying</span> <span class="operator">=</span> <span class="number">true</span>;
+          <span class="name">bubble</span>.<span class="name">jumpTo</span>(<span class="string">&quot;burst&quot;</span>);
+          <span class="keyword">if</span> (<span class="name">fishSprite</span>.<span class="name">currentSprite</span> <span class="operator">==</span> <span class="string">&quot;front&quot;</span>)
+              <span class="name">fishSprite</span>.<span class="name">jumpTo</span>(<span class="name">Math</span>.<span class="name">random</span>() <span class="operator">&gt;</span> <span class="number">0.5</span> ? <span class="string">&quot;left&quot;</span> : <span class="string">&quot;right&quot;</span> );
+          <span class="name">fishSwim</span>.<span class="name">start</span>();
+          <span class="name">Logic</span>.<span class="name">gameState</span>.<span class="name">score</span> <span class="operator">+=</span> <span class="number">1</span>;
+          <span class="name">killedSound</span>.<span class="name">play</span>();
+          <span class="name">bubble</span>.<span class="name">scale</span> <span class="operator">=</span> <span class="number">0.9</span>
+          <span class="name">destroy</span>(<span class="number">350</span>);
+      }
+
+      <span class="keyword">function</span> <span class="name">inked</span>() {
+          <span class="keyword">if</span> (<span class="name">hp</span> <span class="operator">&gt;</span> <span class="number">0</span>)
+              <span class="name">ink</span>.<span class="name">jumpTo</span>(<span class="string">&quot;dirty&quot;</span>);
+      }
+
+      <span class="keyword">function</span> <span class="name">hit</span>(<span class="name">dmg</span>) {
+          <span class="name">hp</span> <span class="operator">-=</span> <span class="name">dmg</span>;
+
+          <span class="keyword">if</span> (<span class="name">hp</span> <span class="operator">&lt;=</span> <span class="number">0</span>)
+              <span class="name">Logic</span>.<span class="name">killMob</span>(<span class="name">col</span>, <span class="name">container</span>);
+      }
+
+      <span class="name">Component</span>.onCompleted: <span class="name">spawnSound</span>.<span class="name">play</span>()
+
+      <span class="type"><a href="../qtmultimedia/qml-qtmultimedia-soundeffect.html">SoundEffect</a></span> {
+          <span class="name">id</span>: <span class="name">spawnSound</span>
+          <span class="name">source</span>: <span class="string">&quot;../audio/catch.wav&quot;</span>
+      }
+      <span class="type"><a href="../qtmultimedia/qml-qtmultimedia-soundeffect.html">SoundEffect</a></span> {
+          <span class="name">id</span>: <span class="name">killedSound</span>
+          <span class="name">source</span>: <span class="string">&quot;../audio/catch-action.wav&quot;</span>
+      }
+
+      <span class="type"><a href="qml-qtquick-spritesequence.html">SpriteSequence</a></span> {
+          <span class="name">id</span>: <span class="name">fishSprite</span>
+          <span class="name">width</span>: <span class="number">64</span>
+          <span class="name">height</span>: <span class="number">64</span>
+          <span class="name">interpolate</span>: <span class="number">false</span>
+          <span class="name">goalSprite</span>: <span class="string">&quot;&quot;</span>
+
+          <span class="type"><a href="qml-qtquick-sprite.html">Sprite</a></span> {
+              <span class="name">name</span>: <span class="string">&quot;left&quot;</span>
+              <span class="name">source</span>: <span class="string">&quot;../gfx/mob-idle.png&quot;</span>
+              <span class="name">frameWidth</span>: <span class="number">64</span>
+              <span class="name">frameHeight</span>: <span class="number">64</span>
+              <span class="name">frameCount</span>: <span class="number">1</span>
+              <span class="name">frameDuration</span>: <span class="number">800</span>
+              <span class="name">frameDurationVariation</span>: <span class="number">400</span>
+              <span class="name">to</span>: { &quot;front&quot; : <span class="number">1</span> }
+          }
+
+          <span class="type"><a href="qml-qtquick-sprite.html">Sprite</a></span> {
+              <span class="name">name</span>: <span class="string">&quot;front&quot;</span>
+              <span class="name">source</span>: <span class="string">&quot;../gfx/mob-idle.png&quot;</span>
+              <span class="name">frameCount</span>: <span class="number">1</span>
+              <span class="name">frameX</span>: <span class="number">64</span>
+              <span class="name">frameWidth</span>: <span class="number">64</span>
+              <span class="name">frameHeight</span>: <span class="number">64</span>
+              <span class="name">frameDuration</span>: <span class="number">800</span>
+              <span class="name">frameDurationVariation</span>: <span class="number">400</span>
+              <span class="name">to</span>: { &quot;left&quot; : <span class="number">1</span>, &quot;right&quot; : <span class="number">1</span> }
+          }
+
+          <span class="type"><a href="qml-qtquick-sprite.html">Sprite</a></span> {
+              <span class="name">name</span>: <span class="string">&quot;right&quot;</span>
+              <span class="name">source</span>: <span class="string">&quot;../gfx/mob-idle.png&quot;</span>
+              <span class="name">frameCount</span>: <span class="number">1</span>
+              <span class="name">frameX</span>: <span class="number">128</span>
+              <span class="name">frameWidth</span>: <span class="number">64</span>
+              <span class="name">frameHeight</span>: <span class="number">64</span>
+              <span class="name">frameDuration</span>: <span class="number">800</span>
+              <span class="name">frameDurationVariation</span>: <span class="number">400</span>
+              <span class="name">to</span>: { &quot;front&quot; : <span class="number">1</span> }
+          }
+
+          <span class="type"><a href="qml-qtquick-sprite.html">Sprite</a></span> { <span class="comment">//WORKAROUND: This prevents the triggering of a rendering error which is currently under investigation.</span>
+              <span class="name">name</span>: <span class="string">&quot;dummy&quot;</span>
+              <span class="name">source</span>: <span class="string">&quot;../gfx/melee-idle.png&quot;</span>
+              <span class="name">frameCount</span>: <span class="number">8</span>
+              <span class="name">frameWidth</span>: <span class="number">64</span>
+              <span class="name">frameHeight</span>: <span class="number">64</span>
+              <span class="name">frameX</span>: <span class="number">0</span>
+              <span class="name">frameDuration</span>: <span class="number">200</span>
+          }
+
+          NumberAnimation on <span class="name">x</span> {
+              <span class="name">id</span>: <span class="name">fishSwim</span>
+              <span class="name">running</span>: <span class="number">false</span>
+              property <span class="type">bool</span> <span class="name">goingLeft</span>: <span class="name">fishSprite</span>.<span class="name">currentSprite</span> <span class="operator">==</span> <span class="string">&quot;right&quot;</span>
+              <span class="name">to</span>: <span class="name">goingLeft</span> ? -<span class="number">360</span> : <span class="number">360</span>
+              <span class="name">duration</span>: <span class="number">300</span>
+          }
+      }
+
+      <span class="type"><a href="qml-qtquick-spritesequence.html">SpriteSequence</a></span> {
+          <span class="name">id</span>: <span class="name">bubble</span>
+          <span class="name">width</span>: <span class="number">64</span>
+          <span class="name">height</span>: <span class="number">64</span>
+          <span class="name">scale</span>: <span class="number">0.4</span> <span class="operator">+</span> (<span class="number">0.2</span>  <span class="operator">*</span> <span class="name">hp</span>)
+          <span class="name">interpolate</span>: <span class="number">false</span>
+          <span class="name">goalSprite</span>: <span class="string">&quot;&quot;</span>
+
+          Behavior on <span class="name">scale</span> {
+              <span class="type"><a href="qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">duration</span>: <span class="number">150</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">OutBack</span> }
+          }
+
+          <span class="type"><a href="qml-qtquick-sprite.html">Sprite</a></span> {
+              <span class="name">name</span>: <span class="string">&quot;big&quot;</span>
+              <span class="name">source</span>: <span class="string">&quot;../gfx/catch.png&quot;</span>
+              <span class="name">frameCount</span>: <span class="number">1</span>
+              <span class="name">to</span>: { &quot;burst&quot; : <span class="number">0</span> }
+          }
+
+          <span class="type"><a href="qml-qtquick-sprite.html">Sprite</a></span> {
+              <span class="name">name</span>: <span class="string">&quot;burst&quot;</span>
+              <span class="name">source</span>: <span class="string">&quot;../gfx/catch-action.png&quot;</span>
+              <span class="name">frameCount</span>: <span class="number">3</span>
+              <span class="name">frameX</span>: <span class="number">64</span>
+              <span class="name">frameDuration</span>: <span class="number">200</span>
+          }
+
+          <span class="type"><a href="qml-qtquick-sprite.html">Sprite</a></span> { <span class="comment">//WORKAROUND: This prevents the triggering of a rendering error which is currently under investigation.</span>
+              <span class="name">name</span>: <span class="string">&quot;dummy&quot;</span>
+              <span class="name">source</span>: <span class="string">&quot;../gfx/melee-idle.png&quot;</span>
+              <span class="name">frameCount</span>: <span class="number">8</span>
+              <span class="name">frameWidth</span>: <span class="number">64</span>
+              <span class="name">frameHeight</span>: <span class="number">64</span>
+              <span class="name">frameX</span>: <span class="number">0</span>
+              <span class="name">frameDuration</span>: <span class="number">200</span>
+          }
+          SequentialAnimation on <span class="name">width</span> {
+              <span class="name">loops</span>: <span class="name">Animation</span>.<span class="name">Infinite</span>
+              <span class="type"><a href="qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: <span class="name">width</span> <span class="operator">*</span> <span class="number">1</span>; <span class="name">to</span>: <span class="name">width</span> <span class="operator">*</span> <span class="number">1.1</span>; <span class="name">duration</span>: <span class="number">800</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuad</span> }
+              <span class="type"><a href="qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: <span class="name">width</span> <span class="operator">*</span> <span class="number">1.1</span>; <span class="name">to</span>: <span class="name">width</span> <span class="operator">*</span> <span class="number">1</span>; <span class="name">duration</span>: <span class="number">1000</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuad</span> }
+          }
+          SequentialAnimation on <span class="name">height</span> {
+              <span class="name">loops</span>: <span class="name">Animation</span>.<span class="name">Infinite</span>
+              <span class="type"><a href="qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: <span class="name">height</span> <span class="operator">*</span> <span class="number">1</span>; <span class="name">to</span>: <span class="name">height</span> <span class="operator">*</span> <span class="number">1.15</span>; <span class="name">duration</span>: <span class="number">1200</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuad</span> }
+              <span class="type"><a href="qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: <span class="name">height</span> <span class="operator">*</span> <span class="number">1.15</span>; <span class="name">to</span>: <span class="name">height</span> <span class="operator">*</span> <span class="number">1</span>; <span class="name">duration</span>: <span class="number">1000</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuad</span> }
+          }
+      }
+
+      <span class="type"><a href="qml-qtquick-spritesequence.html">SpriteSequence</a></span> {
+          <span class="name">id</span>: <span class="name">ink</span>
+          <span class="name">width</span>: <span class="number">64</span>
+          <span class="name">height</span>: <span class="number">64</span>
+          <span class="name">scale</span>: <span class="name">bubble</span>.<span class="name">scale</span>
+          <span class="name">goalSprite</span>: <span class="string">&quot;&quot;</span>
+
+          <span class="type"><a href="qml-qtquick-sprite.html">Sprite</a></span> {
+              <span class="name">name</span>: <span class="string">&quot;clean&quot;</span>
+              <span class="name">source</span>: <span class="string">&quot;../gfx/projectile-action.png&quot;</span>
+              <span class="name">frameCount</span>: <span class="number">1</span>
+              <span class="name">frameX</span>: <span class="number">0</span>
+              <span class="name">frameWidth</span>: <span class="number">64</span>
+              <span class="name">frameHeight</span>: <span class="number">64</span>
+          }
+          <span class="type"><a href="qml-qtquick-sprite.html">Sprite</a></span> {
+              <span class="name">name</span>: <span class="string">&quot;dirty&quot;</span>
+              <span class="name">source</span>: <span class="string">&quot;../gfx/projectile-action.png&quot;</span>
+              <span class="name">frameCount</span>: <span class="number">3</span>
+              <span class="name">frameX</span>: <span class="number">64</span>
+              <span class="name">frameWidth</span>: <span class="number">64</span>
+              <span class="name">frameHeight</span>: <span class="number">64</span>
+              <span class="name">frameDuration</span>: <span class="number">150</span>
+              <span class="name">to</span>: {&quot;clean&quot;:<span class="number">1</span>}
+          }
+
+          <span class="type"><a href="qml-qtquick-sprite.html">Sprite</a></span> { <span class="comment">//WORKAROUND: This prevents the triggering of a rendering error which is currently under investigation.</span>
+              <span class="name">name</span>: <span class="string">&quot;dummy&quot;</span>
+              <span class="name">source</span>: <span class="string">&quot;../gfx/melee-idle.png&quot;</span>
+              <span class="name">frameCount</span>: <span class="number">8</span>
+              <span class="name">frameWidth</span>: <span class="number">64</span>
+              <span class="name">frameHeight</span>: <span class="number">64</span>
+              <span class="name">frameX</span>: <span class="number">0</span>
+              <span class="name">frameDuration</span>: <span class="number">200</span>
+          }
+          SequentialAnimation on <span class="name">width</span> {
+              <span class="name">loops</span>: <span class="name">Animation</span>.<span class="name">Infinite</span>
+              <span class="type"><a href="qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: <span class="name">width</span> <span class="operator">*</span> <span class="number">1</span>; <span class="name">to</span>: <span class="name">width</span> <span class="operator">*</span> <span class="number">1.1</span>; <span class="name">duration</span>: <span class="number">800</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuad</span> }
+              <span class="type"><a href="qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: <span class="name">width</span> <span class="operator">*</span> <span class="number">1.1</span>; <span class="name">to</span>: <span class="name">width</span> <span class="operator">*</span> <span class="number">1</span>; <span class="name">duration</span>: <span class="number">1000</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuad</span> }
+          }
+          SequentialAnimation on <span class="name">height</span> {
+              <span class="name">loops</span>: <span class="name">Animation</span>.<span class="name">Infinite</span>
+              <span class="type"><a href="qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: <span class="name">height</span> <span class="operator">*</span> <span class="number">1</span>; <span class="name">to</span>: <span class="name">height</span> <span class="operator">*</span> <span class="number">1.15</span>; <span class="name">duration</span>: <span class="number">1200</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuad</span> }
+              <span class="type"><a href="qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: <span class="name">height</span> <span class="operator">*</span> <span class="number">1.15</span>; <span class="name">to</span>: <span class="name">height</span> <span class="operator">*</span> <span class="number">1</span>; <span class="name">duration</span>: <span class="number">1000</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuad</span> }
+          }
+
+      }
+
+      SequentialAnimation on <span class="name">x</span> {
+          <span class="name">loops</span>: <span class="name">Animation</span>.<span class="name">Infinite</span>
+          <span class="type"><a href="qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: <span class="name">x</span>; <span class="name">to</span>: <span class="name">x</span> <span class="operator">-</span> <span class="number">5</span>; <span class="name">duration</span>: <span class="number">900</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuad</span> }
+          <span class="type"><a href="qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">from</span>: <span class="name">x</span> <span class="operator">-</span> <span class="number">5</span>; <span class="name">to</span>: <span class="name">x</span>; <span class="name">duration</span>: <span class="number">900</span>; <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuad</span> }
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@demos/maroon/content/mobs/MobBase.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

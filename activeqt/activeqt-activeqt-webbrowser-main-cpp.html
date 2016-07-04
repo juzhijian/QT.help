@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>main.cpp Example File | Active Qt 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="activeqt-index.html">Active Qt</a></td><td ><a href="activeqt-activeqt-webbrowser-example.html">Web Browser Example (ActiveQt)</a></td><td >main.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">main.cpp Example File</h1>
+<span class="subtitle">activeqt/webbrowser/main.cpp</span>
+<!-- $$$activeqt/webbrowser/main.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QMessageBox&gt;</span>
+  <span class="preprocessor">#include &lt;QProgressBar&gt;</span>
+  <span class="preprocessor">#include &lt;QLineEdit&gt;</span>
+  <span class="preprocessor">#include &lt;QLabel&gt;</span>
+  <span class="preprocessor">#include &lt;QStatusBar&gt;</span>
+  <span class="preprocessor">#include &lt;QMainWindow&gt;</span>
+  <span class="preprocessor">#include &lt;QDesktopWidget&gt;</span>
+  <span class="preprocessor">#include &lt;QAbstractEventDispatcher&gt;</span>
+  <span class="preprocessor">#include &lt;QSignalMapper&gt;</span>
+  <span class="preprocessor">#include &lt;QVariant&gt;</span>
+  <span class="preprocessor">#include &lt;QSettings&gt;</span>
+
+  <span class="preprocessor">#include &quot;ui_mainwindow.h&quot;</span>
+
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">char</span> qtUrl<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> <span class="string">&quot;qt.io&quot;</span>;
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">char</span> iWebBrowser2DocumentationUrl<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> <span class="string">&quot;http://msdn.microsoft.com/en-us/library/aa752127%28v=vs.85%29.aspx&quot;</span>;
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">char</span> versionKey<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> <span class="string">&quot;Version&quot;</span>;
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">char</span> geometryKey<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> <span class="string">&quot;Geometry&quot;</span>;
+
+  <span class="keyword">struct</span> Location {
+      Location(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>t <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>()<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>a <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>()) : title(t)<span class="operator">,</span> address(a) {}
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> title;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> address;
+  };
+
+  Q_DECLARE_METATYPE(Location)
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>Location<span class="operator">&gt;</span> defaultBookmarks()
+  {
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>Location<span class="operator">&gt;</span> result;
+      result<span class="operator">.</span>append(Location(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Qt&quot;</span>)<span class="operator">,</span> QLatin1String(qtUrl)));
+      result<span class="operator">.</span>append(Location(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Digia&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;http://qt.digia.com/&quot;</span>)));
+      result<span class="operator">.</span>append(Location(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;IWebBrowser2 MSDN Documentation&quot;</span>)<span class="operator">,</span> QLatin1String(iWebBrowser2DocumentationUrl)));
+      <span class="keyword">return</span> result;
+  }
+
+  <span class="keyword">static</span> bool containsAddress(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>Location<span class="operator">&gt;</span> <span class="operator">&amp;</span>locations<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>address)
+  {
+      foreach (<span class="keyword">const</span> Location <span class="operator">&amp;</span>location<span class="operator">,</span> locations) {
+          <span class="keyword">if</span> (location<span class="operator">.</span>address <span class="operator">=</span><span class="operator">=</span> address)
+              <span class="keyword">return</span> <span class="keyword">true</span>;
+      }
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+  }
+
+  <span class="keyword">static</span> <span class="keyword">inline</span> Location locationFromAction(<span class="keyword">const</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>action)
+  {
+      <span class="keyword">return</span> action<span class="operator">-</span><span class="operator">&gt;</span>data()<span class="operator">.</span>value<span class="operator">&lt;</span>Location<span class="operator">&gt;</span>();
+  }
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>Location<span class="operator">&gt;</span> readBookMarks(<span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> <span class="operator">&amp;</span>settings)
+  {
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>Location<span class="operator">&gt;</span> result;
+      <span class="keyword">if</span> (<span class="keyword">const</span> <span class="type">int</span> count <span class="operator">=</span> settings<span class="operator">.</span>beginReadArray(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Bookmarks&quot;</span>))) {
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> titleKey <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;title&quot;</span>);
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> addressKey <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;address&quot;</span>);
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> count; <span class="operator">+</span><span class="operator">+</span>i) {
+              settings<span class="operator">.</span>setArrayIndex(i);
+              result<span class="operator">.</span>append(Location(settings<span class="operator">.</span>value(titleKey)<span class="operator">.</span>toString()<span class="operator">,</span>
+                                     settings<span class="operator">.</span>value(addressKey)<span class="operator">.</span>toString()));
+          }
+      }
+      settings<span class="operator">.</span>endArray();
+      <span class="keyword">return</span> result;
+  }
+
+  <span class="keyword">static</span> <span class="type">void</span> saveBookMarks(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>Location<span class="operator">&gt;</span> <span class="operator">&amp;</span>bookmarks<span class="operator">,</span> <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> <span class="operator">&amp;</span>settings)
+  {
+      <span class="keyword">const</span> <span class="type">int</span> count <span class="operator">=</span> bookmarks<span class="operator">.</span>size();
+      settings<span class="operator">.</span>beginWriteArray(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Bookmarks&quot;</span>));
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> titleKey <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;title&quot;</span>);
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> addressKey <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;address&quot;</span>);
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> count; <span class="operator">+</span><span class="operator">+</span>i) {
+          settings<span class="operator">.</span>setArrayIndex(i);
+          settings<span class="operator">.</span>setValue(titleKey<span class="operator">,</span> bookmarks<span class="operator">.</span>at(i)<span class="operator">.</span>title);
+          settings<span class="operator">.</span>setValue(addressKey<span class="operator">,</span> bookmarks<span class="operator">.</span>at(i)<span class="operator">.</span>address);
+      }
+      settings<span class="operator">.</span>endArray();
+  }
+
+  <span class="keyword">class</span> MainWindow : <span class="keyword">public</span> <span class="type"><a href="../qtwidgets/qmainwindow.html">QMainWindow</a></span><span class="operator">,</span> <span class="keyword">public</span> Ui<span class="operator">::</span>MainWindow
+  {
+      Q_OBJECT
+  <span class="keyword">public</span>:
+      MainWindow();
+      <span class="operator">~</span>MainWindow();
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> navigate(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>address);
+      <span class="type">void</span> on_WebBrowser_TitleChange(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>title);
+      <span class="type">void</span> on_WebBrowser_ProgressChange(<span class="type">int</span> a<span class="operator">,</span> <span class="type">int</span> b);
+      <span class="type">void</span> on_WebBrowser_CommandStateChange(<span class="type">int</span> cmd<span class="operator">,</span> bool on);
+      <span class="type">void</span> on_WebBrowser_BeforeNavigate();
+      <span class="type">void</span> on_WebBrowser_NavigateComplete(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>address);
+
+      <span class="type">void</span> on_actionGo_triggered();
+      <span class="type">void</span> on_actionNewWindow_triggered();
+      <span class="type">void</span> on_actionAddBookmark_triggered();
+      <span class="type">void</span> on_actionAbout_triggered();
+      <span class="type">void</span> on_actionAboutQt_triggered();
+      <span class="type">void</span> on_actionFileClose_triggered();
+
+  <span class="keyword">private</span>:
+      <span class="keyword">inline</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> address() <span class="keyword">const</span>
+          { <span class="keyword">return</span> addressEdit<span class="operator">-</span><span class="operator">&gt;</span>text()<span class="operator">.</span>trimmed(); }
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>Location<span class="operator">&gt;</span> bookmarks() <span class="keyword">const</span>;
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>addLocation(<span class="keyword">const</span> Location <span class="operator">&amp;</span>location<span class="operator">,</span> <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>menu);
+      <span class="keyword">inline</span> <span class="type">void</span> addBookmark(<span class="keyword">const</span> Location <span class="operator">&amp;</span>location)
+          { bookmarkActions <span class="operator">&lt;</span><span class="operator">&lt;</span> addLocation(location<span class="operator">,</span> BookmarksMenu); }
+
+      <span class="type"><a href="../qtwidgets/qprogressbar.html">QProgressBar</a></span> <span class="operator">*</span>pb;
+      <span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span> <span class="operator">*</span>addressEdit;
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span><span class="operator">&gt;</span> bookmarkActions;
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span><span class="operator">&gt;</span> historyActions;
+      <span class="type"><a href="../qtcore/qsignalmapper.html">QSignalMapper</a></span> locationActionMapper;
+  };
+
+  MainWindow<span class="operator">::</span>MainWindow()
+  {
+      setupUi(<span class="keyword">this</span>);
+
+      addressEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span>;
+      tbAddress<span class="operator">-</span><span class="operator">&gt;</span>insertWidget(actionGo<span class="operator">,</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Address&quot;</span>)));
+      tbAddress<span class="operator">-</span><span class="operator">&gt;</span>insertWidget(actionGo<span class="operator">,</span> addressEdit);
+
+      connect(addressEdit<span class="operator">,</span> SIGNAL(returnPressed())<span class="operator">,</span> actionGo<span class="operator">,</span> SLOT(trigger()));
+      connect(actionBack<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> WebBrowser<span class="operator">,</span> SLOT(GoBack()));
+      connect(actionForward<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> WebBrowser<span class="operator">,</span> SLOT(GoForward()));
+      connect(actionStop<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> WebBrowser<span class="operator">,</span> SLOT(Stop()));
+      connect(actionRefresh<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> WebBrowser<span class="operator">,</span> SLOT(Refresh()));
+      connect(actionHome<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> WebBrowser<span class="operator">,</span> SLOT(GoHome()));
+      connect(actionSearch<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> WebBrowser<span class="operator">,</span> SLOT(GoSearch()));
+
+      pb <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qprogressbar.html">QProgressBar</a></span>(statusBar());
+      pb<span class="operator">-</span><span class="operator">&gt;</span>setTextVisible(<span class="keyword">false</span>);
+      pb<span class="operator">-</span><span class="operator">&gt;</span>hide();
+      statusBar()<span class="operator">-</span><span class="operator">&gt;</span>addPermanentWidget(pb);
+
+      connect(<span class="operator">&amp;</span>locationActionMapper<span class="operator">,</span> SIGNAL(mapped(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(navigate(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>)));
+
+      <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> settings(<span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span><span class="operator">::</span>IniFormat<span class="operator">,</span> <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span><span class="operator">::</span>UserScope<span class="operator">,</span>
+                         <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>organizationName()<span class="operator">,</span> <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>applicationName());
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> restoredGeometry <span class="operator">=</span> settings<span class="operator">.</span>value(QLatin1String(geometryKey))<span class="operator">.</span>toByteArray();
+      <span class="keyword">if</span> (restoredGeometry<span class="operator">.</span>isEmpty() <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>restoreGeometry(restoredGeometry)) {
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> availableGeometry <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span><span class="operator">::</span>desktop()<span class="operator">-</span><span class="operator">&gt;</span>availableGeometry(<span class="keyword">this</span>);
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> size <span class="operator">=</span> (availableGeometry<span class="operator">.</span>size() <span class="operator">*</span> <span class="number">4</span>) <span class="operator">/</span> <span class="number">5</span>;
+          resize(size);
+          move(availableGeometry<span class="operator">.</span>center() <span class="operator">-</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(size<span class="operator">.</span>width()<span class="operator">,</span> size<span class="operator">.</span>height()) <span class="operator">/</span> <span class="number">2</span>);
+      }
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> restoredVersion <span class="operator">=</span> settings<span class="operator">.</span>value(QLatin1String(versionKey))<span class="operator">.</span>toString();
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>Location<span class="operator">&gt;</span> bookmarks <span class="operator">=</span> readBookMarks(settings);
+      <span class="keyword">if</span> (bookmarks<span class="operator">.</span>isEmpty() <span class="operator">|</span><span class="operator">|</span> restoredVersion<span class="operator">.</span>isEmpty())
+          bookmarks <span class="operator">=</span> defaultBookmarks();
+      foreach (<span class="keyword">const</span> Location <span class="operator">&amp;</span>bookmark<span class="operator">,</span> bookmarks)
+          addBookmark(bookmark);
+  }
+
+
+  MainWindow<span class="operator">::</span><span class="operator">~</span>MainWindow()
+  {
+      <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> settings(<span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span><span class="operator">::</span>IniFormat<span class="operator">,</span> <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span><span class="operator">::</span>UserScope<span class="operator">,</span>
+                         <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>organizationName()<span class="operator">,</span> <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>applicationName());
+      saveBookMarks(bookmarks()<span class="operator">,</span> settings);
+      settings<span class="operator">.</span>setValue(QLatin1String(versionKey)<span class="operator">,</span> QLatin1String(QT_VERSION_STR));
+      settings<span class="operator">.</span>setValue(QLatin1String(geometryKey)<span class="operator">,</span> saveGeometry());
+  }
+
+  <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>MainWindow<span class="operator">::</span>addLocation(<span class="keyword">const</span> Location <span class="operator">&amp;</span>location<span class="operator">,</span> <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>menu)
+  {
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>action <span class="operator">=</span> menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(location<span class="operator">.</span>title);
+      action<span class="operator">-</span><span class="operator">&gt;</span>setData(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(location));
+      locationActionMapper<span class="operator">.</span>setMapping(action<span class="operator">,</span> location<span class="operator">.</span>address);
+      connect(action<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="operator">&amp;</span>locationActionMapper<span class="operator">,</span> SLOT(map()));
+      <span class="keyword">return</span> action;
+  }
+
+  <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>Location<span class="operator">&gt;</span> MainWindow<span class="operator">::</span>bookmarks() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>Location<span class="operator">&gt;</span> result;
+      foreach (<span class="keyword">const</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>action<span class="operator">,</span> bookmarkActions)
+          result<span class="operator">.</span>append(locationFromAction(action));
+      <span class="keyword">return</span> result;
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>on_actionAddBookmark_triggered()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>historyActions<span class="operator">.</span>isEmpty()) {
+          <span class="keyword">const</span> Location location <span class="operator">=</span> locationFromAction(historyActions<span class="operator">.</span>last());
+          <span class="keyword">if</span> (<span class="operator">!</span>containsAddress(bookmarks()<span class="operator">,</span> location<span class="operator">.</span>address))
+              addBookmark(location);
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>on_WebBrowser_TitleChange(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>title)
+  {
+      <span class="comment">// This is called multiple times after NavigateComplete().</span>
+      <span class="comment">// Add new URLs to history here.</span>
+      setWindowTitle(<span class="string">&quot;Qt WebBrowser - &quot;</span> <span class="operator">+</span> title);
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> currentAddress <span class="operator">=</span> address();
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> historyAddress <span class="operator">=</span> historyActions<span class="operator">.</span>isEmpty() <span class="operator">?</span>
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span>() : locationFromAction(historyActions<span class="operator">.</span>last())<span class="operator">.</span>address;
+      <span class="keyword">if</span> (currentAddress<span class="operator">.</span>isEmpty() <span class="operator">|</span><span class="operator">|</span> currentAddress <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;about:blank&quot;</span> <span class="operator">|</span><span class="operator">|</span> currentAddress <span class="operator">=</span><span class="operator">=</span> historyAddress)
+          <span class="keyword">return</span>;
+      historyActions <span class="operator">&lt;</span><span class="operator">&lt;</span> addLocation(Location(title<span class="operator">,</span> currentAddress)<span class="operator">,</span> HistoryMenu);
+      <span class="keyword">if</span> (historyActions<span class="operator">.</span>size() <span class="operator">&gt;</span> <span class="number">10</span>)
+          <span class="keyword">delete</span> historyActions<span class="operator">.</span>takeFirst();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>on_WebBrowser_ProgressChange(<span class="type">int</span> a<span class="operator">,</span> <span class="type">int</span> b)
+  {
+      <span class="keyword">if</span> (a <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> b <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">0</span>) {
+          pb<span class="operator">-</span><span class="operator">&gt;</span>hide();
+          <span class="keyword">return</span>;
+      }
+      pb<span class="operator">-</span><span class="operator">&gt;</span>show();
+      pb<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="number">0</span><span class="operator">,</span> b);
+      pb<span class="operator">-</span><span class="operator">&gt;</span>setValue(a);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>on_WebBrowser_CommandStateChange(<span class="type">int</span> cmd<span class="operator">,</span> bool on)
+  {
+      <span class="keyword">switch</span> (cmd) {
+      <span class="keyword">case</span> <span class="number">1</span>:
+          actionForward<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(on);
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> <span class="number">2</span>:
+          actionBack<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(on);
+          <span class="keyword">break</span>;
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>on_WebBrowser_BeforeNavigate()
+  {
+      actionStop<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>on_WebBrowser_NavigateComplete(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>url)
+  {
+      actionStop<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      <span class="keyword">const</span> bool blocked <span class="operator">=</span> addressEdit<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">true</span>);
+      addressEdit<span class="operator">-</span><span class="operator">&gt;</span>setText(url);
+      addressEdit<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(blocked);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>on_actionGo_triggered()
+  {
+      navigate(address());
+  }
+
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>navigate(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>url)
+  {
+      WebBrowser<span class="operator">-</span><span class="operator">&gt;</span>dynamicCall(<span class="string">&quot;Navigate(const QString&amp;)&quot;</span><span class="operator">,</span> url);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>on_actionNewWindow_triggered()
+  {
+      MainWindow <span class="operator">*</span>window <span class="operator">=</span> <span class="keyword">new</span> MainWindow;
+      window<span class="operator">-</span><span class="operator">&gt;</span>show();
+      <span class="keyword">if</span> (addressEdit<span class="operator">-</span><span class="operator">&gt;</span>text()<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+      window<span class="operator">-</span><span class="operator">&gt;</span>addressEdit<span class="operator">-</span><span class="operator">&gt;</span>setText(addressEdit<span class="operator">-</span><span class="operator">&gt;</span>text());
+      window<span class="operator">-</span><span class="operator">&gt;</span>actionStop<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+      window<span class="operator">-</span><span class="operator">&gt;</span>on_actionGo_triggered();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>on_actionAbout_triggered()
+  {
+      <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>about(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;About WebBrowser&quot;</span>)<span class="operator">,</span>
+                  tr(<span class="string">&quot;This Example has been created using the ActiveQt integration into Qt Designer.\n&quot;</span>
+                     <span class="string">&quot;It demonstrates the use of QAxWidget to embed the Internet Explorer ActiveX\n&quot;</span>
+                     <span class="string">&quot;control into a Qt application.&quot;</span>));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>on_actionAboutQt_triggered()
+  {
+      <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>aboutQt(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;About Qt&quot;</span>));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>on_actionFileClose_triggered()
+  {
+      close();
+  }
+
+  <span class="preprocessor">#include &quot;main.moc&quot;</span>
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span> argv)
+  {
+      <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> a(argc<span class="operator">,</span> argv);
+      <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>setApplicationVersion(QT_VERSION_STR);
+      <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>setApplicationName(<span class="string">&quot;Active Qt Web Browser&quot;</span>);
+      <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>setOrganizationName(<span class="string">&quot;QtProject&quot;</span>);
+      MainWindow w;
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> arguments <span class="operator">=</span> <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>arguments();
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> url <span class="operator">=</span> arguments<span class="operator">.</span>size() <span class="operator">&gt;</span> <span class="number">1</span> <span class="operator">?</span>
+          arguments<span class="operator">.</span>at(<span class="number">1</span>) : <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>fromLatin1(qtUrl);
+      w<span class="operator">.</span>navigate(url);
+      w<span class="operator">.</span>show();
+      <span class="keyword">return</span> a<span class="operator">.</span>exec();
+  }
+
+</pre>
+</div>
+<!-- @@@activeqt/webbrowser/main.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

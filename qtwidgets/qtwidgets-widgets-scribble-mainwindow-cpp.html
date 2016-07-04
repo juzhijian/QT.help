@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mainwindow.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-widgets-scribble-example.html">Scribble Example</a></td><td >mainwindow.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mainwindow.cpp Example File</h1>
+<span class="subtitle">widgets/scribble/mainwindow.cpp</span>
+<!-- $$$widgets/scribble/mainwindow.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+
+  <span class="preprocessor">#include &quot;mainwindow.h&quot;</span>
+  <span class="preprocessor">#include &quot;scribblearea.h&quot;</span>
+
+  MainWindow<span class="operator">::</span>MainWindow()
+  {
+      scribbleArea <span class="operator">=</span> <span class="keyword">new</span> ScribbleArea;
+      setCentralWidget(scribbleArea);
+
+      createActions();
+      createMenus();
+
+      setWindowTitle(tr(<span class="string">&quot;Scribble&quot;</span>));
+      resize(<span class="number">500</span><span class="operator">,</span> <span class="number">500</span>);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>closeEvent(<span class="type"><a href="../qtgui/qcloseevent.html">QCloseEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (maybeSave()) {
+          event<span class="operator">-</span><span class="operator">&gt;</span>accept();
+      } <span class="keyword">else</span> {
+          event<span class="operator">-</span><span class="operator">&gt;</span>ignore();
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>open()
+  {
+      <span class="keyword">if</span> (maybeSave()) {
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getOpenFileName(<span class="keyword">this</span><span class="operator">,</span>
+                                     tr(<span class="string">&quot;Open File&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>currentPath());
+          <span class="keyword">if</span> (<span class="operator">!</span>fileName<span class="operator">.</span>isEmpty())
+              scribbleArea<span class="operator">-</span><span class="operator">&gt;</span>openImage(fileName);
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>save()
+  {
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(sender());
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> fileFormat <span class="operator">=</span> action<span class="operator">-</span><span class="operator">&gt;</span>data()<span class="operator">.</span>toByteArray();
+      saveFile(fileFormat);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>penColor()
+  {
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> newColor <span class="operator">=</span> <span class="type"><a href="qcolordialog.html">QColorDialog</a></span><span class="operator">::</span>getColor(scribbleArea<span class="operator">-</span><span class="operator">&gt;</span>penColor());
+      <span class="keyword">if</span> (newColor<span class="operator">.</span>isValid())
+          scribbleArea<span class="operator">-</span><span class="operator">&gt;</span>setPenColor(newColor);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>penWidth()
+  {
+      bool ok;
+      <span class="type">int</span> newWidth <span class="operator">=</span> <span class="type"><a href="qinputdialog.html">QInputDialog</a></span><span class="operator">::</span>getInt(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Scribble&quot;</span>)<span class="operator">,</span>
+                                          tr(<span class="string">&quot;Select pen width:&quot;</span>)<span class="operator">,</span>
+                                          scribbleArea<span class="operator">-</span><span class="operator">&gt;</span>penWidth()<span class="operator">,</span>
+                                          <span class="number">1</span><span class="operator">,</span> <span class="number">50</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="operator">&amp;</span>ok);
+      <span class="keyword">if</span> (ok)
+          scribbleArea<span class="operator">-</span><span class="operator">&gt;</span>setPenWidth(newWidth);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>about()
+  {
+      <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>about(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;About Scribble&quot;</span>)<span class="operator">,</span>
+              tr(<span class="string">&quot;&lt;p&gt;The &lt;b&gt;Scribble&lt;/b&gt; example shows how to use QMainWindow as the &quot;</span>
+                 <span class="string">&quot;base widget for an application, and how to reimplement some of &quot;</span>
+                 <span class="string">&quot;QWidget's event handlers to receive the events generated for &quot;</span>
+                 <span class="string">&quot;the application's widgets:&lt;/p&gt;&lt;p&gt; We reimplement the mouse event &quot;</span>
+                 <span class="string">&quot;handlers to facilitate drawing, the paint event handler to &quot;</span>
+                 <span class="string">&quot;update the application and the resize event handler to optimize &quot;</span>
+                 <span class="string">&quot;the application's appearance. In addition we reimplement the &quot;</span>
+                 <span class="string">&quot;close event handler to intercept the close events before &quot;</span>
+                 <span class="string">&quot;terminating the application.&lt;/p&gt;&lt;p&gt; The example also demonstrates &quot;</span>
+                 <span class="string">&quot;how to use QPainter to draw an image in real time, as well as &quot;</span>
+                 <span class="string">&quot;to repaint widgets.&lt;/p&gt;&quot;</span>));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>createActions()
+  {
+      openAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;&amp;Open...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      openAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Open);
+      connect(openAct<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(open()));
+
+      foreach (<span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> format<span class="operator">,</span> <span class="type"><a href="../qtgui/qimagewriter.html">QImageWriter</a></span><span class="operator">::</span>supportedImageFormats()) {
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> text <span class="operator">=</span> tr(<span class="string">&quot;%1...&quot;</span>)<span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(format)<span class="operator">.</span>toUpper());
+
+          <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(text<span class="operator">,</span> <span class="keyword">this</span>);
+          action<span class="operator">-</span><span class="operator">&gt;</span>setData(format);
+          connect(action<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(save()));
+          saveAsActs<span class="operator">.</span>append(action);
+      }
+
+      printAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;&amp;Print...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(printAct<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> scribbleArea<span class="operator">,</span> SLOT(print()));
+
+      exitAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;E&amp;xit&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      exitAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Quit);
+      connect(exitAct<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(close()));
+
+      penColorAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;&amp;Pen Color...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(penColorAct<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(penColor()));
+
+      penWidthAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Pen &amp;Width...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(penWidthAct<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(penWidth()));
+
+      clearScreenAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;&amp;Clear Screen&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      clearScreenAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(tr(<span class="string">&quot;Ctrl+L&quot;</span>));
+      connect(clearScreenAct<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span>
+              scribbleArea<span class="operator">,</span> SLOT(clearImage()));
+
+      aboutAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;&amp;About&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(aboutAct<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(about()));
+
+      aboutQtAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;About &amp;Qt&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(aboutQtAct<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> qApp<span class="operator">,</span> SLOT(aboutQt()));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>createMenus()
+  {
+      saveAsMenu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmenu.html">QMenu</a></span>(tr(<span class="string">&quot;&amp;Save As&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      foreach (<span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action<span class="operator">,</span> saveAsActs)
+          saveAsMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(action);
+
+      fileMenu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmenu.html">QMenu</a></span>(tr(<span class="string">&quot;&amp;File&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(openAct);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addMenu(saveAsMenu);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(printAct);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(exitAct);
+
+      optionMenu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmenu.html">QMenu</a></span>(tr(<span class="string">&quot;&amp;Options&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      optionMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(penColorAct);
+      optionMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(penWidthAct);
+      optionMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      optionMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(clearScreenAct);
+
+      helpMenu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmenu.html">QMenu</a></span>(tr(<span class="string">&quot;&amp;Help&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(aboutAct);
+      helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(aboutQtAct);
+
+      menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(fileMenu);
+      menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(optionMenu);
+      menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(helpMenu);
+  }
+
+  bool MainWindow<span class="operator">::</span>maybeSave()
+  {
+      <span class="keyword">if</span> (scribbleArea<span class="operator">-</span><span class="operator">&gt;</span>isModified()) {
+         <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>StandardButton ret;
+         ret <span class="operator">=</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Scribble&quot;</span>)<span class="operator">,</span>
+                            tr(<span class="string">&quot;The image has been modified.\n&quot;</span>
+                               <span class="string">&quot;Do you want to save your changes?&quot;</span>)<span class="operator">,</span>
+                            <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Save <span class="operator">|</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Discard
+                            <span class="operator">|</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Cancel);
+          <span class="keyword">if</span> (ret <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Save) {
+              <span class="keyword">return</span> saveFile(<span class="string">&quot;png&quot;</span>);
+          } <span class="keyword">else</span> <span class="keyword">if</span> (ret <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Cancel) {
+              <span class="keyword">return</span> <span class="keyword">false</span>;
+          }
+      }
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  bool MainWindow<span class="operator">::</span>saveFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>fileFormat)
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> initialPath <span class="operator">=</span> <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>currentPath() <span class="operator">+</span> <span class="string">&quot;/untitled.&quot;</span> <span class="operator">+</span> fileFormat;
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getSaveFileName(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Save As&quot;</span>)<span class="operator">,</span>
+                                 initialPath<span class="operator">,</span>
+                                 tr(<span class="string">&quot;%1 Files (*.%2);;All Files (*)&quot;</span>)
+                                 <span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>fromLatin1(fileFormat<span class="operator">.</span>toUpper()))
+                                 <span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>fromLatin1(fileFormat)));
+      <span class="keyword">if</span> (fileName<span class="operator">.</span>isEmpty()) {
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      } <span class="keyword">else</span> {
+          <span class="keyword">return</span> scribbleArea<span class="operator">-</span><span class="operator">&gt;</span>saveImage(fileName<span class="operator">,</span> fileFormat<span class="operator">.</span>constData());
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@widgets/scribble/mainwindow.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>glbuffers.h Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-graphicsview-boxes-example.html">Boxes</a></td><td >glbuffers.h Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">glbuffers.h Example File</h1>
+<span class="subtitle">graphicsview/boxes/glbuffers.h</span>
+<!-- $$$graphicsview/boxes/glbuffers.h-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#ifndef GLBUFFERS_H</span>
+  <span class="preprocessor">#define GLBUFFERS_H</span>
+
+  <span class="comment">//#include &lt;GL/glew.h&gt;</span>
+  <span class="preprocessor">#include &quot;glextensions.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+  <span class="preprocessor">#include &lt;QtOpenGL&gt;</span>
+
+  <span class="preprocessor">#define BUFFER_OFFSET(i) ((char*)0 + (i))</span>
+  <span class="preprocessor">#define SIZE_OF_MEMBER(cls, member) sizeof(static_cast&lt;cls *&gt;(0)-&gt;member)</span>
+
+  <span class="preprocessor">#define GLBUFFERS_ASSERT_OPENGL(prefix, assertion, returnStatement)                         \
+  if (m_failed || !(assertion)) {                                                             \
+      if (!m_failed) qCritical(prefix &quot;: The necessary OpenGL functions are not available.&quot;); \
+      m_failed = true;                                                                        \
+      returnStatement;                                                                        \
+  }</span>
+
+  <span class="type">void</span> qgluPerspective(GLdouble fovy<span class="operator">,</span> GLdouble aspect<span class="operator">,</span> GLdouble zNear<span class="operator">,</span> GLdouble zFar);
+
+  <span class="keyword">class</span> QMatrix4x4;
+
+  <span class="keyword">class</span> GLTexture
+  {
+  <span class="keyword">public</span>:
+      GLTexture();
+      <span class="keyword">virtual</span> <span class="operator">~</span>GLTexture();
+      <span class="keyword">virtual</span> <span class="type">void</span> bind() <span class="operator">=</span> <span class="number">0</span>;
+      <span class="keyword">virtual</span> <span class="type">void</span> unbind() <span class="operator">=</span> <span class="number">0</span>;
+      <span class="keyword">virtual</span> bool failed() <span class="keyword">const</span> {<span class="keyword">return</span> m_failed;}
+  <span class="keyword">protected</span>:
+      GLuint m_texture;
+      bool m_failed;
+  };
+
+  <span class="keyword">class</span> GLFrameBufferObject
+  {
+  <span class="keyword">public</span>:
+      <span class="keyword">friend</span> <span class="keyword">class</span> GLRenderTargetCube;
+      <span class="comment">// friend class GLRenderTarget2D;</span>
+
+      GLFrameBufferObject(<span class="type">int</span> width<span class="operator">,</span> <span class="type">int</span> height);
+      <span class="keyword">virtual</span> <span class="operator">~</span>GLFrameBufferObject();
+      bool isComplete();
+      <span class="keyword">virtual</span> bool failed() <span class="keyword">const</span> {<span class="keyword">return</span> m_failed;}
+  <span class="keyword">protected</span>:
+      <span class="type">void</span> setAsRenderTarget(bool state <span class="operator">=</span> <span class="keyword">true</span>);
+      GLuint m_fbo;
+      GLuint m_depthBuffer;
+      <span class="type">int</span> m_width<span class="operator">,</span> m_height;
+      bool m_failed;
+  };
+
+  <span class="keyword">class</span> GLTexture2D : <span class="keyword">public</span> GLTexture
+  {
+  <span class="keyword">public</span>:
+      GLTexture2D(<span class="type">int</span> width<span class="operator">,</span> <span class="type">int</span> height);
+      <span class="keyword">explicit</span> GLTexture2D(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">&amp;</span> fileName<span class="operator">,</span> <span class="type">int</span> width <span class="operator">=</span> <span class="number">0</span><span class="operator">,</span> <span class="type">int</span> height <span class="operator">=</span> <span class="number">0</span>);
+      <span class="type">void</span> load(<span class="type">int</span> width<span class="operator">,</span> <span class="type">int</span> height<span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span> <span class="operator">*</span>data);
+      <span class="keyword">virtual</span> <span class="type">void</span> bind() Q_DECL_OVERRIDE;
+      <span class="keyword">virtual</span> <span class="type">void</span> unbind() Q_DECL_OVERRIDE;
+  };
+
+  <span class="keyword">class</span> GLTexture3D : <span class="keyword">public</span> GLTexture
+  {
+  <span class="keyword">public</span>:
+      GLTexture3D(<span class="type">int</span> width<span class="operator">,</span> <span class="type">int</span> height<span class="operator">,</span> <span class="type">int</span> depth);
+      <span class="comment">// TODO: Implement function below</span>
+      <span class="comment">//GLTexture3D(const QString&amp; fileName, int width = 0, int height = 0);</span>
+      <span class="type">void</span> load(<span class="type">int</span> width<span class="operator">,</span> <span class="type">int</span> height<span class="operator">,</span> <span class="type">int</span> depth<span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span> <span class="operator">*</span>data);
+      <span class="keyword">virtual</span> <span class="type">void</span> bind() Q_DECL_OVERRIDE;
+      <span class="keyword">virtual</span> <span class="type">void</span> unbind() Q_DECL_OVERRIDE;
+  };
+
+  <span class="keyword">class</span> GLTextureCube : <span class="keyword">public</span> GLTexture
+  {
+  <span class="keyword">public</span>:
+      GLTextureCube(<span class="type">int</span> size);
+      <span class="keyword">explicit</span> GLTextureCube(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span><span class="operator">&amp;</span> fileNames<span class="operator">,</span> <span class="type">int</span> size <span class="operator">=</span> <span class="number">0</span>);
+      <span class="type">void</span> load(<span class="type">int</span> size<span class="operator">,</span> <span class="type">int</span> face<span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span> <span class="operator">*</span>data);
+      <span class="keyword">virtual</span> <span class="type">void</span> bind() Q_DECL_OVERRIDE;
+      <span class="keyword">virtual</span> <span class="type">void</span> unbind() Q_DECL_OVERRIDE;
+  };
+
+  <span class="comment">// TODO: Define and implement class below</span>
+  <span class="comment">//class GLRenderTarget2D : public GLTexture2D</span>
+
+  <span class="keyword">class</span> GLRenderTargetCube : <span class="keyword">public</span> GLTextureCube
+  {
+  <span class="keyword">public</span>:
+      GLRenderTargetCube(<span class="type">int</span> size);
+      <span class="comment">// begin rendering to one of the cube's faces. 0 &lt;= face &lt; 6</span>
+      <span class="type">void</span> begin(<span class="type">int</span> face);
+      <span class="comment">// end rendering</span>
+      <span class="type">void</span> end();
+      <span class="keyword">virtual</span> bool failed() <span class="keyword">const</span> Q_DECL_OVERRIDE {<span class="keyword">return</span> m_failed <span class="operator">|</span><span class="operator">|</span> m_fbo<span class="operator">.</span>failed();}
+
+      <span class="keyword">static</span> <span class="type">void</span> getViewMatrix(QMatrix4x4<span class="operator">&amp;</span> mat<span class="operator">,</span> <span class="type">int</span> face);
+      <span class="keyword">static</span> <span class="type">void</span> getProjectionMatrix(QMatrix4x4<span class="operator">&amp;</span> mat<span class="operator">,</span> <span class="type">float</span> nearZ<span class="operator">,</span> <span class="type">float</span> farZ);
+  <span class="keyword">private</span>:
+      GLFrameBufferObject m_fbo;
+  };
+
+  <span class="keyword">struct</span> VertexDescription
+  {
+      <span class="keyword">enum</span>
+      {
+          Null <span class="operator">=</span> <span class="number">0</span><span class="operator">,</span> <span class="comment">// Terminates a VertexDescription array</span>
+          Position<span class="operator">,</span>
+          TexCoord<span class="operator">,</span>
+          Normal<span class="operator">,</span>
+          Color<span class="operator">,</span>
+      };
+      <span class="type">int</span> field; <span class="comment">// Position, TexCoord, Normal, Color</span>
+      <span class="type">int</span> type; <span class="comment">// GL_FLOAT, GL_UNSIGNED_BYTE</span>
+      <span class="type">int</span> count; <span class="comment">// number of elements</span>
+      <span class="type">int</span> offset; <span class="comment">// field's offset into vertex struct</span>
+      <span class="type">int</span> index; <span class="comment">// 0 (unused at the moment)</span>
+  };
+
+  <span class="comment">// Implementation of interleaved buffers.</span>
+  <span class="comment">// 'T' is a struct which must include a null-terminated static array</span>
+  <span class="comment">// 'VertexDescription* description'.</span>
+  <span class="comment">// Example:</span>
+  <span class="comment">/*
+  struct Vertex
+  {
+      GLfloat position[3];
+      GLfloat texCoord[2];
+      GLfloat normal[3];
+      GLbyte color[4];
+      static VertexDescription description[];
+  };
+
+  VertexDescription Vertex::description[] = {
+      {VertexDescription::Position, GL_FLOAT, SIZE_OF_MEMBER(Vertex, position) / sizeof(GLfloat), offsetof(Vertex, position), 0},
+      {VertexDescription::TexCoord, GL_FLOAT, SIZE_OF_MEMBER(Vertex, texCoord) / sizeof(GLfloat), offsetof(Vertex, texCoord), 0},
+      {VertexDescription::Normal, GL_FLOAT, SIZE_OF_MEMBER(Vertex, normal) / sizeof(GLfloat), offsetof(Vertex, normal), 0},
+      {VertexDescription::Color, GL_BYTE, SIZE_OF_MEMBER(Vertex, color) / sizeof(GLbyte), offsetof(Vertex, color), 0},
+      {VertexDescription::Null, 0, 0, 0, 0},
+  };
+  */</span>
+  <span class="keyword">template</span><span class="operator">&lt;</span><span class="keyword">class</span> T<span class="operator">&gt;</span>
+  <span class="keyword">class</span> GLVertexBuffer
+  {
+  <span class="keyword">public</span>:
+      GLVertexBuffer(<span class="type">int</span> length<span class="operator">,</span> <span class="keyword">const</span> T <span class="operator">*</span>data <span class="operator">=</span> <span class="number">0</span><span class="operator">,</span> <span class="type">int</span> mode <span class="operator">=</span> GL_STATIC_DRAW)
+          : m_length(<span class="number">0</span>)
+          <span class="operator">,</span> m_mode(mode)
+          <span class="operator">,</span> m_buffer(<span class="number">0</span>)
+          <span class="operator">,</span> m_failed(<span class="keyword">false</span>)
+      {
+          GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLVertexBuffer::GLVertexBuffer&quot;</span><span class="operator">,</span> glGenBuffers <span class="operator">&amp;</span><span class="operator">&amp;</span> glBindBuffer <span class="operator">&amp;</span><span class="operator">&amp;</span> glBufferData<span class="operator">,</span> <span class="keyword">return</span>)
+
+          glGenBuffers(<span class="number">1</span><span class="operator">,</span> <span class="operator">&amp;</span>m_buffer);
+          glBindBuffer(GL_ARRAY_BUFFER<span class="operator">,</span> m_buffer);
+          glBufferData(GL_ARRAY_BUFFER<span class="operator">,</span> (m_length <span class="operator">=</span> length) <span class="operator">*</span> <span class="keyword">sizeof</span>(T)<span class="operator">,</span> data<span class="operator">,</span> mode);
+      }
+
+      <span class="operator">~</span>GLVertexBuffer()
+      {
+          GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLVertexBuffer::~GLVertexBuffer&quot;</span><span class="operator">,</span> glDeleteBuffers<span class="operator">,</span> <span class="keyword">return</span>)
+
+          glDeleteBuffers(<span class="number">1</span><span class="operator">,</span> <span class="operator">&amp;</span>m_buffer);
+      }
+
+      <span class="type">void</span> bind()
+      {
+          GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLVertexBuffer::bind&quot;</span><span class="operator">,</span> glBindBuffer<span class="operator">,</span> <span class="keyword">return</span>)
+
+          glBindBuffer(GL_ARRAY_BUFFER<span class="operator">,</span> m_buffer);
+          <span class="keyword">for</span> (VertexDescription <span class="operator">*</span>desc <span class="operator">=</span> T<span class="operator">::</span>description; desc<span class="operator">-</span><span class="operator">&gt;</span>field <span class="operator">!</span><span class="operator">=</span> VertexDescription<span class="operator">::</span>Null; <span class="operator">+</span><span class="operator">+</span>desc) {
+              <span class="keyword">switch</span> (desc<span class="operator">-</span><span class="operator">&gt;</span>field) {
+              <span class="keyword">case</span> VertexDescription<span class="operator">::</span>Position:
+                  glVertexPointer(desc<span class="operator">-</span><span class="operator">&gt;</span>count<span class="operator">,</span> desc<span class="operator">-</span><span class="operator">&gt;</span>type<span class="operator">,</span> <span class="keyword">sizeof</span>(T)<span class="operator">,</span> BUFFER_OFFSET(desc<span class="operator">-</span><span class="operator">&gt;</span>offset));
+                  glEnableClientState(GL_VERTEX_ARRAY);
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> VertexDescription<span class="operator">::</span>TexCoord:
+                  glTexCoordPointer(desc<span class="operator">-</span><span class="operator">&gt;</span>count<span class="operator">,</span> desc<span class="operator">-</span><span class="operator">&gt;</span>type<span class="operator">,</span> <span class="keyword">sizeof</span>(T)<span class="operator">,</span> BUFFER_OFFSET(desc<span class="operator">-</span><span class="operator">&gt;</span>offset));
+                  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> VertexDescription<span class="operator">::</span>Normal:
+                  glNormalPointer(desc<span class="operator">-</span><span class="operator">&gt;</span>type<span class="operator">,</span> <span class="keyword">sizeof</span>(T)<span class="operator">,</span> BUFFER_OFFSET(desc<span class="operator">-</span><span class="operator">&gt;</span>offset));
+                  glEnableClientState(GL_NORMAL_ARRAY);
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> VertexDescription<span class="operator">::</span>Color:
+                  glColorPointer(desc<span class="operator">-</span><span class="operator">&gt;</span>count<span class="operator">,</span> desc<span class="operator">-</span><span class="operator">&gt;</span>type<span class="operator">,</span> <span class="keyword">sizeof</span>(T)<span class="operator">,</span> BUFFER_OFFSET(desc<span class="operator">-</span><span class="operator">&gt;</span>offset));
+                  glEnableClientState(GL_COLOR_ARRAY);
+                  <span class="keyword">break</span>;
+              <span class="keyword">default</span>:
+                  <span class="keyword">break</span>;
+              }
+          }
+      }
+
+      <span class="type">void</span> unbind()
+      {
+          GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLVertexBuffer::unbind&quot;</span><span class="operator">,</span> glBindBuffer<span class="operator">,</span> <span class="keyword">return</span>)
+
+          glBindBuffer(GL_ARRAY_BUFFER<span class="operator">,</span> <span class="number">0</span>);
+          <span class="keyword">for</span> (VertexDescription <span class="operator">*</span>desc <span class="operator">=</span> T<span class="operator">::</span>description; desc<span class="operator">-</span><span class="operator">&gt;</span>field <span class="operator">!</span><span class="operator">=</span> VertexDescription<span class="operator">::</span>Null; <span class="operator">+</span><span class="operator">+</span>desc) {
+              <span class="keyword">switch</span> (desc<span class="operator">-</span><span class="operator">&gt;</span>field) {
+              <span class="keyword">case</span> VertexDescription<span class="operator">::</span>Position:
+                  glDisableClientState(GL_VERTEX_ARRAY);
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> VertexDescription<span class="operator">::</span>TexCoord:
+                  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> VertexDescription<span class="operator">::</span>Normal:
+                  glDisableClientState(GL_NORMAL_ARRAY);
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> VertexDescription<span class="operator">::</span>Color:
+                  glDisableClientState(GL_COLOR_ARRAY);
+                  <span class="keyword">break</span>;
+              <span class="keyword">default</span>:
+                  <span class="keyword">break</span>;
+              }
+          }
+      }
+
+      <span class="type">int</span> length() <span class="keyword">const</span> {<span class="keyword">return</span> m_length;}
+
+      T <span class="operator">*</span>lock()
+      {
+          GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLVertexBuffer::lock&quot;</span><span class="operator">,</span> glBindBuffer <span class="operator">&amp;</span><span class="operator">&amp;</span> glMapBuffer<span class="operator">,</span> <span class="keyword">return</span> <span class="number">0</span>)
+
+          glBindBuffer(GL_ARRAY_BUFFER<span class="operator">,</span> m_buffer);
+          <span class="comment">//glBufferData(GL_ARRAY_BUFFER, m_length, NULL, m_mode);</span>
+          GLvoid<span class="operator">*</span> buffer <span class="operator">=</span> glMapBuffer(GL_ARRAY_BUFFER<span class="operator">,</span> GL_READ_WRITE);
+          m_failed <span class="operator">=</span> (buffer <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>);
+          <span class="keyword">return</span> <span class="keyword">reinterpret_cast</span><span class="operator">&lt;</span>T <span class="operator">*</span><span class="operator">&gt;</span>(buffer);
+      }
+
+      <span class="type">void</span> unlock()
+      {
+          GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLVertexBuffer::unlock&quot;</span><span class="operator">,</span> glBindBuffer <span class="operator">&amp;</span><span class="operator">&amp;</span> glUnmapBuffer<span class="operator">,</span> <span class="keyword">return</span>)
+
+          glBindBuffer(GL_ARRAY_BUFFER<span class="operator">,</span> m_buffer);
+          glUnmapBuffer(GL_ARRAY_BUFFER);
+      }
+
+      bool failed()
+      {
+          <span class="keyword">return</span> m_failed;
+      }
+
+  <span class="keyword">private</span>:
+      <span class="type">int</span> m_length<span class="operator">,</span> m_mode;
+      GLuint m_buffer;
+      bool m_failed;
+  };
+
+  <span class="keyword">template</span><span class="operator">&lt;</span><span class="keyword">class</span> T<span class="operator">&gt;</span>
+  <span class="keyword">class</span> GLIndexBuffer
+  {
+  <span class="keyword">public</span>:
+      GLIndexBuffer(<span class="type">int</span> length<span class="operator">,</span> <span class="keyword">const</span> T <span class="operator">*</span>data <span class="operator">=</span> <span class="number">0</span><span class="operator">,</span> <span class="type">int</span> mode <span class="operator">=</span> GL_STATIC_DRAW)
+          : m_length(<span class="number">0</span>)
+          <span class="operator">,</span> m_mode(mode)
+          <span class="operator">,</span> m_buffer(<span class="number">0</span>)
+          <span class="operator">,</span> m_failed(<span class="keyword">false</span>)
+      {
+          GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLIndexBuffer::GLIndexBuffer&quot;</span><span class="operator">,</span> glGenBuffers <span class="operator">&amp;</span><span class="operator">&amp;</span> glBindBuffer <span class="operator">&amp;</span><span class="operator">&amp;</span> glBufferData<span class="operator">,</span> <span class="keyword">return</span>)
+
+          glGenBuffers(<span class="number">1</span><span class="operator">,</span> <span class="operator">&amp;</span>m_buffer);
+          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER<span class="operator">,</span> m_buffer);
+          glBufferData(GL_ELEMENT_ARRAY_BUFFER<span class="operator">,</span> (m_length <span class="operator">=</span> length) <span class="operator">*</span> <span class="keyword">sizeof</span>(T)<span class="operator">,</span> data<span class="operator">,</span> mode);
+      }
+
+      <span class="operator">~</span>GLIndexBuffer()
+      {
+          GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLIndexBuffer::~GLIndexBuffer&quot;</span><span class="operator">,</span> glDeleteBuffers<span class="operator">,</span> <span class="keyword">return</span>)
+
+          glDeleteBuffers(<span class="number">1</span><span class="operator">,</span> <span class="operator">&amp;</span>m_buffer);
+      }
+
+      <span class="type">void</span> bind()
+      {
+          GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLIndexBuffer::bind&quot;</span><span class="operator">,</span> glBindBuffer<span class="operator">,</span> <span class="keyword">return</span>)
+
+          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER<span class="operator">,</span> m_buffer);
+      }
+
+      <span class="type">void</span> unbind()
+      {
+          GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLIndexBuffer::unbind&quot;</span><span class="operator">,</span> glBindBuffer<span class="operator">,</span> <span class="keyword">return</span>)
+
+          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER<span class="operator">,</span> <span class="number">0</span>);
+      }
+
+      <span class="type">int</span> length() <span class="keyword">const</span> {<span class="keyword">return</span> m_length;}
+
+      T <span class="operator">*</span>lock()
+      {
+          GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLIndexBuffer::lock&quot;</span><span class="operator">,</span> glBindBuffer <span class="operator">&amp;</span><span class="operator">&amp;</span> glMapBuffer<span class="operator">,</span> <span class="keyword">return</span> <span class="number">0</span>)
+
+          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER<span class="operator">,</span> m_buffer);
+          GLvoid<span class="operator">*</span> buffer <span class="operator">=</span> glMapBuffer(GL_ELEMENT_ARRAY_BUFFER<span class="operator">,</span> GL_READ_WRITE);
+          m_failed <span class="operator">=</span> (buffer <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>);
+          <span class="keyword">return</span> <span class="keyword">reinterpret_cast</span><span class="operator">&lt;</span>T <span class="operator">*</span><span class="operator">&gt;</span>(buffer);
+      }
+
+      <span class="type">void</span> unlock()
+      {
+          GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLIndexBuffer::unlock&quot;</span><span class="operator">,</span> glBindBuffer <span class="operator">&amp;</span><span class="operator">&amp;</span> glUnmapBuffer<span class="operator">,</span> <span class="keyword">return</span>)
+
+          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER<span class="operator">,</span> m_buffer);
+          glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+      }
+
+      bool failed()
+      {
+          <span class="keyword">return</span> m_failed;
+      }
+
+  <span class="keyword">private</span>:
+      <span class="type">int</span> m_length<span class="operator">,</span> m_mode;
+      GLuint m_buffer;
+      bool m_failed;
+  };
+
+  <span class="preprocessor">#endif</span>
+
+</pre>
+</div>
+<!-- @@@graphicsview/boxes/glbuffers.h -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmlmultigraph.qdoc -->
+  <title>Qt Quick 2 Multiple Graphs Example | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td >Qt Quick 2 Multiple Graphs Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#multiple-graphs">Multiple Graphs</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Quick 2 Multiple Graphs Example</h1>
+<span class="subtitle"></span>
+<!-- $$$qmlmultigraph-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Qt Quick 2 multiple graphs example demonstrates using multiple graphs in single window.</p>
+<p class="centerAlign"><img src="images/qmlmultigraph-example.png" alt="" /></p><p>The interesting thing about this example is demonstrating that multiple graphs can be used simultaneously, so most functionality is not explained in detail. For more detailed QML example documentation, see <a href="qtdatavisualization-qmlscatter-example.html">Qt Quick 2 Scatter Example</a>.</p>
+<a name="multiple-graphs"></a>
+<h2 id="multiple-graphs">Multiple Graphs</h2>
+<p>Using multiple graphs in a single application doesn't require anything special, simply define and position the graphs as normal. In this example the graphs are shown in a 2 x 2 grid with <code>GridLayout</code>:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-layouts-gridlayout.html">GridLayout</a></span> {
+      <span class="name">id</span>: <span class="name">gridLayout</span>
+      <span class="name">columns</span>: <span class="number">2</span>
+      <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+      <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+      <span class="name">anchors</span>.top: <span class="name">mainView</span>.<span class="name">top</span>
+      <span class="name">anchors</span>.bottom: <span class="name">mainView</span>.<span class="name">bottom</span>
+      <span class="name">anchors</span>.left: <span class="name">mainView</span>.<span class="name">left</span>
+      <span class="name">anchors</span>.right: <span class="name">mainView</span>.<span class="name">right</span>
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+          <span class="name">border</span>.color: <span class="name">surfaceGraph</span>.<span class="name">theme</span>.<span class="name">gridLineColor</span>
+          <span class="name">border</span>.width: <span class="number">2</span>
+
+          <span class="type"><a href="qml-qtdatavisualization-surface3d.html">Surface3D</a></span> {
+              <span class="name">id</span>: <span class="name">surfaceGraph</span>
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">anchors</span>.margins: <span class="name">parent</span>.<span class="name">border</span>.<span class="name">width</span>
+              <span class="name">theme</span>: <span class="name">Theme3D</span> {
+                  <span class="name">type</span>: <span class="name">Theme3D</span>.<span class="name">ThemePrimaryColors</span>
+                  <span class="name">font</span>.pointSize: <span class="number">60</span>
+              }
+              <span class="name">scene</span>.activeCamera.cameraPreset: <span class="name">Camera3D</span>.<span class="name">CameraPresetIsometricLeftHigh</span>
+
+              <span class="type"><a href="qml-qtdatavisualization-surface3dseries.html">Surface3DSeries</a></span> {
+                  <span class="name">itemLabelFormat</span>: <span class="string">&quot;Pop density at (@xLabel N, @zLabel E): @yLabel&quot;</span>
+                  <span class="type"><a href="qml-qtdatavisualization-itemmodelsurfacedataproxy.html">ItemModelSurfaceDataProxy</a></span> {
+                      <span class="name">itemModel</span>: <span class="name">data</span>.<span class="name">sharedData</span>
+                      <span class="comment">// The surface data points are not neatly lined up in rows and columns,</span>
+                      <span class="comment">// so we define explicit row and column roles.</span>
+                      <span class="name">rowRole</span>: <span class="string">&quot;row&quot;</span>
+                      <span class="name">columnRole</span>: <span class="string">&quot;col&quot;</span>
+                      <span class="name">xPosRole</span>: <span class="string">&quot;latitude&quot;</span>
+                      <span class="name">zPosRole</span>: <span class="string">&quot;longitude&quot;</span>
+                      <span class="name">yPosRole</span>: <span class="string">&quot;pop_density&quot;</span>
+                  }
+              }
+          }
+      }
+
+      <span class="comment">// We'll use one grid cell for buttons</span>
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-layouts-gridlayout.html">GridLayout</a></span> {
+              <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+              <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+              <span class="name">anchors</span>.top: <span class="name">parent</span>.<span class="name">top</span>
+              <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+              <span class="name">columns</span>: <span class="number">2</span>
+
+              <span class="type">NewButton</span> {
+                  <span class="name">Layout</span>.minimumWidth: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">2</span>
+                  <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+                  <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                  <span class="name">text</span>: <span class="string">&quot;Clear Selections&quot;</span>
+                  <span class="name">onClicked</span>: <span class="name">clearSelections</span>() <span class="comment">// call a helper function to keep button itself simpler</span>
+              }
+
+              <span class="type">NewButton</span> {
+                  <span class="name">Layout</span>.minimumWidth: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">2</span>
+                  <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+                  <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                  <span class="name">text</span>: <span class="string">&quot;Quit&quot;</span>
+                  <span class="name">onClicked</span>: <span class="name">Qt</span>.<span class="name">quit</span>(<span class="number">0</span>);
+              }
+
+              <span class="type">NewButton</span> {
+                  <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+                  <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                  <span class="name">text</span>: <span class="string">&quot;Reset Cameras&quot;</span>
+                  <span class="name">onClicked</span>: <span class="name">resetCameras</span>() <span class="comment">// call a helper function to keep button itself simpler</span>
+              }
+
+              <span class="type">NewButton</span> {
+                  <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+                  <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                  <span class="name">text</span>: <span class="string">&quot;Toggle Mesh Styles&quot;</span>
+                  <span class="name">onClicked</span>: <span class="name">toggleMeshStyle</span>() <span class="comment">// call a helper function to keep button itself simpler</span>
+              }
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+          <span class="name">border</span>.color: <span class="name">scatterGraph</span>.<span class="name">theme</span>.<span class="name">gridLineColor</span>
+          <span class="name">border</span>.width: <span class="number">2</span>
+
+          <span class="type"><a href="qml-qtdatavisualization-scatter3d.html">Scatter3D</a></span> {
+              <span class="name">id</span>: <span class="name">scatterGraph</span>
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">anchors</span>.margins: <span class="name">parent</span>.<span class="name">border</span>.<span class="name">width</span>
+              <span class="name">theme</span>: <span class="name">Theme3D</span> {
+                  <span class="name">type</span>: <span class="name">Theme3D</span>.<span class="name">ThemeDigia</span>
+                  <span class="name">font</span>.pointSize: <span class="number">60</span>
+              }
+              <span class="name">scene</span>.activeCamera.cameraPreset: <span class="name">Camera3D</span>.<span class="name">CameraPresetIsometricLeftHigh</span>
+
+              <span class="type"><a href="qml-qtdatavisualization-scatter3dseries.html">Scatter3DSeries</a></span> {
+                  <span class="name">itemLabelFormat</span>: <span class="string">&quot;Pop density at (@xLabel N, @zLabel E): @yLabel&quot;</span>
+                  <span class="type"><a href="qml-qtdatavisualization-itemmodelscatterdataproxy.html">ItemModelScatterDataProxy</a></span> {
+                      <span class="name">itemModel</span>: <span class="name">data</span>.<span class="name">sharedData</span>
+                      <span class="comment">// Mapping model roles to scatter series item coordinates.</span>
+                      <span class="name">xPosRole</span>: <span class="string">&quot;latitude&quot;</span>
+                      <span class="name">zPosRole</span>: <span class="string">&quot;longitude&quot;</span>
+                      <span class="name">yPosRole</span>: <span class="string">&quot;pop_density&quot;</span>
+                  }
+              }
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+          <span class="name">border</span>.color: <span class="name">barGraph</span>.<span class="name">theme</span>.<span class="name">gridLineColor</span>
+          <span class="name">border</span>.width: <span class="number">2</span>
+
+          <span class="type"><a href="qml-qtdatavisualization-bars3d.html">Bars3D</a></span> {
+              <span class="name">id</span>: <span class="name">barGraph</span>
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">anchors</span>.margins: <span class="name">parent</span>.<span class="name">border</span>.<span class="name">width</span>
+              <span class="name">theme</span>: <span class="name">Theme3D</span> {
+                  <span class="name">type</span>: <span class="name">Theme3D</span>.<span class="name">ThemeQt</span>
+                  <span class="name">font</span>.pointSize: <span class="number">60</span>
+              }
+              <span class="name">selectionMode</span>: <span class="name">AbstractGraph3D</span>.<span class="name">SelectionItemAndRow</span> <span class="operator">|</span> <span class="name">AbstractGraph3D</span>.<span class="name">SelectionSlice</span>
+              <span class="name">scene</span>.activeCamera.cameraPreset: <span class="name">Camera3D</span>.<span class="name">CameraPresetIsometricLeftHigh</span>
+
+              <span class="type"><a href="qml-qtdatavisualization-bar3dseries.html">Bar3DSeries</a></span> {
+                  <span class="name">itemLabelFormat</span>: <span class="string">&quot;@seriesName: @valueLabel&quot;</span>
+                  <span class="name">name</span>: <span class="string">&quot;Population density&quot;</span>
+
+                  <span class="type"><a href="qml-qtdatavisualization-itemmodelbardataproxy.html">ItemModelBarDataProxy</a></span> {
+                      <span class="name">itemModel</span>: <span class="name">data</span>.<span class="name">sharedData</span>
+                      <span class="comment">// Mapping model roles to bar series rows, columns, and values.</span>
+                      <span class="name">rowRole</span>: <span class="string">&quot;row&quot;</span>
+                      <span class="name">columnRole</span>: <span class="string">&quot;col&quot;</span>
+                      <span class="name">valueRole</span>: <span class="string">&quot;pop_density&quot;</span>
+                  }
+              }
+          }
+      }
+  }
+
+</pre>
+<p>Each graph has a parent <code>Rectangle</code> item to provide it with a border.</p>
+<p>Note that one of the grid cells is used for buttons in an another <code>GridLayout</code>.</p>
+<p>Files:</p>
+<ul>
+<li><a href="qtdatavisualization-qmlmultigraph-qml-qmlmultigraph-data-qml.html">qmlmultigraph/qml/qmlmultigraph/Data.qml</a></li>
+<li><a href="qtdatavisualization-qmlmultigraph-qml-qmlmultigraph-newbutton-qml.html">qmlmultigraph/qml/qmlmultigraph/NewButton.qml</a></li>
+<li><a href="qtdatavisualization-qmlmultigraph-qml-qmlmultigraph-main-qml.html">qmlmultigraph/qml/qmlmultigraph/main.qml</a></li>
+<li><a href="qtdatavisualization-qmlmultigraph-main-cpp.html">qmlmultigraph/main.cpp</a></li>
+<li><a href="qtdatavisualization-qmlmultigraph-qmlmultigraph-pro.html">qmlmultigraph/qmlmultigraph.pro</a></li>
+<li><a href="qtdatavisualization-qmlmultigraph-qmlmultigraph-qrc.html">qmlmultigraph/qmlmultigraph.qrc</a></li>
+</ul>
+</div>
+<!-- @@@qmlmultigraph -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

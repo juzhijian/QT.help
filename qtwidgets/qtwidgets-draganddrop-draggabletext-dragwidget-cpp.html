@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>dragwidget.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-draganddrop-draggabletext-example.html">Draggable Text Example</a></td><td >dragwidget.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">dragwidget.cpp Example File</h1>
+<span class="subtitle">draganddrop/draggabletext/dragwidget.cpp</span>
+<!-- $$$draganddrop/draggabletext/dragwidget.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+
+  <span class="preprocessor">#include &quot;dragwidget.h&quot;</span>
+
+  <span class="keyword">static</span> <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>createDragLabel(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>text<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+  {
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>label <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(text<span class="operator">,</span> parent);
+      label<span class="operator">-</span><span class="operator">&gt;</span>setAutoFillBackground(<span class="keyword">true</span>);
+      label<span class="operator">-</span><span class="operator">&gt;</span>setFrameShape(<span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Panel);
+      label<span class="operator">-</span><span class="operator">&gt;</span>setFrameShadow(<span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Raised);
+      <span class="keyword">return</span> label;
+  }
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> hotSpotMimeDataKey() { <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;application/x-hotspot&quot;</span>); }
+
+  DragWidget<span class="operator">::</span>DragWidget(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qwidget.html">QWidget</a></span>(parent)
+  {
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> dictionaryFile(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;:/dictionary/words.txt&quot;</span>));
+      dictionaryFile<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly);
+      <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span> inputStream(<span class="operator">&amp;</span>dictionaryFile);
+
+      <span class="type">int</span> x <span class="operator">=</span> <span class="number">5</span>;
+      <span class="type">int</span> y <span class="operator">=</span> <span class="number">5</span>;
+
+      <span class="keyword">while</span> (<span class="operator">!</span>inputStream<span class="operator">.</span>atEnd()) {
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> word;
+          inputStream <span class="operator">&gt;</span><span class="operator">&gt;</span> word;
+          <span class="keyword">if</span> (<span class="operator">!</span>word<span class="operator">.</span>isEmpty()) {
+              <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>wordLabel <span class="operator">=</span> createDragLabel(word<span class="operator">,</span> <span class="keyword">this</span>);
+              wordLabel<span class="operator">-</span><span class="operator">&gt;</span>move(x<span class="operator">,</span> y);
+              wordLabel<span class="operator">-</span><span class="operator">&gt;</span>show();
+              wordLabel<span class="operator">-</span><span class="operator">&gt;</span>setAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WA_DeleteOnClose);
+              x <span class="operator">+</span><span class="operator">=</span> wordLabel<span class="operator">-</span><span class="operator">&gt;</span>width() <span class="operator">+</span> <span class="number">2</span>;
+              <span class="keyword">if</span> (x <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">245</span>) {
+                  x <span class="operator">=</span> <span class="number">5</span>;
+                  y <span class="operator">+</span><span class="operator">=</span> wordLabel<span class="operator">-</span><span class="operator">&gt;</span>height() <span class="operator">+</span> <span class="number">2</span>;
+              }
+          }
+      }
+
+      setAcceptDrops(<span class="keyword">true</span>);
+      setMinimumSize(<span class="number">400</span><span class="operator">,</span> <a href="../qtcore/qtglobal.html#qMax">qMax</a>(<span class="number">200</span><span class="operator">,</span> y));
+      setWindowTitle(tr(<span class="string">&quot;Draggable Text&quot;</span>));
+  }
+
+  <span class="type">void</span> DragWidget<span class="operator">::</span>dragEnterEvent(<span class="type"><a href="../qtgui/qdragenterevent.html">QDragEnterEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>mimeData()<span class="operator">-</span><span class="operator">&gt;</span>hasText()) {
+          <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>source() <span class="operator">=</span><span class="operator">=</span> <span class="keyword">this</span>) {
+              event<span class="operator">-</span><span class="operator">&gt;</span>setDropAction(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>MoveAction);
+              event<span class="operator">-</span><span class="operator">&gt;</span>accept();
+          } <span class="keyword">else</span> {
+              event<span class="operator">-</span><span class="operator">&gt;</span>acceptProposedAction();
+          }
+      } <span class="keyword">else</span> {
+          event<span class="operator">-</span><span class="operator">&gt;</span>ignore();
+      }
+  }
+
+  <span class="type">void</span> DragWidget<span class="operator">::</span>dropEvent(<span class="type"><a href="../qtgui/qdropevent.html">QDropEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>mimeData()<span class="operator">-</span><span class="operator">&gt;</span>hasText()) {
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span> <span class="operator">*</span>mime <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>mimeData();
+          <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> pieces <span class="operator">=</span> mime<span class="operator">-</span><span class="operator">&gt;</span>text()<span class="operator">.</span>split(<span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;\\s+&quot;</span>))<span class="operator">,</span>
+                               <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>SkipEmptyParts);
+          <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> position <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>pos();
+          <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> hotSpot;
+
+          <span class="type">QByteArrayList</span> hotSpotPos <span class="operator">=</span> mime<span class="operator">-</span><span class="operator">&gt;</span>data(hotSpotMimeDataKey())<span class="operator">.</span>split(<span class="char">' '</span>);
+          <span class="keyword">if</span> (hotSpotPos<span class="operator">.</span>size() <span class="operator">=</span><span class="operator">=</span> <span class="number">2</span>) {
+              hotSpot<span class="operator">.</span>setX(hotSpotPos<span class="operator">.</span>first()<span class="operator">.</span>toInt());
+              hotSpot<span class="operator">.</span>setY(hotSpotPos<span class="operator">.</span>last()<span class="operator">.</span>toInt());
+          }
+
+          foreach (<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>piece<span class="operator">,</span> pieces) {
+              <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>newLabel <span class="operator">=</span> createDragLabel(piece<span class="operator">,</span> <span class="keyword">this</span>);
+              newLabel<span class="operator">-</span><span class="operator">&gt;</span>move(position <span class="operator">-</span> hotSpot);
+              newLabel<span class="operator">-</span><span class="operator">&gt;</span>show();
+              newLabel<span class="operator">-</span><span class="operator">&gt;</span>setAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WA_DeleteOnClose);
+
+              position <span class="operator">+</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(newLabel<span class="operator">-</span><span class="operator">&gt;</span>width()<span class="operator">,</span> <span class="number">0</span>);
+          }
+
+          <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>source() <span class="operator">=</span><span class="operator">=</span> <span class="keyword">this</span>) {
+              event<span class="operator">-</span><span class="operator">&gt;</span>setDropAction(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>MoveAction);
+              event<span class="operator">-</span><span class="operator">&gt;</span>accept();
+          } <span class="keyword">else</span> {
+              event<span class="operator">-</span><span class="operator">&gt;</span>acceptProposedAction();
+          }
+      } <span class="keyword">else</span> {
+          event<span class="operator">-</span><span class="operator">&gt;</span>ignore();
+      }
+      foreach (<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>widget<span class="operator">,</span> findChildren<span class="operator">&lt;</span><span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span><span class="operator">&gt;</span>()) {
+          <span class="keyword">if</span> (<span class="operator">!</span>widget<span class="operator">-</span><span class="operator">&gt;</span>isVisible())
+              widget<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+      }
+  }
+
+  <span class="type">void</span> DragWidget<span class="operator">::</span>mousePressEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>child <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qlabel.html">QLabel</a></span><span class="operator">*</span><span class="operator">&gt;</span>(childAt(event<span class="operator">-</span><span class="operator">&gt;</span>pos()));
+      <span class="keyword">if</span> (<span class="operator">!</span>child)
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> hotSpot <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>pos() <span class="operator">-</span> child<span class="operator">-</span><span class="operator">&gt;</span>pos();
+
+      <span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span> <span class="operator">*</span>mimeData <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span>;
+      mimeData<span class="operator">-</span><span class="operator">&gt;</span>setText(child<span class="operator">-</span><span class="operator">&gt;</span>text());
+      mimeData<span class="operator">-</span><span class="operator">&gt;</span>setData(hotSpotMimeDataKey()<span class="operator">,</span>
+                        <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">::</span>number(hotSpot<span class="operator">.</span>x()) <span class="operator">+</span> <span class="char">' '</span> <span class="operator">+</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">::</span>number(hotSpot<span class="operator">.</span>y()));
+
+      <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> pixmap(child<span class="operator">-</span><span class="operator">&gt;</span>size());
+      child<span class="operator">-</span><span class="operator">&gt;</span>render(<span class="operator">&amp;</span>pixmap);
+
+      <span class="type"><a href="../qtgui/qdrag.html">QDrag</a></span> <span class="operator">*</span>drag <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtgui/qdrag.html">QDrag</a></span>(<span class="keyword">this</span>);
+      drag<span class="operator">-</span><span class="operator">&gt;</span>setMimeData(mimeData);
+      drag<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(pixmap);
+      drag<span class="operator">-</span><span class="operator">&gt;</span>setHotSpot(hotSpot);
+
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DropAction dropAction <span class="operator">=</span> drag<span class="operator">-</span><span class="operator">&gt;</span>exec(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CopyAction <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>MoveAction<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CopyAction);
+
+      <span class="keyword">if</span> (dropAction <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>MoveAction)
+          child<span class="operator">-</span><span class="operator">&gt;</span>close();
+  }
+
+</pre>
+</div>
+<!-- @@@draganddrop/draggabletext/dragwidget.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

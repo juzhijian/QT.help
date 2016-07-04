@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>StockModel.qml Example File | Qt Quick 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-demos-stocqt-example.html">Qt Quick Demo - StocQt</a></td><td >StockModel.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">StockModel.qml Example File</h1>
+<span class="subtitle">demos/stocqt/content/StockModel.qml</span>
+<!-- $$$demos/stocqt/content/StockModel.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.0
+
+  <span class="type"><a href="../qtqml/qml-qtqml-models-listmodel.html">ListModel</a></span> {
+      <span class="name">id</span>: <span class="name">model</span>
+      property <span class="type">string</span> <span class="name">stockId</span>: <span class="string">&quot;&quot;</span>
+      property <span class="type">string</span> <span class="name">stockName</span>: <span class="string">&quot;&quot;</span>
+      property <span class="type">string</span> <span class="name">stockDataCycle</span>: <span class="string">&quot;d&quot;</span>
+      property <span class="type">bool</span> <span class="name">ready</span>: <span class="number">false</span>
+      property <span class="type">real</span> <span class="name">stockPrice</span>: <span class="number">0.0</span>
+      property <span class="type">real</span> <span class="name">stockPriceChanged</span>: <span class="number">0.0</span>
+
+      signal <span class="type">dataReady</span>
+
+      <span class="keyword">function</span> <span class="name">indexOf</span>(<span class="name">date</span>) {
+          <span class="keyword">if</span> (<span class="name">model</span>.<span class="name">count</span> <span class="operator">==</span> <span class="number">0</span>)
+              <span class="keyword">return</span> -<span class="number">1</span>;
+
+          var <span class="name">newest</span> = new <span class="name">Date</span>(<span class="name">model</span>.<span class="name">get</span>(<span class="number">0</span>).<span class="name">date</span>);
+          var <span class="name">oldest</span> = new <span class="name">Date</span>(<span class="name">model</span>.<span class="name">get</span>(<span class="name">model</span>.<span class="name">count</span> <span class="operator">-</span> <span class="number">1</span>).<span class="name">date</span>);
+          <span class="keyword">if</span> (<span class="name">newest</span> <span class="operator">&lt;=</span> <span class="name">date</span>)
+              <span class="keyword">return</span> -<span class="number">1</span>;
+
+          <span class="keyword">if</span> (<span class="name">oldest</span> <span class="operator">&gt;=</span> <span class="name">date</span>)
+              <span class="keyword">return</span> <span class="name">model</span>.<span class="name">count</span> <span class="operator">-</span> <span class="number">1</span>;
+
+          var <span class="name">currDiff</span> = <span class="number">0</span>;
+          var <span class="name">bestDiff</span> = <span class="name">Math</span>.<span class="name">abs</span>(<span class="name">date</span>.<span class="name">getTime</span>() <span class="operator">-</span> <span class="name">newest</span>.<span class="name">getTime</span>());
+          var <span class="name">retval</span> = <span class="number">0</span>;
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">model</span>.<span class="name">count</span>; i++) {
+              var <span class="name">d</span> = new <span class="name">Date</span>(<span class="name">model</span>.<span class="name">get</span>(<span class="name">i</span>).<span class="name">date</span>);
+              <span class="name">currDiff</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">abs</span>(<span class="name">d</span>.<span class="name">getTime</span>() <span class="operator">-</span> <span class="name">date</span>.<span class="name">getTime</span>());
+              <span class="keyword">if</span> (<span class="name">currDiff</span> <span class="operator">&lt;</span> <span class="name">bestDiff</span>) {
+                  <span class="name">bestDiff</span> <span class="operator">=</span> <span class="name">currDiff</span>;
+                  <span class="name">retval</span> <span class="operator">=</span> <span class="name">i</span>;
+              }
+              <span class="keyword">if</span> (<span class="name">currDiff</span> <span class="operator">&gt;</span> <span class="name">bestDiff</span>)
+                  <span class="keyword">return</span> <span class="name">retval</span>;
+          }
+
+          <span class="keyword">return</span> -<span class="number">1</span>;
+      }
+
+      <span class="keyword">function</span> <span class="name">requestUrl</span>() {
+          <span class="keyword">if</span> (<span class="name">stockId</span> <span class="operator">===</span> <span class="string">&quot;&quot;</span>)
+              <span class="keyword">return</span>;
+
+          var <span class="name">startDate</span> = new <span class="name">Date</span>(<span class="number">2011</span>, <span class="number">4</span>, <span class="number">25</span>);
+
+          var <span class="name">endDate</span> = new <span class="name">Date</span>(); <span class="comment">//today</span>
+
+          <span class="keyword">if</span> (<span class="name">stockDataCycle</span> <span class="operator">!==</span> <span class="string">&quot;d&quot;</span> <span class="operator">&amp;&amp;</span> <span class="name">stockDataCycle</span> <span class="operator">!==</span> <span class="string">&quot;w&quot;</span> <span class="operator">&amp;&amp;</span> <span class="name">stockDataCycle</span> <span class="operator">!==</span> <span class="string">&quot;m&quot;</span>)
+              <span class="name">stockDataCycle</span> <span class="operator">=</span> <span class="string">&quot;d&quot;</span>;
+
+          <span class="comment">/*
+              Fetch stock data from yahoo finance:
+               url: http://ichart.finance.yahoo.com/table.csv?s=NOK&amp;a=5&amp;b=11&amp;c=2010&amp;d=7&amp;e=23&amp;f=2010&amp;g=d&amp;ignore=.csv
+                  s:stock name/id, a:start day, b:start month, c:start year  default: 25 April 1995, oldest c= 1962
+                  d:end day, e:end month, f:end year, default:today  (data only available 3 days before today)
+                  g:data cycle(d daily,  w weekly, m monthly, v Dividend)
+            */</span>
+          var <span class="name">request</span> = <span class="string">&quot;http://ichart.finance.yahoo.com/table.csv?&quot;</span>;
+          <span class="name">request</span> <span class="operator">+=</span> <span class="string">&quot;s=&quot;</span> <span class="operator">+</span> <span class="name">stockId</span>;
+          <span class="name">request</span> <span class="operator">+=</span> <span class="string">&quot;&amp;a=&quot;</span> <span class="operator">+</span> <span class="name">startDate</span>.<span class="name">getMonth</span>();
+          <span class="name">request</span> <span class="operator">+=</span> <span class="string">&quot;&amp;b=&quot;</span> <span class="operator">+</span> <span class="name">startDate</span>.<span class="name">getDate</span>();
+          <span class="name">request</span> <span class="operator">+=</span> <span class="string">&quot;&amp;c=&quot;</span> <span class="operator">+</span> <span class="name">startDate</span>.<span class="name">getFullYear</span>();
+          <span class="name">request</span> <span class="operator">+=</span> <span class="string">&quot;&amp;d=&quot;</span> <span class="operator">+</span> <span class="name">endDate</span>.<span class="name">getMonth</span>();
+          <span class="name">request</span> <span class="operator">+=</span> <span class="string">&quot;&amp;e=&quot;</span> <span class="operator">+</span> <span class="name">endDate</span>.<span class="name">getDate</span>();
+          <span class="name">request</span> <span class="operator">+=</span> <span class="string">&quot;&amp;f=&quot;</span> <span class="operator">+</span> <span class="name">endDate</span>.<span class="name">getFullYear</span>();
+          <span class="name">request</span> <span class="operator">+=</span> <span class="string">&quot;&amp;g=&quot;</span> <span class="operator">+</span> <span class="name">stockDataCycle</span>;
+          <span class="name">request</span> <span class="operator">+=</span> <span class="string">&quot;&amp;ignore=.csv&quot;</span>;
+          <span class="keyword">return</span> <span class="name">request</span>;
+      }
+
+      <span class="keyword">function</span> <span class="name">createStockPrice</span>(<span class="name">r</span>) {
+          <span class="keyword">return</span> {
+                  &quot;date&quot;: <span class="name">r</span>[<span class="number">0</span>],
+                  &quot;open&quot;:<span class="name">r</span>[<span class="number">1</span>],
+                  &quot;high&quot;:<span class="name">r</span>[<span class="number">2</span>],
+                  &quot;low&quot;:<span class="name">r</span>[<span class="number">3</span>],
+                  &quot;close&quot;:<span class="name">r</span>[<span class="number">4</span>],
+                  &quot;volume&quot;:<span class="name">r</span>[<span class="number">5</span>],
+                  &quot;adjusted&quot;:<span class="name">r</span>[<span class="number">6</span>]
+                 };
+      }
+
+      <span class="keyword">function</span> <span class="name">updateStock</span>() {
+          var <span class="name">req</span> = <span class="name">requestUrl</span>();
+
+          <span class="keyword">if</span> (!<span class="name">req</span>)
+              <span class="keyword">return</span>;
+
+          var <span class="name">xhr</span> = new <span class="name">XMLHttpRequest</span>;
+
+          <span class="name">xhr</span>.<span class="name">open</span>(<span class="string">&quot;GET&quot;</span>, <span class="name">req</span>, <span class="number">true</span>);
+
+          <span class="name">model</span>.<span class="name">ready</span> <span class="operator">=</span> <span class="number">false</span>;
+          <span class="name">model</span>.<span class="name">clear</span>();
+          var <span class="name">i</span> = <span class="number">1</span>; <span class="comment">//skip the first line</span>
+          <span class="name">xhr</span>.<span class="name">onreadystatechange</span> <span class="operator">=</span> <span class="keyword">function</span>() {
+              <span class="keyword">if</span> (<span class="name">xhr</span>.<span class="name">readyState</span> <span class="operator">===</span> <span class="name">XMLHttpRequest</span>.<span class="name">LOADING</span> <span class="operator">||</span> <span class="name">xhr</span>.<span class="name">readyState</span> <span class="operator">===</span> <span class="name">XMLHttpRequest</span>.<span class="name">DONE</span>) {
+                  var <span class="name">records</span> = <span class="name">xhr</span>.<span class="name">responseText</span>.<span class="name">split</span>(<span class="string">'\n'</span>);
+
+                  <span class="keyword">for</span> (;<span class="name">i</span> <span class="operator">&lt;</span> <span class="name">records</span>.<span class="name">length</span>; i++ ) {
+                      var <span class="name">r</span> = <span class="name">records</span>[<span class="name">i</span>].<span class="name">split</span>(<span class="string">','</span>);
+                      <span class="keyword">if</span> (<span class="name">r</span>.<span class="name">length</span> <span class="operator">===</span> <span class="number">7</span>)
+                          <span class="name">model</span>.<span class="name">append</span>(<span class="name">createStockPrice</span>(<span class="name">r</span>));
+                  }
+
+                  <span class="keyword">if</span> (<span class="name">xhr</span>.<span class="name">readyState</span> <span class="operator">===</span> <span class="name">XMLHttpRequest</span>.<span class="name">DONE</span>) {
+                      <span class="keyword">if</span> (<span class="name">model</span>.<span class="name">count</span> <span class="operator">&gt;</span> <span class="number">0</span>) {
+                          <span class="name">model</span>.<span class="name">ready</span> <span class="operator">=</span> <span class="number">true</span>;
+                          <span class="name">model</span>.<span class="name">stockPrice</span> <span class="operator">=</span> <span class="name">model</span>.<span class="name">get</span>(<span class="number">0</span>).<span class="name">adjusted</span>;
+                          <span class="name">model</span>.<span class="name">stockPriceChanged</span> <span class="operator">=</span> <span class="name">model</span>.<span class="name">count</span> <span class="operator">&gt;</span> <span class="number">1</span> ? (<span class="name">Math</span>.<span class="name">round</span>((<span class="name">model</span>.<span class="name">stockPrice</span> <span class="operator">-</span> <span class="name">model</span>.<span class="name">get</span>(<span class="number">1</span>).<span class="name">close</span>) <span class="operator">*</span> <span class="number">100</span>) <span class="operator">/</span> <span class="number">100</span>) : <span class="number">0</span>;
+                      } <span class="keyword">else</span> {
+                          <span class="name">model</span>.<span class="name">stockPrice</span> <span class="operator">=</span> <span class="number">0</span>;
+                          <span class="name">model</span>.<span class="name">stockPriceChanged</span> <span class="operator">=</span> <span class="number">0</span>;
+                      }
+                      <span class="name">model</span>.<span class="name">dataReady</span>(); <span class="comment">// emit signal - model.ready indicates whether the data is valid</span>
+                  }
+              }
+          }
+          <span class="name">xhr</span>.<span class="name">send</span>()
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@demos/stocqt/content/StockModel.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

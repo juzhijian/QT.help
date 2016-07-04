@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>device.h Example File | Qt Bluetooth 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtbluetooth-index.html">Qt Bluetooth</a></td><td ><a href="qtbluetooth-lowenergyscanner-example.html">Bluetooth Low Energy Scanner Example</a></td><td >device.h Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">device.h Example File</h1>
+<span class="subtitle">lowenergyscanner/device.h</span>
+<!-- $$$lowenergyscanner/device.h-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#ifndef DEVICE_H</span>
+  <span class="preprocessor">#define DEVICE_H</span>
+
+  <span class="preprocessor">#include &lt;qbluetoothglobal.h&gt;</span>
+  <span class="preprocessor">#include &lt;qbluetoothlocaldevice.h&gt;</span>
+  <span class="preprocessor">#include &lt;QObject&gt;</span>
+  <span class="preprocessor">#include &lt;QVariant&gt;</span>
+  <span class="preprocessor">#include &lt;QList&gt;</span>
+  <span class="preprocessor">#include &lt;QBluetoothServiceDiscoveryAgent&gt;</span>
+  <span class="preprocessor">#include &lt;QBluetoothDeviceDiscoveryAgent&gt;</span>
+  <span class="preprocessor">#include &lt;QLowEnergyController&gt;</span>
+  <span class="preprocessor">#include &lt;QBluetoothServiceInfo&gt;</span>
+  <span class="preprocessor">#include &quot;deviceinfo.h&quot;</span>
+  <span class="preprocessor">#include &quot;serviceinfo.h&quot;</span>
+  <span class="preprocessor">#include &quot;characteristicinfo.h&quot;</span>
+
+  QT_FORWARD_DECLARE_CLASS (<span class="type"><a href="qbluetoothdeviceinfo.html">QBluetoothDeviceInfo</a></span>)
+  QT_FORWARD_DECLARE_CLASS (<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span>)
+
+  <span class="keyword">class</span> Device: <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+  {
+      Q_OBJECT
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> devicesList READ getDevices NOTIFY devicesUpdated)
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> servicesList READ getServices NOTIFY servicesUpdated)
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> characteristicList READ getCharacteristics NOTIFY characteristicsUpdated)
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> update READ getUpdate WRITE setUpdate NOTIFY updateChanged)
+      Q_PROPERTY(bool useRandomAddress READ isRandomAddress WRITE setRandomAddress NOTIFY randomAddressChanged)
+      Q_PROPERTY(bool state READ state NOTIFY stateChanged)
+      Q_PROPERTY(bool controllerError READ hasControllerError)
+  <span class="keyword">public</span>:
+      Device();
+      <span class="operator">~</span>Device();
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> getDevices();
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> getServices();
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> getCharacteristics();
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> getUpdate();
+      bool state();
+      bool hasControllerError() <span class="keyword">const</span>;
+
+      bool isRandomAddress() <span class="keyword">const</span>;
+      <span class="type">void</span> setRandomAddress(bool newValue);
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> startDeviceDiscovery();
+      <span class="type">void</span> scanServices(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>address);
+
+      <span class="type">void</span> connectToService(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>uuid);
+      <span class="type">void</span> disconnectFromDevice();
+
+  <span class="keyword">private</span> <span class="keyword">slots</span>:
+      <span class="comment">// QBluetoothDeviceDiscoveryAgent related</span>
+      <span class="type">void</span> addDevice(<span class="keyword">const</span> <span class="type"><a href="qbluetoothdeviceinfo.html">QBluetoothDeviceInfo</a></span><span class="operator">&amp;</span>);
+      <span class="type">void</span> deviceScanFinished();
+      <span class="type">void</span> deviceScanError(<span class="type"><a href="qbluetoothdevicediscoveryagent.html">QBluetoothDeviceDiscoveryAgent</a></span><span class="operator">::</span>Error);
+
+      <span class="comment">// QLowEnergyController realted</span>
+      <span class="type">void</span> addLowEnergyService(<span class="keyword">const</span> <span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span> <span class="operator">&amp;</span>uuid);
+      <span class="type">void</span> deviceConnected();
+      <span class="type">void</span> errorReceived(<span class="type"><a href="qlowenergycontroller.html">QLowEnergyController</a></span><span class="operator">::</span>Error);
+      <span class="type">void</span> serviceScanDone();
+      <span class="type">void</span> deviceDisconnected();
+
+      <span class="comment">// QLowEnergyService related</span>
+      <span class="type">void</span> serviceDetailsDiscovered(<span class="type"><a href="qlowenergyservice.html">QLowEnergyService</a></span><span class="operator">::</span>ServiceState newState);
+
+  Q_SIGNALS:
+      <span class="type">void</span> devicesUpdated();
+      <span class="type">void</span> servicesUpdated();
+      <span class="type">void</span> characteristicsUpdated();
+      <span class="type">void</span> updateChanged();
+      <span class="type">void</span> stateChanged();
+      <span class="type">void</span> disconnected();
+      <span class="type">void</span> randomAddressChanged();
+
+  <span class="keyword">private</span>:
+      <span class="type">void</span> setUpdate(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> message);
+      <span class="type"><a href="qbluetoothdevicediscoveryagent.html">QBluetoothDeviceDiscoveryAgent</a></span> <span class="operator">*</span>discoveryAgent;
+      DeviceInfo currentDevice;
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">*</span><span class="operator">&gt;</span> devices;
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">*</span><span class="operator">&gt;</span> m_services;
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">*</span><span class="operator">&gt;</span> m_characteristics;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> m_previousAddress;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> m_message;
+      bool connected;
+      <span class="type"><a href="qlowenergycontroller.html">QLowEnergyController</a></span> <span class="operator">*</span>controller;
+      bool m_deviceScanState;
+      bool randomAddress;
+  };
+
+  <span class="preprocessor">#endif // DEVICE_H</span>
+
+</pre>
+</div>
+<!-- @@@lowenergyscanner/device.h -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>main.qml Example File | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td ><a href="qtdatavisualization-qmlbars-example.html">Qt Quick 2 Bars Example</a></td><td >main.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">main.qml Example File</h1>
+<span class="subtitle">qmlbars/qml/qmlbars/main.qml</span>
+<!-- $$$qmlbars/qml/qmlbars/main.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Data Visualization module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.1
+  import QtQuick.Controls 1.0
+  import QtQuick.Layouts 1.0
+  import QtDataVisualization 1.1
+  import QtQuick.Window 2.0
+  import &quot;.&quot;
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">mainview</span>
+      <span class="name">width</span>: <span class="number">1280</span>
+      <span class="name">height</span>: <span class="number">1024</span>
+
+      property <span class="type">int</span> <span class="name">buttonLayoutHeight</span>: <span class="number">180</span>;
+      <span class="name">state</span>: <span class="name">Screen</span>.<span class="name">width</span> <span class="operator">&lt;</span> <span class="name">Screen</span>.<span class="name">height</span> ? <span class="string">&quot;portrait&quot;</span> : <span class="string">&quot;landscape&quot;</span>
+
+      <span class="type">Data</span> {
+          <span class="name">id</span>: <span class="name">graphData</span>
+      }
+
+      <span class="type">Axes</span> {
+          <span class="name">id</span>: <span class="name">graphAxes</span>
+      }
+
+      property <span class="type"><a href="qml-qtdatavisualization-bar3dseries.html">Bar3DSeries</a></span> <span class="name">selectedSeries</span>
+      <span class="name">selectedSeries</span>: <span class="name">barSeries</span>
+
+      <span class="keyword">function</span> <span class="name">handleSelectionChange</span>(<span class="name">series</span>, position) {
+          <span class="keyword">if</span> (<span class="name">position</span> <span class="operator">!=</span> <span class="name">series</span>.<span class="name">invalidSelectionPosition</span>) {
+              <span class="name">selectedSeries</span> <span class="operator">=</span> <span class="name">series</span>
+          }
+
+          <span class="comment">// Set tableView current row to selected bar</span>
+          var <span class="name">rowRole</span> = <span class="name">series</span>.<span class="name">dataProxy</span>.<span class="name">rowLabels</span>[<span class="name">position</span>.<span class="name">x</span>];
+          var <span class="name">colRole</span>
+          <span class="keyword">if</span> (<span class="name">barGraph</span>.<span class="name">columnAxis</span> <span class="operator">===</span> <span class="name">graphAxes</span>.<span class="name">total</span>)
+              <span class="name">colRole</span> <span class="operator">=</span> <span class="string">&quot;01&quot;</span>;
+          <span class="keyword">else</span>
+              <span class="name">colRole</span> <span class="operator">=</span> <span class="name">series</span>.<span class="name">dataProxy</span>.<span class="name">columnLabels</span>[<span class="name">position</span>.<span class="name">y</span>];
+          var <span class="name">checkTimestamp</span> = <span class="name">rowRole</span> <span class="operator">+</span> <span class="string">&quot;-&quot;</span> <span class="operator">+</span> <span class="name">colRole</span>
+          var <span class="name">currentRow</span> = <span class="name">tableView</span>.<span class="name">currentRow</span>
+          <span class="keyword">if</span> (<span class="name">currentRow</span> <span class="operator">===</span> -<span class="number">1</span> <span class="operator">||</span> <span class="name">checkTimestamp</span> <span class="operator">!==</span> <span class="name">graphData</span>.<span class="name">model</span>.<span class="name">get</span>(<span class="name">currentRow</span>).<span class="name">timestamp</span>) {
+              var <span class="name">totalRows</span> = <span class="name">tableView</span>.<span class="name">rowCount</span>;
+              <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">totalRows</span>; i++) {
+                  var <span class="name">modelTimestamp</span> = <span class="name">graphData</span>.<span class="name">model</span>.<span class="name">get</span>(<span class="name">i</span>).<span class="name">timestamp</span>
+                  <span class="keyword">if</span> (<span class="name">modelTimestamp</span> <span class="operator">===</span> <span class="name">checkTimestamp</span>) {
+                      <span class="name">tableView</span>.<span class="name">currentRow</span> <span class="operator">=</span> <span class="name">i</span>
+                      <span class="comment">// Workaround to 5.2 row selection issue</span>
+                      <span class="keyword">if</span> (typeof <span class="name">tableView</span>.<span class="name">selection</span> <span class="operator">!=</span> <span class="string">&quot;undefined&quot;</span>) {
+                          <span class="name">tableView</span>.<span class="name">selection</span>.<span class="name">clear</span>()
+                          <span class="name">tableView</span>.<span class="name">selection</span>.<span class="name">select</span>(<span class="name">i</span>)
+                      }
+                      <span class="keyword">break</span>
+                  }
+              }
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+          <span class="name">id</span>: <span class="name">dataView</span>
+          <span class="name">anchors</span>.right: <span class="name">mainview</span>.<span class="name">right</span>;
+          <span class="name">anchors</span>.bottom: <span class="name">mainview</span>.<span class="name">bottom</span>
+
+          <span class="type"><a href="qml-qtdatavisualization-bars3d.html">Bars3D</a></span> {
+              <span class="name">id</span>: <span class="name">barGraph</span>
+              <span class="name">width</span>: <span class="name">dataView</span>.<span class="name">width</span>
+              <span class="name">height</span>: <span class="name">dataView</span>.<span class="name">height</span>
+              <span class="name">shadowQuality</span>: <span class="name">AbstractGraph3D</span>.<span class="name">ShadowQualityMedium</span>
+              <span class="name">selectionMode</span>: <span class="name">AbstractGraph3D</span>.<span class="name">SelectionItem</span>
+              <span class="name">theme</span>: <span class="name">Theme3D</span> {
+                  <span class="name">type</span>: <span class="name">Theme3D</span>.<span class="name">ThemeRetro</span>
+                  <span class="name">labelBorderEnabled</span>: <span class="number">true</span>
+                  <span class="name">font</span>.pointSize: <span class="number">35</span>
+                  <span class="name">labelBackgroundEnabled</span>: <span class="number">true</span>
+                  <span class="name">colorStyle</span>: <span class="name">Theme3D</span>.<span class="name">ColorStyleRangeGradient</span>
+                  <span class="name">singleHighlightGradient</span>: <span class="name">customGradient</span>
+
+                  <span class="type"><a href="qml-qtdatavisualization-colorgradient.html">ColorGradient</a></span> {
+                      <span class="name">id</span>: <span class="name">customGradient</span>
+                      <span class="type"><a href="qml-qtdatavisualization-colorgradientstop.html">ColorGradientStop</a></span> { <span class="name">position</span>: <span class="number">1.0</span>; <span class="name">color</span>: <span class="string">&quot;#FFFF00&quot;</span> }
+                      <span class="type"><a href="qml-qtdatavisualization-colorgradientstop.html">ColorGradientStop</a></span> { <span class="name">position</span>: <span class="number">0.0</span>; <span class="name">color</span>: <span class="string">&quot;#808000&quot;</span> }
+                  }
+              }
+              <span class="name">barThickness</span>: <span class="number">0.7</span>
+              <span class="name">barSpacing</span>: <span class="name">Qt</span>.<span class="name">size</span>(<span class="number">0.5</span>, <span class="number">0.5</span>)
+              <span class="name">barSpacingRelative</span>: <span class="number">false</span>
+              <span class="name">scene</span>.activeCamera.cameraPreset: <span class="name">Camera3D</span>.<span class="name">CameraPresetIsometricLeftHigh</span>
+              <span class="name">columnAxis</span>: <span class="name">graphAxes</span>.<span class="name">column</span>
+              <span class="name">rowAxis</span>: <span class="name">graphAxes</span>.<span class="name">row</span>
+              <span class="name">valueAxis</span>: <span class="name">graphAxes</span>.<span class="name">value</span>
+
+              <span class="type"><a href="qml-qtdatavisualization-bar3dseries.html">Bar3DSeries</a></span> {
+                  <span class="name">id</span>: <span class="name">secondarySeries</span>
+                  <span class="name">visible</span>: <span class="number">false</span>
+                  <span class="name">itemLabelFormat</span>: <span class="string">&quot;Expenses, @colLabel, @rowLabel: -@valueLabel&quot;</span>
+                  <span class="name">baseGradient</span>: <span class="name">secondaryGradient</span>
+
+                  <span class="type"><a href="qml-qtdatavisualization-itemmodelbardataproxy.html">ItemModelBarDataProxy</a></span> {
+                      <span class="name">id</span>: <span class="name">secondaryProxy</span>
+                      <span class="name">itemModel</span>: <span class="name">graphData</span>.<span class="name">model</span>
+                      <span class="name">rowRole</span>: <span class="string">&quot;timestamp&quot;</span>
+                      <span class="name">columnRole</span>: <span class="string">&quot;timestamp&quot;</span>
+                      <span class="name">valueRole</span>: <span class="string">&quot;expenses&quot;</span>
+                      <span class="name">rowRolePattern</span>: /^(\d\d\d\d).*$/
+                      <span class="name">columnRolePattern</span>: /^.*-(\d\d)$/
+                      <span class="name">valueRolePattern</span>: /-/
+                      <span class="name">rowRoleReplace</span>: <span class="string">&quot;\\1&quot;</span>
+                      <span class="name">columnRoleReplace</span>: <span class="string">&quot;\\1&quot;</span>
+                      <span class="name">multiMatchBehavior</span>: <span class="name">ItemModelBarDataProxy</span>.<span class="name">MMBCumulative</span>
+                  }
+
+                  <span class="type"><a href="qml-qtdatavisualization-colorgradient.html">ColorGradient</a></span> {
+                      <span class="name">id</span>: <span class="name">secondaryGradient</span>
+                      <span class="type"><a href="qml-qtdatavisualization-colorgradientstop.html">ColorGradientStop</a></span> { <span class="name">position</span>: <span class="number">1.0</span>; <span class="name">color</span>: <span class="string">&quot;#FF0000&quot;</span> }
+                      <span class="type"><a href="qml-qtdatavisualization-colorgradientstop.html">ColorGradientStop</a></span> { <span class="name">position</span>: <span class="number">0.0</span>; <span class="name">color</span>: <span class="string">&quot;#600000&quot;</span> }
+                  }
+
+                  <span class="name">onSelectedBarChanged</span>: <span class="name">handleSelectionChange</span>(<span class="name">secondarySeries</span>, <span class="name">position</span>)
+              }
+
+              <span class="type"><a href="qml-qtdatavisualization-bar3dseries.html">Bar3DSeries</a></span> {
+                  <span class="name">id</span>: <span class="name">barSeries</span>
+                  <span class="name">itemLabelFormat</span>: <span class="string">&quot;Income, @colLabel, @rowLabel: @valueLabel&quot;</span>
+                  <span class="name">baseGradient</span>: <span class="name">barGradient</span>
+
+                  <span class="type"><a href="qml-qtdatavisualization-itemmodelbardataproxy.html">ItemModelBarDataProxy</a></span> {
+                      <span class="name">id</span>: <span class="name">modelProxy</span>
+                      <span class="name">itemModel</span>: <span class="name">graphData</span>.<span class="name">model</span>
+                      <span class="name">rowRole</span>: <span class="string">&quot;timestamp&quot;</span>
+                      <span class="name">columnRole</span>: <span class="string">&quot;timestamp&quot;</span>
+                      <span class="name">valueRole</span>: <span class="string">&quot;income&quot;</span>
+                      <span class="name">rowRolePattern</span>: /^(\d\d\d\d).*$/
+                      <span class="name">columnRolePattern</span>: /^.*-(\d\d)$/
+                      <span class="name">rowRoleReplace</span>: <span class="string">&quot;\\1&quot;</span>
+                      <span class="name">columnRoleReplace</span>: <span class="string">&quot;\\1&quot;</span>
+                      <span class="name">multiMatchBehavior</span>: <span class="name">ItemModelBarDataProxy</span>.<span class="name">MMBCumulative</span>
+                  }
+
+                  <span class="type"><a href="qml-qtdatavisualization-colorgradient.html">ColorGradient</a></span> {
+                      <span class="name">id</span>: <span class="name">barGradient</span>
+                      <span class="type"><a href="qml-qtdatavisualization-colorgradientstop.html">ColorGradientStop</a></span> { <span class="name">position</span>: <span class="number">1.0</span>; <span class="name">color</span>: <span class="string">&quot;#00FF00&quot;</span> }
+                      <span class="type"><a href="qml-qtdatavisualization-colorgradientstop.html">ColorGradientStop</a></span> { <span class="name">position</span>: <span class="number">0.0</span>; <span class="name">color</span>: <span class="string">&quot;#006000&quot;</span> }
+                  }
+
+                  <span class="name">onSelectedBarChanged</span>: <span class="name">handleSelectionChange</span>(<span class="name">barSeries</span>, <span class="name">position</span>)
+              }
+          }
+      }
+
+      <span class="type">TableView</span> {
+          <span class="name">id</span>: <span class="name">tableView</span>
+          <span class="name">anchors</span>.top: <span class="name">parent</span>.<span class="name">top</span>
+          <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+          <span class="type">TableViewColumn</span>{ <span class="name">role</span>: <span class="string">&quot;timestamp&quot;</span> ; <span class="name">title</span>: <span class="string">&quot;Month&quot;</span> ; <span class="name">width</span>: <span class="name">tableView</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">2</span> }
+          <span class="type">TableViewColumn</span>{ <span class="name">role</span>: <span class="string">&quot;expenses&quot;</span> ; <span class="name">title</span>: <span class="string">&quot;Expenses&quot;</span> ; <span class="name">width</span>: <span class="name">tableView</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">4</span> }
+          <span class="type">TableViewColumn</span>{ <span class="name">role</span>: <span class="string">&quot;income&quot;</span> ; <span class="name">title</span>: <span class="string">&quot;Income&quot;</span> ; <span class="name">width</span>: <span class="name">tableView</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">4</span> }
+          <span class="name">itemDelegate</span>: <span class="name">Item</span> {
+              <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                  <span class="name">id</span>: <span class="name">delegateText</span>
+                  <span class="name">anchors</span>.verticalCenter: <span class="name">parent</span>.<span class="name">verticalCenter</span>
+                  <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+                  <span class="name">anchors</span>.leftMargin: <span class="number">4</span>
+                  <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+                  <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+                  <span class="name">color</span>: <span class="name">styleData</span>.<span class="name">textColor</span>
+                  <span class="name">elide</span>: <span class="name">styleData</span>.<span class="name">elideMode</span>
+                  <span class="name">text</span>: <span class="name">customText</span>
+                  <span class="name">horizontalAlignment</span>: <span class="name">styleData</span>.<span class="name">textAlignment</span>
+
+                  property <span class="type">string</span> <span class="name">originalText</span>: <span class="name">styleData</span>.<span class="name">value</span>
+                  property <span class="type">string</span> <span class="name">customText</span>
+
+                  <span class="name">onOriginalTextChanged</span>: {
+                      <span class="keyword">if</span> (<span class="name">styleData</span>.<span class="name">column</span> <span class="operator">===</span> <span class="number">0</span>) {
+                          <span class="keyword">if</span> (<span class="name">delegateText</span>.<span class="name">originalText</span> <span class="operator">!==</span> <span class="string">&quot;&quot;</span>) {
+                              var <span class="name">pattern</span> = /(\d\d\d\d)-(\d\d)/
+                              var <span class="name">matches</span> = <span class="name">pattern</span>.<span class="name">exec</span>(<span class="name">delegateText</span>.<span class="name">originalText</span>)
+                              var <span class="name">colIndex</span> = <span class="name">parseInt</span>(<span class="name">matches</span>[<span class="number">2</span>], <span class="number">10</span>) <span class="operator">-</span> <span class="number">1</span>
+                              <span class="name">delegateText</span>.<span class="name">customText</span> <span class="operator">=</span> <span class="name">matches</span>[<span class="number">1</span>] <span class="operator">+</span> <span class="string">&quot; - &quot;</span> <span class="operator">+</span> <span class="name">graphAxes</span>.<span class="name">column</span>.<span class="name">labels</span>[<span class="name">colIndex</span>]
+                          }
+                      } <span class="keyword">else</span> {
+                          <span class="name">delegateText</span>.<span class="name">customText</span> <span class="operator">=</span> <span class="name">originalText</span>
+                      }
+                  }
+              }
+          }
+
+          <span class="name">model</span>: <span class="name">graphData</span>.<span class="name">model</span>
+
+          <span class="name">onCurrentRowChanged</span>: {
+              var <span class="name">timestamp</span> = <span class="name">graphData</span>.<span class="name">model</span>.<span class="name">get</span>(<span class="name">currentRow</span>).<span class="name">timestamp</span>
+              var <span class="name">pattern</span> = /(\d\d\d\d)-(\d\d)/
+              var <span class="name">matches</span> = <span class="name">pattern</span>.<span class="name">exec</span>(<span class="name">timestamp</span>)
+              var <span class="name">rowIndex</span> = <span class="name">modelProxy</span>.<span class="name">rowCategoryIndex</span>(<span class="name">matches</span>[<span class="number">1</span>])
+              var <span class="name">colIndex</span>
+              <span class="keyword">if</span> (<span class="name">barGraph</span>.<span class="name">columnAxis</span> <span class="operator">===</span> <span class="name">graphAxes</span>.<span class="name">total</span>)
+                  <span class="name">colIndex</span> <span class="operator">=</span> <span class="number">0</span> <span class="comment">// Just one column when showing yearly totals</span>
+              <span class="keyword">else</span>
+                  <span class="name">colIndex</span> <span class="operator">=</span> <span class="name">modelProxy</span>.<span class="name">columnCategoryIndex</span>(<span class="name">matches</span>[<span class="number">2</span>])
+              <span class="keyword">if</span> (<span class="name">selectedSeries</span>.<span class="name">visible</span>)
+                  <span class="name">mainview</span>.<span class="name">selectedSeries</span>.<span class="name">selectedBar</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">point</span>(<span class="name">rowIndex</span>, <span class="name">colIndex</span>)
+              <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">barSeries</span>.<span class="name">visible</span>)
+                  <span class="name">barSeries</span>.<span class="name">selectedBar</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">point</span>(<span class="name">rowIndex</span>, <span class="name">colIndex</span>)
+              <span class="keyword">else</span>
+                  <span class="name">secondarySeries</span>.<span class="name">selectedBar</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">point</span>(<span class="name">rowIndex</span>, <span class="name">colIndex</span>)
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-layouts-columnlayout.html">ColumnLayout</a></span> {
+          <span class="name">id</span>: <span class="name">controlLayout</span>
+          <span class="name">spacing</span>: <span class="number">0</span>
+
+          <span class="type">Button</span> {
+              <span class="name">id</span>: <span class="name">changeDataButton</span>
+              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+              <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+              <span class="name">text</span>: <span class="string">&quot;Show 2010 - 2012&quot;</span>
+              <span class="name">clip</span>: <span class="number">true</span>
+              <span class="name">onClicked</span>: {
+                  <span class="keyword">if</span> (<span class="name">text</span> <span class="operator">===</span> <span class="string">&quot;Show yearly totals&quot;</span>) {
+                      <span class="name">modelProxy</span>.<span class="name">autoRowCategories</span> <span class="operator">=</span> <span class="number">true</span>
+                      <span class="name">secondaryProxy</span>.<span class="name">autoRowCategories</span> <span class="operator">=</span> <span class="number">true</span>
+                      <span class="name">modelProxy</span>.<span class="name">columnRolePattern</span> <span class="operator">=</span> /^.*$/
+                      <span class="name">secondaryProxy</span>.<span class="name">columnRolePattern</span> <span class="operator">=</span> /^.*$/
+                      <span class="name">graphAxes</span>.<span class="name">value</span>.<span class="name">autoAdjustRange</span> <span class="operator">=</span> <span class="number">true</span>
+                      <span class="name">barGraph</span>.<span class="name">columnAxis</span> <span class="operator">=</span> <span class="name">graphAxes</span>.<span class="name">total</span>
+                      <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Show all years&quot;</span>
+                  } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">text</span> <span class="operator">===</span> <span class="string">&quot;Show all years&quot;</span>) {
+                      <span class="name">modelProxy</span>.<span class="name">autoRowCategories</span> <span class="operator">=</span> <span class="number">true</span>
+                      <span class="name">secondaryProxy</span>.<span class="name">autoRowCategories</span> <span class="operator">=</span> <span class="number">true</span>
+                      <span class="name">modelProxy</span>.<span class="name">columnRolePattern</span> <span class="operator">=</span> /^.*-(\d\d)$/
+                      <span class="name">secondaryProxy</span>.<span class="name">columnRolePattern</span> <span class="operator">=</span> /^.*-(\d\d)$/
+                      <span class="name">graphAxes</span>.<span class="name">value</span>.<span class="name">min</span> <span class="operator">=</span> <span class="number">0</span>
+                      <span class="name">graphAxes</span>.<span class="name">value</span>.<span class="name">max</span> <span class="operator">=</span> <span class="number">35</span>
+                      <span class="name">barGraph</span>.<span class="name">columnAxis</span> <span class="operator">=</span> <span class="name">graphAxes</span>.<span class="name">column</span>
+                      <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Show 2010 - 2012&quot;</span>
+                  } <span class="keyword">else</span> { <span class="comment">// text === &quot;Show 2010 - 2012&quot;</span>
+                      <span class="comment">// Explicitly defining row categories, since we do not want to show data for</span>
+                      <span class="comment">// all years in the model, just for the selected ones.</span>
+                      <span class="name">modelProxy</span>.<span class="name">autoRowCategories</span> <span class="operator">=</span> <span class="number">false</span>
+                      <span class="name">secondaryProxy</span>.<span class="name">autoRowCategories</span> <span class="operator">=</span> <span class="number">false</span>
+                      <span class="name">modelProxy</span>.<span class="name">rowCategories</span> <span class="operator">=</span> [<span class="string">&quot;2010&quot;</span>, <span class="string">&quot;2011&quot;</span>, <span class="string">&quot;2012&quot;</span>]
+                      <span class="name">secondaryProxy</span>.<span class="name">rowCategories</span> <span class="operator">=</span> [<span class="string">&quot;2010&quot;</span>, <span class="string">&quot;2011&quot;</span>, <span class="string">&quot;2012&quot;</span>]
+                      <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Show yearly totals&quot;</span>
+                  }
+              }
+          }
+
+          <span class="type">Button</span> {
+              <span class="name">id</span>: <span class="name">shadowToggle</span>
+              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+              <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+              <span class="name">text</span>: <span class="name">barGraph</span>.<span class="name">shadowsSupported</span> ? <span class="string">&quot;Hide Shadows&quot;</span> : <span class="string">&quot;Shadows not supported&quot;</span>
+              <span class="name">clip</span>: <span class="number">true</span>
+              <span class="name">enabled</span>: <span class="name">barGraph</span>.<span class="name">shadowsSupported</span>
+              <span class="name">onClicked</span>: {
+                  <span class="keyword">if</span> (<span class="name">barGraph</span>.<span class="name">shadowQuality</span> <span class="operator">==</span> <span class="name">AbstractGraph3D</span>.<span class="name">ShadowQualityNone</span>) {
+                      <span class="name">barGraph</span>.<span class="name">shadowQuality</span> <span class="operator">=</span> <span class="name">AbstractGraph3D</span>.<span class="name">ShadowQualityMedium</span>;
+                      <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Hide Shadows&quot;</span>
+                  } <span class="keyword">else</span> {
+                      <span class="name">barGraph</span>.<span class="name">shadowQuality</span> <span class="operator">=</span> <span class="name">AbstractGraph3D</span>.<span class="name">ShadowQualityNone</span>;
+                      <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Show Shadows&quot;</span>
+                  }
+              }
+          }
+
+          <span class="type">Button</span> {
+              <span class="name">id</span>: <span class="name">seriesToggle</span>
+              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+              <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+              <span class="name">text</span>: <span class="string">&quot;Show Expenses&quot;</span>
+              <span class="name">clip</span>: <span class="number">true</span>
+              <span class="name">onClicked</span>: {
+                  <span class="keyword">if</span> (<span class="name">text</span> <span class="operator">===</span> <span class="string">&quot;Show Expenses&quot;</span>) {
+                      <span class="name">barSeries</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">false</span>
+                      <span class="name">secondarySeries</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">true</span>
+                      <span class="name">barGraph</span>.<span class="name">valueAxis</span>.<span class="name">labelFormat</span> <span class="operator">=</span> <span class="string">&quot;-%.2f M\u20AC&quot;</span>
+                      <span class="name">secondarySeries</span>.<span class="name">itemLabelFormat</span> <span class="operator">=</span> <span class="string">&quot;Expenses, @colLabel, @rowLabel: @valueLabel&quot;</span>
+                      <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Show Both&quot;</span>
+                  } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">text</span> <span class="operator">===</span> <span class="string">&quot;Show Both&quot;</span>) {
+                      <span class="name">barSeries</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">true</span>
+                      <span class="name">barGraph</span>.<span class="name">valueAxis</span>.<span class="name">labelFormat</span> <span class="operator">=</span> <span class="string">&quot;%.2f M\u20AC&quot;</span>
+                      <span class="name">secondarySeries</span>.<span class="name">itemLabelFormat</span> <span class="operator">=</span> <span class="string">&quot;Expenses, @colLabel, @rowLabel: -@valueLabel&quot;</span>
+                      <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Show Income&quot;</span>
+                  } <span class="keyword">else</span> { <span class="comment">// text === &quot;Show Income&quot;</span>
+                      <span class="name">secondarySeries</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">false</span>
+                      <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Show Expenses&quot;</span>
+                  }
+              }
+          }
+      }
+
+      <span class="name">states</span>: [
+          <span class="type"><a href="../qtqml/qml-qtqml-statemachine-state.html">State</a></span>  {
+              <span class="name">name</span>: <span class="string">&quot;landscape&quot;</span>
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> {
+                  <span class="name">target</span>: <span class="name">dataView</span>
+                  <span class="name">width</span>: <span class="name">mainview</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">4</span> <span class="operator">*</span> <span class="number">3</span>
+                  <span class="name">height</span>: <span class="name">mainview</span>.<span class="name">height</span>
+              }
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span>  {
+                  <span class="name">target</span>: <span class="name">tableView</span>
+                  <span class="name">height</span>: <span class="name">mainview</span>.<span class="name">height</span> <span class="operator">-</span> <span class="name">buttonLayoutHeight</span>
+                  <span class="name">anchors</span>.right: <span class="name">dataView</span>.<span class="name">left</span>
+                  <span class="name">anchors</span>.left: <span class="name">mainview</span>.<span class="name">left</span>
+                  <span class="name">anchors</span>.bottom: <span class="name">undefined</span>
+              }
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span>  {
+                  <span class="name">target</span>: <span class="name">controlLayout</span>
+                  <span class="name">width</span>: <span class="name">mainview</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">4</span>
+                  <span class="name">height</span>: <span class="name">buttonLayoutHeight</span>
+                  <span class="name">anchors</span>.top: <span class="name">tableView</span>.<span class="name">bottom</span>
+                  <span class="name">anchors</span>.bottom: <span class="name">mainview</span>.<span class="name">bottom</span>
+                  <span class="name">anchors</span>.left: <span class="name">mainview</span>.<span class="name">left</span>
+                  <span class="name">anchors</span>.right: <span class="name">dataView</span>.<span class="name">left</span>
+              }
+          },
+          <span class="type"><a href="../qtqml/qml-qtqml-statemachine-state.html">State</a></span>  {
+              <span class="name">name</span>: <span class="string">&quot;portrait&quot;</span>
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> {
+                  <span class="name">target</span>: <span class="name">dataView</span>
+                  <span class="name">width</span>: <span class="name">mainview</span>.<span class="name">height</span> <span class="operator">/</span> <span class="number">4</span> <span class="operator">*</span> <span class="number">3</span>
+                  <span class="name">height</span>: <span class="name">mainview</span>.<span class="name">width</span>
+              }
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span>  {
+                  <span class="name">target</span>: <span class="name">tableView</span>
+                  <span class="name">height</span>: <span class="name">mainview</span>.<span class="name">width</span>
+                  <span class="name">anchors</span>.right: <span class="name">controlLayout</span>.<span class="name">left</span>
+                  <span class="name">anchors</span>.left: <span class="name">mainview</span>.<span class="name">left</span>
+                  <span class="name">anchors</span>.bottom: <span class="name">dataView</span>.<span class="name">top</span>
+              }
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span>  {
+                  <span class="name">target</span>: <span class="name">controlLayout</span>
+                  <span class="name">width</span>: <span class="name">mainview</span>.<span class="name">height</span> <span class="operator">/</span> <span class="number">4</span>
+                  <span class="name">height</span>: <span class="name">mainview</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">4</span>
+                  <span class="name">anchors</span>.top: <span class="name">mainview</span>.<span class="name">top</span>
+                  <span class="name">anchors</span>.bottom: <span class="name">dataView</span>.<span class="name">top</span>
+                  <span class="name">anchors</span>.left: <span class="name">undefined</span>
+                  <span class="name">anchors</span>.right: <span class="name">mainview</span>.<span class="name">right</span>
+              }
+          }
+      ]
+  }
+
+</pre>
+</div>
+<!-- @@@qmlbars/qml/qmlbars/main.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

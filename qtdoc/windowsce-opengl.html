@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- wince-opengl.qdoc -->
+  <title>Qt for Windows CE and OpenGL ES | Qt 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.7</a></td><td >Qt for Windows CE and OpenGL ES</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#introduction">Introduction</a></li>
+<li class="level1"><a href="#using-opengl-es-with-qt">Using OpenGL ES with Qt</a></li>
+<li class="level1"><a href="#using-opengl-with-qt-for-windows-ce">Using OpenGL with Qt for Windows CE</a></li>
+<li class="level2"><a href="#configure">Configure</a></li>
+<li class="level2"><a href="#using-opengl-to-accelerate-normal-2d-painting">Using OpenGL to Accelerate Normal 2D Painting</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt for Windows CE and OpenGL ES</h1>
+<span class="subtitle"></span>
+<!-- $$$windowsce-opengl.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="introduction"></a>
+<h2 id="introduction">Introduction</h2>
+<p><a href="http://www.opengl.org">OpenGL</a> is an industry standard API for 2D/3D graphics. It provides a powerful, low-level interface between software and acceleration hardware, and it is operating system and window system independent. <a href="http://www.khronos.org/opengles">OpenGL ES</a> is a subset of the <a href="http://www.opengl.org">OpenGL</a> standard. Because it is designed for use with embedded systems, it has a smaller, more constrained API.</p>
+<p><a href="http://www.khronos.org/opengles/1_X">OpenGL ES version 1.x</a> is designed for fixed function hardware, while its successor <a href="http://www.khronos.org/opengles/2_X">OpenGL ES version 2.x</a> is designed for programmable hardware. It is worth noting that there is a significant difference between the two, and that they are not compatible with each other. OpenGL ES 1.x limits processing to a pre-defined set of fixed options for drawing and lighting objects. OpenGL 2.x has a significantly shorter graphics pipeline than 1.x&#x2e; Instead of using function transformation and a fragment pipeline, 2.x uses the <a href="http://www.khronos.org/registry/gles/specs/2.0/GLSL_ES_Specification_1.0.17.pdf">OpenGL ES Shading Language (GLSL ES)</a>. Instead of using the pre-defined functions, the programmer writes small shader programs telling the hardware in detail how to render each object.</p>
+<p>The <a href="../qtopengl/qtopengl-index.html">Qt OpenGL</a> module offers classes that make it easy to draw 3D graphics in GUI applications using OpenGL ES. Qt provides a plugin that integrates both OpenGL ES versions <a href="http://www.khronos.org/opengles/1_X">1.x</a> and <a href="http://www.khronos.org/opengles/2_X">2.x</a> with Qt for Embedded. However, Qt for Embedded can be adapted to a wide range of OpenGL versions.</p>
+<p>To translate <a href="../qtgui/qpainter.html">QPainter</a> operations into OpenGL ES calls (there are actually two subclasses, one for OpenGL/ES 1.1 and another for OpenGL/ES 2.0), Qt uses a subclass of <a href="../qtgui/qpaintengine.html">QPaintEngine</a>. This specialized paint engine can be used to improve 2D rendering performance on appropriate hardware. It can also overlay controls and decorations onto 3D scenes drawn using OpenGL.</p>
+<a name="using-opengl-es-with-qt"></a>
+<h2 id="using-opengl-es-with-qt">Using OpenGL ES with Qt</h2>
+<p>To use OpenGL-enabled widgets in a Qt for Embedded application, all that is required is to subclass QGLWidget and draw into instances of the subclass with standard OpenGL functions. The current implementation only supports OpenGL ES and 2D painting within a QGLWidget. Using OpenGL ES to accelerate regular widgets as well as compositing top-level windows with OpenGL ES are not currently supported. These issues will be addressed in future versions of Qt.</p>
+<p><b>Note: </b>The OpenGL paint engine is not currently supported in regular widgets. However, any application that uses <a href="../qtwidgets/qgraphicsview.html">QGraphicsView</a> can set a QGLWidget as the viewport and obtain access to the OpenGL paint engine that way:</p><pre class="cpp">
+
+  <span class="type"><a href="../qtwidgets/qgraphicsview.html">QGraphicsView</a></span> view(<span class="operator">&amp;</span>scene);
+  view<span class="operator">.</span>setViewport(<span class="keyword">new</span> <span class="type"><a href="../qtopengl/qglwidget.html">QGLWidget</a></span>());
+  view<span class="operator">.</span>setHorizontalScrollBarPolicy(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ScrollBarAlwaysOff);
+  view<span class="operator">.</span>setVerticalScrollBarPolicy(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ScrollBarAlwaysOff);
+  view<span class="operator">.</span>setViewportUpdateMode(<span class="type"><a href="../qtwidgets/qgraphicsview.html">QGraphicsView</a></span><span class="operator">::</span>FullViewportUpdate);
+  view<span class="operator">.</span>setFrameStyle(<span class="number">0</span>);
+  view<span class="operator">.</span>showFullScreen();
+
+</pre>
+<p>It is recommended that the <a href="../qtwidgets/qgraphicsview.html#ViewportUpdateMode-enum">QGraphicsView::FullViewportUpdate</a> flag be set because the default double-buffered behavior of QGLWidget does not support partial updates. It is also recommended that the window be shown full-screen because that usually has the best performance on current OpenGL ES implementations.</p>
+<p>Once a <a href="../qtwidgets/qgraphicsview.html">QGraphicsView</a> has been initialized as above, regular widgets can be added to the canvas using <a href="../qtwidgets/qgraphicsproxywidget.html">QGraphicsProxyWidget</a> if the application requires them.</p>
+<p><b>Note: </b>OpenGL ES 2.X does not support PBuffers, so QGLPixelBuffer will not work. In this case, QGLFramebufferObject should be used instead. However, OpenGL ES 1.X does not support Framebuffer objects, with the exception of some OpenGL ES 1.X extensions. In this case, please use QGLPixelBuffer.</p><p><b>Note: </b>On most embedded hardware, the OpenGL implementation is actually <a href="http://www.khronos.org/opengles/1_X/">OpenGL/ES 1.1</a> or <a href="http://www.khronos.org/opengles/2_X/">OpenGL/ES 2.0</a>. When painting within a <a href="../qtopengl/qglwidget.html#paintGL">QGLWidget::paintGL</a>() override, it is necessary to limit the application to only the features that are present in the OpenGL/ES implementation.</p><a name="using-opengl-with-qt-for-windows-ce"></a>
+<h2 id="using-opengl-with-qt-for-windows-ce">Using OpenGL with Qt for Windows CE</h2>
+<p>Qt for Windows CE uses EGL 1.1 to embed OpenGL ES windows within the Windows CE window manager.</p>
+<a name="configure"></a>
+<h3 >Configure</h3>
+<p>To configure Qt for Windows Mobile 5.0 and OpenGL ES Common support you can run <code>configure</code> like this:</p>
+<pre class="cpp">
+
+  configure <span class="operator">-</span>platform win32<span class="operator">-</span>msvc2005 <span class="operator">-</span>xplatform wincewm50pocket<span class="operator">-</span>msvc2005 <span class="operator">-</span>opengl<span class="operator">-</span>es<span class="operator">-</span>cm
+
+</pre>
+<p>OpenGL ES includes profiles for floating-point and fixed-point arithmetic. The floating point profile is called OpenGL ES CM (Common) and the fixed-point profile is called OpenGL ES CL (Common Lite). The fixed-point profile is no longer supported since Qt 4.7&#x2e;</p>
+<p>You can run <code>configure</code> with the <code>-opengl-es-cm</code> option for the Common profile. Ensure that the <code>lib</code> and <code>includes</code> paths include the OpenGL ES headers and libararies from your SDK. The OpenGL ES lib should be called either <code>libGLES_CM.lib</code> for the Common profile.</p>
+<a name="using-opengl-to-accelerate-normal-2d-painting"></a>
+<h3 >Using OpenGL to Accelerate Normal 2D Painting</h3>
+<p>Qt provides QOpenGLPaintEngine, a subclass of <a href="../qtgui/qpaintengine.html">QPaintEngine</a> that translates <a href="../qtgui/qpainter.html">QPainter</a> operations into OpenGL calls. This is especially convenient for drawing text or <a href="../qtgui/qimage.html">QImage</a> objects in an OpenGL ES context. For further details, refer to the <a href="../qtgui/qtgui-openglwindow-example.html">OpenGL Window Example</a>.</p>
+</div>
+<!-- @@@windowsce-opengl.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

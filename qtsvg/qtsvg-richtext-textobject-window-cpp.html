@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>window.cpp Example File | Qt SVG 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtsvg-index.html">Qt SVG</a></td><td ><a href="qtsvg-richtext-textobject-example.html">Text Object Example</a></td><td >window.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">window.cpp Example File</h1>
+<span class="subtitle">richtext/textobject/window.cpp</span>
+<!-- $$$richtext/textobject/window.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+  <span class="preprocessor">#include &lt;QtSvg&gt;</span>
+
+  <span class="preprocessor">#include &quot;window.h&quot;</span>
+  <span class="preprocessor">#include &quot;svgtextobject.h&quot;</span>
+
+  Window<span class="operator">::</span>Window()
+  {
+      setupGui();
+      setupTextObject();
+
+      setWindowTitle(<span class="string">&quot;Text Object Example&quot;</span>);
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>insertTextObject()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> fileNameLineEdit<span class="operator">-</span><span class="operator">&gt;</span>text();
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+      <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly)) {
+          <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Error Opening File&quot;</span>)<span class="operator">,</span>
+                               tr(<span class="string">&quot;Could not open '%1'&quot;</span>)<span class="operator">.</span>arg(fileName));
+      }
+
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> svgData <span class="operator">=</span> file<span class="operator">.</span>readAll();
+
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> svgCharFormat;
+      svgCharFormat<span class="operator">.</span>setObjectType(SvgTextFormat);
+      <span class="type"><a href="qsvgrenderer.html">QSvgRenderer</a></span> renderer(svgData);
+
+      <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> svgBufferImage(renderer<span class="operator">.</span>defaultSize()<span class="operator">,</span> <span class="type"><a href="../qtgui/qimage.html">QImage</a></span><span class="operator">::</span>Format_ARGB32);
+      <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter(<span class="operator">&amp;</span>svgBufferImage);
+      renderer<span class="operator">.</span>render(<span class="operator">&amp;</span>painter<span class="operator">,</span> svgBufferImage<span class="operator">.</span>rect());
+
+      svgCharFormat<span class="operator">.</span>setProperty(SvgData<span class="operator">,</span> svgBufferImage);
+
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> textEdit<span class="operator">-</span><span class="operator">&gt;</span>textCursor();
+      cursor<span class="operator">.</span>insertText(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="type"><a href="../qtcore/qchar.html">QChar</a></span><span class="operator">::</span>ObjectReplacementCharacter)<span class="operator">,</span> svgCharFormat);
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>setTextCursor(cursor);
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>setupTextObject()
+  {
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>svgInterface <span class="operator">=</span> <span class="keyword">new</span> SvgTextObject;
+      svgInterface<span class="operator">-</span><span class="operator">&gt;</span>setParent(<span class="keyword">this</span>);
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">-</span><span class="operator">&gt;</span>documentLayout()<span class="operator">-</span><span class="operator">&gt;</span>registerHandler(SvgTextFormat<span class="operator">,</span> svgInterface);
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>setupGui()
+  {
+      fileNameLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Svg File Name:&quot;</span>));
+      fileNameLineEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span>;
+      insertTextObjectButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;Insert Image&quot;</span>));
+
+      fileNameLineEdit<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="string">&quot;:/files/heart.svg&quot;</span>);
+      connect(insertTextObjectButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(insertTextObject()));
+
+      <span class="type"><a href="../qtwidgets/qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>bottomLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qhboxlayout.html">QHBoxLayout</a></span>;
+      bottomLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(fileNameLabel);
+      bottomLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(fileNameLineEdit);
+      bottomLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(insertTextObjectButton);
+
+      textEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtextedit.html">QTextEdit</a></span>;
+
+      <span class="type"><a href="../qtwidgets/qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>mainLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qvboxlayout.html">QVBoxLayout</a></span>;
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(textEdit);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(bottomLayout);
+
+      setLayout(mainLayout);
+  }
+
+</pre>
+</div>
+<!-- @@@richtext/textobject/window.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,798 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>volumetric.cpp Example File | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td ><a href="qtdatavisualization-volumetric-example.html">Volumetric rendering Example</a></td><td >volumetric.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">volumetric.cpp Example File</h1>
+<span class="subtitle">volumetric/volumetric.cpp</span>
+<!-- $$$volumetric/volumetric.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Data Visualization module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;volumetric.h&quot;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/qvalue3daxis.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/q3dscene.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/q3dcamera.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/q3dtheme.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/qcustom3dlabel.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/q3dscatter.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/q3dinputhandler.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/qmath.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QLabel&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QRadioButton&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QSlider&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QDebug&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QOpenGLContext&gt;</span>
+
+  <span class="keyword">using</span> <span class="keyword">namespace</span> <span class="type"><a href="qtdatavisualization-qmlmodule.html">QtDataVisualization</a></span>;
+
+  <span class="keyword">const</span> <span class="type">int</span> lowDetailSize(<span class="number">128</span>);
+  <span class="keyword">const</span> <span class="type">int</span> mediumDetailSize(<span class="number">256</span>);
+  <span class="keyword">const</span> <span class="type">int</span> highDetailSize(<span class="number">512</span>);
+  <span class="keyword">const</span> <span class="type">int</span> colorTableSize(<span class="number">256</span>);
+  <span class="keyword">const</span> <span class="type">int</span> layerDataSize(<span class="number">512</span>);
+  <span class="keyword">const</span> <span class="type">int</span> mineShaftDiameter(<span class="number">1</span>);
+
+  <span class="keyword">const</span> <span class="type">int</span> airColorIndex(<span class="number">254</span>);
+  <span class="keyword">const</span> <span class="type">int</span> mineShaftColorIndex(<span class="number">255</span>);
+  <span class="keyword">const</span> <span class="type">int</span> layerColorThickness(<span class="number">60</span>);
+  <span class="keyword">const</span> <span class="type">int</span> heightToColorDiv(<span class="number">140</span>);
+  <span class="keyword">const</span> <span class="type">int</span> magmaColorsMin(<span class="number">0</span>);
+  <span class="keyword">const</span> <span class="type">int</span> magmaColorsMax(layerColorThickness);
+  <span class="keyword">const</span> <span class="type">int</span> aboveWaterGroundColorsMin(magmaColorsMax <span class="operator">+</span> <span class="number">1</span>);
+  <span class="keyword">const</span> <span class="type">int</span> aboveWaterGroundColorsMax(aboveWaterGroundColorsMin <span class="operator">+</span> layerColorThickness);
+  <span class="keyword">const</span> <span class="type">int</span> underWaterGroundColorsMin(aboveWaterGroundColorsMax <span class="operator">+</span> <span class="number">1</span>);
+  <span class="keyword">const</span> <span class="type">int</span> underWaterGroundColorsMax(underWaterGroundColorsMin <span class="operator">+</span> layerColorThickness);
+  <span class="keyword">const</span> <span class="type">int</span> waterColorsMin(underWaterGroundColorsMax <span class="operator">+</span> <span class="number">1</span>);
+  <span class="keyword">const</span> <span class="type">int</span> waterColorsMax(waterColorsMin <span class="operator">+</span> layerColorThickness);
+  <span class="keyword">const</span> <span class="type">int</span> terrainTransparency(<span class="number">12</span>);
+
+  <span class="keyword">static</span> bool isOpenGLES()
+  {
+  <span class="preprocessor">#if defined(QT_OPENGL_ES_2)</span>
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  <span class="preprocessor">#elif (QT_VERSION &lt; QT_VERSION_CHECK(5, 3, 0))</span>
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+  <span class="preprocessor">#else</span>
+      <span class="keyword">return</span> <span class="type"><a href="../qtgui/qopenglcontext.html">QOpenGLContext</a></span><span class="operator">::</span>currentContext()<span class="operator">-</span><span class="operator">&gt;</span>isOpenGLES();
+  <span class="preprocessor">#endif</span>
+  }
+
+  VolumetricModifier<span class="operator">::</span>VolumetricModifier(<span class="type"><a href="q3dscatter.html">Q3DScatter</a></span> <span class="operator">*</span>scatter)
+      : m_graph(scatter)<span class="operator">,</span>
+        m_volumeItem(<span class="number">0</span>)<span class="operator">,</span>
+        m_sliceIndexX(lowDetailSize <span class="operator">/</span> <span class="number">2</span>)<span class="operator">,</span>
+        m_sliceIndexY(lowDetailSize <span class="operator">/</span> <span class="number">4</span>)<span class="operator">,</span>
+        m_sliceIndexZ(lowDetailSize <span class="operator">/</span> <span class="number">2</span>)<span class="operator">,</span>
+        m_slicingX(<span class="keyword">false</span>)<span class="operator">,</span>
+        m_slicingY(<span class="keyword">false</span>)<span class="operator">,</span>
+        m_slicingZ(<span class="keyword">false</span>)<span class="operator">,</span>
+        m_mediumDetailRB(<span class="number">0</span>)<span class="operator">,</span>
+        m_highDetailRB(<span class="number">0</span>)<span class="operator">,</span>
+        m_lowDetailData(<span class="number">0</span>)<span class="operator">,</span>
+        m_mediumDetailData(<span class="number">0</span>)<span class="operator">,</span>
+        m_highDetailData(<span class="number">0</span>)<span class="operator">,</span>
+        m_mediumDetailIndex(<span class="number">0</span>)<span class="operator">,</span>
+        m_highDetailIndex(<span class="number">0</span>)<span class="operator">,</span>
+        m_mediumDetailShaftIndex(<span class="number">0</span>)<span class="operator">,</span>
+        m_highDetailShaftIndex(<span class="number">0</span>)<span class="operator">,</span>
+        m_sliceSliderX(<span class="number">0</span>)<span class="operator">,</span>
+        m_sliceSliderY(<span class="number">0</span>)<span class="operator">,</span>
+        m_sliceSliderZ(<span class="number">0</span>)<span class="operator">,</span>
+        m_usingPrimaryTable(<span class="keyword">true</span>)<span class="operator">,</span>
+        m_sliceLabelX(<span class="number">0</span>)<span class="operator">,</span>
+        m_sliceLabelY(<span class="number">0</span>)<span class="operator">,</span>
+        m_sliceLabelZ(<span class="number">0</span>)
+  {
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setType(<span class="type"><a href="q3dtheme.html">Q3DTheme</a></span><span class="operator">::</span>ThemeQt);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setShadowQuality(QAbstract3DGraph<span class="operator">::</span>ShadowQualityNone);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">-</span><span class="operator">&gt;</span>setCameraPreset(<span class="type"><a href="q3dcamera.html">Q3DCamera</a></span><span class="operator">::</span>CameraPresetFront);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setOrthoProjection(<span class="keyword">true</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setBackgroundEnabled(<span class="keyword">false</span>);
+
+      <span class="comment">// Only allow zooming at the center and limit the zoom to 200% to avoid clipping issues</span>
+      <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="q3dinputhandler.html">Q3DInputHandler</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeInputHandler())<span class="operator">-</span><span class="operator">&gt;</span>setZoomAtTargetEnabled(<span class="keyword">false</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">-</span><span class="operator">&gt;</span>setMaxZoomLevel(<span class="number">200.0f</span>);
+
+      toggleAreaAll(<span class="keyword">true</span>);
+
+      <span class="keyword">if</span> (<span class="operator">!</span>isOpenGLES()) {
+          m_lowDetailData <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span><span class="operator">&gt;</span>(lowDetailSize <span class="operator">*</span> lowDetailSize <span class="operator">*</span> lowDetailSize <span class="operator">/</span> <span class="number">2</span>);
+          m_mediumDetailData <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span><span class="operator">&gt;</span>(mediumDetailSize <span class="operator">*</span> mediumDetailSize <span class="operator">*</span> mediumDetailSize <span class="operator">/</span> <span class="number">2</span>);
+          m_highDetailData <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span><span class="operator">&gt;</span>(highDetailSize <span class="operator">*</span> highDetailSize <span class="operator">*</span> highDetailSize <span class="operator">/</span> <span class="number">2</span>);
+
+          initHeightMap(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;:/heightmaps/layer_ground.png&quot;</span>)<span class="operator">,</span> m_groundLayer);
+          initHeightMap(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;:/heightmaps/layer_water.png&quot;</span>)<span class="operator">,</span> m_waterLayer);
+          initHeightMap(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;:/heightmaps/layer_magma.png&quot;</span>)<span class="operator">,</span> m_magmaLayer);
+
+          initMineShaftArray();
+
+          createVolume(lowDetailSize<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> lowDetailSize<span class="operator">,</span> m_lowDetailData);
+          excavateMineShaft(lowDetailSize<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> m_mineShaftArray<span class="operator">.</span>size()<span class="operator">,</span> m_lowDetailData);
+
+          m_volumeItem <span class="operator">=</span> <span class="keyword">new</span> QCustom3DVolume;
+          <span class="comment">// Adjust water level to zero with a minor tweak to y-coordinate position and scaling</span>
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setScaling(
+                      QVector3D(m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">-</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>min()<span class="operator">,</span>
+                                (m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">-</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>min()) <span class="operator">*</span> <span class="number">0.91f</span><span class="operator">,</span>
+                                m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">-</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>min()));
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setPosition(
+                      QVector3D((m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">+</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>min()) <span class="operator">/</span> <span class="number">2.0f</span><span class="operator">,</span>
+                                <span class="operator">-</span><span class="number">0.045f</span> <span class="operator">*</span> (m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">-</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>min()) <span class="operator">+</span>
+                                (m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">+</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>min()) <span class="operator">/</span> <span class="number">2.0f</span><span class="operator">,</span>
+                                (m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">+</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>min()) <span class="operator">/</span> <span class="number">2.0f</span>));
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setScalingAbsolute(<span class="keyword">false</span>);
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setTextureWidth(lowDetailSize);
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setTextureHeight(lowDetailSize <span class="operator">/</span> <span class="number">2</span>);
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setTextureDepth(lowDetailSize);
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setTextureFormat(<span class="type"><a href="../qtgui/qimage.html">QImage</a></span><span class="operator">::</span>Format_Indexed8);
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setTextureData(<span class="keyword">new</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span><span class="operator">&gt;</span>(<span class="operator">*</span>m_lowDetailData));
+
+          <span class="comment">// Generate color tables.</span>
+          m_colorTable1<span class="operator">.</span>resize(colorTableSize);
+          m_colorTable2<span class="operator">.</span>resize(colorTableSize);
+
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> colorTableSize <span class="operator">-</span> <span class="number">2</span>; i<span class="operator">+</span><span class="operator">+</span>) {
+              <span class="keyword">if</span> (i <span class="operator">&lt;</span> magmaColorsMax) {
+                  m_colorTable1<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRgba">qRgba</a>(<span class="number">130</span> <span class="operator">-</span> (i <span class="operator">*</span> <span class="number">2</span>)<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">255</span>);
+              } <span class="keyword">else</span> <span class="keyword">if</span> (i <span class="operator">&lt;</span> aboveWaterGroundColorsMax) {
+                  m_colorTable1<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRgba">qRgba</a>((i <span class="operator">-</span> magmaColorsMax) <span class="operator">*</span> <span class="number">4</span><span class="operator">,</span>
+                                           ((i <span class="operator">-</span> magmaColorsMax) <span class="operator">*</span> <span class="number">2</span>) <span class="operator">+</span> <span class="number">120</span><span class="operator">,</span>
+                                           (i <span class="operator">-</span> magmaColorsMax) <span class="operator">*</span> <span class="number">5</span><span class="operator">,</span> terrainTransparency);
+              } <span class="keyword">else</span> <span class="keyword">if</span> (i <span class="operator">&lt;</span> underWaterGroundColorsMax) {
+                  m_colorTable1<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRgba">qRgba</a>(((layerColorThickness <span class="operator">-</span> i <span class="operator">-</span> aboveWaterGroundColorsMax)) <span class="operator">+</span> <span class="number">70</span><span class="operator">,</span>
+                                           ((layerColorThickness <span class="operator">-</span> i <span class="operator">-</span> aboveWaterGroundColorsMax) <span class="operator">*</span> <span class="number">2</span>) <span class="operator">+</span> <span class="number">20</span><span class="operator">,</span>
+                                           ((layerColorThickness <span class="operator">-</span> i <span class="operator">-</span> aboveWaterGroundColorsMax)) <span class="operator">+</span> <span class="number">50</span><span class="operator">,</span>
+                                           terrainTransparency);
+              } <span class="keyword">else</span> <span class="keyword">if</span> (i <span class="operator">&lt;</span> waterColorsMax) {
+                  m_colorTable1<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRgba">qRgba</a>(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> ((i <span class="operator">-</span> underWaterGroundColorsMax) <span class="operator">*</span> <span class="number">2</span>) <span class="operator">+</span> <span class="number">120</span><span class="operator">,</span>
+                                           terrainTransparency);
+              } <span class="keyword">else</span> {
+                  m_colorTable1<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRgba">qRgba</a>(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>); <span class="comment">// Not used</span>
+              }
+          }
+          m_colorTable1<span class="operator">[</span>airColorIndex<span class="operator">]</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRgba">qRgba</a>(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+          m_colorTable1<span class="operator">[</span>mineShaftColorIndex<span class="operator">]</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRgba">qRgba</a>(<span class="number">50</span><span class="operator">,</span> <span class="number">50</span><span class="operator">,</span> <span class="number">50</span><span class="operator">,</span> <span class="number">255</span>);
+
+          <span class="comment">// The alternate color table just has gray gradients for all terrain except water</span>
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> colorTableSize <span class="operator">-</span> <span class="number">2</span>; i<span class="operator">+</span><span class="operator">+</span>) {
+              <span class="keyword">if</span> (i <span class="operator">&lt;</span> magmaColorsMax) {
+                  m_colorTable2<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRgba">qRgba</a>(((i <span class="operator">-</span> aboveWaterGroundColorsMax) <span class="operator">*</span> <span class="number">2</span>)<span class="operator">,</span>
+                                           ((i <span class="operator">-</span> aboveWaterGroundColorsMax) <span class="operator">*</span> <span class="number">2</span>)<span class="operator">,</span>
+                                           ((i <span class="operator">-</span> aboveWaterGroundColorsMax) <span class="operator">*</span> <span class="number">2</span>)<span class="operator">,</span> <span class="number">255</span>);
+              } <span class="keyword">else</span> <span class="keyword">if</span> (i <span class="operator">&lt;</span> underWaterGroundColorsMax) {
+                  m_colorTable2<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRgba">qRgba</a>(((i <span class="operator">-</span> aboveWaterGroundColorsMax) <span class="operator">*</span> <span class="number">2</span>)<span class="operator">,</span>
+                                           ((i <span class="operator">-</span> aboveWaterGroundColorsMax) <span class="operator">*</span> <span class="number">2</span>)<span class="operator">,</span>
+                                           ((i <span class="operator">-</span> aboveWaterGroundColorsMax) <span class="operator">*</span> <span class="number">2</span>)<span class="operator">,</span> terrainTransparency);
+              } <span class="keyword">else</span> <span class="keyword">if</span> (i <span class="operator">&lt;</span> waterColorsMax) {
+                  m_colorTable2<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRgba">qRgba</a>(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> ((i <span class="operator">-</span> underWaterGroundColorsMax) <span class="operator">*</span> <span class="number">2</span>) <span class="operator">+</span> <span class="number">120</span><span class="operator">,</span>
+                                           terrainTransparency);
+              } <span class="keyword">else</span> {
+                  m_colorTable2<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRgba">qRgba</a>(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>); <span class="comment">// Not used</span>
+              }
+          }
+          m_colorTable2<span class="operator">[</span>airColorIndex<span class="operator">]</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRgba">qRgba</a>(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+          m_colorTable2<span class="operator">[</span>mineShaftColorIndex<span class="operator">]</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRgba">qRgba</a>(<span class="number">255</span><span class="operator">,</span> <span class="number">255</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">255</span>);
+
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setColorTable(m_colorTable1);
+
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setSliceFrameGaps(QVector3D(<span class="number">0.01f</span><span class="operator">,</span> <span class="number">0.02f</span><span class="operator">,</span> <span class="number">0.01f</span>));
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setSliceFrameThicknesses(QVector3D(<span class="number">0.0025f</span><span class="operator">,</span> <span class="number">0.005f</span><span class="operator">,</span> <span class="number">0.0025f</span>));
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setSliceFrameWidths(QVector3D(<span class="number">0.0025f</span><span class="operator">,</span> <span class="number">0.005f</span><span class="operator">,</span> <span class="number">0.0025f</span>));
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setDrawSliceFrames(<span class="keyword">false</span>);
+          handleSlicingChanges();
+
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>addCustomItem(m_volumeItem);
+
+          m_timer<span class="operator">.</span>start(<span class="number">0</span>);
+      } <span class="keyword">else</span> {
+          <span class="comment">// OpenGL ES2 doesn't support 3D textures, so show a warning label instead</span>
+          QCustom3DLabel <span class="operator">*</span>warningLabel <span class="operator">=</span> <span class="keyword">new</span> QCustom3DLabel(
+                      <span class="string">&quot;QCustom3DVolume is not supported with OpenGL ES2&quot;</span><span class="operator">,</span>
+                      <span class="type"><a href="../qtgui/qfont.html">QFont</a></span>()<span class="operator">,</span>
+                      QVector3D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.5f</span><span class="operator">,</span> <span class="number">0.0f</span>)<span class="operator">,</span>
+                      QVector3D(<span class="number">1.5f</span><span class="operator">,</span> <span class="number">1.5f</span><span class="operator">,</span> <span class="number">0.0f</span>)<span class="operator">,</span>
+                      <span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span>());
+          warningLabel<span class="operator">-</span><span class="operator">&gt;</span>setPositionAbsolute(<span class="keyword">true</span>);
+          warningLabel<span class="operator">-</span><span class="operator">&gt;</span>setFacingCamera(<span class="keyword">true</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>addCustomItem(warningLabel);
+      }
+
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(m_graph<span class="operator">,</span> <span class="operator">&amp;</span>QAbstract3DGraph<span class="operator">::</span>currentFpsChanged<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>handleFpsChange);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(<span class="operator">&amp;</span>m_timer<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span><span class="operator">::</span>timeout<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>handleTimeout);
+
+  }
+
+  VolumetricModifier<span class="operator">::</span><span class="operator">~</span>VolumetricModifier()
+  {
+      <span class="keyword">delete</span> m_graph;
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>setFpsLabel(<span class="type">QLabel</span> <span class="operator">*</span>fpsLabel)
+  {
+      m_fpsLabel <span class="operator">=</span> fpsLabel;
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>setMediumDetailRB(<span class="type">QRadioButton</span> <span class="operator">*</span>button)
+  {
+      m_mediumDetailRB <span class="operator">=</span> button;
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>setHighDetailRB(<span class="type">QRadioButton</span> <span class="operator">*</span>button)
+  {
+      m_highDetailRB <span class="operator">=</span> button;
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>setSliceLabels(<span class="type">QLabel</span> <span class="operator">*</span>xLabel<span class="operator">,</span> <span class="type">QLabel</span> <span class="operator">*</span>yLabel<span class="operator">,</span> <span class="type">QLabel</span> <span class="operator">*</span>zLabel)
+  {
+      m_sliceLabelX <span class="operator">=</span> xLabel;
+      m_sliceLabelY <span class="operator">=</span> yLabel;
+      m_sliceLabelZ <span class="operator">=</span> zLabel;
+
+      adjustSliceX(m_sliceSliderX<span class="operator">-</span><span class="operator">&gt;</span>value());
+      adjustSliceY(m_sliceSliderY<span class="operator">-</span><span class="operator">&gt;</span>value());
+      adjustSliceZ(m_sliceSliderZ<span class="operator">-</span><span class="operator">&gt;</span>value());
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>setAlphaMultiplierLabel(<span class="type">QLabel</span> <span class="operator">*</span>label)
+  {
+      m_alphaMultiplierLabel <span class="operator">=</span> label;
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>sliceX(<span class="type">int</span> enabled)
+  {
+      m_slicingX <span class="operator">=</span> enabled;
+      handleSlicingChanges();
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>sliceY(<span class="type">int</span> enabled)
+  {
+      m_slicingY <span class="operator">=</span> enabled;
+      handleSlicingChanges();
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>sliceZ(<span class="type">int</span> enabled)
+  {
+      m_slicingZ <span class="operator">=</span> enabled;
+      handleSlicingChanges();
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>adjustSliceX(<span class="type">int</span> value)
+  {
+      <span class="keyword">if</span> (m_volumeItem) {
+          m_sliceIndexX <span class="operator">=</span> value <span class="operator">/</span> (<span class="number">1024</span> <span class="operator">/</span> m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>textureWidth());
+          <span class="keyword">if</span> (m_sliceIndexX <span class="operator">=</span><span class="operator">=</span> m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>textureWidth())
+              m_sliceIndexX<span class="operator">-</span><span class="operator">-</span>;
+          <span class="keyword">if</span> (m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>sliceIndexX() <span class="operator">!</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+              m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setSliceIndexX(m_sliceIndexX);
+          m_sliceLabelX<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(
+                      <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span><span class="operator">::</span>fromImage(m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>renderSlice(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>XAxis<span class="operator">,</span> m_sliceIndexX)));
+      }
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>adjustSliceY(<span class="type">int</span> value)
+  {
+      <span class="keyword">if</span> (m_volumeItem) {
+          m_sliceIndexY <span class="operator">=</span> value <span class="operator">/</span> (<span class="number">1024</span> <span class="operator">/</span> m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>textureHeight());
+          <span class="keyword">if</span> (m_sliceIndexY <span class="operator">=</span><span class="operator">=</span> m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>textureHeight())
+              m_sliceIndexY<span class="operator">-</span><span class="operator">-</span>;
+          <span class="keyword">if</span> (m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>sliceIndexY() <span class="operator">!</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+              m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setSliceIndexY(m_sliceIndexY);
+          m_sliceLabelY<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(
+                      <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span><span class="operator">::</span>fromImage(m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>renderSlice(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>YAxis<span class="operator">,</span> m_sliceIndexY)));
+      }
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>adjustSliceZ(<span class="type">int</span> value)
+  {
+      <span class="keyword">if</span> (m_volumeItem) {
+          m_sliceIndexZ <span class="operator">=</span> value <span class="operator">/</span> (<span class="number">1024</span> <span class="operator">/</span> m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>textureDepth());
+          <span class="keyword">if</span> (m_sliceIndexZ <span class="operator">=</span><span class="operator">=</span> m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>textureDepth())
+              m_sliceIndexZ<span class="operator">-</span><span class="operator">-</span>;
+          <span class="keyword">if</span> (m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>sliceIndexZ() <span class="operator">!</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+              m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setSliceIndexZ(m_sliceIndexZ);
+          m_sliceLabelZ<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(
+                      <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span><span class="operator">::</span>fromImage(m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>renderSlice(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ZAxis<span class="operator">,</span> m_sliceIndexZ)));
+      }
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>handleFpsChange(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> fps)
+  {
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fpsFormat <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;FPS: %1&quot;</span>);
+      <span class="type">int</span> fps10 <span class="operator">=</span> <span class="type">int</span>(fps <span class="operator">*</span> <span class="number">10.0</span>);
+      m_fpsLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(fpsFormat<span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>(fps10) <span class="operator">/</span> <span class="number">10.0</span>));
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>handleTimeout()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_mediumDetailRB<span class="operator">-</span><span class="operator">&gt;</span>isEnabled()) {
+          <span class="keyword">if</span> (m_mediumDetailIndex <span class="operator">!</span><span class="operator">=</span> mediumDetailSize) {
+              m_mediumDetailIndex <span class="operator">=</span> createVolume(mediumDetailSize<span class="operator">,</span> m_mediumDetailIndex<span class="operator">,</span> <span class="number">4</span><span class="operator">,</span>
+                                                 m_mediumDetailData);
+          } <span class="keyword">else</span> <span class="keyword">if</span> (m_mediumDetailShaftIndex <span class="operator">!</span><span class="operator">=</span> m_mineShaftArray<span class="operator">.</span>size()) {
+              m_mediumDetailShaftIndex <span class="operator">=</span> excavateMineShaft(mediumDetailSize<span class="operator">,</span> m_mediumDetailShaftIndex<span class="operator">,</span>
+                                                           <span class="number">1</span><span class="operator">,</span> m_mediumDetailData );
+          } <span class="keyword">else</span> {
+              m_mediumDetailRB<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+              <span class="type"><a href="../qtcore/qstring.html">QString</a></span> label <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Medium (%1x%2x%1)&quot;</span>);
+              m_mediumDetailRB<span class="operator">-</span><span class="operator">&gt;</span>setText(label<span class="operator">.</span>arg(mediumDetailSize)<span class="operator">.</span>arg(mediumDetailSize <span class="operator">/</span> <span class="number">2</span>));
+          }
+      } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="operator">!</span>m_highDetailRB<span class="operator">-</span><span class="operator">&gt;</span>isEnabled()) {
+          <span class="keyword">if</span> (m_highDetailIndex <span class="operator">!</span><span class="operator">=</span> highDetailSize) {
+              m_highDetailIndex <span class="operator">=</span> createVolume(highDetailSize<span class="operator">,</span> m_highDetailIndex<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span>
+                                               m_highDetailData);
+          } <span class="keyword">else</span> <span class="keyword">if</span> (m_highDetailShaftIndex <span class="operator">!</span><span class="operator">=</span> m_mineShaftArray<span class="operator">.</span>size()) {
+              m_highDetailShaftIndex <span class="operator">=</span> excavateMineShaft(highDetailSize<span class="operator">,</span> m_highDetailShaftIndex<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span>
+                                                         m_highDetailData);
+          } <span class="keyword">else</span>  {
+              m_highDetailRB<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+              <span class="type"><a href="../qtcore/qstring.html">QString</a></span> label <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;High (%1x%2x%1)&quot;</span>);
+              m_highDetailRB<span class="operator">-</span><span class="operator">&gt;</span>setText(label<span class="operator">.</span>arg(highDetailSize)<span class="operator">.</span>arg(highDetailSize <span class="operator">/</span> <span class="number">2</span>));
+              m_timer<span class="operator">.</span>stop();
+          }
+      }
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>toggleLowDetail(bool enabled)
+  {
+      <span class="keyword">if</span> (enabled <span class="operator">&amp;</span><span class="operator">&amp;</span> m_volumeItem) {
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setTextureData(<span class="keyword">new</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span><span class="operator">&gt;</span>(<span class="operator">*</span>m_lowDetailData));
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setTextureDimensions(lowDetailSize<span class="operator">,</span> lowDetailSize <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> lowDetailSize);
+          adjustSliceX(m_sliceSliderX<span class="operator">-</span><span class="operator">&gt;</span>value());
+          adjustSliceY(m_sliceSliderY<span class="operator">-</span><span class="operator">&gt;</span>value());
+          adjustSliceZ(m_sliceSliderZ<span class="operator">-</span><span class="operator">&gt;</span>value());
+      }
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>toggleMediumDetail(bool enabled)
+  {
+      <span class="keyword">if</span> (enabled <span class="operator">&amp;</span><span class="operator">&amp;</span> m_volumeItem) {
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setTextureData(<span class="keyword">new</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span><span class="operator">&gt;</span>(<span class="operator">*</span>m_mediumDetailData));
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setTextureDimensions(mediumDetailSize<span class="operator">,</span> mediumDetailSize <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> mediumDetailSize);
+          adjustSliceX(m_sliceSliderX<span class="operator">-</span><span class="operator">&gt;</span>value());
+          adjustSliceY(m_sliceSliderY<span class="operator">-</span><span class="operator">&gt;</span>value());
+          adjustSliceZ(m_sliceSliderZ<span class="operator">-</span><span class="operator">&gt;</span>value());
+      }
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>toggleHighDetail(bool enabled)
+  {
+      <span class="keyword">if</span> (enabled <span class="operator">&amp;</span><span class="operator">&amp;</span> m_volumeItem) {
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setTextureData(<span class="keyword">new</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span><span class="operator">&gt;</span>(<span class="operator">*</span>m_highDetailData));
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setTextureDimensions(highDetailSize<span class="operator">,</span> highDetailSize <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> highDetailSize);
+          adjustSliceX(m_sliceSliderX<span class="operator">-</span><span class="operator">&gt;</span>value());
+          adjustSliceY(m_sliceSliderY<span class="operator">-</span><span class="operator">&gt;</span>value());
+          adjustSliceZ(m_sliceSliderZ<span class="operator">-</span><span class="operator">&gt;</span>value());
+      }
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>setFpsMeasurement(bool enabled)
+  {
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setMeasureFps(enabled);
+      <span class="keyword">if</span> (enabled)
+          m_fpsLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Measuring...&quot;</span>));
+      <span class="keyword">else</span>
+          m_fpsLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>());
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>setSliceSliders(<span class="type">QSlider</span> <span class="operator">*</span>sliderX<span class="operator">,</span> <span class="type">QSlider</span> <span class="operator">*</span>sliderY<span class="operator">,</span> <span class="type">QSlider</span> <span class="operator">*</span>sliderZ)
+  {
+      m_sliceSliderX <span class="operator">=</span> sliderX;
+      m_sliceSliderY <span class="operator">=</span> sliderY;
+      m_sliceSliderZ <span class="operator">=</span> sliderZ;
+
+      <span class="comment">// Set sliders to interesting values</span>
+      m_sliceSliderX<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="number">715</span>);
+      m_sliceSliderY<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="number">612</span>);
+      m_sliceSliderZ<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="number">715</span>);
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>changeColorTable(<span class="type">int</span> enabled)
+  {
+      <span class="keyword">if</span> (m_volumeItem) {
+          <span class="keyword">if</span> (enabled)
+              m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setColorTable(m_colorTable2);
+          <span class="keyword">else</span>
+              m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setColorTable(m_colorTable1);
+
+          m_usingPrimaryTable <span class="operator">=</span> <span class="operator">!</span>enabled;
+
+          <span class="comment">// Rerender image labels</span>
+          adjustSliceX(m_sliceSliderX<span class="operator">-</span><span class="operator">&gt;</span>value());
+          adjustSliceY(m_sliceSliderY<span class="operator">-</span><span class="operator">&gt;</span>value());
+          adjustSliceZ(m_sliceSliderZ<span class="operator">-</span><span class="operator">&gt;</span>value());
+      }
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>setPreserveOpacity(bool enabled)
+  {
+
+      <span class="keyword">if</span> (m_volumeItem) {
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setPreserveOpacity(enabled);
+
+          <span class="comment">// Rerender image labels</span>
+          adjustSliceX(m_sliceSliderX<span class="operator">-</span><span class="operator">&gt;</span>value());
+          adjustSliceY(m_sliceSliderY<span class="operator">-</span><span class="operator">&gt;</span>value());
+          adjustSliceZ(m_sliceSliderZ<span class="operator">-</span><span class="operator">&gt;</span>value());
+      }
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>setTransparentGround(bool enabled)
+  {
+      <span class="keyword">if</span> (m_volumeItem) {
+          <span class="type">int</span> newAlpha <span class="operator">=</span> enabled <span class="operator">?</span> terrainTransparency : <span class="number">255</span>;
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> aboveWaterGroundColorsMin; i <span class="operator">&lt;</span> underWaterGroundColorsMax; i<span class="operator">+</span><span class="operator">+</span>) {
+              <span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span> oldColor1 <span class="operator">=</span> m_colorTable1<span class="operator">.</span>at(i);
+              <span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span> oldColor2 <span class="operator">=</span> m_colorTable2<span class="operator">.</span>at(i);
+              m_colorTable1<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRgba">qRgba</a>(<a href="../qtgui/qcolor.html#qRed">qRed</a>(oldColor1)<span class="operator">,</span> <a href="../qtgui/qcolor.html#qGreen">qGreen</a>(oldColor1)<span class="operator">,</span> <a href="../qtgui/qcolor.html#qBlue">qBlue</a>(oldColor1)<span class="operator">,</span> newAlpha);
+              m_colorTable2<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRgba">qRgba</a>(<a href="../qtgui/qcolor.html#qRed">qRed</a>(oldColor2)<span class="operator">,</span> <a href="../qtgui/qcolor.html#qGreen">qGreen</a>(oldColor2)<span class="operator">,</span> <a href="../qtgui/qcolor.html#qBlue">qBlue</a>(oldColor2)<span class="operator">,</span> newAlpha);
+          }
+          <span class="keyword">if</span> (m_usingPrimaryTable)
+              m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setColorTable(m_colorTable1);
+          <span class="keyword">else</span>
+              m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setColorTable(m_colorTable2);
+          adjustSliceX(m_sliceSliderX<span class="operator">-</span><span class="operator">&gt;</span>value());
+          adjustSliceY(m_sliceSliderY<span class="operator">-</span><span class="operator">&gt;</span>value());
+          adjustSliceZ(m_sliceSliderZ<span class="operator">-</span><span class="operator">&gt;</span>value());
+      }
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>setUseHighDefShader(bool enabled)
+  {
+      <span class="keyword">if</span> (m_volumeItem) {
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setUseHighDefShader(enabled);
+      }
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>adjustAlphaMultiplier(<span class="type">int</span> value)
+  {
+      <span class="keyword">if</span> (m_volumeItem) {
+          <span class="type">float</span> mult;
+          <span class="keyword">if</span> (value <span class="operator">&gt;</span> <span class="number">100</span>)
+              mult <span class="operator">=</span> <span class="type">float</span>(value <span class="operator">-</span> <span class="number">99</span>) <span class="operator">/</span> <span class="number">2.0f</span>;
+          <span class="keyword">else</span>
+              mult <span class="operator">=</span> <span class="type">float</span>(value) <span class="operator">/</span> <span class="type">float</span>(<span class="number">500</span> <span class="operator">-</span> value <span class="operator">*</span> <span class="number">4</span>);
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setAlphaMultiplier(mult);
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> labelFormat <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Alpha multiplier: %1&quot;</span>);
+          m_alphaMultiplierLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(labelFormat<span class="operator">.</span>arg(
+                                              <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>alphaMultiplier()<span class="operator">,</span> <span class="char">'f'</span><span class="operator">,</span> <span class="number">3</span>)));
+
+          <span class="comment">// Rerender image labels</span>
+          adjustSliceX(m_sliceSliderX<span class="operator">-</span><span class="operator">&gt;</span>value());
+          adjustSliceY(m_sliceSliderY<span class="operator">-</span><span class="operator">&gt;</span>value());
+          adjustSliceZ(m_sliceSliderZ<span class="operator">-</span><span class="operator">&gt;</span>value());
+      }
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>toggleAreaAll(bool enabled)
+  {
+      <span class="keyword">if</span> (enabled) {
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">1000.0f</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span><span class="number">600.0f</span><span class="operator">,</span> <span class="number">600.0f</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">1000.0f</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>setSegmentCount(<span class="number">5</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>setSegmentCount(<span class="number">6</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>setSegmentCount(<span class="number">5</span>);
+      }
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>toggleAreaMine(bool enabled)
+  {
+      <span class="keyword">if</span> (enabled) {
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="number">350.0f</span><span class="operator">,</span> <span class="number">850.0f</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span><span class="number">500.0f</span><span class="operator">,</span> <span class="number">100.0f</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="number">350.0f</span><span class="operator">,</span> <span class="number">900.0f</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>setSegmentCount(<span class="number">10</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>setSegmentCount(<span class="number">6</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>setSegmentCount(<span class="number">11</span>);
+      }
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>toggleAreaMountain(bool enabled)
+  {
+      <span class="keyword">if</span> (enabled) {
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="number">300.0f</span><span class="operator">,</span> <span class="number">600.0f</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span><span class="number">100.0f</span><span class="operator">,</span> <span class="number">400.0f</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="number">300.0f</span><span class="operator">,</span> <span class="number">600.0f</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>setSegmentCount(<span class="number">9</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>setSegmentCount(<span class="number">5</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>setSegmentCount(<span class="number">9</span>);
+      }
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>setDrawSliceFrames(<span class="type">int</span> enabled)
+  {
+      <span class="keyword">if</span> (m_volumeItem)
+          m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setDrawSliceFrames(enabled);
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>initHeightMap(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName<span class="operator">,</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span><span class="operator">&gt;</span> <span class="operator">&amp;</span>layerData)
+  {
+      <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> heightImage(fileName);
+
+      layerData<span class="operator">.</span>resize(layerDataSize <span class="operator">*</span> layerDataSize);
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span> <span class="operator">*</span>bits <span class="operator">=</span> heightImage<span class="operator">.</span>bits();
+      <span class="type">int</span> index <span class="operator">=</span> <span class="number">0</span>;
+      <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span><span class="operator">&gt;</span> colorTable <span class="operator">=</span> heightImage<span class="operator">.</span>colorTable();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> layerDataSize; i<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> layerDataSize; j<span class="operator">+</span><span class="operator">+</span>) {
+              layerData<span class="operator">[</span>index<span class="operator">]</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRed">qRed</a>(colorTable<span class="operator">.</span>at(bits<span class="operator">[</span>index<span class="operator">]</span>));
+              index<span class="operator">+</span><span class="operator">+</span>;
+          }
+      }
+  }
+
+  <span class="type">int</span> VolumetricModifier<span class="operator">::</span>createVolume(<span class="type">int</span> textureSize<span class="operator">,</span> <span class="type">int</span> startIndex<span class="operator">,</span> <span class="type">int</span> count<span class="operator">,</span>
+                                       <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span><span class="operator">&gt;</span> <span class="operator">*</span>textureData)
+  {
+      <span class="comment">// Generate volume from layer data.</span>
+      <span class="type">int</span> index <span class="operator">=</span> startIndex <span class="operator">*</span> textureSize <span class="operator">*</span> textureSize <span class="operator">/</span> <span class="number">2.0f</span>;
+      <span class="type">int</span> endIndex <span class="operator">=</span> startIndex <span class="operator">+</span> count;
+      <span class="keyword">if</span> (endIndex <span class="operator">&gt;</span> textureSize)
+          endIndex <span class="operator">=</span> textureSize;
+      <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span><span class="operator">&gt;</span> magmaHeights(textureSize);
+      <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span><span class="operator">&gt;</span> waterHeights(textureSize);
+      <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span><span class="operator">&gt;</span> groundHeights(textureSize);
+      <span class="type">float</span> multiplier <span class="operator">=</span> <span class="type">float</span>(layerDataSize) <span class="operator">/</span> <span class="type">float</span>(textureSize);
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> startIndex; i <span class="operator">&lt;</span> endIndex; i<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="comment">// Generate layer height arrays</span>
+          <span class="keyword">for</span> (<span class="type">int</span> l <span class="operator">=</span> <span class="number">0</span>; l <span class="operator">&lt;</span> textureSize; l<span class="operator">+</span><span class="operator">+</span>) {
+              <span class="type">int</span> layerIndex <span class="operator">=</span> (<span class="type">int</span>(i <span class="operator">*</span> multiplier) <span class="operator">*</span> layerDataSize <span class="operator">+</span> <span class="type">int</span>(l <span class="operator">*</span> multiplier));
+              magmaHeights<span class="operator">[</span>l<span class="operator">]</span> <span class="operator">=</span> <span class="type">int</span>(m_magmaLayer<span class="operator">.</span>at(layerIndex));
+              waterHeights<span class="operator">[</span>l<span class="operator">]</span> <span class="operator">=</span> <span class="type">int</span>(m_waterLayer<span class="operator">.</span>at(layerIndex));
+              groundHeights<span class="operator">[</span>l<span class="operator">]</span> <span class="operator">=</span> <span class="type">int</span>(m_groundLayer<span class="operator">.</span>at(layerIndex));
+          }
+          <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> textureSize <span class="operator">/</span> <span class="number">2</span>; j<span class="operator">+</span><span class="operator">+</span>) {
+              <span class="keyword">for</span> (<span class="type">int</span> k <span class="operator">=</span> <span class="number">0</span>; k <span class="operator">&lt;</span> textureSize; k<span class="operator">+</span><span class="operator">+</span>) {
+                  <span class="type">int</span> colorIndex;
+                  <span class="type">int</span> height((layerDataSize <span class="operator">-</span> (j <span class="operator">*</span> <span class="number">2</span> <span class="operator">*</span> multiplier)) <span class="operator">/</span> <span class="number">2</span>);
+                  <span class="keyword">if</span> (height <span class="operator">&lt;</span> magmaHeights<span class="operator">.</span>at(k)) {
+                      <span class="comment">// Magma layer</span>
+                      colorIndex <span class="operator">=</span> <span class="type">int</span>((<span class="type">float</span>(height) <span class="operator">/</span> heightToColorDiv)
+                                       <span class="operator">*</span> <span class="type">float</span>(layerColorThickness)) <span class="operator">+</span> magmaColorsMin;
+                  } <span class="keyword">else</span> <span class="keyword">if</span> (height <span class="operator">&lt;</span> groundHeights<span class="operator">.</span>at(k) <span class="operator">&amp;</span><span class="operator">&amp;</span> height <span class="operator">&lt;</span> waterHeights<span class="operator">.</span>at(k)) {
+                      <span class="comment">// Ground layer below water</span>
+                      colorIndex <span class="operator">=</span> <span class="type">int</span>((<span class="type">float</span>(waterHeights<span class="operator">.</span>at(k) <span class="operator">-</span> height) <span class="operator">/</span> heightToColorDiv)
+                                       <span class="operator">*</span> <span class="type">float</span>(layerColorThickness)) <span class="operator">+</span> underWaterGroundColorsMin;
+                  } <span class="keyword">else</span> <span class="keyword">if</span> (height <span class="operator">&lt;</span> waterHeights<span class="operator">.</span>at(k)) {
+                      <span class="comment">// Water layer where water goes over ground</span>
+                      colorIndex <span class="operator">=</span> <span class="type">int</span>((<span class="type">float</span>(height <span class="operator">-</span> magmaHeights<span class="operator">.</span>at(k)) <span class="operator">/</span> heightToColorDiv)
+                                       <span class="operator">*</span> <span class="type">float</span>(layerColorThickness)) <span class="operator">+</span> waterColorsMin;
+                  } <span class="keyword">else</span> <span class="keyword">if</span> (height <span class="operator">&lt;</span><span class="operator">=</span> groundHeights<span class="operator">.</span>at(k)) {
+                      <span class="comment">// Ground above water</span>
+                      colorIndex <span class="operator">=</span> <span class="type">int</span>((<span class="type">float</span>(height <span class="operator">-</span> waterHeights<span class="operator">.</span>at(k)) <span class="operator">/</span> heightToColorDiv)
+                                       <span class="operator">*</span> <span class="type">float</span>(layerColorThickness)) <span class="operator">+</span> aboveWaterGroundColorsMin;
+                  } <span class="keyword">else</span> {
+                      <span class="comment">// Rest is air</span>
+                      colorIndex <span class="operator">=</span> airColorIndex;
+                  }
+
+                  (<span class="operator">*</span>textureData)<span class="operator">[</span>index<span class="operator">]</span> <span class="operator">=</span> colorIndex;
+                  index<span class="operator">+</span><span class="operator">+</span>;
+              }
+          }
+      }
+      <span class="keyword">return</span> endIndex;
+  }
+
+  <span class="type">int</span> VolumetricModifier<span class="operator">::</span>excavateMineShaft(<span class="type">int</span> textureSize<span class="operator">,</span> <span class="type">int</span> startIndex<span class="operator">,</span> <span class="type">int</span> count<span class="operator">,</span>
+                                            <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span><span class="operator">&gt;</span> <span class="operator">*</span>textureData)
+  {
+      <span class="type">int</span> endIndex <span class="operator">=</span> startIndex <span class="operator">+</span> count;
+      <span class="keyword">if</span> (endIndex <span class="operator">&gt;</span> m_mineShaftArray<span class="operator">.</span>size())
+          endIndex <span class="operator">=</span> m_mineShaftArray<span class="operator">.</span>size();
+      <span class="type">int</span> shaftSize <span class="operator">=</span> mineShaftDiameter <span class="operator">*</span> textureSize <span class="operator">/</span> lowDetailSize;
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> startIndex; i <span class="operator">&lt;</span> endIndex; i<span class="operator">+</span><span class="operator">+</span>) {
+          QVector3D shaftStart(m_mineShaftArray<span class="operator">.</span>at(i)<span class="operator">.</span>first);
+          QVector3D shaftEnd(m_mineShaftArray<span class="operator">.</span>at(i)<span class="operator">.</span>second);
+          <span class="type">int</span> shaftLen <span class="operator">=</span> (shaftEnd <span class="operator">-</span> shaftStart)<span class="operator">.</span>length() <span class="operator">*</span> lowDetailSize;
+          <span class="type">int</span> dataX <span class="operator">=</span> shaftStart<span class="operator">.</span>x() <span class="operator">*</span> textureSize <span class="operator">-</span> (shaftSize <span class="operator">/</span> <span class="number">2</span>);
+          <span class="type">int</span> dataY <span class="operator">=</span> (shaftStart<span class="operator">.</span>y() <span class="operator">*</span> textureSize <span class="operator">-</span> (shaftSize <span class="operator">/</span> <span class="number">2</span>)) <span class="operator">/</span> <span class="number">2</span>;
+          <span class="type">int</span> dataZ <span class="operator">=</span> shaftStart<span class="operator">.</span>z() <span class="operator">*</span> textureSize <span class="operator">-</span> (shaftSize <span class="operator">/</span> <span class="number">2</span>);
+          <span class="type">int</span> dataIndex <span class="operator">=</span> dataX <span class="operator">+</span> (dataY <span class="operator">*</span> textureSize) <span class="operator">+</span> dataZ <span class="operator">*</span> (textureSize <span class="operator">*</span> textureSize <span class="operator">/</span> <span class="number">2</span>);
+          <span class="keyword">if</span> (shaftStart<span class="operator">.</span>x() <span class="operator">!</span><span class="operator">=</span> shaftEnd<span class="operator">.</span>x()) {
+              <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span><span class="operator">=</span> shaftLen; j<span class="operator">+</span><span class="operator">+</span>) {
+                  excavateMineBlock(textureSize<span class="operator">,</span> dataIndex<span class="operator">,</span> shaftSize<span class="operator">,</span> textureData);
+                  dataIndex <span class="operator">+</span><span class="operator">=</span> shaftSize;
+              }
+          } <span class="keyword">else</span> <span class="keyword">if</span> (shaftStart<span class="operator">.</span>y() <span class="operator">!</span><span class="operator">=</span> shaftEnd<span class="operator">.</span>y()) {
+              shaftLen <span class="operator">/</span><span class="operator">=</span> <span class="number">2</span>; <span class="comment">// Vertical shafts are half as long</span>
+              <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span><span class="operator">=</span> shaftLen; j<span class="operator">+</span><span class="operator">+</span>) {
+                  excavateMineBlock(textureSize<span class="operator">,</span> dataIndex<span class="operator">,</span> shaftSize<span class="operator">,</span> textureData);
+                  dataIndex <span class="operator">+</span><span class="operator">=</span> textureSize <span class="operator">*</span> shaftSize;
+              }
+          } <span class="keyword">else</span> {
+              <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span><span class="operator">=</span> shaftLen; j<span class="operator">+</span><span class="operator">+</span>) {
+                  excavateMineBlock(textureSize<span class="operator">,</span> dataIndex<span class="operator">,</span> shaftSize<span class="operator">,</span> textureData);
+                  dataIndex <span class="operator">+</span><span class="operator">=</span> (textureSize <span class="operator">*</span> textureSize <span class="operator">/</span> <span class="number">2</span>) <span class="operator">*</span> shaftSize;
+              }
+          }
+
+      }
+      <span class="keyword">return</span> endIndex;
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>excavateMineBlock(<span class="type">int</span> textureSize<span class="operator">,</span> <span class="type">int</span> dataIndex<span class="operator">,</span> <span class="type">int</span> size<span class="operator">,</span>
+                                             <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span><span class="operator">&gt;</span> <span class="operator">*</span>textureData)
+  {
+      <span class="keyword">for</span> (<span class="type">int</span> k <span class="operator">=</span> <span class="number">0</span>; k <span class="operator">&lt;</span> size; k<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="type">int</span> curIndex <span class="operator">=</span> dataIndex <span class="operator">+</span> (k <span class="operator">*</span> textureSize <span class="operator">*</span> textureSize <span class="operator">/</span> <span class="number">2</span>);
+          <span class="keyword">for</span> (<span class="type">int</span> l <span class="operator">=</span> <span class="number">0</span>; l <span class="operator">&lt;</span> size; l<span class="operator">+</span><span class="operator">+</span>) {
+              curIndex <span class="operator">=</span> dataIndex <span class="operator">+</span> (k <span class="operator">*</span> textureSize <span class="operator">*</span> textureSize <span class="operator">/</span> <span class="number">2</span>)
+                      <span class="operator">+</span> (l <span class="operator">*</span> textureSize);
+              <span class="keyword">for</span> (<span class="type">int</span> m <span class="operator">=</span> <span class="number">0</span>; m <span class="operator">&lt;</span> size; m<span class="operator">+</span><span class="operator">+</span>) {
+                  <span class="keyword">if</span> (textureData<span class="operator">-</span><span class="operator">&gt;</span>at(curIndex) <span class="operator">!</span><span class="operator">=</span> airColorIndex)
+                      (<span class="operator">*</span>textureData)<span class="operator">[</span>curIndex<span class="operator">]</span> <span class="operator">=</span> mineShaftColorIndex;
+                  curIndex<span class="operator">+</span><span class="operator">+</span>;
+              }
+
+          }
+      }
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>handleSlicingChanges()
+  {
+      <span class="keyword">if</span> (m_volumeItem) {
+          <span class="keyword">if</span> (m_slicingX <span class="operator">|</span><span class="operator">|</span> m_slicingY <span class="operator">|</span><span class="operator">|</span> m_slicingZ) {
+              <span class="comment">// Only show slices of selected dimensions</span>
+              m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setDrawSlices(<span class="keyword">true</span>);
+              m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setSliceIndexX(m_slicingX <span class="operator">?</span> m_sliceIndexX : <span class="operator">-</span><span class="number">1</span>);
+              m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setSliceIndexY(m_slicingY <span class="operator">?</span> m_sliceIndexY : <span class="operator">-</span><span class="number">1</span>);
+              m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setSliceIndexZ(m_slicingZ <span class="operator">?</span> m_sliceIndexZ : <span class="operator">-</span><span class="number">1</span>);
+          } <span class="keyword">else</span> {
+              <span class="comment">// Show slice frames for all dimenstions when not actually slicing</span>
+              m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setDrawSlices(<span class="keyword">false</span>);
+              m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setSliceIndexX(m_sliceIndexX);
+              m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setSliceIndexY(m_sliceIndexY);
+              m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setSliceIndexZ(m_sliceIndexZ);
+          }
+      }
+  }
+
+  <span class="type">void</span> VolumetricModifier<span class="operator">::</span>initMineShaftArray()
+  {
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.1f</span><span class="operator">,</span> <span class="number">0.7f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.7f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.5f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.7f</span>));
+
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.4f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.7f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.7f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.4f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.7f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.4f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.8f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.45f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.7f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.45f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.8f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.5f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.7f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.5f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.8f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.55f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.7f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.55f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.8f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.7f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.8f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.65f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.7f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.65f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.8f</span>));
+
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.5f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.7f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.7f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.5f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.7f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.5f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.8f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.55f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.7f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.55f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.8f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.7f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.8f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.65f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.7f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.65f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.8f</span>));
+
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.4f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.7f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.45f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.45f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.5f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.5f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.55f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.55f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.6f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.6f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.65f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.65f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.7f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.7f</span>));
+
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.4f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.7f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.45f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.45f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.5f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.5f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.55f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.55f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.6f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.6f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.65f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.65f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.7f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.7f</span>));
+
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.5f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.7f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.55f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.55f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.6f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.6f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.65f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.65f</span>));
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.7f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.8f</span><span class="operator">,</span> <span class="number">0.7f</span>));
+
+      m_mineShaftArray <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">,</span> QVector3D<span class="operator">&gt;</span>(QVector3D(<span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.1f</span><span class="operator">,</span> <span class="number">0.4f</span>)<span class="operator">,</span>
+                                                      QVector3D(<span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">0.4f</span>));
+  }
+
+</pre>
+</div>
+<!-- @@@volumetric/volumetric.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

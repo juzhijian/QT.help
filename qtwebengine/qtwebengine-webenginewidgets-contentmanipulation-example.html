@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- contentmanipulation.qdoc -->
+  <title>WebEngine Content Manipulation Example | Qt WebEngine 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwebengine-index.html">Qt WebEngine</a></td><td >WebEngine Content Manipulation Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+<li class="level1"><a href="#mainwindow-class-definition">MainWindow Class Definition</a></li>
+<li class="level1"><a href="#mainwindow-class-implementation">MainWindow Class Implementation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">WebEngine Content Manipulation Example</h1>
+<span class="subtitle"></span>
+<!-- $$$webenginewidgets/contentmanipulation-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/contentmanipulation-example.png" alt="" /></p><p><i>Content Manipulation</i> shows how to use JQuery with <a href="qtwebenginewidgets-index.html">Qt WebEngine Widgets</a> to create a web browser with special effects and content manipulation.</p>
+<p>In the application, we call <a href="qwebenginepage.html#runJavaScript">QWebEnginePage::runJavaScript</a>() to execute jQuery JavaScript code. We implement a <a href="../qtwidgets/qmainwindow.html">QMainWindow</a> with a <a href="qwebengineview.html">QWebEngineView</a> as a central widget to build up the browser itself.</p>
+<a name="running-the-example"></a>
+<h2 id="running-the-example">Running the Example</h2>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<a name="mainwindow-class-definition"></a>
+<h2 id="mainwindow-class-definition">MainWindow Class Definition</h2>
+<p>The <code>MainWindow</code> class inherits <a href="../qtwidgets/qmainwindow.html">QMainWindow</a>. It implements a number of slots to perform actions on both the application and on the web content:</p>
+<pre class="qml">
+
+  <span class="keyword">class</span> MainWindow : <span class="keyword">public</span> <span class="type"><a href="../qtwidgets/qmainwindow.html">QMainWindow</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      MainWindow(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">&amp;</span> url);
+
+  <span class="keyword">protected</span> <span class="keyword">slots</span>:
+
+      <span class="type">void</span> adjustLocation();
+      <span class="type">void</span> changeLocation();
+      <span class="type">void</span> adjustTitle();
+      <span class="type">void</span> setProgress(<span class="type">int</span> p);
+      <span class="type">void</span> finishLoading(bool);
+
+      <span class="type">void</span> viewSource();
+
+      <span class="type">void</span> highlightAllLinks();
+      <span class="type">void</span> rotateImages(bool invert);
+      <span class="type">void</span> removeGifImages();
+      <span class="type">void</span> removeInlineFrames();
+      <span class="type">void</span> removeObjectElements();
+      <span class="type">void</span> removeEmbeddedElements();
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> jQuery;
+      <span class="type"><a href="qwebengineview.html">QWebEngineView</a></span> <span class="operator">*</span>view;
+      <span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span> <span class="operator">*</span>locationEdit;
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>rotateAction;
+      <span class="type">int</span> progress;
+  };
+
+</pre>
+<p>We also declare a <a href="../qtcore/qstring.html">QString</a> that contains the jQuery, a <a href="qwebengineview.html">QWebEngineView</a> that displays the web content, and a <a href="../qtwidgets/qlineedit.html">QLineEdit</a> that acts as the address bar.</p>
+<a name="mainwindow-class-implementation"></a>
+<h2 id="mainwindow-class-implementation">MainWindow Class Implementation</h2>
+<p>We start by implementing the constructor. The first part of the constructor sets the value of <code>progress</code> to 0. This value will be used later in the code to visualize the loading of a web page:</p>
+<pre class="qml">
+
+  MainWindow<span class="operator">::</span>MainWindow(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">&amp;</span> url)
+  {
+      progress <span class="operator">=</span> <span class="number">0</span>;
+
+</pre>
+<p>Next, the jQuery library is loaded by using a <a href="../qtcore/qfile.html">QFile</a> and reading the file content. The jQuery library is a JavaScript library that provides different functions for manipulating HTML:</p>
+<pre class="qml">
+
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file;
+      file<span class="operator">.</span>setFileName(<span class="string">&quot;:/jquery.min.js&quot;</span>);
+      file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly);
+      jQuery <span class="operator">=</span> file<span class="operator">.</span>readAll();
+      jQuery<span class="operator">.</span>append(<span class="string">&quot;\nvar qt = { 'jQuery': jQuery.noConflict(true) };&quot;</span>);
+      file<span class="operator">.</span>close();
+
+</pre>
+<p>The second part of the constructor creates a <a href="qwebengineview.html">QWebEngineView</a> and connects slots to the view's signals:</p>
+<pre class="qml">
+
+      view <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qwebengineview.html">QWebEngineView</a></span>(<span class="keyword">this</span>);
+      view<span class="operator">-</span><span class="operator">&gt;</span>load(url);
+      connect(view<span class="operator">,</span> SIGNAL(loadFinished(bool))<span class="operator">,</span> SLOT(adjustLocation()));
+      connect(view<span class="operator">,</span> SIGNAL(titleChanged(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span> SLOT(adjustTitle()));
+      connect(view<span class="operator">,</span> SIGNAL(loadProgress(<span class="type">int</span>))<span class="operator">,</span> SLOT(setProgress(<span class="type">int</span>)));
+      connect(view<span class="operator">,</span> SIGNAL(loadFinished(bool))<span class="operator">,</span> SLOT(finishLoading(bool)));
+
+</pre>
+<p>Furthermore, we create a <a href="../qtwidgets/qlineedit.html">QLineEdit</a> as the browser's address bar. We then set the horizontal <a href="../qtwidgets/qsizepolicy.html">QSizePolicy</a> to fill the available area in the browser at all times. We add the <a href="../qtwidgets/qlineedit.html">QLineEdit</a> to a <a href="../qtwidgets/qtoolbar.html">QToolBar</a> together with a set of navigation actions from <a href="qwebengineview.html#pageAction">QWebEngineView::pageAction</a>():</p>
+<pre class="qml">
+
+      locationEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span>(<span class="keyword">this</span>);
+      locationEdit<span class="operator">-</span><span class="operator">&gt;</span>setSizePolicy(<span class="type"><a href="../qtwidgets/qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>Expanding<span class="operator">,</span> locationEdit<span class="operator">-</span><span class="operator">&gt;</span>sizePolicy()<span class="operator">.</span>verticalPolicy());
+      connect(locationEdit<span class="operator">,</span> SIGNAL(returnPressed())<span class="operator">,</span> SLOT(changeLocation()));
+
+      <span class="type"><a href="../qtwidgets/qtoolbar.html">QToolBar</a></span> <span class="operator">*</span>toolBar <span class="operator">=</span> addToolBar(tr(<span class="string">&quot;Navigation&quot;</span>));
+      toolBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(view<span class="operator">-</span><span class="operator">&gt;</span>pageAction(<span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>Back));
+      toolBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(view<span class="operator">-</span><span class="operator">&gt;</span>pageAction(<span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>Forward));
+      toolBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(view<span class="operator">-</span><span class="operator">&gt;</span>pageAction(<span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>Reload));
+      toolBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(view<span class="operator">-</span><span class="operator">&gt;</span>pageAction(<span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>Stop));
+      toolBar<span class="operator">-</span><span class="operator">&gt;</span>addWidget(locationEdit);
+
+</pre>
+<p>The third part of the constructor implements two <a href="../qtwidgets/qmenu.html">QMenu</a> widgets and assigns a set of actions to them:</p>
+<pre class="qml">
+
+      <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>viewMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;View&quot;</span>));
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">*</span> viewSourceAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span>(<span class="string">&quot;Page Source&quot;</span><span class="operator">,</span> <span class="keyword">this</span>);
+      connect(viewSourceAction<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> SLOT(viewSource()));
+      viewMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(viewSourceAction);
+
+      <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>effectMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Effect&quot;</span>));
+      effectMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(<span class="string">&quot;Highlight all links&quot;</span><span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(highlightAllLinks()));
+
+      rotateAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span>(<span class="keyword">this</span>);
+      rotateAction<span class="operator">-</span><span class="operator">&gt;</span>setIcon(style()<span class="operator">-</span><span class="operator">&gt;</span>standardIcon(<span class="type"><a href="../qtwidgets/qstyle.html">QStyle</a></span><span class="operator">::</span>SP_FileDialogDetailedView));
+      rotateAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      rotateAction<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Turn images upside down&quot;</span>));
+      connect(rotateAction<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(rotateImages(bool)));
+      effectMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(rotateAction);
+
+      <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>toolsMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Tools&quot;</span>));
+      toolsMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Remove GIF images&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(removeGifImages()));
+      toolsMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Remove all inline frames&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(removeInlineFrames()));
+      toolsMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Remove all object elements&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(removeObjectElements()));
+      toolsMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Remove all embedded elements&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(removeEmbeddedElements()));
+
+</pre>
+<p>The last line sets the <a href="qwebengineview.html">QWebEngineView</a> as the central widget in the <a href="../qtwidgets/qmainwindow.html">QMainWindow</a>:</p>
+<pre class="qml">
+
+      setCentralWidget(view);
+  }
+
+</pre>
+<p>When the page is loaded, <code>adjustLocation()</code> is triggered by the <code>loadFinished()</code> signal in <a href="qwebengineview.html">QWebEngineView</a> to update the address bar:</p>
+<pre class="qml">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>adjustLocation()
+  {
+      locationEdit<span class="operator">-</span><span class="operator">&gt;</span>setText(view<span class="operator">-</span><span class="operator">&gt;</span>url()<span class="operator">.</span>toString());
+  }
+
+</pre>
+<p>In <code>changeLocation()</code>, we create a <a href="../qtcore/qurl.html">QUrl</a> object, and then use it to load the page into the <a href="qwebengineview.html">QWebEngineView</a>. When the new web page has finished loading, <code>adjustLocation()</code> will be run once more to update the address bar:</p>
+<pre class="qml">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>changeLocation()
+  {
+      <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> url <span class="operator">=</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromUserInput(locationEdit<span class="operator">-</span><span class="operator">&gt;</span>text());
+      view<span class="operator">-</span><span class="operator">&gt;</span>load(url);
+      view<span class="operator">-</span><span class="operator">&gt;</span>setFocus();
+  }
+
+</pre>
+<p>The <code>adjustTitle()</code> method sets the window title and displays the loading progress:</p>
+<pre class="qml">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>adjustTitle()
+  {
+      <span class="keyword">if</span> (progress <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> progress <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">100</span>)
+          setWindowTitle(view<span class="operator">-</span><span class="operator">&gt;</span>title());
+      <span class="keyword">else</span>
+          setWindowTitle(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1 (%2%)&quot;</span>)<span class="operator">.</span>arg(view<span class="operator">-</span><span class="operator">&gt;</span>title())<span class="operator">.</span>arg(progress));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>setProgress(<span class="type">int</span> p)
+  {
+      progress <span class="operator">=</span> p;
+      adjustTitle();
+  }
+
+</pre>
+<p>This slot is triggered by the <code>titleChanged()</code> signal in <a href="qwebengineview.html">QWebEngineView</a>.</p>
+<p>When a web page has loaded, the <code>finishLoading()</code> method is triggered by the <code>loadFinished()</code> signal in <a href="qwebengineview.html">QWebEngineView</a>. The method then updates the progress in the title bar and calls <code>runJavaScript()</code> to evaluate the jQuery library against the current web page:</p>
+<pre class="qml">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>finishLoading(bool)
+  {
+      progress <span class="operator">=</span> <span class="number">100</span>;
+      adjustTitle();
+      view<span class="operator">-</span><span class="operator">&gt;</span>page()<span class="operator">-</span><span class="operator">&gt;</span>runJavaScript(jQuery);
+
+      rotateImages(rotateAction<span class="operator">-</span><span class="operator">&gt;</span>isChecked());
+  }
+
+</pre>
+<p>This means that the JavaScript can be viewed as a part of the content loaded into the <a href="qwebengineview.html">QWebEngineView</a>, and therefore needs to be loaded every time a new page is loaded. Once the jQuery library is loaded, we can start executing the different jQuery functions in the browser.</p>
+<p>The <code>rotateImages()</code> function is then called explicitly to make sure that the images of the newly loaded page respect the state of the toggle action.</p>
+<p>The first jQuery-based function, <code>highlightAllLinks()</code>, is designed to highlight all links in the current webpage. The JavaScript code looks for web elements named <i>a</i>, which is the tag for a hyperlink. For each such element, the background color is set to be yellow by using CSS:</p>
+<pre class="qml">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>highlightAllLinks()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> code <span class="operator">=</span> <span class="string">&quot;qt.jQuery('a').each( function () { qt.jQuery(this).css('background-color', 'yellow') } ); undefined&quot;</span>;
+      view<span class="operator">-</span><span class="operator">&gt;</span>page()<span class="operator">-</span><span class="operator">&gt;</span>runJavaScript(code);
+  }
+
+</pre>
+<p>We append <code>undefined</code> after the jQuery call to prevent a possible recursion loop and crash caused by the way the elements returned by the each iterator elements reference each other, which causes problems upon converting them to <a href="../qtcore/qvariant.html">QVariant</a>.</p>
+<p>The <code>rotateImages()</code> function rotates the images on the current web page. This JavaScript code relies on CSS transforms. It looks up all <i>img</i> elements and rotates the images 180 degrees and then back again:</p>
+<pre class="qml">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>rotateImages(bool invert)
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> code;
+
+      <span class="keyword">if</span> (invert)
+          code <span class="operator">=</span> <span class="string">&quot;qt.jQuery('img').each( function () { qt.jQuery(this).css('-webkit-transition', '-webkit-transform 2s'); qt.jQuery(this).css('-webkit-transform', 'rotate(180deg)') } ); undefined&quot;</span>;
+      <span class="keyword">else</span>
+          code <span class="operator">=</span> <span class="string">&quot;qt.jQuery('img').each( function () { qt.jQuery(this).css('-webkit-transition', '-webkit-transform 2s'); qt.jQuery(this).css('-webkit-transform', 'rotate(0deg)') } ); undefined&quot;</span>;
+      view<span class="operator">-</span><span class="operator">&gt;</span>page()<span class="operator">-</span><span class="operator">&gt;</span>runJavaScript(code);
+  }
+
+</pre>
+<p>The remaining methods remove different elements from the current web page. The <code>removeGifImages()</code> removes all GIF images on the page by looking up the <i>src</i> attribute of all the elements on the web page. Any element with a <i>gif</i> file as its source is removed:</p>
+<pre class="qml">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>removeGifImages()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> code <span class="operator">=</span> <span class="string">&quot;qt.jQuery('[src*=gif]').remove()&quot;</span>;
+      view<span class="operator">-</span><span class="operator">&gt;</span>page()<span class="operator">-</span><span class="operator">&gt;</span>runJavaScript(code);
+  }
+
+</pre>
+<p>The <code>removeInlineFrames()</code> method removes all <i>iframe</i> or inline elements:</p>
+<pre class="qml">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>removeInlineFrames()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> code <span class="operator">=</span> <span class="string">&quot;qt.jQuery('iframe').remove()&quot;</span>;
+      view<span class="operator">-</span><span class="operator">&gt;</span>page()<span class="operator">-</span><span class="operator">&gt;</span>runJavaScript(code);
+  }
+
+</pre>
+<p>The <code>removeObjectElements()</code> method removes all <i>object</i> elements:</p>
+<pre class="qml">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>removeObjectElements()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> code <span class="operator">=</span> <span class="string">&quot;qt.jQuery('object').remove()&quot;</span>;
+      view<span class="operator">-</span><span class="operator">&gt;</span>page()<span class="operator">-</span><span class="operator">&gt;</span>runJavaScript(code);
+  }
+
+</pre>
+<p>The <code>removeEmbeddedElements()</code> method removes any elements using the <i>embed</i> tag, such as plugins embedded on the page:</p>
+<pre class="qml">
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>removeEmbeddedElements()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> code <span class="operator">=</span> <span class="string">&quot;qt.jQuery('embed').remove()&quot;</span>;
+      view<span class="operator">-</span><span class="operator">&gt;</span>page()<span class="operator">-</span><span class="operator">&gt;</span>runJavaScript(code);
+  }
+
+</pre>
+<p>Files:</p>
+<ul>
+<li><a href="qtwebengine-webenginewidgets-contentmanipulation-jquery-min-js.html">webenginewidgets/contentmanipulation/jquery.min.js</a></li>
+<li><a href="qtwebengine-webenginewidgets-contentmanipulation-mainwindow-cpp.html">webenginewidgets/contentmanipulation/mainwindow.cpp</a></li>
+<li><a href="qtwebengine-webenginewidgets-contentmanipulation-mainwindow-h.html">webenginewidgets/contentmanipulation/mainwindow.h</a></li>
+<li><a href="qtwebengine-webenginewidgets-contentmanipulation-main-cpp.html">webenginewidgets/contentmanipulation/main.cpp</a></li>
+<li><a href="qtwebengine-webenginewidgets-contentmanipulation-contentmanipulation-pro.html">webenginewidgets/contentmanipulation/contentmanipulation.pro</a></li>
+<li><a href="qtwebengine-webenginewidgets-contentmanipulation-jquery-qrc.html">webenginewidgets/contentmanipulation/jquery.qrc</a></li>
+</ul>
+</div>
+<!-- @@@webenginewidgets/contentmanipulation -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

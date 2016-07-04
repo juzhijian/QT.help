@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmloscilloscope.qdoc -->
+  <title>Qt Quick 2 Oscilloscope Example | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td >Qt Quick 2 Oscilloscope Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#data-source-in-c">Data source in C++</a></li>
+<li class="level1"><a href="#qml">QML</a></li>
+<li class="level1"><a href="#enabling-direct-rendering">Enabling direct rendering</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Quick 2 Oscilloscope Example</h1>
+<span class="subtitle"></span>
+<!-- $$$qmloscilloscope-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Qt Quick 2 oscilloscope example shows how to combine C++ and QML in an application, as well as showing data that changes realtime.</p>
+<p class="centerAlign"><img src="images/qmloscilloscope-example.png" alt="" /></p><p>The interesting thing about this example is combining C++ and QML, so we'll concentrate on that and skip explaining the basic functionality - for more detailed QML example documentation, see <a href="qtdatavisualization-qmlscatter-example.html">Qt Quick 2 Scatter Example</a>.</p>
+<a name="data-source-in-c"></a>
+<h2 id="data-source-in-c">Data source in C++</h2>
+<p>The item model based proxies are good for simple and/or static graphs, but to achieve best performance when displaying data changing in realtime, the basic proxies should be used. Those are not supported in QML, as the data items they store are not <a href="../qtcore/qobject.html">QObject</a>s and cannot therefore be directly manipulated from QML code. To overcome this limitation, we implement a simple <code>DataSource</code> class in C++ to populate the data proxy of the series.</p>
+<p>The <code>DataSource</code> class provides three methods that can be called from QML:</p>
+<pre class="cpp">
+
+  <span class="keyword">public</span> Q_SLOTS:
+  <span class="type">void</span> generateData(<span class="type">int</span> cacheCount<span class="operator">,</span> <span class="type">int</span> rowCount<span class="operator">,</span> <span class="type">int</span> columnCount<span class="operator">,</span>
+                    <span class="type">float</span> xMin<span class="operator">,</span> <span class="type">float</span> xMax<span class="operator">,</span> <span class="type">float</span> yMin<span class="operator">,</span> <span class="type">float</span> yMax<span class="operator">,</span> <span class="type">float</span> zMin<span class="operator">,</span> <span class="type">float</span> zMax);
+
+  <span class="type">void</span> update(QSurface3DSeries <span class="operator">*</span>series);
+
+</pre>
+<p>The first method, <code>generateData()</code>, creates a cache of simulated oscilloscope data for us to display. The data is cached in a format accepted by <a href="qsurfacedataproxy.html">QSurfaceDataProxy</a>:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> DataSource<span class="operator">::</span>generateData(<span class="type">int</span> cacheCount<span class="operator">,</span> <span class="type">int</span> rowCount<span class="operator">,</span> <span class="type">int</span> columnCount<span class="operator">,</span>
+                                <span class="type">float</span> xMin<span class="operator">,</span> <span class="type">float</span> xMax<span class="operator">,</span> <span class="type">float</span> yMin<span class="operator">,</span> <span class="type">float</span> yMax<span class="operator">,</span>
+                                <span class="type">float</span> zMin<span class="operator">,</span> <span class="type">float</span> zMax)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>cacheCount <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>rowCount <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>columnCount)
+          <span class="keyword">return</span>;
+
+      clearData();
+      <span class="comment">// Re-create the cache array</span>
+      m_data<span class="operator">.</span>resize(cacheCount);
+      <span class="keyword">for</span> (<span class="type">int</span> i(<span class="number">0</span>); i <span class="operator">&lt;</span> cacheCount; i<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="type">QSurfaceDataArray</span> <span class="operator">&amp;</span>array <span class="operator">=</span> m_data<span class="operator">[</span>i<span class="operator">]</span>;
+          array<span class="operator">.</span>reserve(rowCount);
+          <span class="keyword">for</span> (<span class="type">int</span> j(<span class="number">0</span>); j <span class="operator">&lt;</span> rowCount; j<span class="operator">+</span><span class="operator">+</span>)
+              array<span class="operator">.</span>append(<span class="keyword">new</span> <span class="type">QSurfaceDataRow</span>(columnCount));
+      }
+
+      <span class="type">float</span> xRange <span class="operator">=</span> xMax <span class="operator">-</span> xMin;
+      <span class="type">float</span> yRange <span class="operator">=</span> yMax <span class="operator">-</span> yMin;
+      <span class="type">float</span> zRange <span class="operator">=</span> zMax <span class="operator">-</span> zMin;
+      <span class="type">int</span> cacheIndexStep <span class="operator">=</span> columnCount <span class="operator">/</span> cacheCount;
+      <span class="type">float</span> cacheStep <span class="operator">=</span> <span class="type">float</span>(cacheIndexStep) <span class="operator">*</span> xRange <span class="operator">/</span> <span class="type">float</span>(columnCount);
+
+      <span class="comment">// Populate caches</span>
+      <span class="keyword">for</span> (<span class="type">int</span> i(<span class="number">0</span>); i <span class="operator">&lt;</span> cacheCount; i<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="type">QSurfaceDataArray</span> <span class="operator">&amp;</span>cache <span class="operator">=</span> m_data<span class="operator">[</span>i<span class="operator">]</span>;
+          <span class="type">float</span> cacheXAdjustment <span class="operator">=</span> cacheStep <span class="operator">*</span> i;
+          <span class="type">float</span> cacheIndexAdjustment <span class="operator">=</span> cacheIndexStep <span class="operator">*</span> i;
+          <span class="keyword">for</span> (<span class="type">int</span> j(<span class="number">0</span>); j <span class="operator">&lt;</span> rowCount; j<span class="operator">+</span><span class="operator">+</span>) {
+              <span class="type">QSurfaceDataRow</span> <span class="operator">&amp;</span>row <span class="operator">=</span> <span class="operator">*</span>(cache<span class="operator">[</span>j<span class="operator">]</span>);
+              <span class="type">float</span> rowMod <span class="operator">=</span> (<span class="type">float</span>(j)) <span class="operator">/</span> <span class="type">float</span>(rowCount);
+              <span class="type">float</span> yRangeMod <span class="operator">=</span> yRange <span class="operator">*</span> rowMod;
+              <span class="type">float</span> zRangeMod <span class="operator">=</span> zRange <span class="operator">*</span> rowMod;
+              <span class="type">float</span> z <span class="operator">=</span> zRangeMod <span class="operator">+</span> zMin;
+              <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> rowColWaveAngleMul <span class="operator">=</span> M_PI <span class="operator">*</span> M_PI <span class="operator">*</span> rowMod;
+              <span class="type">float</span> rowColWaveMul <span class="operator">=</span> yRangeMod <span class="operator">*</span> <span class="number">0.2f</span>;
+              <span class="keyword">for</span> (<span class="type">int</span> k(<span class="number">0</span>); k <span class="operator">&lt;</span> columnCount; k<span class="operator">+</span><span class="operator">+</span>) {
+                  <span class="type">float</span> colMod <span class="operator">=</span> (<span class="type">float</span>(k)) <span class="operator">/</span> <span class="type">float</span>(columnCount);
+                  <span class="type">float</span> xRangeMod <span class="operator">=</span> xRange <span class="operator">*</span> colMod;
+                  <span class="type">float</span> x <span class="operator">=</span> xRangeMod <span class="operator">+</span> xMin <span class="operator">+</span> cacheXAdjustment;
+                  <span class="type">float</span> colWave <span class="operator">=</span> <span class="type">float</span>(<a href="../qtcore/qtmath.html#qSin">qSin</a>((<span class="number">2.0</span> <span class="operator">*</span> M_PI <span class="operator">*</span> colMod) <span class="operator">-</span> (<span class="number">1.0</span> <span class="operator">/</span> <span class="number">2.0</span> <span class="operator">*</span> M_PI)) <span class="operator">+</span> <span class="number">1.0</span>);
+                  <span class="type">float</span> y <span class="operator">=</span> (colWave <span class="operator">*</span> ((<span class="type">float</span>(<a href="../qtcore/qtmath.html#qSin">qSin</a>(rowColWaveAngleMul <span class="operator">*</span> colMod) <span class="operator">+</span> <span class="number">1.0</span>))))
+                          <span class="operator">*</span> rowColWaveMul
+                          <span class="operator">+</span> (<span class="number">0.15f</span> <span class="operator">*</span> <span class="type">float</span>(qrand()) <span class="operator">/</span> <span class="type">float</span>(RAND_MAX)) <span class="operator">*</span> yRangeMod;
+
+                  <span class="type">int</span> index <span class="operator">=</span> k <span class="operator">+</span> cacheIndexAdjustment;
+                  <span class="keyword">if</span> (index <span class="operator">&gt;</span><span class="operator">=</span> columnCount) {
+                      <span class="comment">// Wrap over</span>
+                      index <span class="operator">-</span><span class="operator">=</span> columnCount;
+                      x <span class="operator">-</span><span class="operator">=</span> xRange;
+                  }
+                  row<span class="operator">[</span>index<span class="operator">]</span> <span class="operator">=</span> QVector3D(x<span class="operator">,</span> y<span class="operator">,</span> z);
+              }
+          }
+      }
+  }
+
+</pre>
+<p>The second method, <code>update()</code>, copies one set of the cached data into another array, which we set to the data proxy of the series by calling <a href="qsurfacedataproxy.html#resetArray">QSurfaceDataProxy::resetArray</a>(). We reuse the same array if the array dimensions have not changed to minimize overhead:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> DataSource<span class="operator">::</span>update(QSurface3DSeries <span class="operator">*</span>series)
+  {
+      <span class="keyword">if</span> (series <span class="operator">&amp;</span><span class="operator">&amp;</span> m_data<span class="operator">.</span>size()) {
+          <span class="comment">// Each iteration uses data from a different cached array</span>
+          m_index<span class="operator">+</span><span class="operator">+</span>;
+          <span class="keyword">if</span> (m_index <span class="operator">&gt;</span> m_data<span class="operator">.</span>count() <span class="operator">-</span> <span class="number">1</span>)
+              m_index <span class="operator">=</span> <span class="number">0</span>;
+
+          <span class="type">QSurfaceDataArray</span> array <span class="operator">=</span> m_data<span class="operator">.</span>at(m_index);
+          <span class="type">int</span> newRowCount <span class="operator">=</span> array<span class="operator">.</span>size();
+          <span class="type">int</span> newColumnCount <span class="operator">=</span> array<span class="operator">.</span>at(<span class="number">0</span>)<span class="operator">-</span><span class="operator">&gt;</span>size();
+
+          <span class="comment">// If the first time or the dimensions of the cache array have changed,</span>
+          <span class="comment">// reconstruct the reset array</span>
+          <span class="keyword">if</span> (m_resetArray <span class="operator">|</span><span class="operator">|</span> series<span class="operator">-</span><span class="operator">&gt;</span>dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>rowCount() <span class="operator">!</span><span class="operator">=</span> newRowCount
+                  <span class="operator">|</span><span class="operator">|</span> series<span class="operator">-</span><span class="operator">&gt;</span>dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>columnCount() <span class="operator">!</span><span class="operator">=</span> newColumnCount) {
+              m_resetArray <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QSurfaceDataArray</span>();
+              m_resetArray<span class="operator">-</span><span class="operator">&gt;</span>reserve(newRowCount);
+              <span class="keyword">for</span> (<span class="type">int</span> i(<span class="number">0</span>); i <span class="operator">&lt;</span> newRowCount; i<span class="operator">+</span><span class="operator">+</span>)
+                  m_resetArray<span class="operator">-</span><span class="operator">&gt;</span>append(<span class="keyword">new</span> <span class="type">QSurfaceDataRow</span>(newColumnCount));
+          }
+
+          <span class="comment">// Copy items from our cache to the reset array</span>
+          <span class="keyword">for</span> (<span class="type">int</span> i(<span class="number">0</span>); i <span class="operator">&lt;</span> newRowCount; i<span class="operator">+</span><span class="operator">+</span>) {
+              <span class="keyword">const</span> <span class="type">QSurfaceDataRow</span> <span class="operator">&amp;</span>sourceRow <span class="operator">=</span> <span class="operator">*</span>(array<span class="operator">.</span>at(i));
+              <span class="type">QSurfaceDataRow</span> <span class="operator">&amp;</span>row <span class="operator">=</span> <span class="operator">*</span>(<span class="operator">*</span>m_resetArray)<span class="operator">[</span>i<span class="operator">]</span>;
+              <span class="keyword">for</span> (<span class="type">int</span> j(<span class="number">0</span>); j <span class="operator">&lt;</span> newColumnCount; j<span class="operator">+</span><span class="operator">+</span>)
+                  row<span class="operator">[</span>j<span class="operator">]</span><span class="operator">.</span>setPosition(sourceRow<span class="operator">.</span>at(j)<span class="operator">.</span>position());
+          }
+
+          <span class="comment">// Notify the proxy that data has changed</span>
+          series<span class="operator">-</span><span class="operator">&gt;</span>dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>resetArray(m_resetArray);
+      }
+  }
+
+</pre>
+<p><b>Note: </b>Even though we are operating on the array pointer we have previously set to the proxy we still need to call <a href="qsurfacedataproxy.html#resetArray">QSurfaceDataProxy::resetArray</a>() after changing the data in it to prompt the graph to render the data.</p><p>To be able to access the <code>DataSource</code> methods from QML, we need to expose it. We do this by defining a context property in application main:</p>
+<pre class="cpp">
+
+  DataSource dataSource;
+  viewer<span class="operator">.</span>rootContext()<span class="operator">-</span><span class="operator">&gt;</span>setContextProperty(<span class="string">&quot;dataSource&quot;</span><span class="operator">,</span> <span class="operator">&amp;</span>dataSource);
+
+</pre>
+<p>To make it possible to use <a href="qsurface3dseries.html">QSurface3DSeries</a> pointers as parameters on the <code>DataSource</code> class methods on all environments and builds, we need to make sure the meta type is registered:</p>
+<pre class="cpp">
+
+  Q_DECLARE_METATYPE(QSurface3DSeries <span class="operator">*</span>)
+  ...
+  <a href="../qtcore/qmetatype.html#qRegisterMetaType-1">qRegisterMetaType</a><span class="operator">&lt;</span>QSurface3DSeries <span class="operator">*</span><span class="operator">&gt;</span>();
+
+</pre>
+<a name="qml"></a>
+<h2 id="qml">QML</h2>
+<p>In the QML codes, we define a <a href="qml-qtdatavisualization-surface3d.html">Surface3D</a> graph normally and give it a <a href="qml-qtdatavisualization-surface3dseries.html">Surface3DSeries</a>:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtdatavisualization-surface3dseries.html">Surface3DSeries</a></span> {
+      <span class="name">id</span>: <span class="name">surfaceSeries</span>
+      <span class="name">drawMode</span>: <span class="name">Surface3DSeries</span>.<span class="name">DrawSurface</span>;
+      <span class="name">flatShadingEnabled</span>: <span class="number">false</span>;
+      <span class="name">meshSmooth</span>: <span class="number">true</span>
+      <span class="name">itemLabelFormat</span>: <span class="string">&quot;@xLabel, @zLabel: @yLabel&quot;</span>
+      <span class="name">itemLabelVisible</span>: <span class="number">false</span>
+
+      <span class="name">onItemLabelChanged</span>: {
+          <span class="keyword">if</span> (<span class="name">surfaceSeries</span>.<span class="name">selectedPoint</span> <span class="operator">===</span> <span class="name">surfaceSeries</span>.<span class="name">invalidSelectionPosition</span>)
+              <span class="name">selectionText</span>.<span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;No selection&quot;</span>
+          <span class="keyword">else</span>
+              <span class="name">selectionText</span>.<span class="name">text</span> <span class="operator">=</span> <span class="name">surfaceSeries</span>.<span class="name">itemLabel</span>
+      }
+  }
+
+</pre>
+<p>One interesting detail is that we don't specify a proxy for the <a href="qml-qtdatavisualization-surface3dseries.html">Surface3DSeries</a> we attach to the graph. This makes the series to utilize the default <a href="qsurfacedataproxy.html">QSurfaceDataProxy</a>.</p>
+<p>We also hide the item label with <a href="qml-qtdatavisualization-abstract3dseries.html#itemLabelVisible-prop">itemLabelVisible</a>, since we want to display the selected item information in a <code>Text</code> element instead of a floating label above the selection pointer. This is done because the selection pointer moves around a lot as the data changes, which makes the regular selection label difficult to read.</p>
+<p>We initialize the <code>DataSource</code> cache when the graph is complete by calling a helper function <code>generateData()</code>, which calls the method with the same name on the <code>DataSource</code>:</p>
+<pre class="qml">
+
+  <span class="name">Component</span>.onCompleted: <span class="name">mainView</span>.<span class="name">generateData</span>()
+      ...
+  <span class="keyword">function</span> <span class="name">generateData</span>() {
+      <span class="name">dataSource</span>.<span class="name">generateData</span>(<span class="name">mainView</span>.<span class="name">sampleCache</span>, <span class="name">mainView</span>.<span class="name">sampleRows</span>,
+                              <span class="name">mainView</span>.<span class="name">sampleColumns</span>, <span class="name">surfaceGraph</span>.<span class="name">axisX</span>.<span class="name">min</span>,
+                              <span class="name">surfaceGraph</span>.<span class="name">axisX</span>.<span class="name">max</span>, <span class="name">surfaceGraph</span>.<span class="name">axisY</span>.<span class="name">min</span>,
+                              <span class="name">surfaceGraph</span>.<span class="name">axisY</span>.<span class="name">max</span>, <span class="name">surfaceGraph</span>.<span class="name">axisZ</span>.<span class="name">min</span>,
+                              <span class="name">surfaceGraph</span>.<span class="name">axisZ</span>.<span class="name">max</span>)
+  }
+
+</pre>
+<p>To trigger the updates in data, we define a <code>Timer</code> item which calls the <code>update()</code> method on the <code>DataSource</code> at requested intervals. The label update is also triggered on each cycle:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtqml/qml-qtqml-timer.html">Timer</a></span> {
+      <span class="name">id</span>: <span class="name">refreshTimer</span>
+      <span class="name">interval</span>: <span class="number">1000</span> <span class="operator">/</span> <span class="name">frequencySlider</span>.<span class="name">value</span>
+      <span class="name">running</span>: <span class="number">true</span>
+      <span class="name">repeat</span>: <span class="number">true</span>
+      <span class="name">onTriggered</span>: <span class="name">dataSource</span>.<span class="name">update</span>(<span class="name">surfaceSeries</span>)
+  }
+
+</pre>
+<a name="enabling-direct-rendering"></a>
+<h2 id="enabling-direct-rendering">Enabling direct rendering</h2>
+<p>Since this application potentially deals with a lot of rapidly changing data, we use direct rendering mode for performance. To enable antialiasing in this mode the surface format of the application window needs to be changed, as the default format used by <a href="../qtquick/qquickview.html">QQuickView</a> doesn't support antialiasing. We use the utility function provided by Qt Data Visualization to change the surface format in <code>main.cpp</code>:</p>
+<pre class="cpp">
+
+  viewer<span class="operator">.</span>setFormat(<span class="type"><a href="qtdatavisualization-qmlmodule.html">QtDataVisualization</a></span><span class="operator">::</span>qDefaultSurfaceFormat());
+  ...
+  <span class="preprocessor">#include &lt;QtDataVisualization/qutils.h&gt;</span>
+
+</pre>
+<p>On the QML side, direct rendering mode is enabled via <a href="qml-qtdatavisualization-abstractgraph3d.html#renderingMode-prop">renderingMode</a> property:</p>
+<pre class="qml">
+
+  <span class="name">renderingMode</span>: <span class="name">AbstractGraph3D</span>.<span class="name">RenderDirectToBackground</span>
+
+</pre>
+<p>Files:</p>
+<ul>
+<li><a href="qtdatavisualization-qmloscilloscope-datasource-cpp.html">qmloscilloscope/datasource.cpp</a></li>
+<li><a href="qtdatavisualization-qmloscilloscope-datasource-h.html">qmloscilloscope/datasource.h</a></li>
+<li><a href="qtdatavisualization-qmloscilloscope-qml-qmloscilloscope-newbutton-qml.html">qmloscilloscope/qml/qmloscilloscope/NewButton.qml</a></li>
+<li><a href="qtdatavisualization-qmloscilloscope-qml-qmloscilloscope-main-qml.html">qmloscilloscope/qml/qmloscilloscope/main.qml</a></li>
+<li><a href="qtdatavisualization-qmloscilloscope-main-cpp.html">qmloscilloscope/main.cpp</a></li>
+<li><a href="qtdatavisualization-qmloscilloscope-qmloscilloscope-pro.html">qmloscilloscope/qmloscilloscope.pro</a></li>
+<li><a href="qtdatavisualization-qmloscilloscope-qmloscilloscope-qrc.html">qmloscilloscope/qmloscilloscope.qrc</a></li>
+</ul>
+</div>
+<!-- @@@qmloscilloscope -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mimetypemodel.cpp Example File | Qt Core 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-mimetypes-mimetypebrowser-example.html">MIME Type Browser Example</a></td><td >mimetypemodel.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mimetypemodel.cpp Example File</h1>
+<span class="subtitle">mimetypes/mimetypebrowser/mimetypemodel.cpp</span>
+<!-- $$$mimetypes/mimetypebrowser/mimetypemodel.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;mimetypemodel.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QIcon&gt;</span>
+
+  <span class="preprocessor">#include &lt;QDebug&gt;</span>
+  <span class="preprocessor">#include &lt;QMimeDatabase&gt;</span>
+  <span class="preprocessor">#include &lt;QTextStream&gt;</span>
+  <span class="preprocessor">#include &lt;QVariant&gt;</span>
+
+  <span class="preprocessor">#include &lt;algorithm&gt;</span>
+
+  Q_DECLARE_METATYPE(<span class="type"><a href="qmimetype.html">QMimeType</a></span>)
+
+  <span class="keyword">typedef</span> <span class="type"><a href="qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtgui/qstandarditem.html">QStandardItem</a></span> <span class="operator">*</span><span class="operator">&gt;</span> StandardItemList;
+
+  <span class="keyword">enum</span> { mimeTypeRole <span class="operator">=</span> <span class="type"><a href="qt.html">Qt</a></span><span class="operator">::</span>UserRole <span class="operator">+</span> <span class="number">1</span><span class="operator">,</span> iconQueriedRole <span class="operator">=</span> <span class="type"><a href="qt.html">Qt</a></span><span class="operator">::</span>UserRole <span class="operator">+</span> <span class="number">2</span> };
+
+  bool <span class="keyword">operator</span><span class="operator">&lt;</span>(<span class="keyword">const</span> <span class="type"><a href="qmimetype.html">QMimeType</a></span> <span class="operator">&amp;</span>t1<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qmimetype.html">QMimeType</a></span> <span class="operator">&amp;</span>t2)
+  {
+      <span class="keyword">return</span> t1<span class="operator">.</span>name() <span class="operator">&lt;</span> t2<span class="operator">.</span>name();
+  }
+
+  <span class="keyword">static</span> StandardItemList createRow(<span class="keyword">const</span> <span class="type"><a href="qmimetype.html">QMimeType</a></span> <span class="operator">&amp;</span>t)
+  {
+      <span class="keyword">const</span> <span class="type"><a href="qvariant.html">QVariant</a></span> v <span class="operator">=</span> <span class="type"><a href="qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(t);
+      <span class="type"><a href="../qtgui/qstandarditem.html">QStandardItem</a></span> <span class="operator">*</span>nameItem <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtgui/qstandarditem.html">QStandardItem</a></span>(t<span class="operator">.</span>name());
+      <span class="keyword">const</span> <span class="type"><a href="qt.html">Qt</a></span><span class="operator">::</span>ItemFlags flags <span class="operator">=</span> <span class="type"><a href="qt.html">Qt</a></span><span class="operator">::</span>ItemIsSelectable <span class="operator">|</span> <span class="type"><a href="qt.html">Qt</a></span><span class="operator">::</span>ItemIsEnabled;
+      nameItem<span class="operator">-</span><span class="operator">&gt;</span>setData(v<span class="operator">,</span> mimeTypeRole);
+      nameItem<span class="operator">-</span><span class="operator">&gt;</span>setData(<span class="type"><a href="qvariant.html">QVariant</a></span>(<span class="keyword">false</span>)<span class="operator">,</span> iconQueriedRole);
+      nameItem<span class="operator">-</span><span class="operator">&gt;</span>setFlags(flags);
+      nameItem<span class="operator">-</span><span class="operator">&gt;</span>setToolTip(t<span class="operator">.</span>comment());
+      <span class="keyword">return</span> StandardItemList{nameItem};
+  }
+
+  MimetypeModel<span class="operator">::</span>MimetypeModel(<span class="type"><a href="qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtgui/qstandarditemmodel.html">QStandardItemModel</a></span>(<span class="number">0</span><span class="operator">,</span> ColumnCount<span class="operator">,</span> parent)
+  {
+      setHorizontalHeaderLabels(<span class="type"><a href="qstringlist.html">QStringList</a></span>{tr(<span class="string">&quot;Name&quot;</span>)});
+      populate();
+  }
+
+  <span class="type"><a href="qvariant.html">QVariant</a></span> MimetypeModel<span class="operator">::</span>data(<span class="keyword">const</span> <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (role <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="qt.html">Qt</a></span><span class="operator">::</span>DecorationRole <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>index<span class="operator">.</span>isValid() <span class="operator">|</span><span class="operator">|</span> index<span class="operator">.</span>data(iconQueriedRole)<span class="operator">.</span>toBool())
+          <span class="keyword">return</span> <span class="type"><a href="../qtgui/qstandarditemmodel.html">QStandardItemModel</a></span><span class="operator">::</span>data(index<span class="operator">,</span> role);
+      <span class="type"><a href="../qtgui/qstandarditem.html">QStandardItem</a></span> <span class="operator">*</span>item <span class="operator">=</span> itemFromIndex(index);
+      <span class="keyword">const</span> <span class="type"><a href="qstring.html">QString</a></span> iconName <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>data(mimeTypeRole)<span class="operator">.</span>value<span class="operator">&lt;</span><span class="type"><a href="qmimetype.html">QMimeType</a></span><span class="operator">&gt;</span>()<span class="operator">.</span>iconName();
+      <span class="keyword">if</span> (<span class="operator">!</span>iconName<span class="operator">.</span>isEmpty())
+          item<span class="operator">-</span><span class="operator">&gt;</span>setIcon(<span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(iconName));
+      item<span class="operator">-</span><span class="operator">&gt;</span>setData(<span class="type"><a href="qvariant.html">QVariant</a></span>(<span class="keyword">true</span>)<span class="operator">,</span> iconQueriedRole);
+      <span class="keyword">return</span> item<span class="operator">-</span><span class="operator">&gt;</span>icon();
+  }
+
+  <span class="type"><a href="qmimetype.html">QMimeType</a></span> MimetypeModel<span class="operator">::</span>mimeType(<span class="keyword">const</span> <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> index<span class="operator">.</span>data(mimeTypeRole)<span class="operator">.</span>value<span class="operator">&lt;</span><span class="type"><a href="qmimetype.html">QMimeType</a></span><span class="operator">&gt;</span>();
+  }
+
+  <span class="type">void</span> MimetypeModel<span class="operator">::</span>populate()
+  {
+      <span class="keyword">typedef</span> <span class="type"><a href="qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qmimetype.html">QMimeType</a></span><span class="operator">&gt;</span><span class="operator">::</span>Iterator Iterator;
+
+      <span class="type"><a href="qmimedatabase.html">QMimeDatabase</a></span> mimeDatabase;
+      <span class="type"><a href="qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qmimetype.html">QMimeType</a></span><span class="operator">&gt;</span> allTypes <span class="operator">=</span> mimeDatabase<span class="operator">.</span>allMimeTypes();
+
+      <span class="comment">// Move top level types to rear end of list, sort this partition,</span>
+      <span class="comment">// create top level items and truncate the list.</span>
+      Iterator end <span class="operator">=</span> allTypes<span class="operator">.</span>end();
+      <span class="keyword">const</span> Iterator topLevelStart <span class="operator">=</span>
+          std<span class="operator">::</span>stable_partition(allTypes<span class="operator">.</span>begin()<span class="operator">,</span> end<span class="operator">,</span>
+                                <span class="operator">[</span><span class="operator">]</span>(<span class="keyword">const</span> <span class="type"><a href="qmimetype.html">QMimeType</a></span> <span class="operator">&amp;</span>t) { <span class="keyword">return</span> <span class="operator">!</span>t<span class="operator">.</span>parentMimeTypes()<span class="operator">.</span>isEmpty(); });
+      std<span class="operator">::</span>stable_sort(topLevelStart<span class="operator">,</span> end);
+      <span class="keyword">for</span> (Iterator it <span class="operator">=</span> topLevelStart; it <span class="operator">!</span><span class="operator">=</span> end; <span class="operator">+</span><span class="operator">+</span>it) {
+          <span class="keyword">const</span> StandardItemList row <span class="operator">=</span> createRow(<span class="operator">*</span>it);
+          appendRow(row);
+          m_nameIndexHash<span class="operator">.</span>insert(it<span class="operator">-</span><span class="operator">&gt;</span>name()<span class="operator">,</span> indexFromItem(row<span class="operator">.</span>constFirst()));
+      }
+      allTypes<span class="operator">.</span>erase(topLevelStart<span class="operator">,</span> end);
+
+      <span class="keyword">while</span> (<span class="operator">!</span>allTypes<span class="operator">.</span>isEmpty()) {
+          <span class="comment">// Find a type inheriting one that is already in the model.</span>
+          end <span class="operator">=</span> allTypes<span class="operator">.</span>end();
+          <span class="keyword">auto</span> nameIndexIt <span class="operator">=</span> m_nameIndexHash<span class="operator">.</span>constEnd();
+          <span class="keyword">for</span> (Iterator it <span class="operator">=</span> allTypes<span class="operator">.</span>begin(); it <span class="operator">!</span><span class="operator">=</span> end; <span class="operator">+</span><span class="operator">+</span>it) {
+              nameIndexIt <span class="operator">=</span> m_nameIndexHash<span class="operator">.</span>constFind(it<span class="operator">-</span><span class="operator">&gt;</span>parentMimeTypes()<span class="operator">.</span>constFirst());
+              <span class="keyword">if</span> (nameIndexIt <span class="operator">!</span><span class="operator">=</span> m_nameIndexHash<span class="operator">.</span>constEnd())
+                  <span class="keyword">break</span>;
+          }
+          <span class="keyword">if</span> (nameIndexIt <span class="operator">=</span><span class="operator">=</span> m_nameIndexHash<span class="operator">.</span>constEnd()) {
+              <a href="qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Orphaned mime types:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> allTypes;
+              <span class="keyword">break</span>;
+          }
+
+          <span class="comment">// Move types inheriting the parent type to rear end of list, sort this partition,</span>
+          <span class="comment">// append the items to parent and truncate the list.</span>
+          <span class="keyword">const</span> <span class="type"><a href="qstring.html">QString</a></span> <span class="operator">&amp;</span>parentName <span class="operator">=</span> nameIndexIt<span class="operator">.</span>key();
+          <span class="keyword">const</span> Iterator start <span class="operator">=</span>
+              std<span class="operator">::</span>stable_partition(allTypes<span class="operator">.</span>begin()<span class="operator">,</span> end<span class="operator">,</span> <span class="operator">[</span>parentName<span class="operator">]</span>(<span class="keyword">const</span> <span class="type"><a href="qmimetype.html">QMimeType</a></span> <span class="operator">&amp;</span>t)
+                                    { <span class="keyword">return</span> <span class="operator">!</span>t<span class="operator">.</span>parentMimeTypes()<span class="operator">.</span>contains(parentName); });
+          std<span class="operator">::</span>stable_sort(start<span class="operator">,</span> end);
+          <span class="type"><a href="../qtgui/qstandarditem.html">QStandardItem</a></span> <span class="operator">*</span>parentItem <span class="operator">=</span> itemFromIndex(nameIndexIt<span class="operator">.</span>value());
+          <span class="keyword">for</span> (Iterator it <span class="operator">=</span> start; it <span class="operator">!</span><span class="operator">=</span> end; <span class="operator">+</span><span class="operator">+</span>it) {
+              <span class="keyword">const</span> StandardItemList row <span class="operator">=</span> createRow(<span class="operator">*</span>it);
+              parentItem<span class="operator">-</span><span class="operator">&gt;</span>appendRow(row);
+              m_nameIndexHash<span class="operator">.</span>insert(it<span class="operator">-</span><span class="operator">&gt;</span>name()<span class="operator">,</span> indexFromItem(row<span class="operator">.</span>constFirst()));
+          }
+          allTypes<span class="operator">.</span>erase(start<span class="operator">,</span> end);
+      }
+  }
+
+  <span class="type"><a href="qtextstream.html">QTextStream</a></span> <span class="operator">&amp;</span><span class="keyword">operator</span><span class="operator">&lt;</span><span class="operator">&lt;</span>(<span class="type"><a href="qtextstream.html">QTextStream</a></span> <span class="operator">&amp;</span>stream<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstringlist.html">QStringList</a></span> <span class="operator">&amp;</span>list)
+  {
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span><span class="operator">,</span> size <span class="operator">=</span> list<span class="operator">.</span>size(); i <span class="operator">&lt;</span> size; <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="keyword">if</span> (i)
+              stream <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;, &quot;</span>;
+          stream <span class="operator">&lt;</span><span class="operator">&lt;</span> list<span class="operator">.</span>at(i);
+      }
+      <span class="keyword">return</span> stream;
+  }
+
+  <span class="type"><a href="qstring.html">QString</a></span> MimetypeModel<span class="operator">::</span>formatMimeTypeInfo(<span class="keyword">const</span> <span class="type"><a href="qmimetype.html">QMimeType</a></span> <span class="operator">&amp;</span>t)
+  {
+      <span class="type"><a href="qstring.html">QString</a></span> result;
+      <span class="type"><a href="qtextstream.html">QTextStream</a></span> str(<span class="operator">&amp;</span>result);
+      str <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;h3&gt;&lt;center&gt;&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> t<span class="operator">.</span>name() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;/center&gt;&lt;/h3&gt;&lt;br&gt;&lt;table&gt;&quot;</span>;
+
+      <span class="keyword">const</span> <span class="type"><a href="qstringlist.html">QStringList</a></span> <span class="operator">&amp;</span>aliases <span class="operator">=</span> t<span class="operator">.</span>aliases();
+      <span class="keyword">if</span> (<span class="operator">!</span>aliases<span class="operator">.</span>isEmpty())
+          str <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;tr&gt;&lt;td&gt;Aliases:&lt;/td&gt;&lt;td&gt;&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot; (&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> aliases <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="char">')'</span>;
+
+      str <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;/td&gt;&lt;/tr&gt;&quot;</span>
+          <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;tr&gt;&lt;td&gt;Comment:&lt;/td&gt;&lt;td&gt;&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> t<span class="operator">.</span>comment() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;/td&gt;&lt;/tr&gt;&quot;</span>
+          <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;tr&gt;&lt;td&gt;Icon name:&lt;/td&gt;&lt;td&gt;&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> t<span class="operator">.</span>iconName() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;/td&gt;&lt;/tr&gt;&quot;</span>;
+
+      <span class="keyword">const</span> <span class="type"><a href="qstring.html">QString</a></span> <span class="operator">&amp;</span>filter <span class="operator">=</span> t<span class="operator">.</span>filterString();
+      <span class="keyword">if</span> (<span class="operator">!</span>filter<span class="operator">.</span>isEmpty())
+          str <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;tr&gt;&lt;td&gt;Filter:&lt;/td&gt;&lt;td&gt;&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> t<span class="operator">.</span>filterString() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;/td&gt;&lt;/tr&gt;&quot;</span>;
+
+      <span class="keyword">const</span> <span class="type"><a href="qstringlist.html">QStringList</a></span> <span class="operator">&amp;</span>patterns <span class="operator">=</span> t<span class="operator">.</span>globPatterns();
+      <span class="keyword">if</span> (<span class="operator">!</span>patterns<span class="operator">.</span>isEmpty())
+          str <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;tr&gt;&lt;td&gt;Glob patterns:&lt;/td&gt;&lt;td&gt;&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> patterns <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;/td&gt;&lt;/tr&gt;&quot;</span>;
+
+      <span class="keyword">const</span> <span class="type"><a href="qstringlist.html">QStringList</a></span> <span class="operator">&amp;</span>parentMimeTypes <span class="operator">=</span> t<span class="operator">.</span>parentMimeTypes();
+      <span class="keyword">if</span> (<span class="operator">!</span>parentMimeTypes<span class="operator">.</span>isEmpty())
+          str <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;tr&gt;&lt;td&gt;Parent types:&lt;/td&gt;&lt;td&gt;&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> t<span class="operator">.</span>parentMimeTypes() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;/td&gt;&lt;/tr&gt;&quot;</span>;
+
+      <span class="type"><a href="qstringlist.html">QStringList</a></span> suffixes <span class="operator">=</span> t<span class="operator">.</span>suffixes();
+      <span class="keyword">if</span> (<span class="operator">!</span>suffixes<span class="operator">.</span>isEmpty()) {
+          str <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;tr&gt;&lt;td&gt;Suffixes:&lt;/td&gt;&lt;td&gt;&quot;</span>;
+          <span class="keyword">const</span> <span class="type"><a href="qstring.html">QString</a></span> <span class="operator">&amp;</span>preferredSuffix <span class="operator">=</span> t<span class="operator">.</span>preferredSuffix();
+          <span class="keyword">if</span> (<span class="operator">!</span>preferredSuffix<span class="operator">.</span>isEmpty()) {
+              suffixes<span class="operator">.</span>removeOne(preferredSuffix);
+              str <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;b&gt;&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> preferredSuffix <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;/b&gt; &quot;</span>;
+          }
+          str <span class="operator">&lt;</span><span class="operator">&lt;</span> suffixes <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;/td&gt;&lt;/tr&gt;&quot;</span>;
+      }
+      str <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;&lt;/table&gt;&lt;/body&gt;&lt;/html&gt;&quot;</span>;
+      <span class="keyword">return</span> result;
+  }
+
+</pre>
+</div>
+<!-- @@@mimetypes/mimetypebrowser/mimetypemodel.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

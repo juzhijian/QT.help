@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mainwindow.cpp Example File | Qt SVG 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtsvg-index.html">Qt SVG</a></td><td ><a href="qtsvg-svgviewer-example.html">SVG Viewer Example</a></td><td >mainwindow.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mainwindow.cpp Example File</h1>
+<span class="subtitle">svgviewer/mainwindow.cpp</span>
+<!-- $$$svgviewer/mainwindow.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;mainwindow.h&quot;</span>
+  <span class="preprocessor">#include &quot;exportdialog.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+  <span class="preprocessor">#include &lt;QSvgRenderer&gt;</span>
+
+  <span class="preprocessor">#include &quot;svgview.h&quot;</span>
+
+  <span class="keyword">static</span> <span class="keyword">inline</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> picturesLocation()
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>standardLocations(<span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>PicturesLocation)<span class="operator">.</span>value(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>currentPath());
+  }
+
+  MainWindow<span class="operator">::</span>MainWindow()
+      : <span class="type"><a href="../qtwidgets/qmainwindow.html">QMainWindow</a></span>()
+      <span class="operator">,</span> m_view(<span class="keyword">new</span> SvgView)
+  {
+      <span class="type"><a href="../qtwidgets/qtoolbar.html">QToolBar</a></span> <span class="operator">*</span>toolBar <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtoolbar.html">QToolBar</a></span>(<span class="keyword">this</span>);
+      addToolBar(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopToolBarArea<span class="operator">,</span> toolBar);
+
+      <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>fileMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;File&quot;</span>));
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> openIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;document-open&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(<span class="string">&quot;:/qt-project.org/styles/commonstyle/images/standardbutton-open-32.png&quot;</span>));
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>openAction <span class="operator">=</span> fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(openIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Open...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>openFile);
+      openAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Open);
+      toolBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(openAction);
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> exportIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;document-save&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(<span class="string">&quot;:/qt-project.org/styles/commonstyle/images/standardbutton-save-32.png&quot;</span>));
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>exportAction <span class="operator">=</span> fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(exportIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Export...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>exportImage);
+      exportAction<span class="operator">-</span><span class="operator">&gt;</span>setToolTip(tr(<span class="string">&quot;Export Image&quot;</span>));
+      exportAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">+</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_E);
+      toolBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(exportAction);
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>quitAction <span class="operator">=</span> fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;E&amp;xit&quot;</span>)<span class="operator">,</span> qApp<span class="operator">,</span> <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>quit);
+      quitAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Quit);
+
+      <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>viewMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;View&quot;</span>));
+      m_backgroundAction <span class="operator">=</span> viewMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Background&quot;</span>));
+      m_backgroundAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      m_backgroundAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      m_backgroundAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+      connect(m_backgroundAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">::</span>toggled<span class="operator">,</span> m_view<span class="operator">,</span> <span class="operator">&amp;</span>SvgView<span class="operator">::</span>setViewBackground);
+
+      m_outlineAction <span class="operator">=</span> viewMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Outline&quot;</span>));
+      m_outlineAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      m_outlineAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      m_outlineAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      connect(m_outlineAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">::</span>toggled<span class="operator">,</span> m_view<span class="operator">,</span> <span class="operator">&amp;</span>SvgView<span class="operator">::</span>setViewOutline);
+
+      <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>rendererMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Renderer&quot;</span>));
+      m_nativeAction <span class="operator">=</span> rendererMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Native&quot;</span>));
+      m_nativeAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      m_nativeAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      m_nativeAction<span class="operator">-</span><span class="operator">&gt;</span>setData(<span class="type">int</span>(SvgView<span class="operator">::</span>Native));
+  <span class="preprocessor">#ifndef QT_NO_OPENGL</span>
+      m_glAction <span class="operator">=</span> rendererMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;OpenGL&quot;</span>));
+      m_glAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      m_glAction<span class="operator">-</span><span class="operator">&gt;</span>setData(<span class="type">int</span>(SvgView<span class="operator">::</span>OpenGL));
+  <span class="preprocessor">#endif</span>
+      m_imageAction <span class="operator">=</span> rendererMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Image&quot;</span>));
+      m_imageAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      m_imageAction<span class="operator">-</span><span class="operator">&gt;</span>setData(<span class="type">int</span>(SvgView<span class="operator">::</span>Image));
+
+      rendererMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      m_highQualityAntialiasingAction <span class="operator">=</span> rendererMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;High Quality Antialiasing&quot;</span>));
+      m_highQualityAntialiasingAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      m_highQualityAntialiasingAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      m_highQualityAntialiasingAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+      connect(m_highQualityAntialiasingAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">::</span>toggled<span class="operator">,</span> m_view<span class="operator">,</span> <span class="operator">&amp;</span>SvgView<span class="operator">::</span>setHighQualityAntialiasing);
+  <span class="preprocessor">#ifdef QT_NO_OPENGL</span>
+      m_highQualityAntialiasingAction<span class="operator">-</span><span class="operator">&gt;</span>setVisible(<span class="keyword">false</span>);
+  <span class="preprocessor">#endif</span>
+
+      <span class="type"><a href="../qtwidgets/qactiongroup.html">QActionGroup</a></span> <span class="operator">*</span>rendererGroup <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qactiongroup.html">QActionGroup</a></span>(<span class="keyword">this</span>);
+      rendererGroup<span class="operator">-</span><span class="operator">&gt;</span>addAction(m_nativeAction);
+  <span class="preprocessor">#ifndef QT_NO_OPENGL</span>
+      rendererGroup<span class="operator">-</span><span class="operator">&gt;</span>addAction(m_glAction);
+  <span class="preprocessor">#endif</span>
+      rendererGroup<span class="operator">-</span><span class="operator">&gt;</span>addAction(m_imageAction);
+
+      menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(rendererMenu);
+
+      connect(rendererGroup<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qactiongroup.html">QActionGroup</a></span><span class="operator">::</span>triggered<span class="operator">,</span>
+              <span class="operator">[</span><span class="keyword">this</span><span class="operator">]</span> (<span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>a) { setRenderer(a<span class="operator">-</span><span class="operator">&gt;</span>data()<span class="operator">.</span>toInt()); });
+
+      <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>help <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Help&quot;</span>));
+      help<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;About Qt&quot;</span>)<span class="operator">,</span> qApp<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span><span class="operator">::</span>aboutQt);
+
+      setCentralWidget(m_view);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>openFile()
+  {
+      <span class="type"><a href="../qtwidgets/qfiledialog.html">QFileDialog</a></span> fileDialog(<span class="keyword">this</span>);
+      fileDialog<span class="operator">.</span>setAcceptMode(<span class="type"><a href="../qtwidgets/qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>AcceptOpen);
+      fileDialog<span class="operator">.</span>setMimeTypeFilters(<span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;image/svg+xml&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;image/svg+xml-compressed&quot;</span>);
+      fileDialog<span class="operator">.</span>setWindowTitle(tr(<span class="string">&quot;Open SVG File&quot;</span>));
+      <span class="keyword">if</span> (m_currentPath<span class="operator">.</span>isEmpty())
+          fileDialog<span class="operator">.</span>setDirectory(picturesLocation());
+
+      <span class="keyword">while</span> (fileDialog<span class="operator">.</span>exec() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>loadFile(fileDialog<span class="operator">.</span>selectedFiles()<span class="operator">.</span>constFirst()))
+          ;
+  }
+
+  bool MainWindow<span class="operator">::</span>loadFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span><span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span><span class="operator">::</span>exists(fileName) <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>m_view<span class="operator">-</span><span class="operator">&gt;</span>openFile(fileName)) {
+          <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>critical(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Open SVG File&quot;</span>)<span class="operator">,</span>
+                                tr(<span class="string">&quot;Could not open file '%1'.&quot;</span>)<span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(fileName)));
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      }
+
+      <span class="keyword">if</span> (<span class="operator">!</span>fileName<span class="operator">.</span>startsWith(<span class="string">&quot;:/&quot;</span>)) {
+          m_currentPath <span class="operator">=</span> fileName;
+          setWindowFilePath(fileName);
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> size <span class="operator">=</span> m_view<span class="operator">-</span><span class="operator">&gt;</span>svgSize();
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> message <span class="operator">=</span>
+              tr(<span class="string">&quot;Opened %1, %2x%3&quot;</span>)<span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span>(fileName)<span class="operator">.</span>fileName())<span class="operator">.</span>arg(size<span class="operator">.</span>width())<span class="operator">.</span>arg(size<span class="operator">.</span>width());
+          statusBar()<span class="operator">-</span><span class="operator">&gt;</span>showMessage(message);
+      }
+
+      m_outlineAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+      m_backgroundAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> availableSize <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span><span class="operator">::</span>desktop()<span class="operator">-</span><span class="operator">&gt;</span>availableGeometry(<span class="keyword">this</span>)<span class="operator">.</span>size();
+      resize(m_view<span class="operator">-</span><span class="operator">&gt;</span>sizeHint()<span class="operator">.</span>expandedTo(availableSize <span class="operator">/</span> <span class="number">4</span>) <span class="operator">+</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">80</span><span class="operator">,</span> <span class="number">80</span> <span class="operator">+</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>height()));
+
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>setRenderer(<span class="type">int</span> renderMode)
+  {
+
+      m_highQualityAntialiasingAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(renderMode <span class="operator">=</span><span class="operator">=</span> SvgView<span class="operator">::</span>OpenGL);
+      m_view<span class="operator">-</span><span class="operator">&gt;</span>setRenderer(<span class="keyword">static_cast</span><span class="operator">&lt;</span>SvgView<span class="operator">::</span>RendererType<span class="operator">&gt;</span>(renderMode));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>exportImage()
+  {
+      ExportDialog exportDialog(<span class="keyword">this</span>);
+      exportDialog<span class="operator">.</span>setExportSize(m_view<span class="operator">-</span><span class="operator">&gt;</span>svgSize());
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName;
+      <span class="keyword">if</span> (m_currentPath<span class="operator">.</span>isEmpty()) {
+          fileName <span class="operator">=</span> picturesLocation() <span class="operator">+</span> QLatin1String(<span class="string">&quot;/export.png&quot;</span>);
+      } <span class="keyword">else</span> {
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span> fi(m_currentPath);
+          fileName <span class="operator">=</span> fi<span class="operator">.</span>absolutePath() <span class="operator">+</span> QLatin1Char(<span class="char">'/'</span>) <span class="operator">+</span> fi<span class="operator">.</span>baseName() <span class="operator">+</span> QLatin1String(<span class="string">&quot;.png&quot;</span>);
+      }
+      exportDialog<span class="operator">.</span>setExportFileName(fileName);
+
+      <span class="keyword">while</span> (<span class="keyword">true</span>) {
+          <span class="keyword">if</span> (exportDialog<span class="operator">.</span>exec() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted)
+              <span class="keyword">break</span>;
+
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> imageSize <span class="operator">=</span> exportDialog<span class="operator">.</span>exportSize();
+          <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> image(imageSize<span class="operator">,</span> <span class="type"><a href="../qtgui/qimage.html">QImage</a></span><span class="operator">::</span>Format_ARGB32);
+          image<span class="operator">.</span>fill(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>transparent);
+          <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter;
+          painter<span class="operator">.</span>begin(<span class="operator">&amp;</span>image);
+          m_view<span class="operator">-</span><span class="operator">&gt;</span>renderer()<span class="operator">-</span><span class="operator">&gt;</span>render(<span class="operator">&amp;</span>painter<span class="operator">,</span> <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span>(<span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>()<span class="operator">,</span> <span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span>(imageSize)));
+          painter<span class="operator">.</span>end();
+
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> exportDialog<span class="operator">.</span>exportFileName();
+          <span class="keyword">if</span> (image<span class="operator">.</span>save(fileName)) {
+
+              <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> message <span class="operator">=</span> tr(<span class="string">&quot;Exported %1, %2x%3, %4 bytes&quot;</span>)
+                  <span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(fileName))<span class="operator">.</span>arg(imageSize<span class="operator">.</span>width())<span class="operator">.</span>arg(imageSize<span class="operator">.</span>height())
+                  <span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span>(fileName)<span class="operator">.</span>size());
+              statusBar()<span class="operator">-</span><span class="operator">&gt;</span>showMessage(message);
+              <span class="keyword">break</span>;
+          } <span class="keyword">else</span> {
+              <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>critical(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Export Image&quot;</span>)<span class="operator">,</span>
+                                    tr(<span class="string">&quot;Could not write file '%1'.&quot;</span>)<span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(fileName)));
+          }
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@svgviewer/mainwindow.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

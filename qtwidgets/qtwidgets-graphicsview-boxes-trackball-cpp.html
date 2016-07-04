@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>trackball.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-graphicsview-boxes-example.html">Boxes</a></td><td >trackball.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">trackball.cpp Example File</h1>
+<span class="subtitle">graphicsview/boxes/trackball.cpp</span>
+<!-- $$$graphicsview/boxes/trackball.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;trackball.h&quot;</span>
+  <span class="preprocessor">#include &quot;scene.h&quot;</span>
+  <span class="preprocessor">#include &lt;cmath&gt;</span>
+
+  <span class="comment">//============================================================================//</span>
+  <span class="comment">//                                  TrackBall                                 //</span>
+  <span class="comment">//============================================================================//</span>
+
+  TrackBall<span class="operator">::</span>TrackBall(TrackMode mode)
+      : m_angularVelocity(<span class="number">0</span>)
+      <span class="operator">,</span> m_paused(<span class="keyword">false</span>)
+      <span class="operator">,</span> m_pressed(<span class="keyword">false</span>)
+      <span class="operator">,</span> m_mode(mode)
+  {
+      m_axis <span class="operator">=</span> QVector3D(<span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+      m_rotation <span class="operator">=</span> <span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span>();
+      m_lastTime <span class="operator">=</span> <span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime();
+  }
+
+  TrackBall<span class="operator">::</span>TrackBall(<span class="type">float</span> angularVelocity<span class="operator">,</span> <span class="keyword">const</span> QVector3D<span class="operator">&amp;</span> axis<span class="operator">,</span> TrackMode mode)
+      : m_axis(axis)
+      <span class="operator">,</span> m_angularVelocity(angularVelocity)
+      <span class="operator">,</span> m_paused(<span class="keyword">false</span>)
+      <span class="operator">,</span> m_pressed(<span class="keyword">false</span>)
+      <span class="operator">,</span> m_mode(mode)
+  {
+      m_rotation <span class="operator">=</span> <span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span>();
+      m_lastTime <span class="operator">=</span> <span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime();
+  }
+
+  <span class="type">void</span> TrackBall<span class="operator">::</span>push(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span><span class="operator">&amp;</span> p<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span> <span class="operator">&amp;</span>)
+  {
+      m_rotation <span class="operator">=</span> rotation();
+      m_pressed <span class="operator">=</span> <span class="keyword">true</span>;
+      m_lastTime <span class="operator">=</span> <span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime();
+      m_lastPos <span class="operator">=</span> p;
+      m_angularVelocity <span class="operator">=</span> <span class="number">0.0f</span>;
+  }
+
+  <span class="type">void</span> TrackBall<span class="operator">::</span>move(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span><span class="operator">&amp;</span> p<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span> <span class="operator">&amp;</span>transformation)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_pressed)
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qtime.html">QTime</a></span> currentTime <span class="operator">=</span> <span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime();
+      <span class="type">int</span> msecs <span class="operator">=</span> m_lastTime<span class="operator">.</span>msecsTo(currentTime);
+      <span class="keyword">if</span> (msecs <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">20</span>)
+          <span class="keyword">return</span>;
+
+      <span class="keyword">switch</span> (m_mode) {
+      <span class="keyword">case</span> Plane:
+          {
+              <span class="type"><a href="../qtcore/qlinef.html">QLineF</a></span> delta(m_lastPos<span class="operator">,</span> p);
+              m_angularVelocity <span class="operator">=</span> <span class="number">180</span><span class="operator">*</span>delta<span class="operator">.</span>length() <span class="operator">/</span> (PI<span class="operator">*</span>msecs);
+              m_axis <span class="operator">=</span> QVector3D(<span class="operator">-</span>delta<span class="operator">.</span>dy()<span class="operator">,</span> delta<span class="operator">.</span>dx()<span class="operator">,</span> <span class="number">0.0f</span>)<span class="operator">.</span>normalized();
+              m_axis <span class="operator">=</span> transformation<span class="operator">.</span>rotatedVector(m_axis);
+              m_rotation <span class="operator">=</span> <span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span><span class="operator">::</span>fromAxisAndAngle(m_axis<span class="operator">,</span> <span class="number">180</span> <span class="operator">/</span> PI <span class="operator">*</span> delta<span class="operator">.</span>length()) <span class="operator">*</span> m_rotation;
+          }
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> Sphere:
+          {
+              QVector3D lastPos3D <span class="operator">=</span> QVector3D(m_lastPos<span class="operator">.</span>x()<span class="operator">,</span> m_lastPos<span class="operator">.</span>y()<span class="operator">,</span> <span class="number">0.0f</span>);
+              <span class="type">float</span> sqrZ <span class="operator">=</span> <span class="number">1</span> <span class="operator">-</span> QVector3D<span class="operator">::</span>dotProduct(lastPos3D<span class="operator">,</span> lastPos3D);
+              <span class="keyword">if</span> (sqrZ <span class="operator">&gt;</span> <span class="number">0</span>)
+                  lastPos3D<span class="operator">.</span>setZ(std<span class="operator">::</span>sqrt(sqrZ));
+              <span class="keyword">else</span>
+                  lastPos3D<span class="operator">.</span>normalize();
+
+              QVector3D currentPos3D <span class="operator">=</span> QVector3D(p<span class="operator">.</span>x()<span class="operator">,</span> p<span class="operator">.</span>y()<span class="operator">,</span> <span class="number">0.0f</span>);
+              sqrZ <span class="operator">=</span> <span class="number">1</span> <span class="operator">-</span> QVector3D<span class="operator">::</span>dotProduct(currentPos3D<span class="operator">,</span> currentPos3D);
+              <span class="keyword">if</span> (sqrZ <span class="operator">&gt;</span> <span class="number">0</span>)
+                  currentPos3D<span class="operator">.</span>setZ(std<span class="operator">::</span>sqrt(sqrZ));
+              <span class="keyword">else</span>
+                  currentPos3D<span class="operator">.</span>normalize();
+
+              m_axis <span class="operator">=</span> QVector3D<span class="operator">::</span>crossProduct(lastPos3D<span class="operator">,</span> currentPos3D);
+              <span class="type">float</span> angle <span class="operator">=</span> <span class="number">180</span> <span class="operator">/</span> PI <span class="operator">*</span> std<span class="operator">::</span>asin(std<span class="operator">::</span>sqrt(QVector3D<span class="operator">::</span>dotProduct(m_axis<span class="operator">,</span> m_axis)));
+
+              m_angularVelocity <span class="operator">=</span> angle <span class="operator">/</span> msecs;
+              m_axis<span class="operator">.</span>normalize();
+              m_axis <span class="operator">=</span> transformation<span class="operator">.</span>rotatedVector(m_axis);
+              m_rotation <span class="operator">=</span> <span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span><span class="operator">::</span>fromAxisAndAngle(m_axis<span class="operator">,</span> angle) <span class="operator">*</span> m_rotation;
+          }
+          <span class="keyword">break</span>;
+      }
+
+      m_lastPos <span class="operator">=</span> p;
+      m_lastTime <span class="operator">=</span> currentTime;
+  }
+
+  <span class="type">void</span> TrackBall<span class="operator">::</span>release(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span><span class="operator">&amp;</span> p<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span> <span class="operator">&amp;</span>transformation)
+  {
+      <span class="comment">// Calling move() caused the rotation to stop if the framerate was too low.</span>
+      move(p<span class="operator">,</span> transformation);
+      m_pressed <span class="operator">=</span> <span class="keyword">false</span>;
+  }
+
+  <span class="type">void</span> TrackBall<span class="operator">::</span>start()
+  {
+      m_lastTime <span class="operator">=</span> <span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime();
+      m_paused <span class="operator">=</span> <span class="keyword">false</span>;
+  }
+
+  <span class="type">void</span> TrackBall<span class="operator">::</span>stop()
+  {
+      m_rotation <span class="operator">=</span> rotation();
+      m_paused <span class="operator">=</span> <span class="keyword">true</span>;
+  }
+
+  <span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span> TrackBall<span class="operator">::</span>rotation() <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (m_paused <span class="operator">|</span><span class="operator">|</span> m_pressed)
+          <span class="keyword">return</span> m_rotation;
+
+      <span class="type"><a href="../qtcore/qtime.html">QTime</a></span> currentTime <span class="operator">=</span> <span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime();
+      <span class="type">float</span> angle <span class="operator">=</span> m_angularVelocity <span class="operator">*</span> m_lastTime<span class="operator">.</span>msecsTo(currentTime);
+      <span class="keyword">return</span> <span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span><span class="operator">::</span>fromAxisAndAngle(m_axis<span class="operator">,</span> angle) <span class="operator">*</span> m_rotation;
+  }
+
+</pre>
+</div>
+<!-- @@@graphicsview/boxes/trackball.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>toolbar.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-mainwindows-mainwindow-example.html">Main Window</a></td><td >toolbar.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">toolbar.cpp Example File</h1>
+<span class="subtitle">mainwindows/mainwindow/toolbar.cpp</span>
+<!-- $$$mainwindows/mainwindow/toolbar.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;toolbar.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QMainWindow&gt;</span>
+  <span class="preprocessor">#include &lt;QMenu&gt;</span>
+  <span class="preprocessor">#include &lt;QPainter&gt;</span>
+  <span class="preprocessor">#include &lt;QPainterPath&gt;</span>
+  <span class="preprocessor">#include &lt;QSpinBox&gt;</span>
+  <span class="preprocessor">#include &lt;QLabel&gt;</span>
+  <span class="preprocessor">#include &lt;QToolTip&gt;</span>
+
+  <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> genIcon(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> <span class="operator">&amp;</span>iconSize<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span><span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>color)
+  {
+      <span class="type">int</span> w <span class="operator">=</span> iconSize<span class="operator">.</span>width();
+      <span class="type">int</span> h <span class="operator">=</span> iconSize<span class="operator">.</span>height();
+
+      <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> image(w<span class="operator">,</span> h<span class="operator">,</span> <span class="type"><a href="../qtgui/qimage.html">QImage</a></span><span class="operator">::</span>Format_ARGB32_Premultiplied);
+      image<span class="operator">.</span>fill(<span class="number">0</span>);
+
+      <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> p(<span class="operator">&amp;</span>image);
+
+      <span class="keyword">extern</span> <span class="type">void</span> render_qt_text(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span><span class="operator">,</span> <span class="type">int</span><span class="operator">,</span> <span class="type">int</span><span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>);
+      render_qt_text(<span class="operator">&amp;</span>p<span class="operator">,</span> w<span class="operator">,</span> h<span class="operator">,</span> color);
+
+      <span class="keyword">return</span> <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span><span class="operator">::</span>fromImage(image<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DiffuseDither <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DiffuseAlphaDither);
+  }
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> genIcon(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> <span class="operator">&amp;</span>iconSize<span class="operator">,</span> <span class="type">int</span> number<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>color)
+  { <span class="keyword">return</span> genIcon(iconSize<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(number)<span class="operator">,</span> color); }
+
+  ToolBar<span class="operator">::</span>ToolBar(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>title<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qtoolbar.html">QToolBar</a></span>(parent)
+      <span class="operator">,</span> spinbox(Q_NULLPTR)
+      <span class="operator">,</span> spinboxAction(Q_NULLPTR)
+  {
+      setWindowTitle(title);
+      setObjectName(title);
+
+      setIconSize(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">32</span><span class="operator">,</span> <span class="number">32</span>));
+
+      menu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmenu.html">QMenu</a></span>(<span class="string">&quot;One&quot;</span><span class="operator">,</span> <span class="keyword">this</span>);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>setIcon(genIcon(iconSize()<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black));
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(genIcon(iconSize()<span class="operator">,</span> <span class="string">&quot;A&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>blue)<span class="operator">,</span> <span class="string">&quot;A&quot;</span>);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(genIcon(iconSize()<span class="operator">,</span> <span class="string">&quot;B&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>blue)<span class="operator">,</span> <span class="string">&quot;B&quot;</span>);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(genIcon(iconSize()<span class="operator">,</span> <span class="string">&quot;C&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>blue)<span class="operator">,</span> <span class="string">&quot;C&quot;</span>);
+      addAction(menu<span class="operator">-</span><span class="operator">&gt;</span>menuAction());
+
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>two <span class="operator">=</span> addAction(genIcon(iconSize()<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white)<span class="operator">,</span> <span class="string">&quot;Two&quot;</span>);
+      <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> boldFont;
+      boldFont<span class="operator">.</span>setBold(<span class="keyword">true</span>);
+      two<span class="operator">-</span><span class="operator">&gt;</span>setFont(boldFont);
+
+      addAction(genIcon(iconSize()<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>red)<span class="operator">,</span> <span class="string">&quot;Three&quot;</span>);
+      addAction(genIcon(iconSize()<span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>green)<span class="operator">,</span> <span class="string">&quot;Four&quot;</span>);
+      addAction(genIcon(iconSize()<span class="operator">,</span> <span class="number">5</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>blue)<span class="operator">,</span> <span class="string">&quot;Five&quot;</span>);
+      addAction(genIcon(iconSize()<span class="operator">,</span> <span class="number">6</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>yellow)<span class="operator">,</span> <span class="string">&quot;Six&quot;</span>);
+      orderAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(<span class="keyword">this</span>);
+      orderAction<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Order Items in Tool Bar&quot;</span>));
+      connect(orderAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ToolBar<span class="operator">::</span>order);
+
+      randomizeAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(<span class="keyword">this</span>);
+      randomizeAction<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Randomize Items in Tool Bar&quot;</span>));
+      connect(randomizeAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ToolBar<span class="operator">::</span>randomize);
+
+      addSpinBoxAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(<span class="keyword">this</span>);
+      addSpinBoxAction<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Add Spin Box&quot;</span>));
+      connect(addSpinBoxAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ToolBar<span class="operator">::</span>addSpinBox);
+
+      removeSpinBoxAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(<span class="keyword">this</span>);
+      removeSpinBoxAction<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Remove Spin Box&quot;</span>));
+      removeSpinBoxAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      connect(removeSpinBoxAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ToolBar<span class="operator">::</span>removeSpinBox);
+
+      movableAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Movable&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      movableAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(movableAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ToolBar<span class="operator">::</span>changeMovable);
+
+      allowedAreasActions <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qactiongroup.html">QActionGroup</a></span>(<span class="keyword">this</span>);
+      allowedAreasActions<span class="operator">-</span><span class="operator">&gt;</span>setExclusive(<span class="keyword">false</span>);
+
+      allowLeftAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Allow on Left&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      allowLeftAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(allowLeftAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ToolBar<span class="operator">::</span>allowLeft);
+
+      allowRightAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Allow on Right&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      allowRightAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(allowRightAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ToolBar<span class="operator">::</span>allowRight);
+
+      allowTopAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Allow on Top&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      allowTopAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(allowTopAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ToolBar<span class="operator">::</span>allowTop);
+
+      allowBottomAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Allow on Bottom&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      allowBottomAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(allowBottomAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ToolBar<span class="operator">::</span>allowBottom);
+
+      allowedAreasActions<span class="operator">-</span><span class="operator">&gt;</span>addAction(allowLeftAction);
+      allowedAreasActions<span class="operator">-</span><span class="operator">&gt;</span>addAction(allowRightAction);
+      allowedAreasActions<span class="operator">-</span><span class="operator">&gt;</span>addAction(allowTopAction);
+      allowedAreasActions<span class="operator">-</span><span class="operator">&gt;</span>addAction(allowBottomAction);
+
+      areaActions <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qactiongroup.html">QActionGroup</a></span>(<span class="keyword">this</span>);
+      areaActions<span class="operator">-</span><span class="operator">&gt;</span>setExclusive(<span class="keyword">true</span>);
+
+      leftAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Place on Left&quot;</span>) <span class="operator">,</span> <span class="keyword">this</span>);
+      leftAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(leftAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ToolBar<span class="operator">::</span>placeLeft);
+
+      rightAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Place on Right&quot;</span>) <span class="operator">,</span> <span class="keyword">this</span>);
+      rightAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(rightAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ToolBar<span class="operator">::</span>placeRight);
+
+      topAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Place on Top&quot;</span>) <span class="operator">,</span> <span class="keyword">this</span>);
+      topAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(topAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ToolBar<span class="operator">::</span>placeTop);
+
+      bottomAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Place on Bottom&quot;</span>) <span class="operator">,</span> <span class="keyword">this</span>);
+      bottomAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(bottomAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ToolBar<span class="operator">::</span>placeBottom);
+
+      areaActions<span class="operator">-</span><span class="operator">&gt;</span>addAction(leftAction);
+      areaActions<span class="operator">-</span><span class="operator">&gt;</span>addAction(rightAction);
+      areaActions<span class="operator">-</span><span class="operator">&gt;</span>addAction(topAction);
+      areaActions<span class="operator">-</span><span class="operator">&gt;</span>addAction(bottomAction);
+
+      connect(movableAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> areaActions<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qactiongroup.html">QActionGroup</a></span><span class="operator">::</span>setEnabled);
+
+      connect(movableAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> allowedAreasActions<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qactiongroup.html">QActionGroup</a></span><span class="operator">::</span>setEnabled);
+
+      menu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmenu.html">QMenu</a></span>(title<span class="operator">,</span> <span class="keyword">this</span>);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(toggleViewAction());
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(orderAction);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(randomizeAction);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(addSpinBoxAction);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(removeSpinBoxAction);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(movableAction);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addActions(allowedAreasActions<span class="operator">-</span><span class="operator">&gt;</span>actions());
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addActions(areaActions<span class="operator">-</span><span class="operator">&gt;</span>actions());
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Insert break&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ToolBar<span class="operator">::</span>insertToolBarBreak);
+
+      connect(menu<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qmenu.html">QMenu</a></span><span class="operator">::</span>aboutToShow<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ToolBar<span class="operator">::</span>updateMenu);
+
+      randomize();
+  }
+
+  <span class="type">void</span> ToolBar<span class="operator">::</span>updateMenu()
+  {
+      <span class="type"><a href="qmainwindow.html">QMainWindow</a></span> <span class="operator">*</span>mainWindow <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qmainwindow.html">QMainWindow</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(parentWidget());
+      Q_ASSERT(mainWindow <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ToolBarArea area <span class="operator">=</span> mainWindow<span class="operator">-</span><span class="operator">&gt;</span>toolBarArea(<span class="keyword">this</span>);
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ToolBarAreas areas <span class="operator">=</span> allowedAreas();
+
+      movableAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(isMovable());
+
+      allowLeftAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(isAreaAllowed(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftToolBarArea));
+      allowRightAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(isAreaAllowed(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightToolBarArea));
+      allowTopAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(isAreaAllowed(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopToolBarArea));
+      allowBottomAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(isAreaAllowed(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BottomToolBarArea));
+
+      <span class="keyword">if</span> (allowedAreasActions<span class="operator">-</span><span class="operator">&gt;</span>isEnabled()) {
+          allowLeftAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(area <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftToolBarArea);
+          allowRightAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(area <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightToolBarArea);
+          allowTopAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(area <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopToolBarArea);
+          allowBottomAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(area <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BottomToolBarArea);
+      }
+
+      leftAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(area <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftToolBarArea);
+      rightAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(area <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightToolBarArea);
+      topAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(area <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopToolBarArea);
+      bottomAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(area <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BottomToolBarArea);
+
+      <span class="keyword">if</span> (areaActions<span class="operator">-</span><span class="operator">&gt;</span>isEnabled()) {
+          leftAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(areas <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftToolBarArea);
+          rightAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(areas <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightToolBarArea);
+          topAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(areas <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopToolBarArea);
+          bottomAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(areas <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BottomToolBarArea);
+      }
+  }
+
+  <span class="type">void</span> ToolBar<span class="operator">::</span>order()
+  {
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span><span class="operator">&gt;</span> ordered;
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span><span class="operator">&gt;</span> actions1 <span class="operator">=</span> actions();
+      foreach (<span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action<span class="operator">,</span> findChildren<span class="operator">&lt;</span><span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span><span class="operator">&gt;</span>()) {
+          <span class="keyword">if</span> (<span class="operator">!</span>actions1<span class="operator">.</span>contains(action))
+              <span class="keyword">continue</span>;
+          actions1<span class="operator">.</span>removeAll(action);
+          ordered<span class="operator">.</span>append(action);
+      }
+
+      clear();
+      addActions(ordered);
+
+      orderAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+  }
+
+  <span class="type">void</span> ToolBar<span class="operator">::</span>randomize()
+  {
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span><span class="operator">&gt;</span> randomized;
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span><span class="operator">&gt;</span> actions <span class="operator">=</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>actions();
+      <span class="keyword">while</span> (<span class="operator">!</span>actions<span class="operator">.</span>isEmpty()) {
+          <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action <span class="operator">=</span> actions<span class="operator">.</span>takeAt(rand() <span class="operator">%</span> actions<span class="operator">.</span>size());
+          randomized<span class="operator">.</span>append(action);
+      }
+      clear();
+      addActions(randomized);
+
+      orderAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+  }
+
+  <span class="type">void</span> ToolBar<span class="operator">::</span>addSpinBox()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>spinbox)
+          spinbox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qspinbox.html">QSpinBox</a></span>(<span class="keyword">this</span>);
+      <span class="keyword">if</span> (<span class="operator">!</span>spinboxAction)
+          spinboxAction <span class="operator">=</span> addWidget(spinbox);
+      <span class="keyword">else</span>
+          addAction(spinboxAction);
+
+      addSpinBoxAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      removeSpinBoxAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+  }
+
+  <span class="type">void</span> ToolBar<span class="operator">::</span>removeSpinBox()
+  {
+      <span class="keyword">if</span> (spinboxAction)
+          removeAction(spinboxAction);
+
+      addSpinBoxAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+      removeSpinBoxAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+  }
+
+  <span class="type">void</span> ToolBar<span class="operator">::</span>allow(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ToolBarArea area<span class="operator">,</span> bool a)
+  {
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ToolBarAreas areas <span class="operator">=</span> allowedAreas();
+      areas <span class="operator">=</span> a <span class="operator">?</span> areas <span class="operator">|</span> area : areas <span class="operator">&amp;</span> <span class="operator">~</span>area;
+      setAllowedAreas(areas);
+
+      <span class="keyword">if</span> (areaActions<span class="operator">-</span><span class="operator">&gt;</span>isEnabled()) {
+          leftAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(areas <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftToolBarArea);
+          rightAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(areas <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightToolBarArea);
+          topAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(areas <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopToolBarArea);
+          bottomAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(areas <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BottomToolBarArea);
+      }
+  }
+
+  <span class="type">void</span> ToolBar<span class="operator">::</span>place(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ToolBarArea area<span class="operator">,</span> bool p)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>p)
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="qmainwindow.html">QMainWindow</a></span> <span class="operator">*</span>mainWindow <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qmainwindow.html">QMainWindow</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(parentWidget());
+      Q_ASSERT(mainWindow <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>);
+
+      mainWindow<span class="operator">-</span><span class="operator">&gt;</span>addToolBar(area<span class="operator">,</span> <span class="keyword">this</span>);
+
+      <span class="keyword">if</span> (allowedAreasActions<span class="operator">-</span><span class="operator">&gt;</span>isEnabled()) {
+          allowLeftAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(area <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftToolBarArea);
+          allowRightAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(area <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightToolBarArea);
+          allowTopAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(area <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopToolBarArea);
+          allowBottomAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(area <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BottomToolBarArea);
+      }
+  }
+
+  <span class="type">void</span> ToolBar<span class="operator">::</span>changeMovable(bool movable)
+  { setMovable(movable); }
+
+  <span class="type">void</span> ToolBar<span class="operator">::</span>allowLeft(bool a)
+  { allow(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftToolBarArea<span class="operator">,</span> a); }
+
+  <span class="type">void</span> ToolBar<span class="operator">::</span>allowRight(bool a)
+  { allow(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightToolBarArea<span class="operator">,</span> a); }
+
+  <span class="type">void</span> ToolBar<span class="operator">::</span>allowTop(bool a)
+  { allow(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopToolBarArea<span class="operator">,</span> a); }
+
+  <span class="type">void</span> ToolBar<span class="operator">::</span>allowBottom(bool a)
+  { allow(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BottomToolBarArea<span class="operator">,</span> a); }
+
+  <span class="type">void</span> ToolBar<span class="operator">::</span>placeLeft(bool p)
+  { place(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftToolBarArea<span class="operator">,</span> p); }
+
+  <span class="type">void</span> ToolBar<span class="operator">::</span>placeRight(bool p)
+  { place(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightToolBarArea<span class="operator">,</span> p); }
+
+  <span class="type">void</span> ToolBar<span class="operator">::</span>placeTop(bool p)
+  { place(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopToolBarArea<span class="operator">,</span> p); }
+
+  <span class="type">void</span> ToolBar<span class="operator">::</span>placeBottom(bool p)
+  { place(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BottomToolBarArea<span class="operator">,</span> p); }
+
+  <span class="type">void</span> ToolBar<span class="operator">::</span>insertToolBarBreak()
+  {
+      <span class="type"><a href="qmainwindow.html">QMainWindow</a></span> <span class="operator">*</span>mainWindow <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qmainwindow.html">QMainWindow</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(parentWidget());
+      Q_ASSERT(mainWindow <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>);
+
+      mainWindow<span class="operator">-</span><span class="operator">&gt;</span>insertToolBarBreak(<span class="keyword">this</span>);
+  }
+
+</pre>
+</div>
+<!-- @@@mainwindows/mainwindow/toolbar.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mainwidget.cpp Example File | Qt Charts 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcharts-index.html">Qt Charts</a></td><td ><a href="qtcharts-piechartcustomization-example.html">Pie Chart Customization Example</a></td><td >mainwidget.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mainwidget.cpp Example File</h1>
+<span class="subtitle">piechartcustomization/mainwidget.cpp</span>
+<!-- $$$piechartcustomization/mainwidget.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Charts module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+  <span class="preprocessor">#include &quot;mainwidget.h&quot;</span>
+  <span class="preprocessor">#include &quot;customslice.h&quot;</span>
+  <span class="preprocessor">#include &quot;pentool.h&quot;</span>
+  <span class="preprocessor">#include &quot;brushtool.h&quot;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QPushButton&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QComboBox&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QCheckBox&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QLineEdit&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QGroupBox&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QDoubleSpinBox&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QFormLayout&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QFontDialog&gt;</span>
+  <span class="preprocessor">#include &lt;QtCharts/QChartView&gt;</span>
+  <span class="preprocessor">#include &lt;QtCharts/QPieSeries&gt;</span>
+
+  QT_CHARTS_USE_NAMESPACE
+
+  MainWidget<span class="operator">::</span>MainWidget(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>(parent)<span class="operator">,</span>
+        m_slice(<span class="number">0</span>)
+  {
+      <span class="comment">// create chart</span>
+      <span class="type"><a href="qchart.html">QChart</a></span> <span class="operator">*</span>chart <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qchart.html">QChart</a></span>;
+      chart<span class="operator">-</span><span class="operator">&gt;</span>setTitle(<span class="string">&quot;Piechart customization&quot;</span>);
+      chart<span class="operator">-</span><span class="operator">&gt;</span>setAnimationOptions(<span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>AllAnimations);
+
+      <span class="comment">// create series</span>
+      m_series <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpieseries.html">QPieSeries</a></span>();
+      <span class="operator">*</span>m_series <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="keyword">new</span> CustomSlice(<span class="string">&quot;Slice 1&quot;</span><span class="operator">,</span> <span class="number">10.0</span>);
+      <span class="operator">*</span>m_series <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="keyword">new</span> CustomSlice(<span class="string">&quot;Slice 2&quot;</span><span class="operator">,</span> <span class="number">20.0</span>);
+      <span class="operator">*</span>m_series <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="keyword">new</span> CustomSlice(<span class="string">&quot;Slice 3&quot;</span><span class="operator">,</span> <span class="number">30.0</span>);
+      <span class="operator">*</span>m_series <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="keyword">new</span> CustomSlice(<span class="string">&quot;Slice 4&quot;</span><span class="operator">,</span> <span class="number">40.0</span>);
+      <span class="operator">*</span>m_series <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="keyword">new</span> CustomSlice(<span class="string">&quot;Slice 5&quot;</span><span class="operator">,</span> <span class="number">50.0</span>);
+      m_series<span class="operator">-</span><span class="operator">&gt;</span>setLabelsVisible();
+      chart<span class="operator">-</span><span class="operator">&gt;</span>addSeries(m_series);
+
+      connect(m_series<span class="operator">,</span> SIGNAL(clicked(<span class="type"><a href="qpieslice.html">QPieSlice</a></span><span class="operator">*</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(handleSliceClicked(<span class="type"><a href="qpieslice.html">QPieSlice</a></span><span class="operator">*</span>)));
+
+      <span class="comment">// chart settings</span>
+      m_themeComboBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qcombobox.html">QComboBox</a></span>();
+      m_themeComboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;Light&quot;</span><span class="operator">,</span> <span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>ChartThemeLight);
+      m_themeComboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;BlueCerulean&quot;</span><span class="operator">,</span> <span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>ChartThemeBlueCerulean);
+      m_themeComboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;Dark&quot;</span><span class="operator">,</span> <span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>ChartThemeDark);
+      m_themeComboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;BrownSand&quot;</span><span class="operator">,</span> <span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>ChartThemeBrownSand);
+      m_themeComboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;BlueNcs&quot;</span><span class="operator">,</span> <span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>ChartThemeBlueNcs);
+      m_themeComboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;High Contrast&quot;</span><span class="operator">,</span> <span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>ChartThemeHighContrast);
+      m_themeComboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;Blue Icy&quot;</span><span class="operator">,</span> <span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>ChartThemeBlueIcy);
+      m_themeComboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;Qt&quot;</span><span class="operator">,</span> <span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>ChartThemeQt);
+
+      m_aaCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qcheckbox.html">QCheckBox</a></span>();
+      m_animationsCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qcheckbox.html">QCheckBox</a></span>();
+      m_animationsCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked);
+
+      m_legendCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qcheckbox.html">QCheckBox</a></span>();
+
+      <span class="type"><a href="../qtwidgets/qformlayout.html">QFormLayout</a></span> <span class="operator">*</span>chartSettingsLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qformlayout.html">QFormLayout</a></span>();
+      chartSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Theme&quot;</span><span class="operator">,</span> m_themeComboBox);
+      chartSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Antialiasing&quot;</span><span class="operator">,</span> m_aaCheckBox);
+      chartSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Animations&quot;</span><span class="operator">,</span> m_animationsCheckBox);
+      chartSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Legend&quot;</span><span class="operator">,</span> m_legendCheckBox);
+      <span class="type"><a href="../qtwidgets/qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>chartSettings <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qgroupbox.html">QGroupBox</a></span>(<span class="string">&quot;Chart&quot;</span>);
+      chartSettings<span class="operator">-</span><span class="operator">&gt;</span>setLayout(chartSettingsLayout);
+
+      connect(m_themeComboBox<span class="operator">,</span> SIGNAL(currentIndexChanged(<span class="type">int</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateChartSettings()));
+      connect(m_aaCheckBox<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateChartSettings()));
+      connect(m_animationsCheckBox<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateChartSettings()));
+      connect(m_legendCheckBox<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateChartSettings()));
+
+      <span class="comment">// series settings</span>
+      m_hPosition <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qdoublespinbox.html">QDoubleSpinBox</a></span>();
+      m_hPosition<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(<span class="number">0.0</span>);
+      m_hPosition<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(<span class="number">1.0</span>);
+      m_hPosition<span class="operator">-</span><span class="operator">&gt;</span>setSingleStep(<span class="number">0.1</span>);
+      m_hPosition<span class="operator">-</span><span class="operator">&gt;</span>setValue(m_series<span class="operator">-</span><span class="operator">&gt;</span>horizontalPosition());
+
+      m_vPosition <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qdoublespinbox.html">QDoubleSpinBox</a></span>();
+      m_vPosition<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(<span class="number">0.0</span>);
+      m_vPosition<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(<span class="number">1.0</span>);
+      m_vPosition<span class="operator">-</span><span class="operator">&gt;</span>setSingleStep(<span class="number">0.1</span>);
+      m_vPosition<span class="operator">-</span><span class="operator">&gt;</span>setValue(m_series<span class="operator">-</span><span class="operator">&gt;</span>verticalPosition());
+
+      m_sizeFactor <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qdoublespinbox.html">QDoubleSpinBox</a></span>();
+      m_sizeFactor<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(<span class="number">0.0</span>);
+      m_sizeFactor<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(<span class="number">1.0</span>);
+      m_sizeFactor<span class="operator">-</span><span class="operator">&gt;</span>setSingleStep(<span class="number">0.1</span>);
+      m_sizeFactor<span class="operator">-</span><span class="operator">&gt;</span>setValue(m_series<span class="operator">-</span><span class="operator">&gt;</span>pieSize());
+
+      m_startAngle <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qdoublespinbox.html">QDoubleSpinBox</a></span>();
+      m_startAngle<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(<span class="operator">-</span><span class="number">720</span>);
+      m_startAngle<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(<span class="number">720</span>);
+      m_startAngle<span class="operator">-</span><span class="operator">&gt;</span>setValue(m_series<span class="operator">-</span><span class="operator">&gt;</span>pieStartAngle());
+      m_startAngle<span class="operator">-</span><span class="operator">&gt;</span>setSingleStep(<span class="number">1</span>);
+
+      m_endAngle <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qdoublespinbox.html">QDoubleSpinBox</a></span>();
+      m_endAngle<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(<span class="operator">-</span><span class="number">720</span>);
+      m_endAngle<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(<span class="number">720</span>);
+      m_endAngle<span class="operator">-</span><span class="operator">&gt;</span>setValue(m_series<span class="operator">-</span><span class="operator">&gt;</span>pieEndAngle());
+      m_endAngle<span class="operator">-</span><span class="operator">&gt;</span>setSingleStep(<span class="number">1</span>);
+
+      m_holeSize <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qdoublespinbox.html">QDoubleSpinBox</a></span>();
+      m_holeSize<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(<span class="number">0.0</span>);
+      m_holeSize<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(<span class="number">1.0</span>);
+      m_holeSize<span class="operator">-</span><span class="operator">&gt;</span>setSingleStep(<span class="number">0.1</span>);
+      m_holeSize<span class="operator">-</span><span class="operator">&gt;</span>setValue(m_series<span class="operator">-</span><span class="operator">&gt;</span>holeSize());
+
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>appendSlice <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(<span class="string">&quot;Append slice&quot;</span>);
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>insertSlice <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(<span class="string">&quot;Insert slice&quot;</span>);
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>removeSlice <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(<span class="string">&quot;Remove selected slice&quot;</span>);
+
+      <span class="type"><a href="../qtwidgets/qformlayout.html">QFormLayout</a></span> <span class="operator">*</span>seriesSettingsLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qformlayout.html">QFormLayout</a></span>();
+      seriesSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Horizontal position&quot;</span><span class="operator">,</span> m_hPosition);
+      seriesSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Vertical position&quot;</span><span class="operator">,</span> m_vPosition);
+      seriesSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Size factor&quot;</span><span class="operator">,</span> m_sizeFactor);
+      seriesSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Start angle&quot;</span><span class="operator">,</span> m_startAngle);
+      seriesSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;End angle&quot;</span><span class="operator">,</span> m_endAngle);
+      seriesSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Hole size&quot;</span><span class="operator">,</span> m_holeSize);
+      seriesSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(appendSlice);
+      seriesSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(insertSlice);
+      seriesSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(removeSlice);
+      <span class="type"><a href="../qtwidgets/qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>seriesSettings <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qgroupbox.html">QGroupBox</a></span>(<span class="string">&quot;Series&quot;</span>);
+      seriesSettings<span class="operator">-</span><span class="operator">&gt;</span>setLayout(seriesSettingsLayout);
+
+      connect(m_vPosition<span class="operator">,</span> SIGNAL(valueChanged(<span class="type">double</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateSerieSettings()));
+      connect(m_hPosition<span class="operator">,</span> SIGNAL(valueChanged(<span class="type">double</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateSerieSettings()));
+      connect(m_sizeFactor<span class="operator">,</span> SIGNAL(valueChanged(<span class="type">double</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateSerieSettings()));
+      connect(m_startAngle<span class="operator">,</span> SIGNAL(valueChanged(<span class="type">double</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateSerieSettings()));
+      connect(m_endAngle<span class="operator">,</span> SIGNAL(valueChanged(<span class="type">double</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateSerieSettings()));
+      connect(m_holeSize<span class="operator">,</span> SIGNAL(valueChanged(<span class="type">double</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateSerieSettings()));
+      connect(appendSlice<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(appendSlice()));
+      connect(insertSlice<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(insertSlice()));
+      connect(removeSlice<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(removeSlice()));
+
+      <span class="comment">// slice settings</span>
+      m_sliceName <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span>(<span class="string">&quot;&lt;click a slice&gt;&quot;</span>);
+      m_sliceName<span class="operator">-</span><span class="operator">&gt;</span>setSizePolicy(<span class="type"><a href="../qtwidgets/qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>Maximum<span class="operator">,</span> <span class="type"><a href="../qtwidgets/qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>Maximum);
+      m_sliceValue <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qdoublespinbox.html">QDoubleSpinBox</a></span>();
+      m_sliceValue<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(<span class="number">1000</span>);
+      m_sliceLabelVisible <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qcheckbox.html">QCheckBox</a></span>();
+      m_sliceLabelArmFactor <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qdoublespinbox.html">QDoubleSpinBox</a></span>();
+      m_sliceLabelArmFactor<span class="operator">-</span><span class="operator">&gt;</span>setSingleStep(<span class="number">0.01</span>);
+      m_sliceExploded <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qcheckbox.html">QCheckBox</a></span>();
+      m_sliceExplodedFactor <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qdoublespinbox.html">QDoubleSpinBox</a></span>();
+      m_sliceExplodedFactor<span class="operator">-</span><span class="operator">&gt;</span>setSingleStep(<span class="number">0.01</span>);
+      m_pen <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>();
+      m_penTool <span class="operator">=</span> <span class="keyword">new</span> PenTool(<span class="string">&quot;Slice pen&quot;</span><span class="operator">,</span> <span class="keyword">this</span>);
+      m_brush <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>();
+      m_brushTool <span class="operator">=</span> <span class="keyword">new</span> BrushTool(<span class="string">&quot;Slice brush&quot;</span><span class="operator">,</span> <span class="keyword">this</span>);
+      m_font <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>();
+      m_labelBrush <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>();
+      m_labelBrushTool <span class="operator">=</span> <span class="keyword">new</span> BrushTool(<span class="string">&quot;Label brush&quot;</span><span class="operator">,</span> <span class="keyword">this</span>);
+      m_labelPosition <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qcombobox.html">QComboBox</a></span>(<span class="keyword">this</span>);
+      m_labelPosition<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;Outside&quot;</span><span class="operator">,</span> <span class="type"><a href="qpieslice.html">QPieSlice</a></span><span class="operator">::</span>LabelOutside);
+      m_labelPosition<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;Inside horizontal&quot;</span><span class="operator">,</span> <span class="type"><a href="qpieslice.html">QPieSlice</a></span><span class="operator">::</span>LabelInsideHorizontal);
+      m_labelPosition<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;Inside tangential&quot;</span><span class="operator">,</span> <span class="type"><a href="qpieslice.html">QPieSlice</a></span><span class="operator">::</span>LabelInsideTangential);
+      m_labelPosition<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;Inside normal&quot;</span><span class="operator">,</span> <span class="type"><a href="qpieslice.html">QPieSlice</a></span><span class="operator">::</span>LabelInsideNormal);
+
+      <span class="type"><a href="../qtwidgets/qformlayout.html">QFormLayout</a></span> <span class="operator">*</span>sliceSettingsLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qformlayout.html">QFormLayout</a></span>();
+      sliceSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Label&quot;</span><span class="operator">,</span> m_sliceName);
+      sliceSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Value&quot;</span><span class="operator">,</span> m_sliceValue);
+      sliceSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Pen&quot;</span><span class="operator">,</span> m_pen);
+      sliceSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Brush&quot;</span><span class="operator">,</span> m_brush);
+      sliceSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Label visible&quot;</span><span class="operator">,</span> m_sliceLabelVisible);
+      sliceSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Label font&quot;</span><span class="operator">,</span> m_font);
+      sliceSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Label brush&quot;</span><span class="operator">,</span> m_labelBrush);
+      sliceSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Label position&quot;</span><span class="operator">,</span> m_labelPosition);
+      sliceSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Label arm length&quot;</span><span class="operator">,</span> m_sliceLabelArmFactor);
+      sliceSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Exploded&quot;</span><span class="operator">,</span> m_sliceExploded);
+      sliceSettingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(<span class="string">&quot;Explode distance&quot;</span><span class="operator">,</span> m_sliceExplodedFactor);
+      <span class="type"><a href="../qtwidgets/qgroupbox.html">QGroupBox</a></span> <span class="operator">*</span>sliceSettings <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qgroupbox.html">QGroupBox</a></span>(<span class="string">&quot;Selected slice&quot;</span>);
+      sliceSettings<span class="operator">-</span><span class="operator">&gt;</span>setLayout(sliceSettingsLayout);
+
+      connect(m_sliceName<span class="operator">,</span> SIGNAL(textChanged(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateSliceSettings()));
+      connect(m_sliceValue<span class="operator">,</span> SIGNAL(valueChanged(<span class="type">double</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateSliceSettings()));
+      connect(m_pen<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> m_penTool<span class="operator">,</span> SLOT(show()));
+      connect(m_penTool<span class="operator">,</span> SIGNAL(changed())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateSliceSettings()));
+      connect(m_brush<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> m_brushTool<span class="operator">,</span> SLOT(show()));
+      connect(m_brushTool<span class="operator">,</span> SIGNAL(changed())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateSliceSettings()));
+      connect(m_font<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(showFontDialog()));
+      connect(m_labelBrush<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> m_labelBrushTool<span class="operator">,</span> SLOT(show()));
+      connect(m_labelBrushTool<span class="operator">,</span> SIGNAL(changed())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateSliceSettings()));
+      connect(m_sliceLabelVisible<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateSliceSettings()));
+      connect(m_sliceLabelVisible<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateSliceSettings()));
+      connect(m_sliceLabelArmFactor<span class="operator">,</span> SIGNAL(valueChanged(<span class="type">double</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateSliceSettings()));
+      connect(m_sliceExploded<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateSliceSettings()));
+      connect(m_sliceExplodedFactor<span class="operator">,</span> SIGNAL(valueChanged(<span class="type">double</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateSliceSettings()));
+      connect(m_labelPosition<span class="operator">,</span> SIGNAL(currentIndexChanged(<span class="type">int</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateSliceSettings()));
+
+      <span class="comment">// create chart view</span>
+      m_chartView <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qchartview.html">QChartView</a></span>(chart);
+
+      <span class="comment">// create main layout</span>
+      <span class="type"><a href="../qtwidgets/qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>settingsLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qvboxlayout.html">QVBoxLayout</a></span>();
+      settingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(chartSettings);
+      settingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(seriesSettings);
+      settingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(sliceSettings);
+      settingsLayout<span class="operator">-</span><span class="operator">&gt;</span>addStretch();
+
+      <span class="type"><a href="../qtwidgets/qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>baseLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qgridlayout.html">QGridLayout</a></span>();
+      baseLayout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(settingsLayout<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      baseLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_chartView<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+      setLayout(baseLayout);
+
+      updateSerieSettings();
+      updateChartSettings();
+  }
+
+  <span class="type">void</span> MainWidget<span class="operator">::</span>updateChartSettings()
+  {
+      <span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>ChartTheme theme <span class="operator">=</span> (<span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>ChartTheme) m_themeComboBox<span class="operator">-</span><span class="operator">&gt;</span>itemData(m_themeComboBox<span class="operator">-</span><span class="operator">&gt;</span>currentIndex())<span class="operator">.</span>toInt();
+      m_chartView<span class="operator">-</span><span class="operator">&gt;</span>chart()<span class="operator">-</span><span class="operator">&gt;</span>setTheme(theme);
+      m_chartView<span class="operator">-</span><span class="operator">&gt;</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing<span class="operator">,</span> m_aaCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked());
+
+      <span class="keyword">if</span> (m_animationsCheckBox<span class="operator">-</span><span class="operator">&gt;</span>checkState() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked)
+          m_chartView<span class="operator">-</span><span class="operator">&gt;</span>chart()<span class="operator">-</span><span class="operator">&gt;</span>setAnimationOptions(<span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>AllAnimations);
+      <span class="keyword">else</span>
+          m_chartView<span class="operator">-</span><span class="operator">&gt;</span>chart()<span class="operator">-</span><span class="operator">&gt;</span>setAnimationOptions(<span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>NoAnimation);
+
+      <span class="keyword">if</span> (m_legendCheckBox<span class="operator">-</span><span class="operator">&gt;</span>checkState() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked)
+          m_chartView<span class="operator">-</span><span class="operator">&gt;</span>chart()<span class="operator">-</span><span class="operator">&gt;</span>legend()<span class="operator">-</span><span class="operator">&gt;</span>show();
+      <span class="keyword">else</span>
+          m_chartView<span class="operator">-</span><span class="operator">&gt;</span>chart()<span class="operator">-</span><span class="operator">&gt;</span>legend()<span class="operator">-</span><span class="operator">&gt;</span>hide();
+  }
+
+  <span class="type">void</span> MainWidget<span class="operator">::</span>updateSerieSettings()
+  {
+      m_series<span class="operator">-</span><span class="operator">&gt;</span>setHorizontalPosition(m_hPosition<span class="operator">-</span><span class="operator">&gt;</span>value());
+      m_series<span class="operator">-</span><span class="operator">&gt;</span>setVerticalPosition(m_vPosition<span class="operator">-</span><span class="operator">&gt;</span>value());
+      m_series<span class="operator">-</span><span class="operator">&gt;</span>setPieSize(m_sizeFactor<span class="operator">-</span><span class="operator">&gt;</span>value());
+      m_holeSize<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(m_sizeFactor<span class="operator">-</span><span class="operator">&gt;</span>value());
+      m_series<span class="operator">-</span><span class="operator">&gt;</span>setPieStartAngle(m_startAngle<span class="operator">-</span><span class="operator">&gt;</span>value());
+      m_series<span class="operator">-</span><span class="operator">&gt;</span>setPieEndAngle(m_endAngle<span class="operator">-</span><span class="operator">&gt;</span>value());
+      m_series<span class="operator">-</span><span class="operator">&gt;</span>setHoleSize(m_holeSize<span class="operator">-</span><span class="operator">&gt;</span>value());
+  }
+
+  <span class="type">void</span> MainWidget<span class="operator">::</span>updateSliceSettings()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_slice)
+          <span class="keyword">return</span>;
+
+      m_slice<span class="operator">-</span><span class="operator">&gt;</span>setLabel(m_sliceName<span class="operator">-</span><span class="operator">&gt;</span>text());
+
+      m_slice<span class="operator">-</span><span class="operator">&gt;</span>setValue(m_sliceValue<span class="operator">-</span><span class="operator">&gt;</span>value());
+
+      m_slice<span class="operator">-</span><span class="operator">&gt;</span>setPen(m_penTool<span class="operator">-</span><span class="operator">&gt;</span>pen());
+      m_slice<span class="operator">-</span><span class="operator">&gt;</span>setBrush(m_brushTool<span class="operator">-</span><span class="operator">&gt;</span>brush());
+
+      m_slice<span class="operator">-</span><span class="operator">&gt;</span>setLabelBrush(m_labelBrushTool<span class="operator">-</span><span class="operator">&gt;</span>brush());
+      m_slice<span class="operator">-</span><span class="operator">&gt;</span>setLabelVisible(m_sliceLabelVisible<span class="operator">-</span><span class="operator">&gt;</span>isChecked());
+      m_slice<span class="operator">-</span><span class="operator">&gt;</span>setLabelArmLengthFactor(m_sliceLabelArmFactor<span class="operator">-</span><span class="operator">&gt;</span>value());
+      m_slice<span class="operator">-</span><span class="operator">&gt;</span>setLabelPosition((<span class="type"><a href="qpieslice.html">QPieSlice</a></span><span class="operator">::</span>LabelPosition)m_labelPosition<span class="operator">-</span><span class="operator">&gt;</span>currentIndex()); <span class="comment">// assumes that index is in sync with the enum</span>
+
+      m_slice<span class="operator">-</span><span class="operator">&gt;</span>setExploded(m_sliceExploded<span class="operator">-</span><span class="operator">&gt;</span>isChecked());
+      m_slice<span class="operator">-</span><span class="operator">&gt;</span>setExplodeDistanceFactor(m_sliceExplodedFactor<span class="operator">-</span><span class="operator">&gt;</span>value());
+  }
+
+  <span class="type">void</span> MainWidget<span class="operator">::</span>handleSliceClicked(<span class="type"><a href="qpieslice.html">QPieSlice</a></span> <span class="operator">*</span>slice)
+  {
+      m_slice <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>CustomSlice <span class="operator">*</span><span class="operator">&gt;</span>(slice);
+
+      <span class="comment">// name</span>
+      m_sliceName<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">true</span>);
+      m_sliceName<span class="operator">-</span><span class="operator">&gt;</span>setText(slice<span class="operator">-</span><span class="operator">&gt;</span>label());
+      m_sliceName<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">false</span>);
+
+      <span class="comment">// value</span>
+      m_sliceValue<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">true</span>);
+      m_sliceValue<span class="operator">-</span><span class="operator">&gt;</span>setValue(slice<span class="operator">-</span><span class="operator">&gt;</span>value());
+      m_sliceValue<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">false</span>);
+
+      <span class="comment">// pen</span>
+      m_pen<span class="operator">-</span><span class="operator">&gt;</span>setText(PenTool<span class="operator">::</span>name(m_slice<span class="operator">-</span><span class="operator">&gt;</span>pen()));
+      m_penTool<span class="operator">-</span><span class="operator">&gt;</span>setPen(m_slice<span class="operator">-</span><span class="operator">&gt;</span>pen());
+
+      <span class="comment">// brush</span>
+      m_brush<span class="operator">-</span><span class="operator">&gt;</span>setText(m_slice<span class="operator">-</span><span class="operator">&gt;</span>originalBrush()<span class="operator">.</span>color()<span class="operator">.</span>name());
+      m_brushTool<span class="operator">-</span><span class="operator">&gt;</span>setBrush(m_slice<span class="operator">-</span><span class="operator">&gt;</span>originalBrush());
+
+      <span class="comment">// label</span>
+      m_labelBrush<span class="operator">-</span><span class="operator">&gt;</span>setText(BrushTool<span class="operator">::</span>name(m_slice<span class="operator">-</span><span class="operator">&gt;</span>labelBrush()));
+      m_labelBrushTool<span class="operator">-</span><span class="operator">&gt;</span>setBrush(m_slice<span class="operator">-</span><span class="operator">&gt;</span>labelBrush());
+      m_font<span class="operator">-</span><span class="operator">&gt;</span>setText(slice<span class="operator">-</span><span class="operator">&gt;</span>labelFont()<span class="operator">.</span>toString());
+      m_sliceLabelVisible<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">true</span>);
+      m_sliceLabelVisible<span class="operator">-</span><span class="operator">&gt;</span>setChecked(slice<span class="operator">-</span><span class="operator">&gt;</span>isLabelVisible());
+      m_sliceLabelVisible<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">false</span>);
+      m_sliceLabelArmFactor<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">true</span>);
+      m_sliceLabelArmFactor<span class="operator">-</span><span class="operator">&gt;</span>setValue(slice<span class="operator">-</span><span class="operator">&gt;</span>labelArmLengthFactor());
+      m_sliceLabelArmFactor<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">false</span>);
+      m_labelPosition<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">true</span>);
+      m_labelPosition<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(slice<span class="operator">-</span><span class="operator">&gt;</span>labelPosition()); <span class="comment">// assumes that index is in sync with the enum</span>
+      m_labelPosition<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">false</span>);
+
+      <span class="comment">// exploded</span>
+      m_sliceExploded<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">true</span>);
+      m_sliceExploded<span class="operator">-</span><span class="operator">&gt;</span>setChecked(slice<span class="operator">-</span><span class="operator">&gt;</span>isExploded());
+      m_sliceExploded<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">false</span>);
+      m_sliceExplodedFactor<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">true</span>);
+      m_sliceExplodedFactor<span class="operator">-</span><span class="operator">&gt;</span>setValue(slice<span class="operator">-</span><span class="operator">&gt;</span>explodeDistanceFactor());
+      m_sliceExplodedFactor<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">false</span>);
+  }
+
+  <span class="type">void</span> MainWidget<span class="operator">::</span>showFontDialog()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_slice)
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtwidgets/qfontdialog.html">QFontDialog</a></span> dialog(m_slice<span class="operator">-</span><span class="operator">&gt;</span>labelFont());
+      dialog<span class="operator">.</span>show();
+      dialog<span class="operator">.</span>exec();
+
+      m_slice<span class="operator">-</span><span class="operator">&gt;</span>setLabelFont(dialog<span class="operator">.</span>currentFont());
+      m_font<span class="operator">-</span><span class="operator">&gt;</span>setText(dialog<span class="operator">.</span>currentFont()<span class="operator">.</span>toString());
+  }
+
+  <span class="type">void</span> MainWidget<span class="operator">::</span>appendSlice()
+  {
+      <span class="operator">*</span>m_series <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="keyword">new</span> CustomSlice(<span class="string">&quot;Slice &quot;</span> <span class="operator">+</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(m_series<span class="operator">-</span><span class="operator">&gt;</span>count() <span class="operator">+</span> <span class="number">1</span>)<span class="operator">,</span> <span class="number">10.0</span>);
+  }
+
+  <span class="type">void</span> MainWidget<span class="operator">::</span>insertSlice()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_slice)
+          <span class="keyword">return</span>;
+
+      <span class="type">int</span> i <span class="operator">=</span> m_series<span class="operator">-</span><span class="operator">&gt;</span>slices()<span class="operator">.</span>indexOf(m_slice);
+
+      m_series<span class="operator">-</span><span class="operator">&gt;</span>insert(i<span class="operator">,</span> <span class="keyword">new</span> CustomSlice(<span class="string">&quot;Slice &quot;</span> <span class="operator">+</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(m_series<span class="operator">-</span><span class="operator">&gt;</span>count() <span class="operator">+</span> <span class="number">1</span>)<span class="operator">,</span> <span class="number">10.0</span>));
+  }
+
+  <span class="type">void</span> MainWidget<span class="operator">::</span>removeSlice()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_slice)
+          <span class="keyword">return</span>;
+
+      m_sliceName<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="string">&quot;&lt;click a slice&gt;&quot;</span>);
+
+      m_series<span class="operator">-</span><span class="operator">&gt;</span>remove(m_slice);
+      m_slice <span class="operator">=</span> <span class="number">0</span>;
+  }
+
+  <span class="preprocessor">#include &quot;moc_mainwidget.cpp&quot;</span>
+
+</pre>
+</div>
+<!-- @@@piechartcustomization/mainwidget.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

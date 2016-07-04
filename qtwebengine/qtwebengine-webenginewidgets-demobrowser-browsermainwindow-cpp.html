@@ -1,0 +1,1074 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>browsermainwindow.cpp Example File | Qt WebEngine 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwebengine-index.html">Qt WebEngine</a></td><td ><a href="qtwebengine-webenginewidgets-demobrowser-example.html">WebEngine Demo Browser Example</a></td><td >browsermainwindow.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">browsermainwindow.cpp Example File</h1>
+<span class="subtitle">webenginewidgets/demobrowser/browsermainwindow.cpp</span>
+<!-- $$$webenginewidgets/demobrowser/browsermainwindow.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;browsermainwindow.h&quot;</span>
+
+  <span class="preprocessor">#include &quot;autosaver.h&quot;</span>
+  <span class="preprocessor">#include &quot;bookmarks.h&quot;</span>
+  <span class="preprocessor">#include &quot;browserapplication.h&quot;</span>
+  <span class="preprocessor">#include &quot;chasewidget.h&quot;</span>
+  <span class="preprocessor">#include &quot;downloadmanager.h&quot;</span>
+  <span class="preprocessor">#include &quot;history.h&quot;</span>
+  <span class="preprocessor">#include &quot;printtopdfdialog.h&quot;</span>
+  <span class="preprocessor">#include &quot;settings.h&quot;</span>
+  <span class="preprocessor">#include &quot;tabwidget.h&quot;</span>
+  <span class="preprocessor">#include &quot;toolbarsearch.h&quot;</span>
+  <span class="preprocessor">#include &quot;ui_passworddialog.h&quot;</span>
+  <span class="preprocessor">#include &quot;webview.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtCore/QSettings&gt;</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets/QDesktopWidget&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QFileDialog&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QPlainTextEdit&gt;</span>
+  <span class="preprocessor">#include &lt;QtPrintSupport/QPrintDialog&gt;</span>
+  <span class="preprocessor">#include &lt;QtPrintSupport/QPrintPreviewDialog&gt;</span>
+  <span class="preprocessor">#include &lt;QtPrintSupport/QPrinter&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QMenuBar&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QMessageBox&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QStatusBar&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QToolBar&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QInputDialog&gt;</span>
+
+  <span class="preprocessor">#include &lt;QWebEngineHistory&gt;</span>
+  <span class="preprocessor">#include &lt;QWebEngineProfile&gt;</span>
+  <span class="preprocessor">#include &lt;QWebEngineSettings&gt;</span>
+
+  <span class="preprocessor">#include &lt;QtCore/QDebug&gt;</span>
+
+  <span class="keyword">template</span><span class="operator">&lt;</span><span class="keyword">typename</span> Arg<span class="operator">,</span> <span class="keyword">typename</span> R<span class="operator">,</span> <span class="keyword">typename</span> C<span class="operator">&gt;</span>
+  <span class="keyword">struct</span> InvokeWrapper {
+      R <span class="operator">*</span>receiver;
+      <span class="type">void</span> (C<span class="operator">::</span><span class="operator">*</span>memberFun)(Arg);
+      <span class="type">void</span> <span class="keyword">operator</span>()(Arg result) {
+          (receiver<span class="operator">-</span><span class="operator">&gt;</span><span class="operator">*</span>memberFun)(result);
+      }
+  };
+
+  <span class="keyword">template</span><span class="operator">&lt;</span><span class="keyword">typename</span> Arg<span class="operator">,</span> <span class="keyword">typename</span> R<span class="operator">,</span> <span class="keyword">typename</span> C<span class="operator">&gt;</span>
+  InvokeWrapper<span class="operator">&lt;</span>Arg<span class="operator">,</span> R<span class="operator">,</span> C<span class="operator">&gt;</span> invoke(R <span class="operator">*</span>receiver<span class="operator">,</span> <span class="type">void</span> (C<span class="operator">::</span><span class="operator">*</span>memberFun)(Arg))
+  {
+      InvokeWrapper<span class="operator">&lt;</span>Arg<span class="operator">,</span> R<span class="operator">,</span> C<span class="operator">&gt;</span> wrapper <span class="operator">=</span> {receiver<span class="operator">,</span> memberFun};
+      <span class="keyword">return</span> wrapper;
+  }
+
+  <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>BrowserMainWindow<span class="operator">::</span>defaultHome <span class="operator">=</span> <span class="string">&quot;http://qt.io/&quot;</span>;
+
+  BrowserMainWindow<span class="operator">::</span>BrowserMainWindow(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowFlags flags)
+      : <span class="type"><a href="../qtwidgets/qmainwindow.html">QMainWindow</a></span>(parent<span class="operator">,</span> flags)
+      <span class="operator">,</span> m_tabWidget(<span class="keyword">new</span> TabWidget(<span class="keyword">this</span>))
+      <span class="operator">,</span> m_autoSaver(<span class="keyword">new</span> AutoSaver(<span class="keyword">this</span>))
+      <span class="operator">,</span> m_historyBack(<span class="number">0</span>)
+      <span class="operator">,</span> m_historyForward(<span class="number">0</span>)
+      <span class="operator">,</span> m_stop(<span class="number">0</span>)
+      <span class="operator">,</span> m_reload(<span class="number">0</span>)
+  {
+      setToolButtonStyle(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ToolButtonFollowStyle);
+      setAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WA_DeleteOnClose<span class="operator">,</span> <span class="keyword">true</span>);
+      statusBar()<span class="operator">-</span><span class="operator">&gt;</span>setSizeGripEnabled(<span class="keyword">true</span>);
+      setupMenu();
+      setupToolBar();
+
+      <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>centralWidget <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>(<span class="keyword">this</span>);
+      BookmarksModel <span class="operator">*</span>bookmarksModel <span class="operator">=</span> BrowserApplication<span class="operator">::</span>bookmarksManager()<span class="operator">-</span><span class="operator">&gt;</span>bookmarksModel();
+      m_bookmarksToolbar <span class="operator">=</span> <span class="keyword">new</span> BookmarksToolBar(bookmarksModel<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(m_bookmarksToolbar<span class="operator">,</span> SIGNAL(openUrl(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>))<span class="operator">,</span>
+              m_tabWidget<span class="operator">,</span> SLOT(loadUrlInCurrentTab(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>)));
+      connect(m_bookmarksToolbar<span class="operator">-</span><span class="operator">&gt;</span>toggleViewAction()<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(updateBookmarksToolbarActionText(bool)));
+
+      <span class="type"><a href="../qtwidgets/qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qvboxlayout.html">QVBoxLayout</a></span>;
+      layout<span class="operator">-</span><span class="operator">&gt;</span>setSpacing(<span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>setMargin(<span class="number">0</span>);
+  <span class="preprocessor">#if defined(Q_OS_OSX)</span>
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_bookmarksToolbar);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(<span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>); <span class="comment">// &lt;- OS X tab widget style bug</span>
+  <span class="preprocessor">#else</span>
+      addToolBarBreak();
+      addToolBar(m_bookmarksToolbar);
+  <span class="preprocessor">#endif</span>
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_tabWidget);
+      centralWidget<span class="operator">-</span><span class="operator">&gt;</span>setLayout(layout);
+      setCentralWidget(centralWidget);
+
+      connect(m_tabWidget<span class="operator">,</span> SIGNAL(loadPage(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span>
+          <span class="keyword">this</span><span class="operator">,</span> SLOT(loadPage(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>)));
+      connect(m_tabWidget<span class="operator">,</span> SIGNAL(setCurrentTitle(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span>
+          <span class="keyword">this</span><span class="operator">,</span> SLOT(slotUpdateWindowTitle(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>)));
+      connect(m_tabWidget<span class="operator">,</span> SIGNAL(showStatusBarMessage(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span>
+              statusBar()<span class="operator">,</span> SLOT(showMessage(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>)));
+      connect(m_tabWidget<span class="operator">,</span> SIGNAL(linkHovered(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span>
+              statusBar()<span class="operator">,</span> SLOT(showMessage(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>)));
+      connect(m_tabWidget<span class="operator">,</span> SIGNAL(loadProgress(<span class="type">int</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(slotLoadProgress(<span class="type">int</span>)));
+      connect(m_tabWidget<span class="operator">,</span> SIGNAL(tabsChanged())<span class="operator">,</span>
+              m_autoSaver<span class="operator">,</span> SLOT(changeOccurred()));
+      connect(m_tabWidget<span class="operator">,</span> SIGNAL(geometryChangeRequested(<span class="type"><a href="../qtcore/qrect.html">QRect</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(geometryChangeRequested(<span class="type"><a href="../qtcore/qrect.html">QRect</a></span>)));
+  <span class="preprocessor">#if defined(QWEBENGINEPAGE_PRINTREQUESTED)</span>
+      connect(m_tabWidget<span class="operator">,</span> SIGNAL(printRequested(<span class="type">QWebEngineFrame</span><span class="operator">*</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(printRequested(<span class="type">QWebEngineFrame</span><span class="operator">*</span>)));
+  <span class="preprocessor">#endif</span>
+      connect(m_tabWidget<span class="operator">,</span> SIGNAL(menuBarVisibilityChangeRequested(bool))<span class="operator">,</span>
+              menuBar()<span class="operator">,</span> SLOT(setVisible(bool)));
+      connect(m_tabWidget<span class="operator">,</span> SIGNAL(statusBarVisibilityChangeRequested(bool))<span class="operator">,</span>
+              statusBar()<span class="operator">,</span> SLOT(setVisible(bool)));
+      connect(m_tabWidget<span class="operator">,</span> SIGNAL(toolBarVisibilityChangeRequested(bool))<span class="operator">,</span>
+              m_navigationBar<span class="operator">,</span> SLOT(setVisible(bool)));
+      connect(m_tabWidget<span class="operator">,</span> SIGNAL(toolBarVisibilityChangeRequested(bool))<span class="operator">,</span>
+              m_bookmarksToolbar<span class="operator">,</span> SLOT(setVisible(bool)));
+  <span class="preprocessor">#if defined(Q_OS_OSX)</span>
+      connect(m_tabWidget<span class="operator">,</span> SIGNAL(lastTabClosed())<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(close()));
+  <span class="preprocessor">#else</span>
+      connect(m_tabWidget<span class="operator">,</span> SIGNAL(lastTabClosed())<span class="operator">,</span>
+              m_tabWidget<span class="operator">,</span> SLOT(newTab()));
+  <span class="preprocessor">#endif</span>
+
+      slotUpdateWindowTitle();
+      loadDefaultState();
+      m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>newTab();
+
+      <span class="type">int</span> size <span class="operator">=</span> m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>lineEditStack()<span class="operator">-</span><span class="operator">&gt;</span>sizeHint()<span class="operator">.</span>height();
+      m_navigationBar<span class="operator">-</span><span class="operator">&gt;</span>setIconSize(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(size<span class="operator">,</span> size));
+
+  }
+
+  BrowserMainWindow<span class="operator">::</span><span class="operator">~</span>BrowserMainWindow()
+  {
+      m_autoSaver<span class="operator">-</span><span class="operator">&gt;</span>changeOccurred();
+      m_autoSaver<span class="operator">-</span><span class="operator">&gt;</span>saveIfNeccessary();
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>loadDefaultState()
+  {
+      <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> settings;
+      settings<span class="operator">.</span>beginGroup(QLatin1String(<span class="string">&quot;BrowserMainWindow&quot;</span>));
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> data <span class="operator">=</span> settings<span class="operator">.</span>value(QLatin1String(<span class="string">&quot;defaultState&quot;</span>))<span class="operator">.</span>toByteArray();
+      restoreState(data);
+      settings<span class="operator">.</span>endGroup();
+  }
+
+  <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> BrowserMainWindow<span class="operator">::</span>sizeHint() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> desktopRect <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span><span class="operator">::</span>desktop()<span class="operator">-</span><span class="operator">&gt;</span>screenGeometry();
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> size <span class="operator">=</span> desktopRect<span class="operator">.</span>size() <span class="operator">*</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>(<span class="number">0.9</span>);
+      <span class="keyword">return</span> size;
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>save()
+  {
+      BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>saveSession();
+
+      <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> settings;
+      settings<span class="operator">.</span>beginGroup(QLatin1String(<span class="string">&quot;BrowserMainWindow&quot;</span>));
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> data <span class="operator">=</span> saveState(<span class="keyword">false</span>);
+      settings<span class="operator">.</span>setValue(QLatin1String(<span class="string">&quot;defaultState&quot;</span>)<span class="operator">,</span> data);
+      settings<span class="operator">.</span>endGroup();
+  }
+
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#qint32-typedef">qint32</a></span> BrowserMainWindowMagic <span class="operator">=</span> <span class="number">0xba</span>;
+
+  <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> BrowserMainWindow<span class="operator">::</span>saveState(bool withTabs) <span class="keyword">const</span>
+  {
+      <span class="type">int</span> version <span class="operator">=</span> <span class="number">2</span>;
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> data;
+      <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> stream(<span class="operator">&amp;</span>data<span class="operator">,</span> <span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>WriteOnly);
+
+      stream <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qtglobal.html#qint32-typedef">qint32</a></span>(BrowserMainWindowMagic);
+      stream <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qtglobal.html#qint32-typedef">qint32</a></span>(version);
+
+      stream <span class="operator">&lt;</span><span class="operator">&lt;</span> size();
+      stream <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="operator">!</span>m_navigationBar<span class="operator">-</span><span class="operator">&gt;</span>isHidden();
+      stream <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="operator">!</span>m_bookmarksToolbar<span class="operator">-</span><span class="operator">&gt;</span>isHidden();
+      stream <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="operator">!</span>statusBar()<span class="operator">-</span><span class="operator">&gt;</span>isHidden();
+      <span class="keyword">if</span> (withTabs)
+          stream <span class="operator">&lt;</span><span class="operator">&lt;</span> tabWidget()<span class="operator">-</span><span class="operator">&gt;</span>saveState();
+      <span class="keyword">else</span>
+          stream <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span>();
+      <span class="keyword">return</span> data;
+  }
+
+  bool BrowserMainWindow<span class="operator">::</span>restoreState(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>state)
+  {
+      <span class="type">int</span> version <span class="operator">=</span> <span class="number">2</span>;
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> sd <span class="operator">=</span> state;
+      <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> stream(<span class="operator">&amp;</span>sd<span class="operator">,</span> <span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly);
+      <span class="keyword">if</span> (stream<span class="operator">.</span>atEnd())
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      <span class="type"><a href="../qtcore/qtglobal.html#qint32-typedef">qint32</a></span> marker;
+      <span class="type"><a href="../qtcore/qtglobal.html#qint32-typedef">qint32</a></span> v;
+      stream <span class="operator">&gt;</span><span class="operator">&gt;</span> marker;
+      stream <span class="operator">&gt;</span><span class="operator">&gt;</span> v;
+      <span class="keyword">if</span> (marker <span class="operator">!</span><span class="operator">=</span> BrowserMainWindowMagic <span class="operator">|</span><span class="operator">|</span> v <span class="operator">!</span><span class="operator">=</span> version)
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> size;
+      bool showToolbar;
+      bool showBookmarksBar;
+      bool showStatusbar;
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> tabState;
+
+      stream <span class="operator">&gt;</span><span class="operator">&gt;</span> size;
+      stream <span class="operator">&gt;</span><span class="operator">&gt;</span> showToolbar;
+      stream <span class="operator">&gt;</span><span class="operator">&gt;</span> showBookmarksBar;
+      stream <span class="operator">&gt;</span><span class="operator">&gt;</span> showStatusbar;
+      stream <span class="operator">&gt;</span><span class="operator">&gt;</span> tabState;
+
+      resize(size);
+
+      m_navigationBar<span class="operator">-</span><span class="operator">&gt;</span>setVisible(showToolbar);
+      updateToolbarActionText(showToolbar);
+
+      m_bookmarksToolbar<span class="operator">-</span><span class="operator">&gt;</span>setVisible(showBookmarksBar);
+      updateBookmarksToolbarActionText(showBookmarksBar);
+
+      statusBar()<span class="operator">-</span><span class="operator">&gt;</span>setVisible(showStatusbar);
+      updateStatusbarActionText(showStatusbar);
+
+      <span class="keyword">if</span> (<span class="operator">!</span>tabWidget()<span class="operator">-</span><span class="operator">&gt;</span>restoreState(tabState))
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>runScriptOnOpenViews(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>source)
+  {
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span><span class="number">0</span>; i <span class="operator">&lt;</span> tabWidget()<span class="operator">-</span><span class="operator">&gt;</span>count(); <span class="operator">+</span><span class="operator">+</span>i)
+          tabWidget()<span class="operator">-</span><span class="operator">&gt;</span>webView(i)<span class="operator">-</span><span class="operator">&gt;</span>page()<span class="operator">-</span><span class="operator">&gt;</span>runJavaScript(source);
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>setupMenu()
+  {
+      <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qshortcut.html">QShortcut</a></span>(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_F6)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotSwapFocus()));
+
+      <span class="comment">// File</span>
+      <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>fileMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;File&quot;</span>));
+
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;New Window&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotFileNew())<span class="operator">,</span> <span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>New);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>newTabAction());
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Open File...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotFileOpen())<span class="operator">,</span> <span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Open);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Open &amp;Location...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span>
+                  SLOT(slotSelectLineEdit())<span class="operator">,</span> <span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ControlModifier <span class="operator">+</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_L));
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>closeTabAction());
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+  <span class="preprocessor">#if defined(QWEBENGINE_SAVE_AS_FILE)</span>
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Save As...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span>
+                  SLOT(slotFileSaveAs())<span class="operator">,</span> <span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span>(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Save));
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+  <span class="preprocessor">#endif</span>
+      BookmarksManager <span class="operator">*</span>bookmarksManager <span class="operator">=</span> BrowserApplication<span class="operator">::</span>bookmarksManager();
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Import Bookmarks...&quot;</span>)<span class="operator">,</span> bookmarksManager<span class="operator">,</span> SLOT(importBookmarks()));
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Export Bookmarks...&quot;</span>)<span class="operator">,</span> bookmarksManager<span class="operator">,</span> SLOT(exportBookmarks()));
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+  <span class="preprocessor">#if defined(QWEBENGINEPAGE_PRINT)</span>
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;P&amp;rint Preview...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotFilePrintPreview()));
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Print...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotFilePrint())<span class="operator">,</span> <span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Print);
+  <span class="preprocessor">#endif</span>
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Print to PDF...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotFilePrintToPDF()));
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>action <span class="operator">=</span> fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Private &amp;Browsing...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotPrivateBrowsing()));
+      action<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      action<span class="operator">-</span><span class="operator">&gt;</span>setChecked(BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>privateBrowsing());
+      connect(BrowserApplication<span class="operator">::</span>instance()<span class="operator">,</span> SIGNAL(privateBrowsingChanged(bool))<span class="operator">,</span> action<span class="operator">,</span> SLOT(setChecked(bool)));
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+
+  <span class="preprocessor">#if defined(Q_OS_OSX)</span>
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Quit&quot;</span>)<span class="operator">,</span> BrowserApplication<span class="operator">::</span>instance()<span class="operator">,</span> SLOT(quitBrowser())<span class="operator">,</span> <span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Q));
+  <span class="preprocessor">#else</span>
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Quit&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(close())<span class="operator">,</span> <span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Q));
+  <span class="preprocessor">#endif</span>
+
+      <span class="comment">// Edit</span>
+      <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>editMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Edit&quot;</span>));
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>m_undo <span class="operator">=</span> editMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Undo&quot;</span>));
+      m_undo<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Undo);
+      m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>addWebAction(m_undo<span class="operator">,</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>Undo);
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>m_redo <span class="operator">=</span> editMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Redo&quot;</span>));
+      m_redo<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Redo);
+      m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>addWebAction(m_redo<span class="operator">,</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>Redo);
+      editMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>m_cut <span class="operator">=</span> editMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Cu&amp;t&quot;</span>));
+      m_cut<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Cut);
+      m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>addWebAction(m_cut<span class="operator">,</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>Cut);
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>m_copy <span class="operator">=</span> editMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Copy&quot;</span>));
+      m_copy<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Copy);
+      m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>addWebAction(m_copy<span class="operator">,</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>Copy);
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>m_paste <span class="operator">=</span> editMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Paste&quot;</span>));
+      m_paste<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Paste);
+      m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>addWebAction(m_paste<span class="operator">,</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>Paste);
+      editMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>m_find <span class="operator">=</span> editMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Find&quot;</span>));
+      m_find<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Find);
+      connect(m_find<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotEditFind()));
+      <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qshortcut.html">QShortcut</a></span>(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Slash)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotEditFind()));
+
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>m_findNext <span class="operator">=</span> editMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Find Next&quot;</span>));
+      m_findNext<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>FindNext);
+      connect(m_findNext<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotEditFindNext()));
+
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>m_findPrevious <span class="operator">=</span> editMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Find Previous&quot;</span>));
+      m_findPrevious<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>FindPrevious);
+      connect(m_findPrevious<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotEditFindPrevious()));
+      editMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+
+      editMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Preferences&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotPreferences())<span class="operator">,</span> tr(<span class="string">&quot;Ctrl+,&quot;</span>));
+
+      <span class="comment">// View</span>
+      <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>viewMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;View&quot;</span>));
+
+      m_viewBookmarkBar <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span>(<span class="keyword">this</span>);
+      updateBookmarksToolbarActionText(<span class="keyword">true</span>);
+      m_viewBookmarkBar<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(tr(<span class="string">&quot;Shift+Ctrl+B&quot;</span>));
+      connect(m_viewBookmarkBar<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotViewBookmarksBar()));
+      viewMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(m_viewBookmarkBar);
+
+      m_viewToolbar <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span>(<span class="keyword">this</span>);
+      updateToolbarActionText(<span class="keyword">true</span>);
+      m_viewToolbar<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(tr(<span class="string">&quot;Ctrl+|&quot;</span>));
+      connect(m_viewToolbar<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotViewToolbar()));
+      viewMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(m_viewToolbar);
+
+      m_viewStatusbar <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span>(<span class="keyword">this</span>);
+      updateStatusbarActionText(<span class="keyword">true</span>);
+      m_viewStatusbar<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(tr(<span class="string">&quot;Ctrl+/&quot;</span>));
+      connect(m_viewStatusbar<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotViewStatusbar()));
+      viewMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(m_viewStatusbar);
+
+      viewMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+
+      m_stop <span class="operator">=</span> viewMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Stop&quot;</span>));
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">&gt;</span> shortcuts;
+      shortcuts<span class="operator">.</span>append(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Period));
+      shortcuts<span class="operator">.</span>append(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Escape);
+      m_stop<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(shortcuts);
+      m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>addWebAction(m_stop<span class="operator">,</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>Stop);
+
+      m_reload <span class="operator">=</span> viewMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Reload Page&quot;</span>));
+      m_reload<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Refresh);
+      m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>addWebAction(m_reload<span class="operator">,</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>Reload);
+
+      viewMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Zoom &amp;In&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotViewZoomIn())<span class="operator">,</span> <span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Plus));
+      viewMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Zoom &amp;Out&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotViewZoomOut())<span class="operator">,</span> <span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Minus));
+      viewMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Reset &amp;Zoom&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotViewResetZoom())<span class="operator">,</span> <span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_0));
+
+      viewMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      viewMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Page S&amp;ource&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotViewPageSource())<span class="operator">,</span> tr(<span class="string">&quot;Ctrl+Alt+U&quot;</span>));
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>a <span class="operator">=</span> viewMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Full Screen&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotViewFullScreen(bool))<span class="operator">,</span>  <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_F11);
+      a<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+
+      <span class="comment">// History</span>
+      HistoryMenu <span class="operator">*</span>historyMenu <span class="operator">=</span> <span class="keyword">new</span> HistoryMenu(<span class="keyword">this</span>);
+      connect(historyMenu<span class="operator">,</span> SIGNAL(openUrl(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>))<span class="operator">,</span>
+              m_tabWidget<span class="operator">,</span> SLOT(loadUrlInCurrentTab(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>)));
+      connect(historyMenu<span class="operator">,</span> SIGNAL(hovered(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span>
+              SLOT(slotUpdateStatusbar(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>)));
+      historyMenu<span class="operator">-</span><span class="operator">&gt;</span>setTitle(tr(<span class="string">&quot;Hi&amp;story&quot;</span>));
+      menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(historyMenu);
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">*</span><span class="operator">&gt;</span> historyActions;
+
+      m_historyBack <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span>(tr(<span class="string">&quot;Back&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>addWebAction(m_historyBack<span class="operator">,</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>Back);
+      m_historyBack<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Back);
+      m_historyBack<span class="operator">-</span><span class="operator">&gt;</span>setIconVisibleInMenu(<span class="keyword">false</span>);
+      historyActions<span class="operator">.</span>append(m_historyBack);
+
+      m_historyForward <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span>(tr(<span class="string">&quot;Forward&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>addWebAction(m_historyForward<span class="operator">,</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>Forward);
+      m_historyForward<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Forward);
+      m_historyForward<span class="operator">-</span><span class="operator">&gt;</span>setIconVisibleInMenu(<span class="keyword">false</span>);
+      historyActions<span class="operator">.</span>append(m_historyForward);
+
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>m_historyHome <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span>(tr(<span class="string">&quot;Home&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(m_historyHome<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotHome()));
+      m_historyHome<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>SHIFT <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_H));
+      historyActions<span class="operator">.</span>append(m_historyHome);
+
+  <span class="preprocessor">#if defined(QWEBENGINEHISTORY_RESTORESESSION)</span>
+      m_restoreLastSession <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span>(tr(<span class="string">&quot;Restore Last Session&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(m_restoreLastSession<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> BrowserApplication<span class="operator">::</span>instance()<span class="operator">,</span> SLOT(restoreLastSession()));
+      m_restoreLastSession<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>canRestoreSession());
+      historyActions<span class="operator">.</span>append(m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>recentlyClosedTabsAction());
+      historyActions<span class="operator">.</span>append(m_restoreLastSession);
+  <span class="preprocessor">#endif</span>
+
+      historyMenu<span class="operator">-</span><span class="operator">&gt;</span>setInitialActions(historyActions);
+
+      <span class="comment">// Bookmarks</span>
+      BookmarksMenu <span class="operator">*</span>bookmarksMenu <span class="operator">=</span> <span class="keyword">new</span> BookmarksMenu(<span class="keyword">this</span>);
+      connect(bookmarksMenu<span class="operator">,</span> SIGNAL(openUrl(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>))<span class="operator">,</span>
+              m_tabWidget<span class="operator">,</span> SLOT(loadUrlInCurrentTab(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>)));
+      connect(bookmarksMenu<span class="operator">,</span> SIGNAL(hovered(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(slotUpdateStatusbar(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>)));
+      bookmarksMenu<span class="operator">-</span><span class="operator">&gt;</span>setTitle(tr(<span class="string">&quot;&amp;Bookmarks&quot;</span>));
+      menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(bookmarksMenu);
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">*</span><span class="operator">&gt;</span> bookmarksActions;
+
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>showAllBookmarksAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span>(tr(<span class="string">&quot;Show All Bookmarks&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(showAllBookmarksAction<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotShowBookmarksDialog()));
+      m_addBookmark <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span>(<span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(QLatin1String(<span class="string">&quot;:addbookmark.png&quot;</span>))<span class="operator">,</span> tr(<span class="string">&quot;Add Bookmark...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      m_addBookmark<span class="operator">-</span><span class="operator">&gt;</span>setIconVisibleInMenu(<span class="keyword">false</span>);
+
+      connect(m_addBookmark<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotAddBookmark()));
+      m_addBookmark<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_D));
+
+      bookmarksActions<span class="operator">.</span>append(showAllBookmarksAction);
+      bookmarksActions<span class="operator">.</span>append(m_addBookmark);
+      bookmarksMenu<span class="operator">-</span><span class="operator">&gt;</span>setInitialActions(bookmarksActions);
+
+      <span class="comment">// Window</span>
+      m_windowMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Window&quot;</span>));
+      connect(m_windowMenu<span class="operator">,</span> SIGNAL(aboutToShow())<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(slotAboutToShowWindowMenu()));
+      slotAboutToShowWindowMenu();
+
+      <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>toolsMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Tools&quot;</span>));
+      toolsMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Web &amp;Search&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotWebSearch())<span class="operator">,</span> <span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span>(tr(<span class="string">&quot;Ctrl+K&quot;</span><span class="operator">,</span> <span class="string">&quot;Web Search&quot;</span>)));
+  <span class="preprocessor">#if defined(QWEBENGINEINSPECTOR)</span>
+      a <span class="operator">=</span> toolsMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Enable Web &amp;Inspector&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotToggleInspector(bool)));
+      a<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+  <span class="preprocessor">#endif</span>
+
+      <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>helpMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Help&quot;</span>));
+      helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;About &amp;Qt&quot;</span>)<span class="operator">,</span> qApp<span class="operator">,</span> SLOT(aboutQt()));
+      helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;About &amp;Demo Browser&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotAboutApplication()));
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>setupToolBar()
+  {
+      m_navigationBar <span class="operator">=</span> addToolBar(tr(<span class="string">&quot;Navigation&quot;</span>));
+      connect(m_navigationBar<span class="operator">-</span><span class="operator">&gt;</span>toggleViewAction()<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(updateToolbarActionText(bool)));
+
+      m_historyBack<span class="operator">-</span><span class="operator">&gt;</span>setIcon(style()<span class="operator">-</span><span class="operator">&gt;</span>standardIcon(<span class="type"><a href="../qtwidgets/qstyle.html">QStyle</a></span><span class="operator">::</span>SP_ArrowBack<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="keyword">this</span>));
+      m_historyBackMenu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span>(<span class="keyword">this</span>);
+      m_historyBack<span class="operator">-</span><span class="operator">&gt;</span>setMenu(m_historyBackMenu);
+      connect(m_historyBackMenu<span class="operator">,</span> SIGNAL(aboutToShow())<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(slotAboutToShowBackMenu()));
+      connect(m_historyBackMenu<span class="operator">,</span> SIGNAL(triggered(<span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">*</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(slotOpenActionUrl(<span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">*</span>)));
+      m_navigationBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(m_historyBack);
+
+      m_historyForward<span class="operator">-</span><span class="operator">&gt;</span>setIcon(style()<span class="operator">-</span><span class="operator">&gt;</span>standardIcon(<span class="type"><a href="../qtwidgets/qstyle.html">QStyle</a></span><span class="operator">::</span>SP_ArrowForward<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="keyword">this</span>));
+      m_historyForwardMenu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span>(<span class="keyword">this</span>);
+      connect(m_historyForwardMenu<span class="operator">,</span> SIGNAL(aboutToShow())<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(slotAboutToShowForwardMenu()));
+      connect(m_historyForwardMenu<span class="operator">,</span> SIGNAL(triggered(<span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">*</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(slotOpenActionUrl(<span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">*</span>)));
+      m_historyForward<span class="operator">-</span><span class="operator">&gt;</span>setMenu(m_historyForwardMenu);
+      m_navigationBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(m_historyForward);
+
+      m_stopReload <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span>(<span class="keyword">this</span>);
+      m_reloadIcon <span class="operator">=</span> style()<span class="operator">-</span><span class="operator">&gt;</span>standardIcon(<span class="type"><a href="../qtwidgets/qstyle.html">QStyle</a></span><span class="operator">::</span>SP_BrowserReload);
+      m_stopReload<span class="operator">-</span><span class="operator">&gt;</span>setIcon(m_reloadIcon);
+
+      m_navigationBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(m_stopReload);
+
+      m_navigationBar<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>lineEditStack());
+
+      m_toolbarSearch <span class="operator">=</span> <span class="keyword">new</span> ToolbarSearch(m_navigationBar);
+      m_navigationBar<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_toolbarSearch);
+      connect(m_toolbarSearch<span class="operator">,</span> SIGNAL(search(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>))<span class="operator">,</span> SLOT(loadUrl(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>)));
+
+      m_chaseWidget <span class="operator">=</span> <span class="keyword">new</span> ChaseWidget(<span class="keyword">this</span>);
+      m_navigationBar<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_chaseWidget);
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotShowBookmarksDialog()
+  {
+      BookmarksDialog <span class="operator">*</span>dialog <span class="operator">=</span> <span class="keyword">new</span> BookmarksDialog(<span class="keyword">this</span>);
+      connect(dialog<span class="operator">,</span> SIGNAL(openUrl(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>))<span class="operator">,</span>
+              m_tabWidget<span class="operator">,</span> SLOT(loadUrlInCurrentTab(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>)));
+      dialog<span class="operator">-</span><span class="operator">&gt;</span>show();
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotAddBookmark()
+  {
+      WebView <span class="operator">*</span>webView <span class="operator">=</span> currentTab();
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> url <span class="operator">=</span> webView<span class="operator">-</span><span class="operator">&gt;</span>url()<span class="operator">.</span>toString();
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> title <span class="operator">=</span> webView<span class="operator">-</span><span class="operator">&gt;</span>title();
+      AddBookmarkDialog dialog(url<span class="operator">,</span> title);
+      dialog<span class="operator">.</span>exec();
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotViewToolbar()
+  {
+      <span class="keyword">if</span> (m_navigationBar<span class="operator">-</span><span class="operator">&gt;</span>isVisible()) {
+          updateToolbarActionText(<span class="keyword">false</span>);
+          m_navigationBar<span class="operator">-</span><span class="operator">&gt;</span>close();
+      } <span class="keyword">else</span> {
+          updateToolbarActionText(<span class="keyword">true</span>);
+          m_navigationBar<span class="operator">-</span><span class="operator">&gt;</span>show();
+      }
+      m_autoSaver<span class="operator">-</span><span class="operator">&gt;</span>changeOccurred();
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotViewBookmarksBar()
+  {
+      <span class="keyword">if</span> (m_bookmarksToolbar<span class="operator">-</span><span class="operator">&gt;</span>isVisible()) {
+          updateBookmarksToolbarActionText(<span class="keyword">false</span>);
+          m_bookmarksToolbar<span class="operator">-</span><span class="operator">&gt;</span>close();
+      } <span class="keyword">else</span> {
+          updateBookmarksToolbarActionText(<span class="keyword">true</span>);
+          m_bookmarksToolbar<span class="operator">-</span><span class="operator">&gt;</span>show();
+      }
+      m_autoSaver<span class="operator">-</span><span class="operator">&gt;</span>changeOccurred();
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>updateStatusbarActionText(bool visible)
+  {
+      m_viewStatusbar<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="operator">!</span>visible <span class="operator">?</span> tr(<span class="string">&quot;Show Status Bar&quot;</span>) : tr(<span class="string">&quot;Hide Status Bar&quot;</span>));
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>handleFindTextResult(bool found)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>found)
+          slotUpdateStatusbar(tr(<span class="string">&quot;\&quot;%1\&quot; not found.&quot;</span>)<span class="operator">.</span>arg(m_lastSearch));
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>updateToolbarActionText(bool visible)
+  {
+      m_viewToolbar<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="operator">!</span>visible <span class="operator">?</span> tr(<span class="string">&quot;Show Toolbar&quot;</span>) : tr(<span class="string">&quot;Hide Toolbar&quot;</span>));
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>updateBookmarksToolbarActionText(bool visible)
+  {
+      m_viewBookmarkBar<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="operator">!</span>visible <span class="operator">?</span> tr(<span class="string">&quot;Show Bookmarks bar&quot;</span>) : tr(<span class="string">&quot;Hide Bookmarks bar&quot;</span>));
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotViewStatusbar()
+  {
+      <span class="keyword">if</span> (statusBar()<span class="operator">-</span><span class="operator">&gt;</span>isVisible()) {
+          updateStatusbarActionText(<span class="keyword">false</span>);
+          statusBar()<span class="operator">-</span><span class="operator">&gt;</span>close();
+      } <span class="keyword">else</span> {
+          updateStatusbarActionText(<span class="keyword">true</span>);
+          statusBar()<span class="operator">-</span><span class="operator">&gt;</span>show();
+      }
+      m_autoSaver<span class="operator">-</span><span class="operator">&gt;</span>changeOccurred();
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>loadUrl(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>url)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>currentTab() <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>url<span class="operator">.</span>isValid())
+          <span class="keyword">return</span>;
+
+      m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>currentLineEdit()<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>fromUtf8(url<span class="operator">.</span>toEncoded()));
+      m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>loadUrlInCurrentTab(url);
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotDownloadManager()
+  {
+      BrowserApplication<span class="operator">::</span>downloadManager()<span class="operator">-</span><span class="operator">&gt;</span>show();
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotSelectLineEdit()
+  {
+      m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>currentLineEdit()<span class="operator">-</span><span class="operator">&gt;</span>selectAll();
+      m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>currentLineEdit()<span class="operator">-</span><span class="operator">&gt;</span>setFocus();
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotFileSaveAs()
+  {
+      <span class="comment">// not implemented yet.</span>
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotPreferences()
+  {
+      SettingsDialog <span class="operator">*</span>s <span class="operator">=</span> <span class="keyword">new</span> SettingsDialog(<span class="keyword">this</span>);
+      s<span class="operator">-</span><span class="operator">&gt;</span>show();
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotUpdateStatusbar(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>string)
+  {
+      statusBar()<span class="operator">-</span><span class="operator">&gt;</span>showMessage(string<span class="operator">,</span> <span class="number">2000</span>);
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotUpdateWindowTitle(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>title)
+  {
+      <span class="keyword">if</span> (title<span class="operator">.</span>isEmpty()) {
+          setWindowTitle(tr(<span class="string">&quot;Qt Demo Browser&quot;</span>));
+      } <span class="keyword">else</span> {
+  <span class="preprocessor">#if defined(Q_OS_OSX)</span>
+          setWindowTitle(title);
+  <span class="preprocessor">#else</span>
+          setWindowTitle(tr(<span class="string">&quot;%1 - Qt Demo Browser&quot;</span><span class="operator">,</span> <span class="string">&quot;Page title and Browser name&quot;</span>)<span class="operator">.</span>arg(title));
+  <span class="preprocessor">#endif</span>
+      }
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotAboutApplication()
+  {
+      <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>about(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;About&quot;</span>)<span class="operator">,</span> tr(
+          <span class="string">&quot;Version %1&quot;</span>
+          <span class="string">&quot;&lt;p&gt;This demo demonstrates the facilities &quot;</span>
+          <span class="string">&quot;of Qt WebEngine in action, providing an example &quot;</span>
+          <span class="string">&quot;browser for you to experiment with.&lt;p&gt;&quot;</span>
+          <span class="string">&quot;&lt;p&gt;Qt WebEngine is based on the Chromium open source project &quot;</span>
+          <span class="string">&quot;developed at &lt;a href=\&quot;http://www.chromium.org/\&quot;&gt;http://www.chromium.org/&lt;/a&gt;.&quot;</span>
+          )<span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>applicationVersion()));
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotFileNew()
+  {
+      BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>newMainWindow();
+      BrowserMainWindow <span class="operator">*</span>mw <span class="operator">=</span> BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>mainWindow();
+      mw<span class="operator">-</span><span class="operator">&gt;</span>slotHome();
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotFileOpen()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> file <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getOpenFileName(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Open Web Resource&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>()<span class="operator">,</span>
+              tr(<span class="string">&quot;Web Resources (*.html *.htm *.svg *.png *.gif *.svgz);;All files (*.*)&quot;</span>));
+
+      <span class="keyword">if</span> (file<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+
+      loadPage(file);
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotFilePrintPreview()
+  {
+  <span class="preprocessor">#ifndef QT_NO_PRINTPREVIEWDIALOG</span>
+      <span class="keyword">if</span> (<span class="operator">!</span>currentTab())
+          <span class="keyword">return</span>;
+      <span class="type"><a href="../qtprintsupport/qprintpreviewdialog.html">QPrintPreviewDialog</a></span> <span class="operator">*</span>dialog <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtprintsupport/qprintpreviewdialog.html">QPrintPreviewDialog</a></span>(<span class="keyword">this</span>);
+      connect(dialog<span class="operator">,</span> SIGNAL(paintRequested(<span class="type"><a href="../qtprintsupport/qprinter.html">QPrinter</a></span><span class="operator">*</span>))<span class="operator">,</span>
+              currentTab()<span class="operator">,</span> SLOT(print(<span class="type"><a href="../qtprintsupport/qprinter.html">QPrinter</a></span><span class="operator">*</span>)));
+      dialog<span class="operator">-</span><span class="operator">&gt;</span>exec();
+  <span class="preprocessor">#endif</span>
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotFilePrint()
+  {
+  <span class="preprocessor">#if defined(QWEBENGINEPAGE_PRINT)</span>
+      <span class="keyword">if</span> (<span class="operator">!</span>currentTab())
+          <span class="keyword">return</span>;
+      printRequested(currentTab()<span class="operator">-</span><span class="operator">&gt;</span>page()<span class="operator">-</span><span class="operator">&gt;</span>mainFrame());
+  <span class="preprocessor">#endif</span>
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotHandlePdfPrinted(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&amp;</span> result)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>result<span class="operator">.</span>size())
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(m_printerOutputFileName);
+
+      m_printerOutputFileName<span class="operator">.</span>clear();
+      <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>WriteOnly))
+          <span class="keyword">return</span>;
+
+      file<span class="operator">.</span>write(result<span class="operator">.</span>data()<span class="operator">,</span> result<span class="operator">.</span>size());
+      file<span class="operator">.</span>close();
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotFilePrintToPDF()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>currentTab() <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>m_printerOutputFileName<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span> info(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;printout.pdf&quot;</span>));
+      PrintToPdfDialog <span class="operator">*</span>dialog <span class="operator">=</span> <span class="keyword">new</span> PrintToPdfDialog(info<span class="operator">.</span>absoluteFilePath()<span class="operator">,</span> <span class="keyword">this</span>);
+      dialog<span class="operator">-</span><span class="operator">&gt;</span>setWindowTitle(tr(<span class="string">&quot;Print to PDF&quot;</span>));
+      <span class="keyword">if</span> (dialog<span class="operator">-</span><span class="operator">&gt;</span>exec() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted <span class="operator">|</span><span class="operator">|</span> dialog<span class="operator">-</span><span class="operator">&gt;</span>filePath()<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+
+      m_printerOutputFileName <span class="operator">=</span> dialog<span class="operator">-</span><span class="operator">&gt;</span>filePath();
+      currentTab()<span class="operator">-</span><span class="operator">&gt;</span>page()<span class="operator">-</span><span class="operator">&gt;</span>printToPdf(invoke(<span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>BrowserMainWindow<span class="operator">::</span>slotHandlePdfPrinted)<span class="operator">,</span> dialog<span class="operator">-</span><span class="operator">&gt;</span>pageLayout());
+  }
+
+  <span class="preprocessor">#if defined(QWEBENGINEPAGE_PRINT)</span>
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>printRequested(<span class="type">QWebEngineFrame</span> <span class="operator">*</span>frame)
+  {
+  <span class="preprocessor">#ifndef QT_NO_PRINTDIALOG</span>
+      <span class="type"><a href="../qtprintsupport/qprinter.html">QPrinter</a></span> printer;
+      <span class="type"><a href="../qtprintsupport/qprintdialog.html">QPrintDialog</a></span> <span class="operator">*</span>dialog <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtprintsupport/qprintdialog.html">QPrintDialog</a></span>(<span class="operator">&amp;</span>printer<span class="operator">,</span> <span class="keyword">this</span>);
+      dialog<span class="operator">-</span><span class="operator">&gt;</span>setWindowTitle(tr(<span class="string">&quot;Print Document&quot;</span>));
+      <span class="keyword">if</span> (dialog<span class="operator">-</span><span class="operator">&gt;</span>exec() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted)
+          <span class="keyword">return</span>;
+      frame<span class="operator">-</span><span class="operator">&gt;</span>print(<span class="operator">&amp;</span>printer);
+  <span class="preprocessor">#endif</span>
+  }
+  <span class="preprocessor">#endif</span>
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotPrivateBrowsing()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>privateBrowsing()) {
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> title <span class="operator">=</span> tr(<span class="string">&quot;Are you sure you want to turn on private browsing?&quot;</span>);
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> text <span class="operator">=</span> tr(<span class="string">&quot;&lt;b&gt;%1&lt;/b&gt;&lt;br&gt;&lt;br&gt;&quot;</span>
+              <span class="string">&quot;This action will reload all open tabs.&lt;br&gt;&quot;</span>
+              <span class="string">&quot;When private browsing in turned on,&quot;</span>
+              <span class="string">&quot; webpages are not added to the history,&quot;</span>
+              <span class="string">&quot; items are automatically removed from the Downloads window,&quot;</span> \
+              <span class="string">&quot; new cookies are not stored, current cookies can't be accessed,&quot;</span> \
+              <span class="string">&quot; site icons wont be stored, session wont be saved, &quot;</span> \
+              <span class="string">&quot; and searches are not added to the pop-up menu in the Google search box.&quot;</span> \
+              <span class="string">&quot;  Until you close the window, you can still click the Back and Forward buttons&quot;</span> \
+              <span class="string">&quot; to return to the webpages you have opened.&quot;</span>)<span class="operator">.</span>arg(title);
+
+          <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>StandardButton button <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>question(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>()<span class="operator">,</span> text<span class="operator">,</span>
+                                 <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Ok <span class="operator">|</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Cancel<span class="operator">,</span>
+                                 <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Ok);
+
+          <span class="keyword">if</span> (button <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Ok)
+              BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>setPrivateBrowsing(<span class="keyword">true</span>);
+      } <span class="keyword">else</span> {
+          <span class="comment">// TODO: Also ask here</span>
+          BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>setPrivateBrowsing(<span class="keyword">false</span>);
+      }
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>closeEvent(<span class="type"><a href="../qtgui/qcloseevent.html">QCloseEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>count() <span class="operator">&gt;</span> <span class="number">1</span>) {
+          <span class="type">int</span> ret <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>()<span class="operator">,</span>
+                             tr(<span class="string">&quot;Are you sure you want to close the window?&quot;</span>
+                                <span class="string">&quot;  There are %1 tabs open&quot;</span>)<span class="operator">.</span>arg(m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>count())<span class="operator">,</span>
+                             <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Yes <span class="operator">|</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>No<span class="operator">,</span>
+                             <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>No);
+          <span class="keyword">if</span> (ret <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>No) {
+              event<span class="operator">-</span><span class="operator">&gt;</span>ignore();
+              <span class="keyword">return</span>;
+          }
+      }
+      event<span class="operator">-</span><span class="operator">&gt;</span>accept();
+      deleteLater();
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotEditFind()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>currentTab())
+          <span class="keyword">return</span>;
+      bool ok;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> search <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qinputdialog.html">QInputDialog</a></span><span class="operator">::</span>getText(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Find&quot;</span>)<span class="operator">,</span>
+                                            tr(<span class="string">&quot;Text:&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span><span class="operator">::</span>Normal<span class="operator">,</span>
+                                            m_lastSearch<span class="operator">,</span> <span class="operator">&amp;</span>ok);
+      <span class="keyword">if</span> (ok <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>search<span class="operator">.</span>isEmpty()) {
+          m_lastSearch <span class="operator">=</span> search;
+          currentTab()<span class="operator">-</span><span class="operator">&gt;</span>findText(m_lastSearch<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> invoke(<span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>BrowserMainWindow<span class="operator">::</span>handleFindTextResult));
+      }
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotEditFindNext()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>currentTab() <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>m_lastSearch<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+      currentTab()<span class="operator">-</span><span class="operator">&gt;</span>findText(m_lastSearch);
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotEditFindPrevious()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>currentTab() <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>m_lastSearch<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+      currentTab()<span class="operator">-</span><span class="operator">&gt;</span>findText(m_lastSearch<span class="operator">,</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>FindBackward);
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotViewZoomIn()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>currentTab())
+          <span class="keyword">return</span>;
+      currentTab()<span class="operator">-</span><span class="operator">&gt;</span>setZoomFactor(currentTab()<span class="operator">-</span><span class="operator">&gt;</span>zoomFactor() <span class="operator">+</span> <span class="number">0.1</span>);
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotViewZoomOut()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>currentTab())
+          <span class="keyword">return</span>;
+      currentTab()<span class="operator">-</span><span class="operator">&gt;</span>setZoomFactor(currentTab()<span class="operator">-</span><span class="operator">&gt;</span>zoomFactor() <span class="operator">-</span> <span class="number">0.1</span>);
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotViewResetZoom()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>currentTab())
+          <span class="keyword">return</span>;
+      currentTab()<span class="operator">-</span><span class="operator">&gt;</span>setZoomFactor(<span class="number">1.0</span>);
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotViewFullScreen(bool makeFullScreen)
+  {
+      <span class="keyword">if</span> (makeFullScreen) {
+          showFullScreen();
+      } <span class="keyword">else</span> {
+          <span class="keyword">if</span> (isMinimized())
+              showMinimized();
+          <span class="keyword">else</span> <span class="keyword">if</span> (isMaximized())
+              showMaximized();
+          <span class="keyword">else</span> showNormal();
+      }
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotViewPageSource()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>currentTab())
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtwidgets/qplaintextedit.html">QPlainTextEdit</a></span> <span class="operator">*</span>view <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qplaintextedit.html">QPlainTextEdit</a></span>;
+      view<span class="operator">-</span><span class="operator">&gt;</span>setWindowTitle(tr(<span class="string">&quot;Page Source of %1&quot;</span>)<span class="operator">.</span>arg(currentTab()<span class="operator">-</span><span class="operator">&gt;</span>title()));
+      view<span class="operator">-</span><span class="operator">&gt;</span>setMinimumWidth(<span class="number">640</span>);
+      view<span class="operator">-</span><span class="operator">&gt;</span>setAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WA_DeleteOnClose);
+      view<span class="operator">-</span><span class="operator">&gt;</span>show();
+
+      currentTab()<span class="operator">-</span><span class="operator">&gt;</span>page()<span class="operator">-</span><span class="operator">&gt;</span>toHtml(invoke(view<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qplaintextedit.html">QPlainTextEdit</a></span><span class="operator">::</span>setPlainText));
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotHome()
+  {
+      <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> settings;
+      settings<span class="operator">.</span>beginGroup(QLatin1String(<span class="string">&quot;MainWindow&quot;</span>));
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> home <span class="operator">=</span> settings<span class="operator">.</span>value(QLatin1String(<span class="string">&quot;home&quot;</span>)<span class="operator">,</span> QLatin1String(defaultHome))<span class="operator">.</span>toString();
+      loadPage(home);
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotWebSearch()
+  {
+      m_toolbarSearch<span class="operator">-</span><span class="operator">&gt;</span>lineEdit()<span class="operator">-</span><span class="operator">&gt;</span>selectAll();
+      m_toolbarSearch<span class="operator">-</span><span class="operator">&gt;</span>lineEdit()<span class="operator">-</span><span class="operator">&gt;</span>setFocus();
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotToggleInspector(bool enable)
+  {
+  <span class="preprocessor">#if defined(QWEBENGINEINSPECTOR)</span>
+      <span class="type"><a href="qwebenginesettings.html">QWebEngineSettings</a></span><span class="operator">::</span>globalSettings()<span class="operator">-</span><span class="operator">&gt;</span>setAttribute(<span class="type"><a href="qwebenginesettings.html">QWebEngineSettings</a></span><span class="operator">::</span>DeveloperExtrasEnabled<span class="operator">,</span> enable);
+      <span class="keyword">if</span> (enable) {
+          <span class="type">int</span> result <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>question(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Web Inspector&quot;</span>)<span class="operator">,</span>
+                                             tr(<span class="string">&quot;The web inspector will only work correctly for pages that were loaded after enabling.\n&quot;</span>
+                                             <span class="string">&quot;Do you want to reload all pages?&quot;</span>)<span class="operator">,</span>
+                                             <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Yes <span class="operator">|</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>No);
+          <span class="keyword">if</span> (result <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Yes) {
+              m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>reloadAllTabs();
+          }
+      }
+  <span class="preprocessor">#else</span>
+      Q_UNUSED(enable);
+  <span class="preprocessor">#endif</span>
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotSwapFocus()
+  {
+      <span class="keyword">if</span> (currentTab()<span class="operator">-</span><span class="operator">&gt;</span>hasFocus())
+          m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>currentLineEdit()<span class="operator">-</span><span class="operator">&gt;</span>setFocus();
+      <span class="keyword">else</span>
+          currentTab()<span class="operator">-</span><span class="operator">&gt;</span>setFocus();
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>loadPage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>page)
+  {
+      <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> url <span class="operator">=</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromUserInput(page);
+      loadUrl(url);
+  }
+
+  TabWidget <span class="operator">*</span>BrowserMainWindow<span class="operator">::</span>tabWidget() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_tabWidget;
+  }
+
+  WebView <span class="operator">*</span>BrowserMainWindow<span class="operator">::</span>currentTab() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>currentWebView();
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotLoadProgress(<span class="type">int</span> progress)
+  {
+      <span class="keyword">if</span> (progress <span class="operator">&lt;</span> <span class="number">100</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> progress <span class="operator">&gt;</span> <span class="number">0</span>) {
+          m_chaseWidget<span class="operator">-</span><span class="operator">&gt;</span>setAnimated(<span class="keyword">true</span>);
+          disconnect(m_stopReload<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> m_reload<span class="operator">,</span> SLOT(trigger()));
+          <span class="keyword">if</span> (m_stopIcon<span class="operator">.</span>isNull())
+              m_stopIcon <span class="operator">=</span> style()<span class="operator">-</span><span class="operator">&gt;</span>standardIcon(<span class="type"><a href="../qtwidgets/qstyle.html">QStyle</a></span><span class="operator">::</span>SP_BrowserStop);
+          m_stopReload<span class="operator">-</span><span class="operator">&gt;</span>setIcon(m_stopIcon);
+          connect(m_stopReload<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> m_stop<span class="operator">,</span> SLOT(trigger()));
+          m_stopReload<span class="operator">-</span><span class="operator">&gt;</span>setToolTip(tr(<span class="string">&quot;Stop loading the current page&quot;</span>));
+      } <span class="keyword">else</span> {
+          m_chaseWidget<span class="operator">-</span><span class="operator">&gt;</span>setAnimated(<span class="keyword">false</span>);
+          disconnect(m_stopReload<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> m_stop<span class="operator">,</span> SLOT(trigger()));
+          m_stopReload<span class="operator">-</span><span class="operator">&gt;</span>setIcon(m_reloadIcon);
+          connect(m_stopReload<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> m_reload<span class="operator">,</span> SLOT(trigger()));
+          m_stopReload<span class="operator">-</span><span class="operator">&gt;</span>setToolTip(tr(<span class="string">&quot;Reload the current page&quot;</span>));
+      }
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotAboutToShowBackMenu()
+  {
+      m_historyBackMenu<span class="operator">-</span><span class="operator">&gt;</span>clear();
+      <span class="keyword">if</span> (<span class="operator">!</span>currentTab())
+          <span class="keyword">return</span>;
+      <span class="type"><a href="qwebenginehistory.html">QWebEngineHistory</a></span> <span class="operator">*</span>history <span class="operator">=</span> currentTab()<span class="operator">-</span><span class="operator">&gt;</span>history();
+      <span class="type">int</span> historyCount <span class="operator">=</span> history<span class="operator">-</span><span class="operator">&gt;</span>count();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> history<span class="operator">-</span><span class="operator">&gt;</span>backItems(historyCount)<span class="operator">.</span>count() <span class="operator">-</span> <span class="number">1</span>; i <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span>; <span class="operator">-</span><span class="operator">-</span>i) {
+          <span class="type"><a href="qwebenginehistoryitem.html">QWebEngineHistoryItem</a></span> item <span class="operator">=</span> history<span class="operator">-</span><span class="operator">&gt;</span>backItems(history<span class="operator">-</span><span class="operator">&gt;</span>count())<span class="operator">.</span>at(i);
+          <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>action <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span>(<span class="keyword">this</span>);
+          action<span class="operator">-</span><span class="operator">&gt;</span>setData(<span class="operator">-</span><span class="number">1</span><span class="operator">*</span>(historyCount<span class="operator">-</span>i<span class="operator">-</span><span class="number">1</span>));
+          <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> icon <span class="operator">=</span> BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>icon(item<span class="operator">.</span>url());
+          action<span class="operator">-</span><span class="operator">&gt;</span>setIcon(icon);
+          action<span class="operator">-</span><span class="operator">&gt;</span>setText(item<span class="operator">.</span>title());
+          m_historyBackMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(action);
+      }
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotAboutToShowForwardMenu()
+  {
+      m_historyForwardMenu<span class="operator">-</span><span class="operator">&gt;</span>clear();
+      <span class="keyword">if</span> (<span class="operator">!</span>currentTab())
+          <span class="keyword">return</span>;
+      <span class="type"><a href="qwebenginehistory.html">QWebEngineHistory</a></span> <span class="operator">*</span>history <span class="operator">=</span> currentTab()<span class="operator">-</span><span class="operator">&gt;</span>history();
+      <span class="type">int</span> historyCount <span class="operator">=</span> history<span class="operator">-</span><span class="operator">&gt;</span>count();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> history<span class="operator">-</span><span class="operator">&gt;</span>forwardItems(history<span class="operator">-</span><span class="operator">&gt;</span>count())<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="type"><a href="qwebenginehistoryitem.html">QWebEngineHistoryItem</a></span> item <span class="operator">=</span> history<span class="operator">-</span><span class="operator">&gt;</span>forwardItems(historyCount)<span class="operator">.</span>at(i);
+          <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>action <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span>(<span class="keyword">this</span>);
+          action<span class="operator">-</span><span class="operator">&gt;</span>setData(historyCount<span class="operator">-</span>i);
+          <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> icon <span class="operator">=</span> BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>icon(item<span class="operator">.</span>url());
+          action<span class="operator">-</span><span class="operator">&gt;</span>setIcon(icon);
+          action<span class="operator">-</span><span class="operator">&gt;</span>setText(item<span class="operator">.</span>title());
+          m_historyForwardMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(action);
+      }
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotAboutToShowWindowMenu()
+  {
+      m_windowMenu<span class="operator">-</span><span class="operator">&gt;</span>clear();
+      m_windowMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>nextTabAction());
+      m_windowMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(m_tabWidget<span class="operator">-</span><span class="operator">&gt;</span>previousTabAction());
+      m_windowMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      m_windowMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Downloads&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotDownloadManager())<span class="operator">,</span> <span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span>(tr(<span class="string">&quot;Alt+Ctrl+L&quot;</span><span class="operator">,</span> <span class="string">&quot;Download Manager&quot;</span>)));
+      m_windowMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>BrowserMainWindow<span class="operator">*</span><span class="operator">&gt;</span> windows <span class="operator">=</span> BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>mainWindows();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> windows<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>i) {
+          BrowserMainWindow <span class="operator">*</span>window <span class="operator">=</span> windows<span class="operator">.</span>at(i);
+          <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>action <span class="operator">=</span> m_windowMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(window<span class="operator">-</span><span class="operator">&gt;</span>windowTitle()<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(slotShowWindow()));
+          action<span class="operator">-</span><span class="operator">&gt;</span>setData(i);
+          action<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+          <span class="keyword">if</span> (window <span class="operator">=</span><span class="operator">=</span> <span class="keyword">this</span>)
+              action<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      }
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotShowWindow()
+  {
+      <span class="keyword">if</span> (<span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>action <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">*</span><span class="operator">&gt;</span>(sender())) {
+          <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> v <span class="operator">=</span> action<span class="operator">-</span><span class="operator">&gt;</span>data();
+          <span class="keyword">if</span> (v<span class="operator">.</span>canConvert<span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span>()) {
+              <span class="type">int</span> offset <span class="operator">=</span> qvariant_cast<span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span>(v);
+              <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>BrowserMainWindow<span class="operator">*</span><span class="operator">&gt;</span> windows <span class="operator">=</span> BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>mainWindows();
+              windows<span class="operator">.</span>at(offset)<span class="operator">-</span><span class="operator">&gt;</span>activateWindow();
+              windows<span class="operator">.</span>at(offset)<span class="operator">-</span><span class="operator">&gt;</span>currentTab()<span class="operator">-</span><span class="operator">&gt;</span>setFocus();
+          }
+      }
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>slotOpenActionUrl(<span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>action)
+  {
+      <span class="type">int</span> offset <span class="operator">=</span> action<span class="operator">-</span><span class="operator">&gt;</span>data()<span class="operator">.</span>toInt();
+      <span class="type"><a href="qwebenginehistory.html">QWebEngineHistory</a></span> <span class="operator">*</span>history <span class="operator">=</span> currentTab()<span class="operator">-</span><span class="operator">&gt;</span>history();
+      <span class="keyword">if</span> (offset <span class="operator">&lt;</span> <span class="number">0</span>)
+          history<span class="operator">-</span><span class="operator">&gt;</span>goToItem(history<span class="operator">-</span><span class="operator">&gt;</span>backItems(<span class="operator">-</span><span class="number">1</span><span class="operator">*</span>offset)<span class="operator">.</span>first()); <span class="comment">// back</span>
+      <span class="keyword">else</span> <span class="keyword">if</span> (offset <span class="operator">&gt;</span> <span class="number">0</span>)
+          history<span class="operator">-</span><span class="operator">&gt;</span>goToItem(history<span class="operator">-</span><span class="operator">&gt;</span>forwardItems(history<span class="operator">-</span><span class="operator">&gt;</span>count() <span class="operator">-</span> offset <span class="operator">+</span> <span class="number">1</span>)<span class="operator">.</span>back()); <span class="comment">// forward</span>
+  }
+
+  <span class="type">void</span> BrowserMainWindow<span class="operator">::</span>geometryChangeRequested(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> <span class="operator">&amp;</span>geometry)
+  {
+      setGeometry(geometry);
+  }
+
+</pre>
+</div>
+<!-- @@@webenginewidgets/demobrowser/browsermainwindow.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

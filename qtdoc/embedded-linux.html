@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- emb-linux.qdoc -->
+  <title>Qt for Embedded Linux | Qt 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.7</a></td><td >Qt for Embedded Linux</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#configuring-a-specific-device">Configuring a Specific Device</a></li>
+<li class="level1"><a href="#platform-plugins-for-embedded-linux-devices">Platform Plugins for Embedded Linux Devices</a></li>
+<li class="level2"><a href="#eglfs">EGLFS</a></li>
+<li class="level2"><a href="#linuxfb">LinuxFB</a></li>
+<li class="level1"><a href="#input">Input</a></li>
+<li class="level2"><a href="#using-libinput">Using libinput</a></li>
+<li class="level2"><a href="#input-on-eglfs-and-linuxfb-without-libinput">Input on eglfs and linuxfb without libinput</a></li>
+<li class="level2"><a href="#mouse">Mouse</a></li>
+<li class="level2"><a href="#keyboard">Keyboard</a></li>
+<li class="level2"><a href="#touch">Touch</a></li>
+<li class="level2"><a href="#pen-based-tablets">Pen-based tablets</a></li>
+<li class="level2"><a href="#debugging-input-devices">Debugging Input Devices</a></li>
+<li class="level2"><a href="#using-custom-mouse-cursor-images">Using Custom Mouse Cursor Images</a></li>
+<li class="level1"><a href="#display-output">Display Output</a></li>
+<li class="level2"><a href="#eglfs-with-eglfs-kms-backend">eglfs with eglfs_kms backend</a></li>
+<li class="level2"><a href="#eglfs-with-eglfs-kms-egldevice-backend">eglfs with eglfs_kms_egldevice backend</a></li>
+<li class="level2"><a href="#eglfs-with-other-backends">eglfs with other backends</a></li>
+<li class="level2"><a href="#video-memory">Video Memory</a></li>
+<li class="level2"><a href="#linuxfb">linuxfb</a></li>
+<li class="level1"><a href="#fonts">Fonts</a></li>
+<li class="level1"><a href="#platform-plugins-for-windowing-systems-on-embedded-linux-devices">Platform Plugins for Windowing Systems on Embedded Linux Devices</a></li>
+<li class="level2"><a href="#xcb">XCB</a></li>
+<li class="level2"><a href="#wayland">Wayland</a></li>
+<li class="level1"><a href="#related-topics">Related Topics</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt for Embedded Linux</h1>
+<span class="subtitle"></span>
+<!-- $$$embedded-linux.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Since the Qt 5.0 release, Qt no longer contains its own window system (QWS) implementation. For single-process use cases, the <a href="qpa.html">Qt Platform Abstraction</a> is a superior solution. Multiple graphical processes can be supported through Wayland.</p>
+<p>There are multiple platform plugins that are potentially usable on Embedded Linux systems: EGLFS, <a href="embedded-linux.html#linuxfb">LinuxFB</a>, KMS, DirectFB, Wayland. The availability of these depend on the configuration of Qt. The default platform plugin is also device-specific. For instance, on many boards <i>eglfs</i> is chosen as the default one. If the default is not suitable, the <code>QT_QPA_PLATFORM</code> environment variable parameter can be used to request another plugin. Alternatively, for quick tests, the <code>-platform</code> command-line can be used with the same syntax.</p>
+<a name="configuring-a-specific-device"></a>
+<h2 id="configuring-a-specific-device">Configuring a Specific Device</h2>
+<p>Building Qt for a given device requires a toolchain and a sysroot. Additionally, some devices require vendor-specific adaptation code for EGL and OpenGL ES 2.0 support. This is not relevant for non-accelerated platforms, for example the ones using the <a href="embedded-linux.html#linuxfb">LinuxFB</a> plugin, which is meant for software-based rendering only. This means Qt Quick 2 is not functional in such a setup as it depends on OpenGL for rendering.</p>
+<p>The directory <i>qtbase/mkspecs/devices</i> contains configuration and graphics adaptation code for a number of devices. For example, the <code>linux-rasp-pi2-g++</code> mkspec contains build settings such as the optimal compiler and linker flags for the <a href="http://www.raspberrypi.org">Raspberry Pi 2</a> device. The mkspec also contains information about either an implementation of the <i>eglfs</i> hooks (vendor-specific adaptation code), or a reference to the suitable <i>eglfs</i> device integration plugin. The device is selected through the <a href="configure-options.html">configure</a> tool's <code>-device</code> parameter. The name that follows after this argument must, at least partially, match one of the subdirectories under <i>devices</i>.</p>
+<p>The following is an example configuration for the Raspberry Pi 2. For most Embedded Linux boards, the configure command looks similar:</p>
+<pre class="cpp">
+
+  ./configure -release -opengl es2 -device linux-rasp-pi2-g++ -device-option CROSS_COMPILE=$TOOLCHAIN/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf- -sysroot $ROOTFS -prefix /usr/local/qt5
+
+</pre>
+<p>The most important parameters are <code>-device</code> and <code>-sysroot</code>. By specifying <code>-sysroot</code>, the include files and libraries used by <code>configure</code>'s feature detection tests, as well as Qt itself, is taken from the specified location, instead of the host PC's standard locations. This means that installing development packages on the host machine has no relevance. For example, to get <code>libinput</code> support it is not sufficient or necessary to have the <code>libinput</code> development headers and libraries installed on the host environment. Instead, the headers and the libraries for the target architecture (e.g&#x2e; ARM) must be present in the <code>sysroot</code>.</p>
+<p><code>pkg-config</code> is supported also when performing cross-compilation. <code>configure</code> automatically sets <code>PKG_CONFIG_LIBDIR</code> to make <code>pkg-config</code> report compiler and linker settings based on the <code>sysroot</code> instead of the host machine. This usually functions well without any further adjustments. However, environment variables such as <code>PKG_CONFIG_PATH</code> must be unset for the host machine before running <code>configure</code>. Otherwise, the Qt build may attempt to use inappropriate headers and libraries from the host system.</p>
+<p>Specifying <code>-sysroot</code> results in automatically setting the <code>--sysroot</code> argument when invoking the compiler. In some cases this is not desirable and can be disabled by passing <code>-no-gcc-sysroot</code> to <code>configure</code>.</p>
+<p><code>-prefix</code>, <code>-extprefix</code> and <code>-hostprefix</code> control the intended destination directory of the Qt build. In the above example the ARM build of Qt is expected to be placed in <code>/usr/local/qt5</code> on the target device. Note that running <code>make install</code> does not deploy anything to the device. Instead, the <code>install</code> step targets the directory specified by <code>extprefix</code> which defaults to <code>sysroot</code> + <code>prefix</code> and is therefore optional. However, in many cases &quot;polluting&quot; the sysroot is not desirable and thus specifying <code>-extprefix</code> becomes important. Finally, <code>-hostprefix</code> allows separating host tools like qmake, rcc, uic from the binaries for the target. When given, such tools will be installed under the specified directory instead of <code>extprefix</code>.</p>
+<p>See <a href="configure-options.html">Qt Configure Options</a> for more information.</p>
+<a name="platform-plugins-for-embedded-linux-devices"></a>
+<h2 id="platform-plugins-for-embedded-linux-devices">Platform Plugins for Embedded Linux Devices</h2>
+<a name="eglfs"></a>
+<h3 >EGLFS</h3>
+<p><a href="http://www.khronos.org/egl">EGL</a> is an interface between OpenGL and the native windowing system. Qt can use EGL for context and surface management, however the API contains no platform-specifics: The creation of a <i>native window</i> (which will not necessarily be an actual window on the screen) must still be done by platform-specific means. Hence the need for the board or GPU-specific adaptation code. Such adaptations are provided either as <i>eglfs hooks</i>, which can be a single source file compiled into the platform plugin, or as dynamically loaded <i>EGL device integration</i> plugins.</p>
+<p><i>EGLFS</i> is a platform plugin for running Qt5 applications on top of EGL and OpenGL ES 2.0 without an actual windowing system (like X11 or Wayland). In addition to Qt Quick 2 and native OpenGL applications, it supports software-rendered windows (for example <a href="../qtwidgets/qwidget.html">QWidget</a>) too. In the latter case the widgets' contents are rendered using the CPU into images, which are then uploaded into textures and composited by the plugin.</p>
+<p>This is the recommended plugin for modern Embedded Linux devices that include a GPU.</p>
+<p><i>EGLFS</i> forces the first top-level window (be it either a <a href="../qtwidgets/qwidget.html">QWidget</a> or a <a href="../qtquick/qquickview.html">QQuickView</a>) to become fullscreen. This window is also chosen to be the <i>root</i> widget window into which all other top-level widgets (for example dialogs, popup menus or combobox dropdowns) are composited. This is necessary because with <i>EGLFS</i> there is always exactly one native window and EGL window surface, and these belong to the widget or window that is created first. This approach works well when there is a main window that exists for the entire lifetime of the application and all other widgets are either non top-levels or are created afterwards, once the main window is shown.</p>
+<p>There are further restrictions for OpenGL-based windows. As of Qt 5.3, <code>eglfs</code> supports a single fullscreen GL window (for example, an OpenGL-based <a href="../qtgui/qwindow.html">QWindow</a>, a <a href="../qtquick/qquickview.html">QQuickView</a> or a QGLWidget). Opening additional OpenGL windows or mixing such windows with <a href="../qtwidgets/qwidget.html">QWidget</a>-based content is not supported and terminates the application with an error message.</p>
+<p>If necessary, <code>eglfs</code> can be configured using the following environment variables:</p>
+<ul>
+<li><code>QT_QPA_EGLFS_FB</code> - Overrides the framebuffer device. The default is <code>/dev/fb0</code>. On most embedded platforms this is not very relevant because the framebuffer is used only for querying settings like the display dimensions. On certain devices however, this parameter provides the ability to specify the display to be used in multiple display setups, similarly to the <code>fb</code> parameter in <a href="embedded-linux.html#linuxfb">LinuxFB</a>.</li>
+<li><code>QT_QPA_EGLFS_WIDTH</code> and <code>QT_QPA_EGLFS_HEIGHT</code> - Contain the screen width and height in pixels. While <code>eglfs</code> tries to determine the dimensions from the framebuffer device <i>/dev/fb0</i>, but this does not work always and manually specifying the sizes may become necessary.</li>
+<li><code>QT_QPA_EGLFS_PHYSICAL_WIDTH</code> and <code>QT_QPA_EGLFS_PHYSICAL_HEIGHT</code> - Physical screen width and height in millimeters. On platforms where the framebuffer device <i>/dev/fb0</i> is not available or the query is not successful, the values are calculated based on a default DPI of 100. This variable can be used to override any such defaults.</li>
+<li><code>QT_QPA_EGLFS_DEPTH</code> - Overrides the color depth for the screen. On platforms where the framebuffer device <i>/dev/fb0</i> is not available or the query is not successful, the default of <code>32</code> is used. This variable can be used to override any such defaults. Note that this affects only the color depth value reported by <a href="../qtgui/qscreen.html">QScreen</a>. It has no connection to EGL configurations and the color depth used for OpenGL rendering.</li>
+<li><code>QT_QPA_EGLFS_SWAPINTERVAL</code> - By default a swap interval of <code>1</code> will be requested. This enables synchronizing to the displays vertical refresh. The value can be overridden with this environment variable. For instance, passing 0 will disable blocking on swap, resulting in running as fast as possible without any synchronization.</li>
+<li><code>QT_QPA_EGLFS_FORCEVSYNC</code> - When set, <code>eglfs</code> requests <code>FBIO_WAITFORVSYNC</code> on the framebuffer device.</li>
+<li><code>QT_QPA_EGLFS_FORCE888</code> - When set, the red, green, and blue color channel sizes are ignored whenever creating a new context, window or offscreen surface. Instead, the plugin requests a configuration with 8 bits per channel. This can be helpful on devices where configurations with less than 32 or 24 bits per pixel are chosen by default but are known to be not suitable, for example, due to banding effects. Instead of changing all the applications, this variable provides an easier shortcut to force 24/32 bpp configurations for a given device.</li>
+<li><code>QT_QPA_EGLFS_DEBUG</code> - When set, some debugging information is printed on the debug output. For example, the input <a href="../qtgui/qsurfaceformat.html">QSurfaceFormat</a> and the properties of the chosen EGL configuration are printed while creating a new context. Together with Qt Quick's <code>QSG_INFO</code> variable, this can provide useful information for troubleshooting issues related to the EGL configuration.</li>
+<li><code>QT_QPA_EGLFS_INTEGRATION</code> - In addition to the compiled-in <i>hooks</i>, it is also possible to provide device or vendor-specific adaptation in the form of dynamically loaded plugins. This environment variable enforces a specific plugin. For example, setting it to <i>eglfs_kms</i> uses the KMS/DRM backend. This is only an option when no static or compiled-in hooks were specified in the device makespecs. In practice, the traditional compiled-in hooks are rarely used, almost all backends are now migrated to plugins. The device makespecs still contain a relevant <code>EGLFS_DEVICE_INTEGRATION</code> entry: the name of the preferred backend for that particular device. This is optional, but very useful to avoid the need to set this environment variable in case there are more than one plugins present in the target system. In a desktop environment the KMS or X11 backends are prioritized, depending on the presence of the <code>DISPLAY</code> environment variable. Note that on some boards the special value of <code>none</code> is used instead of an actual plugin. This indicates that no special integration is necessary to use EGL with the framebuffer and so no plugins must be loaded.</li>
+</ul>
+<p>In addition to <code>QT_QPA_EGLFS_DEBUG</code>, <code>eglfs</code> also supports the more modern categorized logging system of Qt. The following logging categories are available:</p>
+<ul>
+<li><code>qt.qpa.egldeviceintegration</code> – Enables logging for dynamically loaded backends. Very useful to check what backend is in use.</li>
+<li><code>qt.qpa.input</code> – Enables debug output both from the <code>evdev</code> and <code>libinput</code> input handlers. Very useful to check if a given input device was recognized and opened.</li>
+<li><code>qt.qpa.eglfs.kms</code> – Enables verbose logging in the KMS/DRM backend.</li>
+</ul>
+<a name="linuxfb"></a>
+<h3 >LinuxFB</h3>
+<p>This plugin writes directly to the framebuffer. Only software-rendered content is supported. Note that on some setups the display performance is expected to be limited.</p>
+<p>The <code>linuxfb</code> plugin allows specifying additional settings by passing them in the <code>QT_QPA_PLATFORM</code> environment variable or <code>-platform</code> command-line option. For example, <code>QT_QPA_PLATFORM=linuxfb:fb=/dev/fb1</code> specifies that the framebuffer device <code>/dev/fb1</code> must be used instead of the default <code>fb0</code>. Multiple settings can be specified by separating them with a colon.</p>
+<ul>
+<li><code>fb=/dev/fbN</code> - Specifies the framebuffer devices. On multiple display setups this typically allows running the application on different displays. For the time being there is no way to use multiple framebuffers from one Qt application.</li>
+<li><code>size=</code><i>&lt;width&gt;</i><code>x</code><i>&lt;height&gt;</i> - Specifies the screen size in pixels. The plugin tries to query the display dimensions, both physical and logical, from the framebuffer device. This may not always lead to proper results however, and therefore it may become necessary to explicitly specify the values.</li>
+<li><code>mmsize=</code><i>&lt;width&gt;</i><code>x</code><i>&lt;height&gt;</i> - Physical width and height in millimeters.</li>
+<li><code>offset=</code><i>&lt;width&gt;</i><code>x</code><i>&lt;height&gt;</i> - Offset in pixels specifying the top-left corner of the screen. The default position is at <code>(0, 0)</code>.</li>
+<li><code>nographicsmodeswitch</code> - Do not switch the virtual terminal to graphics mode (<code>KD_GRAPHICS</code>). In addition to switching to graphics mode, the blinking cursor and screen blanking are normally disabled too. When this parameter is set, these are also skipped.</li>
+<li><code>tty=/dev/ttyN</code> - Overrides the virtual console. Only used when <code>nographicsmodeswitch</code> is not set.</li>
+</ul>
+<a name="input"></a>
+<h2 id="input">Input</h2>
+<p>When no windowing system is present, the mouse, keyboard, and touch input are read directly via <code>evdev</code> or using helper libraries such as <code>libinput</code> or <code>tslib</code>. Note that this requires that device nodes <code>/dev/input/event*</code> are readable by the user. <code>eglfs</code> and <code>linuxfb</code> have all the input handling code compiled-in.</p>
+<a name="using-libinput"></a>
+<h3 >Using libinput</h3>
+<p><a href="http://www.freedesktop.org/wiki/Software/libinput">libinput</a> is a library to handle input devices. It offers an alternative to the Qt's own <code>evdev</code> input support. To enable using <code>libinput</code>, make sure the development files for <code>libudev</code> and <code>libinput</code> are available when configuring and building Qt. <code>xkbcommon</code> is also necessary if keyboard support is desired. With <code>eglfs</code> and <code>linuxfb</code> no further actions are necessary as these plugins use <code>libinput</code> by default. If <code>libinput</code> support is not available or the environment variable <code>QT_QPA_EGLFS_NO_LIBINPUT</code> is set, Qt's own evdev handlers come in to play.</p>
+<a name="input-on-eglfs-and-linuxfb-without-libinput"></a>
+<h3 >Input on eglfs and linuxfb without libinput</h3>
+<p>Parameters like the device node name can be set in the environment variables <code>QT_QPA_EVDEV_MOUSE_PARAMETERS</code>, <code>QT_QPA_EVDEV_KEYBOARD_PARAMETERS</code> and <code>QT_QPA_EVDEV_TOUCHSCREEN_PARAMETERS</code>. Additionally, the built-in input handlers can be disabled by setting <code>QT_QPA_EGLFS_DISABLE_INPUT</code> or <code>QT_QPA_FB_DISABLE_INPUT</code> to <code>1</code>. On some touch screens the coordinates must be rotated, which is done by setting <code>QT_QPA_EVDEV_TOUCHSCREEN_PARAMETERS</code> to <code>rotate=180</code>.</p>
+<a name="mouse"></a>
+<h3 >Mouse</h3>
+<p>The mouse cursor shows up whenever <code>QT_QPA_EGLFS_HIDECURSOR</code> (for eglfs) or <code>QT_QPA_FB_HIDECURSOR</code> (for linuxfb) is not set and Qt's libudev-based device discovery reports that at least one mouse is available. When <code>libudev</code> support is not present, the mouse cursor always show up unless explicitly disabled via the environment variable.</p>
+<p>Hot plugging is supported, but only if Qt was configured with <code>libudev</code> support (that is, if the <i>libudev</i> development headers are present in the sysroot at configure time). This allows connecting or disconnecting an input device while the application is running.</p>
+<a name="keyboard"></a>
+<h3 >Keyboard</h3>
+<p>The <i>evdev</i> keyboard handler supports the following extra parameters:</p>
+<ul>
+<li><code>/dev/input/..&#x2e;</code> - Specifies the name of the input device. When not given, Qt looks for a suitable device either via <i>libudev</i> or by walking through the available nodes.</li>
+<li><code>grab</code> - Enables grabbing the input device.</li>
+<li><code>keymap</code> - Specifies the name of a custom keyboard map file.</li>
+<li><code>enable-compose</code> - Enables compositing.</li>
+<li><code>repeat-delay</code> - Sets a custom key repeat delay.</li>
+<li><code>repeat-rate</code> - Sets a custom key repeat rate.</li>
+</ul>
+<p>On Embedded Linux systems that do not have their terminal sessions disabled, the behavior on a key press can be confusing as input event is processed by the Qt application and the tty. To overcome this, the following options are available:</p>
+<ul>
+<li><i>EGLFS</i> and <i>LinuxFB</i> attempt to disable the terminal keyboard on application startup by setting the tty's keyboard mode to <code>K_OFF</code>. This prevents keystrokes from going to the terminal. If the standard behavior needs to be restored for some reason, set the environment variable <code>QT_QPA_ENABLE_TERMINAL_KEYBOARD</code> to <code>1</code>. Note that this works only when the application is launched from a remote console (for example, via <code>ssh</code>) and the terminal keyboard input remains enabled.</li>
+<li>An alternative approach is to use the <i>evdev</i> keyboard handler's <code>grab</code> parameter by passing <i>grab=1</i> in <code>QT_QPA_EVDEV_KEYBOARD_PARAMETERS</code>. This results in trying to get a grab on the input device. If the <code>grab</code> is successful, no other components in the system receive events from it as long as the Qt application is running. This approach is more suitable for applications started remotely as it does not need access to the tty device.</li>
+<li>Finally, for many specialized Embedded Linux images it does not make sense to have the standard terminal sessions enabled in the first place. Refer to your build environment's documentation on how to disable them. For example, when generating images using the <a href="http://www.yoctoproject.org">Yocto Project</a>, unsetting <code>SYSVINIT_ENABLED_GETTYS</code> results in having no <code>getty</code> process running, and thus no input, on any of the virtual terminals.</li>
+</ul>
+<p>If the default built-in keymap is not sufficient, a different one can be specified either via the <code>keymap</code> parameter or by using the eglfs-specific <a href="../qtplatformheaders/qeglfsfunctions.html#loadKeymap">loadKeymap()</a> function. The latter allows switching the keymap at runtime. Note however that this requires using eglfs' built-in keyboard handler; it is not supported when the keyboard handler is loaded via the <code>-plugin</code> command-line parameter.</p>
+<p><b>Note: </b>Special system key combinations, such as console switching (<i>Ctrl+Alt+Fx</i>) or zap (<i>Ctrl+Alt+Backspace</i>) are not currently supported and are ignored.</p><p>To generate a custom keymap, the <i>kmap2qmap</i> utility can be used. This can be found in the <i>qttools</i> module. The source files have to be in standard Linux <code>kmap</code> format, which is understood by the kernel's <code>loadkeys</code> command. This means one can use the following sources to generate <code>qmap</code> files:</p>
+<ul>
+<li>The <a href="http://lct.sourceforge.net/">Linux Console Tools (LCT)</a> project.</li>
+<li><a href="http://www.x.org/">Xorg</a> X11 keymaps can be converted to the <code>kmap</code> format with the <code>ckbcomp</code> utility.</li>
+<li>As <code>kmap</code> files are plain-text files, they can also be hand crafted.</li>
+</ul>
+<p><code>kmap2qmap</code> is a command line program, that needs at least 2 files as parameters. The last one is the generated <code>.qmap</code> file, while all the others are parsed as input <code>.kmap</code> files. For example:</p>
+<pre class="cpp">
+
+  kmap2qmap i386/qwertz/de-latin1-nodeadkeys.kmap include/compose.latin1.inc de-latin1-nodeadkeys.qmap
+
+</pre>
+<p><b>Note: </b><code>kmap2qmap</code> does not support all the (pseudo) symbols that the Linux kernel supports. When converting a standard keymap, a number of warnings will be shown regarding <code>Show_Registers</code>, <code>Hex_A</code>, and so on; these messages can safely be ignored.</p><a name="touch"></a>
+<h3 >Touch</h3>
+<p>For some resistive, single-touch touch screens it may be necessary to fall back to using <code>tslib</code> instead of relying on the Linux multi-touch protocol and the event devices. For modern touch screens this is not necessary. <code>tslib</code> support can be enabled by setting the environment variable <code>QT_QPA_EGLFS_TSLIB</code> or <code>QT_QPA_FB_TSLIB</code> to 1. To change the device, set the environment variable <code>TSLIB_TSDEVICE</code> or pass the device name on the command-line. Note that the <code>tslib</code> input handler generates mouse events and supports single touch only, as opposed to <code>evdevtouch</code> which generates true multi-touch <a href="../qtgui/qtouchevent.html">QTouchEvent</a> events too.</p>
+<a name="pen-based-tablets"></a>
+<h3 >Pen-based tablets</h3>
+<p>The <code>evdevtablet</code> plugin provides basic support for Wacom and similar, pen-based tablets. It generates <a href="../qtgui/qtabletevent.html">QTabletEvent</a> events only. To enable it, pass <code>QT_QPA_GENERIC_PLUGINS=evdevtablet</code> in the environment or, alternatively, pass <code>-plugin evdevtablet</code> argument on the command-line. The plugin can take a device node parameter, for example <code>QT_QPA_GENERIC_PLUGINS=evdevtablet:/dev/event1</code>, in case the Qt's automatic device discovery (based either on <i>libudev</i> or a walkthrough of <code>/dev/input/event*</code>) is not functional or misbehaving.</p>
+<a name="debugging-input-devices"></a>
+<h3 >Debugging Input Devices</h3>
+<p>It is possible to print some information to the debug output by enabling the <code>qt.qpa.input</code> logging rule, for example by setting the <code>QT_LOGGING_RULES</code> environment variable to <code>qt.qpa.input=true</code>. This is useful for detecting which device is being used, or to troubleshoot device discovery issues.</p>
+<a name="using-custom-mouse-cursor-images"></a>
+<h3 >Using Custom Mouse Cursor Images</h3>
+<p><code>eglfs</code> comes with its own set of 32x32 sized mouse cursor images. If these are not sufficient, a custom cursor atlas can be provided by setting the <code>QT_QPA_EGLFS_CURSOR</code> environment variable to the name of a JSON file. The file can also be embedded into the application via Qt's resource system.</p>
+<p>For example, an embedded cursor atlas with 8 cursor images per row can be specified like the following:</p>
+<pre class="cpp">
+
+  {
+    &quot;image&quot;: &quot;:/cursor-atlas.png&quot;,
+    &quot;cursorsPerRow&quot;: 8,
+    &quot;hotSpots&quot;: [
+        [7, 2],
+        [12, 3],
+        [12, 12],
+        ..&#x2e;
+    ]
+  }
+
+</pre>
+<p>Note that the images are expected to be tightly packed in the atlas: the width and height of the cursors are decided based on the total image size and the <code>cursorsPerRow</code> setting. Atlases have to provide an image for all the supported cursors.</p>
+<a name="display-output"></a>
+<h2 id="display-output">Display Output</h2>
+<p>When having multiple displays connected, the level of support for targeting one or more of these from one single Qt application varies between the platform plugins and often depends on the device and its graphics stack.</p>
+<a name="eglfs-with-eglfs-kms-backend"></a>
+<h3 >eglfs with eglfs_kms backend</h3>
+<p>When the KMS/DRM backend is in use, eglfs reports all available screens in <a href="../qtgui/qguiapplication.html#screens">QGuiApplication::screens</a>(). Applications can target different screens with different windows via <a href="../qtgui/qwindow.html#setScreen">QWindow::setScreen</a>(). Note however that the restriction of one single fullscreen window per screen still applies.</p>
+<p>When getting started with developing on a given embedded device, it is often necessary to verify the behavior of the device and drivers, and that the connected displays are working as they should. One easy way is to use the hellowindow example. Launching it with <code>-platform eglfs --multiscreen --timeout</code> arguments shows a rotating Qt logo on each connected screen for a few seconds.</p>
+<p>The KMS/DRM backend also supports custom configurations via a JSON file. Set the environment variable <code>QT_QPA_EGLFS_KMS_CONFIG</code> to the name of the file to enable this. The file can also be embedded into the application via the Qt resource system. An example configuration is below:</p>
+<pre class="cpp">
+
+  {
+    &quot;device&quot;: &quot;/dev/dri/card1&quot;,
+    &quot;hwcursor&quot;: false,
+    &quot;pbuffers&quot;: true,
+    &quot;outputs&quot;: [
+      {
+        &quot;name&quot;: &quot;VGA1&quot;,
+        &quot;mode&quot;: &quot;off&quot;
+      },
+      {
+        &quot;name&quot;: &quot;HDMI1&quot;,
+        &quot;mode&quot;: &quot;1024x768&quot;
+      }
+    ]
+  }
+
+</pre>
+<p>Here we configure the specified device so that</p>
+<ul>
+<li>it will not use the hardware cursor (falls back to rendering the mouse cursor via OpenGL; by default hardware cursors are enabled as they are more efficient),</li>
+<li>it will back <a href="../qtgui/qoffscreensurface.html">QOffscreenSurface</a> with standard EGL pbuffer surfaces (by default this is disabled and a gbm surface is used instead),</li>
+<li>output on the VGA connector is disabled, while HDMI is active with a resolution of 1024x768.</li>
+</ul>
+<p>Additionally, such a configuration also disables looking for a device via <code>libudev</code> and instead the specified device is used.</p>
+<p>For troubleshooting it might be useful to enable debug logs from the KMS/DRM backend. To do this, enable the categorized logging rule, <code>qt.qpa.eglfs.kms</code>.</p>
+<a name="eglfs-with-eglfs-kms-egldevice-backend"></a>
+<h3 >eglfs with eglfs_kms_egldevice backend</h3>
+<p>This backend, typically used on Tegra devices, is similar to the KMS/DRM backend mentioned above, except that it relies on the EGLDevice and EGLStream extensions instead of GBM.</p>
+<p>For technical details about this approach, check out <a href="https://wiki.qt.io/Qt_for_Embedded_Linux/XDC2014RitgerEGLNonMesa">this presentation</a>.</p>
+<p>As of Qt 5.7 this backend shares many of its internal implementation with the GBM-based backend. This means that multiple screens and the advanced configuration via <code>QT_QPA_EGLFS_KMS_CONFIG</code> are supported. Some settings, like hardware cursors, may not be applicable however.</p>
+<p>By default the backend will find the first available display and pick the EGL layer that corresponds to it. When necessary, this can be overridden by setting the <code>QT_QPA_EGLFS_LAYER_INDEX</code> environment variable to the index of the desired layer. To see which layers are available, and to debug potential startup issues, enable the logging category <code>qt.qpa.eglfs.kms</code>. In some cases it may be necessary to perform a video mode set on application startup even when the screen reports that the desired resolution is already set. This is normally optimized away, but if the screen stays powered down, try setting the environment variable <code>QT_QPA_EGLFS_ALWAYS_SET_MODE</code> to a non-zero value and relaunch the application.</p>
+<a name="eglfs-with-other-backends"></a>
+<h3 >eglfs with other backends</h3>
+<p>Other backends, that are typically based on targeting the framebuffer directly via the vendor's EGL implementation, usually provides limited or no support for multiple displays. In some cases the <code>QT_QPA_EGLFS_FB</code> environment variable can be used to specify the framebuffer to target, similarly to linuxfb. Alternatively, driver-specific environment variables or kernel parameters may also be available to control the used framebuffer. Refer to the embedded board's documentation.</p>
+<a name="video-memory"></a>
+<h3 >Video Memory</h3>
+<p>Systems with a fixed amount of dedicated video memory may need extra care before running Qt application based on Qt Quick or classes like <a href="../qtwidgets/qopenglwidget.html">QOpenGLWidget</a>. The default setting may be insufficient for such applications, especially when they are displayed on a high resolution (for example, full HD) screen. In this case, they may start failing in unexpected ways. It is recommended to ensure that there is at least 128 MB of GPU memory available. For systems that do not have a fixed amount of memory reserved for the GPU this is not an issue.</p>
+<a name="linuxfb"></a>
+<h3 >linuxfb</h3>
+<p>Use the <code>fb</code> plugin parameter to specify the framebuffer device to use.</p>
+<a name="fonts"></a>
+<h2 id="fonts">Fonts</h2>
+<p>Qt normally uses <code>fontconfig</code> to provide access to system fonts. If <code>fontconfig</code> is not available, Qt will fall back to using <code>QBasicFontDatabase</code>. In this case, Qt applications will look for fonts in Qt's <code>lib/fonts</code> directory. Qt will automatically detect pre-rendered fonts and TrueType fonts. This directory can be overridden by setting the <code>QT_QPA_FONTDIR</code> environment variable.</p>
+<p>For more information on the supported formats, see <a href="qt-embedded-fonts.html">Qt for Embedded Linux Fonts</a>.</p>
+<p><b>Note: </b>Qt no longer ships any fonts in the <code>lib/fonts</code> directory. This means that it is up to the platform (the system image) to provide the necessary fonts.</p><a name="platform-plugins-for-windowing-systems-on-embedded-linux-devices"></a>
+<h2 id="platform-plugins-for-windowing-systems-on-embedded-linux-devices">Platform Plugins for Windowing Systems on Embedded Linux Devices</h2>
+<a name="xcb"></a>
+<h3 >XCB</h3>
+<p>This is the X11 plugin used on regular desktop Linux platforms. In some embedded environments, that provide X and the necessary development files for <a href="http://xcb.freedesktop.org">xcb</a>, this plugin functions just like it does on a regular PC desktop.</p>
+<p><b>Note: </b>On some devices there is no EGL and OpenGL support available under X because the EGL implementation is not compatible with Xlib. In this case the XCB plugin is built without EGL support, meaning that Qt Quick 2 or other OpenGL-based applications does not work with this platform plugin. It can still be used however to run software-rendered applications (based on <a href="../qtwidgets/qwidget.html">QWidget</a> for example).</p><p>As a general rule, the usage of XCB on embedded devices is not advisable. Plugins like eglfs are likely to provide better performance, and hardware acceleration.</p>
+<a name="wayland"></a>
+<h3 >Wayland</h3>
+<p><a href="http://wayland.freedesktop.org/">Wayland</a> is a light-weight windowing system; or more precisely, it is a protocol for clients to talk to a display server.</p>
+<p>The Qt Wayland module provides a <code>wayland</code> platform plugin that allows Qt application to connect to a Wayland compositor.</p>
+<p><b>Note: </b>You may experience issues with touch screen input while using the <a href="http://wayland.freedesktop.org/">Weston</a> reference compositor. Refer to the <a href="https://wiki.qt.io/WestonTouchScreenIssues">Qt Wiki</a> for further information.</p><a name="related-topics"></a>
+<h2 id="related-topics">Related Topics</h2>
+<ul>
+<li><a href="http://doc.qt.io/QtForDeviceCreation">Qt for Device Creation</a></li>
+<li><a href="http://doc.qt.io/emulator/index.html">Emulator</a></li>
+<li><a href="../qtvirtualkeyboard/qtvirtualkeyboard-index.html">Qt Virtual Keyboard</a></li>
+</ul>
+</div>
+<!-- @@@embedded-linux.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

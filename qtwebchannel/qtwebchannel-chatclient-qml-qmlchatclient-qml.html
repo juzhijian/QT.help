@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>qmlchatclient.qml Example File | Qt WebChannel 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwebchannel-index.html">Qt WebChannel</a></td><td ><a href="qtwebchannel-chatclient-qml-example.html">Qt WebChannel ChatClient QML Example</a></td><td >qmlchatclient.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">qmlchatclient.qml Example File</h1>
+<span class="subtitle">chatclient-qml/qmlchatclient.qml</span>
+<!-- $$$chatclient-qml/qmlchatclient.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Copyright (C) 2016 basysKom GmbH, author Bernd Lamecker &lt;bernd.lamecker@basyskom.com&gt;
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the QtWebChannel module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.2
+  import QtQuick.Controls 1.1
+  import QtQuick.Window 2.0
+  import QtQuick.Layouts 1.1
+  import Qt.WebSockets 1.0
+  import &quot;qwebchannel.js&quot; as WebChannel
+
+  <span class="type">ApplicationWindow</span> {
+      <span class="name">id</span>: <span class="name">root</span>
+      <span class="name">title</span>: <span class="name">qsTr</span>(<span class="string">&quot;Hello World&quot;</span>)
+      <span class="name">width</span>: <span class="number">640</span>
+      <span class="name">height</span>: <span class="number">480</span>
+
+      property <span class="type">var</span> <span class="name">channel</span>;
+
+      <span class="type">WebSocket</span> {
+          <span class="name">id</span>: <span class="name">socket</span>
+
+          <span class="name">url</span>: <span class="string">&quot;ws://localhost:12345&quot;</span>;
+          <span class="name">active</span>: <span class="number">false</span>
+
+          <span class="comment">// the following three properties/functions are required to align the QML WebSocket API with the HTML5 WebSocket API.</span>
+          property <span class="type">var</span> <span class="name">send</span>: <span class="keyword">function</span> (<span class="name">arg</span>) {
+              <span class="name">sendTextMessage</span>(<span class="name">arg</span>);
+          }
+
+          <span class="name">onTextMessageReceived</span>: {
+              <span class="name">onmessage</span>({data: <span class="name">message</span>});
+          }
+          property <span class="type">var</span> <span class="name">onmessage</span>;
+
+          <span class="name">onStatusChanged</span>: <span class="keyword">if</span> (<span class="name">socket</span>.<span class="name">status</span> <span class="operator">==</span> <span class="name">WebSocket</span>.<span class="name">Error</span>) {
+                               <span class="name">console</span>.<span class="name">error</span>(<span class="string">&quot;Error: &quot;</span> <span class="operator">+</span> <span class="name">socket</span>.<span class="name">errorString</span>)
+                           } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">socket</span>.<span class="name">status</span> <span class="operator">==</span> <span class="name">WebSocket</span>.<span class="name">Closed</span>) {
+                               <span class="name">messageBox</span>.<span class="name">text</span> <span class="operator">+=</span> <span class="string">&quot;\nSocket closed&quot;</span>
+                           } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">socket</span>.<span class="name">status</span> <span class="operator">==</span> <span class="name">WebSocket</span>.<span class="name">Open</span>) {
+                               <span class="comment">//open the webchannel with the socket as transport</span>
+                               new <span class="name">WebChannel</span>.<span class="name">QWebChannel</span>(<span class="name">socket</span>, <span class="keyword">function</span>(<span class="name">ch</span>) {
+                                   <span class="name">root</span>.<span class="name">channel</span> <span class="operator">=</span> <span class="name">ch</span>;
+
+                                   <span class="comment">//connect to the changed signal of the userList property</span>
+                                   <span class="name">ch</span>.<span class="name">objects</span>.<span class="name">chatserver</span>.<span class="name">userListChanged</span>.<span class="name">connect</span>(<span class="keyword">function</span>(<span class="name">args</span>) {
+                                       <span class="name">userlist</span>.<span class="name">text</span> <span class="operator">=</span> <span class="string">''</span>;
+                                       <span class="name">ch</span>.<span class="name">objects</span>.<span class="name">chatserver</span>.<span class="name">userList</span>.<span class="name">forEach</span>(<span class="keyword">function</span>(<span class="name">user</span>) {
+                                           <span class="name">userlist</span>.<span class="name">text</span> <span class="operator">+=</span> <span class="name">user</span> <span class="operator">+</span> <span class="string">'\n'</span>;
+                                       });
+                                   });
+                                   <span class="comment">//connect to the newMessage signal</span>
+                                   <span class="name">ch</span>.<span class="name">objects</span>.<span class="name">chatserver</span>.<span class="name">newMessage</span>.<span class="name">connect</span>(<span class="keyword">function</span>(<span class="name">time</span>, user, message) {
+                                       <span class="name">chat</span>.<span class="name">text</span> <span class="operator">=</span> <span class="name">chat</span>.<span class="name">text</span> <span class="operator">+</span> <span class="string">&quot;[&quot;</span> <span class="operator">+</span> <span class="name">time</span> <span class="operator">+</span> <span class="string">&quot;] &quot;</span> <span class="operator">+</span> <span class="name">user</span> <span class="operator">+</span> <span class="string">&quot;: &quot;</span> <span class="operator">+</span>  <span class="name">message</span> <span class="operator">+</span> <span class="string">'\n'</span>;
+                                   });
+                                   <span class="comment">//connect to the keep alive signal</span>
+                                   <span class="name">ch</span>.<span class="name">objects</span>.<span class="name">chatserver</span>.<span class="name">keepAlive</span>.<span class="name">connect</span>(<span class="keyword">function</span>(<span class="name">args</span>) {
+                                       <span class="keyword">if</span> (<span class="name">loginName</span>.<span class="name">text</span> <span class="operator">!==</span> <span class="string">''</span>)
+                                           <span class="comment">//and call the keep alive response method as an answer</span>
+                                           <span class="name">ch</span>.<span class="name">objects</span>.<span class="name">chatserver</span>.<span class="name">keepAliveResponse</span>(<span class="name">loginName</span>.<span class="name">text</span>)
+                                  });
+                              });
+                           }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-layouts-gridlayout.html">GridLayout</a></span> {
+          <span class="name">id</span>: <span class="name">grid</span>
+          <span class="name">columns</span>: <span class="number">2</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+              <span class="name">id</span>: <span class="name">chat</span>
+              <span class="name">text</span>: <span class="string">&quot;&quot;</span>
+              <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+          }
+
+          <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+              <span class="name">id</span>: <span class="name">userlist</span>
+              <span class="name">text</span>: <span class="string">&quot;&quot;</span>
+              <span class="name">width</span>: <span class="number">150</span>
+              <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+          }
+          <span class="type">TextField</span> {
+              <span class="name">id</span>: <span class="name">message</span>
+              <span class="name">height</span>: <span class="number">50</span>
+              <span class="name">Layout</span>.columnSpan: <span class="number">2</span>
+              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+
+              <span class="name">onEditingFinished</span>: {
+                  <span class="keyword">if</span> (<span class="name">message</span>.<span class="name">text</span>.<span class="name">length</span>)
+                      <span class="comment">//call the sendMessage method to send the message</span>
+                      <span class="name">root</span>.<span class="name">channel</span>.<span class="name">objects</span>.<span class="name">chatserver</span>.<span class="name">sendMessage</span>(<span class="name">loginName</span>.<span class="name">text</span>, <span class="name">message</span>.<span class="name">text</span>);
+                  <span class="name">message</span>.<span class="name">text</span> <span class="operator">=</span> <span class="string">''</span>;
+              }
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-window-window.html">Window</a></span> {
+         <span class="name">id</span>: <span class="name">loginWindow</span>;
+         <span class="name">title</span>: <span class="string">&quot;Login&quot;</span>;
+         <span class="name">modality</span>: <span class="name">Qt</span>.<span class="name">ApplicationModal</span>
+
+         <span class="type">TextField</span> {
+             <span class="name">id</span>: <span class="name">loginName</span>
+
+             <span class="name">anchors</span>.top: <span class="name">parent</span>.<span class="name">top</span>
+             <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+         }
+         <span class="type">Button</span> {
+             <span class="name">anchors</span>.top: <span class="name">loginName</span>.<span class="name">bottom</span>
+             <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+             <span class="name">id</span>: <span class="name">loginButton</span>
+             <span class="name">text</span>: <span class="string">&quot;Login&quot;</span>
+
+             <span class="name">onClicked</span>: {
+                 <span class="comment">//call the login method</span>
+                 <span class="name">root</span>.<span class="name">channel</span>.<span class="name">objects</span>.<span class="name">chatserver</span>.<span class="name">login</span>(<span class="name">loginName</span>.<span class="name">text</span>, <span class="keyword">function</span>(<span class="name">arg</span>) {
+                     <span class="comment">//check the return value for success</span>
+                     <span class="keyword">if</span> (<span class="name">arg</span> <span class="operator">===</span> <span class="number">true</span>) {
+                         <span class="name">loginError</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">false</span>;
+                         <span class="name">loginWindow</span>.<span class="name">close</span>();
+                     } <span class="keyword">else</span> {
+                         <span class="name">loginError</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">true</span>;
+                     }
+                 });
+
+             }
+         }
+         <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+             <span class="name">id</span>: <span class="name">loginError</span>
+             <span class="name">anchors</span>.top: <span class="name">loginButton</span>.<span class="name">bottom</span>
+             <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+             <span class="name">text</span>: <span class="string">&quot;Name already in use&quot;</span>
+             <span class="name">visible</span>: <span class="number">false</span>;
+         }
+      }
+
+      <span class="name">Component</span>.onCompleted: {
+          <span class="name">loginWindow</span>.<span class="name">show</span>();
+          <span class="name">socket</span>.<span class="name">active</span> <span class="operator">=</span> <span class="number">true</span>; <span class="comment">//connect</span>
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@chatclient-qml/qmlchatclient.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

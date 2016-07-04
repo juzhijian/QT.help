@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>scenemodifier.cpp Example File | Qt 3D 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-basicshapes-cpp-example.html">Qt 3D: Basic Shapes C++ Example</a></td><td >scenemodifier.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">scenemodifier.cpp Example File</h1>
+<span class="subtitle">basicshapes-cpp/scenemodifier.cpp</span>
+<!-- $$$basicshapes-cpp/scenemodifier.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2014 Klaralvdalens Datakonsult AB (KDAB).
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt3D module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;scenemodifier.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtCore/QDebug&gt;</span>
+
+  SceneModifier<span class="operator">::</span>SceneModifier(<span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span> <span class="operator">*</span>rootEntity)
+      : m_rootEntity(rootEntity)
+  {
+
+      <span class="comment">// Torus shape data</span>
+      m_torus <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QTorusMesh</span>();
+      m_torus<span class="operator">-</span><span class="operator">&gt;</span>setRadius(<span class="number">1.0f</span>);
+      m_torus<span class="operator">-</span><span class="operator">&gt;</span>setMinorRadius(<span class="number">0.4f</span>);
+      m_torus<span class="operator">-</span><span class="operator">&gt;</span>setRings(<span class="number">100</span>);
+      m_torus<span class="operator">-</span><span class="operator">&gt;</span>setSlices(<span class="number">20</span>);
+
+      <span class="comment">// TorusMesh Transform</span>
+      <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type"><a href="../qtgui/qtransform.html">QTransform</a></span> <span class="operator">*</span>torusTransform <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type"><a href="../qtgui/qtransform.html">QTransform</a></span>();
+      torusTransform<span class="operator">-</span><span class="operator">&gt;</span>setScale(<span class="number">2.0f</span>);
+      torusTransform<span class="operator">-</span><span class="operator">&gt;</span>setRotation(<span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span><span class="operator">::</span>fromAxisAndAngle(QVector3D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span>)<span class="operator">,</span> <span class="number">25.0f</span>));
+      torusTransform<span class="operator">-</span><span class="operator">&gt;</span>setTranslation(QVector3D(<span class="number">5.0f</span><span class="operator">,</span> <span class="number">4.0f</span><span class="operator">,</span> <span class="number">0.0f</span>));
+
+      <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QPhongMaterial</span> <span class="operator">*</span>torusMaterial <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QPhongMaterial</span>();
+      torusMaterial<span class="operator">-</span><span class="operator">&gt;</span>setDiffuse(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span>(<span class="number">0xbeb32b</span>)));
+
+      <span class="comment">// Torus</span>
+      m_torusEntity <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span>(m_rootEntity);
+      m_torusEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(m_torus);
+      m_torusEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(torusMaterial);
+      m_torusEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(torusTransform);
+
+      <span class="comment">// Cone shape data</span>
+      <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QConeMesh</span> <span class="operator">*</span>cone <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QConeMesh</span>();
+      cone<span class="operator">-</span><span class="operator">&gt;</span>setTopRadius(<span class="number">0.5</span>);
+      cone<span class="operator">-</span><span class="operator">&gt;</span>setBottomRadius(<span class="number">1</span>);
+      cone<span class="operator">-</span><span class="operator">&gt;</span>setLength(<span class="number">3</span>);
+      cone<span class="operator">-</span><span class="operator">&gt;</span>setRings(<span class="number">50</span>);
+      cone<span class="operator">-</span><span class="operator">&gt;</span>setSlices(<span class="number">20</span>);
+
+      <span class="comment">// ConeMesh Transform</span>
+      <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type"><a href="../qtgui/qtransform.html">QTransform</a></span> <span class="operator">*</span>coneTransform <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type"><a href="../qtgui/qtransform.html">QTransform</a></span>();
+      coneTransform<span class="operator">-</span><span class="operator">&gt;</span>setScale(<span class="number">1.5f</span>);
+      coneTransform<span class="operator">-</span><span class="operator">&gt;</span>setRotation(<span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span><span class="operator">::</span>fromAxisAndAngle(QVector3D(<span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span>)<span class="operator">,</span> <span class="number">45.0f</span>));
+      coneTransform<span class="operator">-</span><span class="operator">&gt;</span>setTranslation(QVector3D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">4.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.5</span>));
+
+      <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QPhongMaterial</span> <span class="operator">*</span>coneMaterial <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QPhongMaterial</span>();
+      coneMaterial<span class="operator">-</span><span class="operator">&gt;</span>setDiffuse(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span>(<span class="number">0x928327</span>)));
+
+      <span class="comment">// Cone</span>
+      m_coneEntity <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span>(m_rootEntity);
+      m_coneEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(cone);
+      m_coneEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(coneMaterial);
+      m_coneEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(coneTransform);
+
+      <span class="comment">// Cylinder shape data</span>
+      <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QCylinderMesh</span> <span class="operator">*</span>cylinder <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QCylinderMesh</span>();
+      cylinder<span class="operator">-</span><span class="operator">&gt;</span>setRadius(<span class="number">1</span>);
+      cylinder<span class="operator">-</span><span class="operator">&gt;</span>setLength(<span class="number">3</span>);
+      cylinder<span class="operator">-</span><span class="operator">&gt;</span>setRings(<span class="number">100</span>);
+      cylinder<span class="operator">-</span><span class="operator">&gt;</span>setSlices(<span class="number">20</span>);
+
+      <span class="comment">// CylinderMesh Transform</span>
+      <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type"><a href="../qtgui/qtransform.html">QTransform</a></span> <span class="operator">*</span>cylinderTransform <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type"><a href="../qtgui/qtransform.html">QTransform</a></span>();
+      cylinderTransform<span class="operator">-</span><span class="operator">&gt;</span>setScale(<span class="number">1.5f</span>);
+      cylinderTransform<span class="operator">-</span><span class="operator">&gt;</span>setRotation(<span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span><span class="operator">::</span>fromAxisAndAngle(QVector3D(<span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span>)<span class="operator">,</span> <span class="number">45.0f</span>));
+      cylinderTransform<span class="operator">-</span><span class="operator">&gt;</span>setTranslation(QVector3D(<span class="operator">-</span><span class="number">5.0f</span><span class="operator">,</span> <span class="number">4.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.5</span>));
+
+      <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QPhongMaterial</span> <span class="operator">*</span>cylinderMaterial <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QPhongMaterial</span>();
+      cylinderMaterial<span class="operator">-</span><span class="operator">&gt;</span>setDiffuse(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span>(<span class="number">0x928327</span>)));
+
+      <span class="comment">// Cylinder</span>
+      m_cylinderEntity <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span>(m_rootEntity);
+      m_cylinderEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(cylinder);
+      m_cylinderEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(cylinderMaterial);
+      m_cylinderEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(cylinderTransform);
+
+      <span class="comment">// Cuboid shape data</span>
+      <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QCuboidMesh</span> <span class="operator">*</span>cuboid <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QCuboidMesh</span>();
+
+      <span class="comment">// CuboidMesh Transform</span>
+      <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type"><a href="../qtgui/qtransform.html">QTransform</a></span> <span class="operator">*</span>cuboidTransform <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type"><a href="../qtgui/qtransform.html">QTransform</a></span>();
+      cuboidTransform<span class="operator">-</span><span class="operator">&gt;</span>setScale(<span class="number">4.0f</span>);
+      cuboidTransform<span class="operator">-</span><span class="operator">&gt;</span>setTranslation(QVector3D(<span class="number">5.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">4.0f</span><span class="operator">,</span> <span class="number">0.0f</span>));
+
+      <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QPhongMaterial</span> <span class="operator">*</span>cuboidMaterial <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QPhongMaterial</span>();
+      cuboidMaterial<span class="operator">-</span><span class="operator">&gt;</span>setDiffuse(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span>(<span class="number">0x665423</span>)));
+
+      <span class="comment">//Cuboid</span>
+      m_cuboidEntity <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span>(m_rootEntity);
+      m_cuboidEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(cuboid);
+      m_cuboidEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(cuboidMaterial);
+      m_cuboidEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(cuboidTransform);
+
+      <span class="comment">// Plane shape data</span>
+      <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QPlaneMesh</span> <span class="operator">*</span>planeMesh <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QPlaneMesh</span>();
+      planeMesh<span class="operator">-</span><span class="operator">&gt;</span>setWidth(<span class="number">2</span>);
+      planeMesh<span class="operator">-</span><span class="operator">&gt;</span>setHeight(<span class="number">2</span>);
+
+      <span class="comment">// Plane mesh transform</span>
+      <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type"><a href="../qtgui/qtransform.html">QTransform</a></span> <span class="operator">*</span>planeTransform <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type"><a href="../qtgui/qtransform.html">QTransform</a></span>();
+      planeTransform<span class="operator">-</span><span class="operator">&gt;</span>setScale(<span class="number">1.3f</span>);
+      planeTransform<span class="operator">-</span><span class="operator">&gt;</span>setRotation(<span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span><span class="operator">::</span>fromAxisAndAngle(QVector3D(<span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span>)<span class="operator">,</span> <span class="number">45.0f</span>));
+      planeTransform<span class="operator">-</span><span class="operator">&gt;</span>setTranslation(QVector3D(<span class="number">0.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">4.0f</span><span class="operator">,</span> <span class="number">0.0f</span>));
+
+      <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QPhongMaterial</span> <span class="operator">*</span>planeMaterial <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QPhongMaterial</span>();
+      planeMaterial<span class="operator">-</span><span class="operator">&gt;</span>setDiffuse(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span>(<span class="number">0xa69929</span>)));
+
+      <span class="comment">// Plane</span>
+      m_planeEntity <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span>(m_rootEntity);
+      m_planeEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(planeMesh);
+      m_planeEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(planeMaterial);
+      m_planeEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(planeTransform);
+
+      <span class="comment">// Sphere shape data</span>
+      <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QSphereMesh</span> <span class="operator">*</span>sphereMesh <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QSphereMesh</span>();
+      sphereMesh<span class="operator">-</span><span class="operator">&gt;</span>setRings(<span class="number">20</span>);
+      sphereMesh<span class="operator">-</span><span class="operator">&gt;</span>setSlices(<span class="number">20</span>);
+      sphereMesh<span class="operator">-</span><span class="operator">&gt;</span>setRadius(<span class="number">2</span>);
+
+      <span class="comment">// Sphere mesh transform</span>
+      <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type"><a href="../qtgui/qtransform.html">QTransform</a></span> <span class="operator">*</span>sphereTransform <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type"><a href="../qtgui/qtransform.html">QTransform</a></span>();
+
+      sphereTransform<span class="operator">-</span><span class="operator">&gt;</span>setScale(<span class="number">1.3f</span>);
+      sphereTransform<span class="operator">-</span><span class="operator">&gt;</span>setTranslation(QVector3D(<span class="operator">-</span><span class="number">5.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">4.0f</span><span class="operator">,</span> <span class="number">0.0f</span>));
+
+      <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QPhongMaterial</span> <span class="operator">*</span>sphereMaterial <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QPhongMaterial</span>();
+      sphereMaterial<span class="operator">-</span><span class="operator">&gt;</span>setDiffuse(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span>(<span class="number">0xa69929</span>)));
+
+      <span class="comment">// Sphere</span>
+      m_sphereEntity <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span>(m_rootEntity);
+      m_sphereEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(sphereMesh);
+      m_sphereEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(sphereMaterial);
+      m_sphereEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(sphereTransform);
+  }
+
+  SceneModifier<span class="operator">::</span><span class="operator">~</span>SceneModifier()
+  {
+  }
+
+  <span class="type">void</span> SceneModifier<span class="operator">::</span>enableTorus(bool enabled)
+  {
+      m_torusEntity<span class="operator">-</span><span class="operator">&gt;</span>setParent(enabled <span class="operator">?</span> m_rootEntity : nullptr);
+  }
+
+  <span class="type">void</span> SceneModifier<span class="operator">::</span>enableCone(bool enabled)
+  {
+      m_coneEntity<span class="operator">-</span><span class="operator">&gt;</span>setParent(enabled <span class="operator">?</span> m_rootEntity : nullptr);
+  }
+
+  <span class="type">void</span> SceneModifier<span class="operator">::</span>enableCylinder(bool enabled)
+  {
+      m_cylinderEntity<span class="operator">-</span><span class="operator">&gt;</span>setParent(enabled <span class="operator">?</span> m_rootEntity : nullptr);
+  }
+
+  <span class="type">void</span> SceneModifier<span class="operator">::</span>enableCuboid(bool enabled)
+  {
+      m_cuboidEntity<span class="operator">-</span><span class="operator">&gt;</span>setParent(enabled <span class="operator">?</span> m_rootEntity : nullptr);
+  }
+
+  <span class="type">void</span> SceneModifier<span class="operator">::</span>enablePlane(bool enabled)
+  {
+      m_planeEntity<span class="operator">-</span><span class="operator">&gt;</span>setParent(enabled <span class="operator">?</span> m_rootEntity : nullptr);
+  }
+
+  <span class="type">void</span> SceneModifier<span class="operator">::</span>enableSphere(bool enabled)
+  {
+      m_sphereEntity<span class="operator">-</span><span class="operator">&gt;</span>setParent(enabled <span class="operator">?</span> m_rootEntity : nullptr);
+  }
+
+</pre>
+</div>
+<!-- @@@basicshapes-cpp/scenemodifier.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

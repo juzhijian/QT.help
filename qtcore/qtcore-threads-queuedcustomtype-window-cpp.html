@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>window.cpp Example File | Qt Core 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-threads-queuedcustomtype-example.html">Queued Custom Type Example</a></td><td >window.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">window.cpp Example File</h1>
+<span class="subtitle">threads/queuedcustomtype/window.cpp</span>
+<!-- $$$threads/queuedcustomtype/window.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+  <span class="preprocessor">#include &quot;window.h&quot;</span>
+
+  Window<span class="operator">::</span>Window()
+  {
+      thread <span class="operator">=</span> <span class="keyword">new</span> RenderThread();
+
+      label <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlabel.html">QLabel</a></span>();
+      label<span class="operator">-</span><span class="operator">&gt;</span>setAlignment(<span class="type"><a href="qt.html">Qt</a></span><span class="operator">::</span>AlignCenter);
+
+      loadButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;&amp;Load image...&quot;</span>));
+      resetButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;&amp;Stop&quot;</span>));
+      resetButton<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+
+      connect(loadButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(loadImage()));
+      connect(resetButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> thread<span class="operator">,</span> SLOT(stopProcess()));
+      connect(thread<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(resetUi()));
+      connect(thread<span class="operator">,</span> SIGNAL(sendBlock(Block))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(addBlock(Block)));
+
+      <span class="type"><a href="../qtwidgets/qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>buttonLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qhboxlayout.html">QHBoxLayout</a></span>();
+      buttonLayout<span class="operator">-</span><span class="operator">&gt;</span>addStretch();
+      buttonLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(loadButton);
+      buttonLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(resetButton);
+      buttonLayout<span class="operator">-</span><span class="operator">&gt;</span>addStretch();
+
+      <span class="type"><a href="../qtwidgets/qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qvboxlayout.html">QVBoxLayout</a></span>(<span class="keyword">this</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(label);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(buttonLayout);
+
+      setWindowTitle(tr(<span class="string">&quot;Queued Custom Type&quot;</span>));
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>loadImage()
+  {
+      <span class="type"><a href="qstringlist.html">QStringList</a></span> formats;
+      foreach (<span class="type"><a href="qbytearray.html">QByteArray</a></span> format<span class="operator">,</span> <span class="type"><a href="../qtgui/qimagereader.html">QImageReader</a></span><span class="operator">::</span>supportedImageFormats())
+          <span class="keyword">if</span> (format<span class="operator">.</span>toLower() <span class="operator">=</span><span class="operator">=</span> format)
+              formats<span class="operator">.</span>append(<span class="string">&quot;*.&quot;</span> <span class="operator">+</span> format);
+
+      <span class="type"><a href="qstring.html">QString</a></span> newPath <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getOpenFileName(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Open Image&quot;</span>)<span class="operator">,</span>
+          path<span class="operator">,</span> tr(<span class="string">&quot;Image files (%1)&quot;</span>)<span class="operator">.</span>arg(formats<span class="operator">.</span>join(<span class="char">' '</span>)));
+
+      <span class="keyword">if</span> (newPath<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> image(newPath);
+      <span class="keyword">if</span> (<span class="operator">!</span>image<span class="operator">.</span>isNull()) {
+          loadImage(image);
+          path <span class="operator">=</span> newPath;
+      }
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>loadImage(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> <span class="operator">&amp;</span>image)
+  {
+      <span class="type"><a href="../qtwidgets/qdesktopwidget.html">QDesktopWidget</a></span> desktop;
+      <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> useImage;
+      <span class="type"><a href="qrect.html">QRect</a></span> space <span class="operator">=</span> desktop<span class="operator">.</span>availableGeometry();
+      <span class="keyword">if</span> (image<span class="operator">.</span>width() <span class="operator">&gt;</span> <span class="number">0.75</span><span class="operator">*</span>space<span class="operator">.</span>width() <span class="operator">|</span><span class="operator">|</span> image<span class="operator">.</span>height() <span class="operator">&gt;</span> <span class="number">0.75</span><span class="operator">*</span>space<span class="operator">.</span>height())
+          useImage <span class="operator">=</span> image<span class="operator">.</span>scaled(<span class="number">0.75</span><span class="operator">*</span>space<span class="operator">.</span>width()<span class="operator">,</span> <span class="number">0.75</span><span class="operator">*</span>space<span class="operator">.</span>height()<span class="operator">,</span>
+                                  <span class="type"><a href="qt.html">Qt</a></span><span class="operator">::</span>KeepAspectRatio<span class="operator">,</span> <span class="type"><a href="qt.html">Qt</a></span><span class="operator">::</span>SmoothTransformation);
+      <span class="keyword">else</span>
+          useImage <span class="operator">=</span> image;
+
+      pixmap <span class="operator">=</span> <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>(useImage<span class="operator">.</span>width()<span class="operator">,</span> useImage<span class="operator">.</span>height());
+      pixmap<span class="operator">.</span>fill(<a href="../qtgui/qcolor.html#qRgb">qRgb</a>(<span class="number">255</span><span class="operator">,</span> <span class="number">255</span><span class="operator">,</span> <span class="number">255</span>));
+      label<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(pixmap);
+      loadButton<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      resetButton<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+      thread<span class="operator">-</span><span class="operator">&gt;</span>processImage(useImage);
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>addBlock(<span class="keyword">const</span> Block <span class="operator">&amp;</span>block)
+  {
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> color <span class="operator">=</span> block<span class="operator">.</span>color();
+      color<span class="operator">.</span>setAlpha(<span class="number">64</span>);
+
+      <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter;
+      painter<span class="operator">.</span>begin(<span class="operator">&amp;</span>pixmap);
+      painter<span class="operator">.</span>fillRect(block<span class="operator">.</span>rect()<span class="operator">,</span> color);
+      painter<span class="operator">.</span>end();
+      label<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(pixmap);
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>resetUi()
+  {
+      loadButton<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+      resetButton<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+  }
+
+</pre>
+</div>
+<!-- @@@threads/queuedcustomtype/window.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

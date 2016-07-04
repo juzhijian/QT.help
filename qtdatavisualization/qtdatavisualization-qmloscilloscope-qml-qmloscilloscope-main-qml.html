@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>main.qml Example File | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td ><a href="qtdatavisualization-qmloscilloscope-example.html">Qt Quick 2 Oscilloscope Example</a></td><td >main.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">main.qml Example File</h1>
+<span class="subtitle">qmloscilloscope/qml/qmloscilloscope/main.qml</span>
+<!-- $$$qmloscilloscope/qml/qmloscilloscope/main.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Data Visualization module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.1
+  import QtQuick.Layouts 1.0
+  import QtQuick.Controls 1.0
+  import QtDataVisualization 1.1
+  import &quot;.&quot;
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">mainView</span>
+      <span class="name">width</span>: <span class="number">1280</span>
+      <span class="name">height</span>: <span class="number">1024</span>
+
+      property <span class="type">int</span> <span class="name">sampleColumns</span>: <span class="name">sampleSlider</span>.<span class="name">value</span>
+      property <span class="type">int</span> <span class="name">sampleRows</span>: <span class="name">sampleColumns</span> <span class="operator">/</span> <span class="number">2</span>
+      property <span class="type">int</span> <span class="name">sampleCache</span>: <span class="number">24</span>
+
+      <span class="name">onSampleRowsChanged</span>: {
+          <span class="name">surfaceSeries</span>.<span class="name">selectedPoint</span> <span class="operator">=</span> <span class="name">surfaceSeries</span>.<span class="name">invalidSelectionPosition</span>
+          <span class="name">generateData</span>()
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+          <span class="name">id</span>: <span class="name">dataView</span>
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+          <span class="name">height</span>: <span class="name">parent</span>.<span class="name">height</span> <span class="operator">-</span> <span class="name">buttonLayout</span>.<span class="name">height</span>
+
+          <span class="type"><a href="qml-qtdatavisualization-surface3d.html">Surface3D</a></span> {
+              <span class="name">id</span>: <span class="name">surfaceGraph</span>
+
+              <span class="name">width</span>: <span class="name">dataView</span>.<span class="name">width</span>
+              <span class="name">height</span>: <span class="name">dataView</span>.<span class="name">height</span>
+              <span class="name">shadowQuality</span>: <span class="name">AbstractGraph3D</span>.<span class="name">ShadowQualityNone</span>
+              <span class="name">selectionMode</span>: <span class="name">AbstractGraph3D</span>.<span class="name">SelectionSlice</span> <span class="operator">|</span> <span class="name">AbstractGraph3D</span>.<span class="name">SelectionItemAndRow</span>
+              <span class="name">renderingMode</span>: <span class="name">AbstractGraph3D</span>.<span class="name">RenderDirectToBackground</span>
+
+              <span class="name">axisX</span>.labelFormat: <span class="string">&quot;%d ms&quot;</span>
+              <span class="name">axisY</span>.labelFormat: <span class="string">&quot;%d W&quot;</span>
+              <span class="name">axisZ</span>.labelFormat: <span class="string">&quot;%d mV&quot;</span>
+              <span class="name">axisX</span>.min: <span class="number">0</span>
+              <span class="name">axisY</span>.min: <span class="number">0</span>
+              <span class="name">axisZ</span>.min: <span class="number">0</span>
+              <span class="name">axisX</span>.max: <span class="number">1000</span>
+              <span class="name">axisY</span>.max: <span class="number">100</span>
+              <span class="name">axisZ</span>.max: <span class="number">800</span>
+              <span class="name">axisX</span>.segmentCount: <span class="number">4</span>
+              <span class="name">axisY</span>.segmentCount: <span class="number">4</span>
+              <span class="name">axisZ</span>.segmentCount: <span class="number">4</span>
+              <span class="name">measureFps</span>: <span class="number">true</span>
+
+              <span class="name">onCurrentFpsChanged</span>: {
+                  <span class="keyword">if</span> (<span class="name">fps</span> <span class="operator">&gt;</span> <span class="number">10</span>)
+                      <span class="name">fpsText</span>.<span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;FPS: &quot;</span> <span class="operator">+</span> <span class="name">Math</span>.<span class="name">round</span>(<span class="name">surfaceGraph</span>.<span class="name">currentFps</span>)
+                  <span class="keyword">else</span>
+                      <span class="name">fpsText</span>.<span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;FPS: &quot;</span> <span class="operator">+</span> <span class="name">Math</span>.<span class="name">round</span>(<span class="name">surfaceGraph</span>.<span class="name">currentFps</span> <span class="operator">*</span> <span class="number">10.0</span>) <span class="operator">/</span> <span class="number">10.0</span>
+              }
+
+              <span class="type"><a href="qml-qtdatavisualization-surface3dseries.html">Surface3DSeries</a></span> {
+                  <span class="name">id</span>: <span class="name">surfaceSeries</span>
+                  <span class="name">drawMode</span>: <span class="name">Surface3DSeries</span>.<span class="name">DrawSurface</span>;
+                  <span class="name">flatShadingEnabled</span>: <span class="number">false</span>;
+                  <span class="name">meshSmooth</span>: <span class="number">true</span>
+                  <span class="name">itemLabelFormat</span>: <span class="string">&quot;@xLabel, @zLabel: @yLabel&quot;</span>
+                  <span class="name">itemLabelVisible</span>: <span class="number">false</span>
+
+                  <span class="name">onItemLabelChanged</span>: {
+                      <span class="keyword">if</span> (<span class="name">surfaceSeries</span>.<span class="name">selectedPoint</span> <span class="operator">===</span> <span class="name">surfaceSeries</span>.<span class="name">invalidSelectionPosition</span>)
+                          <span class="name">selectionText</span>.<span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;No selection&quot;</span>
+                      <span class="keyword">else</span>
+                          <span class="name">selectionText</span>.<span class="name">text</span> <span class="operator">=</span> <span class="name">surfaceSeries</span>.<span class="name">itemLabel</span>
+                  }
+              }
+
+              <span class="name">Component</span>.onCompleted: <span class="name">mainView</span>.<span class="name">generateData</span>()
+          }
+      }
+
+      <span class="type"><a href="../qtqml/qml-qtqml-timer.html">Timer</a></span> {
+          <span class="name">id</span>: <span class="name">refreshTimer</span>
+          <span class="name">interval</span>: <span class="number">1000</span> <span class="operator">/</span> <span class="name">frequencySlider</span>.<span class="name">value</span>
+          <span class="name">running</span>: <span class="number">true</span>
+          <span class="name">repeat</span>: <span class="number">true</span>
+          <span class="name">onTriggered</span>: <span class="name">dataSource</span>.<span class="name">update</span>(<span class="name">surfaceSeries</span>)
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+          <span class="name">height</span>: <span class="name">flatShadingToggle</span>.<span class="name">height</span> <span class="operator">*</span> <span class="number">2</span>
+          <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+          <span class="name">anchors</span>.top: <span class="name">parent</span>.<span class="name">top</span>
+          <span class="name">color</span>: <span class="name">surfaceGraph</span>.<span class="name">theme</span>.<span class="name">backgroundColor</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-layouts-columnlayout.html">ColumnLayout</a></span> {
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="type"><a href="../qtquick/qml-qtquick-layouts-rowlayout.html">RowLayout</a></span> {
+                  <span class="name">id</span>: <span class="name">sliderLayout</span>
+                  <span class="name">anchors</span>.top: <span class="name">parent</span>.<span class="name">top</span>
+                  <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+                  <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                  <span class="name">Layout</span>.minimumHeight: <span class="name">flatShadingToggle</span>.<span class="name">height</span>
+                  <span class="name">spacing</span>: <span class="number">0</span>
+
+                  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+                      <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+                      <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                      <span class="name">Layout</span>.minimumWidth: <span class="name">samplesText</span>.<span class="name">implicitWidth</span> <span class="operator">+</span> <span class="number">120</span>
+                      <span class="name">Layout</span>.maximumWidth: <span class="name">samplesText</span>.<span class="name">implicitWidth</span> <span class="operator">+</span> <span class="number">120</span>
+                      <span class="name">Layout</span>.alignment: <span class="name">Qt</span>.<span class="name">AlignHCenter</span> <span class="operator">|</span> <span class="name">Qt</span>.<span class="name">AlignVCenter</span>
+
+                      <span class="name">border</span>.color: <span class="string">&quot;gray&quot;</span>
+                      <span class="name">border</span>.width: <span class="number">1</span>
+                      <span class="name">radius</span>: <span class="number">4</span>
+
+                      <span class="type"><a href="../qtquick/qml-qtquick-layouts-rowlayout.html">RowLayout</a></span> {
+                          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                          <span class="name">anchors</span>.margins: <span class="name">parent</span>.<span class="name">border</span>.<span class="name">width</span> <span class="operator">+</span> <span class="number">1</span>
+
+                          <span class="type">Slider</span> {
+                              <span class="name">id</span>: <span class="name">sampleSlider</span>
+                              <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">Layout</span>.alignment: <span class="name">Qt</span>.<span class="name">AlignHCenter</span> <span class="operator">|</span> <span class="name">Qt</span>.<span class="name">AlignVCenter</span>
+                              <span class="name">Layout</span>.minimumWidth: <span class="number">80</span>
+                              <span class="name">minimumValue</span>: <span class="name">mainView</span>.<span class="name">sampleCache</span> <span class="operator">*</span> <span class="number">2</span>
+                              <span class="name">maximumValue</span>: <span class="name">minimumValue</span> <span class="operator">*</span> <span class="number">10</span>
+                              <span class="name">stepSize</span>: <span class="name">mainView</span>.<span class="name">sampleCache</span>
+                              <span class="name">updateValueWhileDragging</span>: <span class="number">false</span>
+                              <span class="name">Component</span>.onCompleted: <span class="name">value</span> <span class="operator">=</span> <span class="name">minimumValue</span> <span class="operator">*</span> <span class="number">2</span>
+                          }
+
+                          <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+                              <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">Layout</span>.minimumWidth: <span class="name">samplesText</span>.<span class="name">implicitWidth</span> <span class="operator">+</span> <span class="number">10</span>
+                              <span class="name">Layout</span>.maximumWidth: <span class="name">samplesText</span>.<span class="name">implicitWidth</span> <span class="operator">+</span> <span class="number">10</span>
+                              <span class="name">Layout</span>.alignment: <span class="name">Qt</span>.<span class="name">AlignHCenter</span> <span class="operator">|</span> <span class="name">Qt</span>.<span class="name">AlignVCenter</span>
+
+                              <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                                  <span class="name">id</span>: <span class="name">samplesText</span>
+                                  <span class="name">text</span>: <span class="string">&quot;Samples: &quot;</span> <span class="operator">+</span> (<span class="name">mainView</span>.<span class="name">sampleRows</span> <span class="operator">*</span> <span class="name">mainView</span>.<span class="name">sampleColumns</span>)
+                                  <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                                  <span class="name">verticalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignVCenter</span>
+                                  <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                              }
+                          }
+                      }
+                  }
+
+                  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+                      <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+                      <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                      <span class="name">Layout</span>.minimumWidth: <span class="name">frequencyText</span>.<span class="name">implicitWidth</span> <span class="operator">+</span> <span class="number">120</span>
+                      <span class="name">Layout</span>.maximumWidth: <span class="name">frequencyText</span>.<span class="name">implicitWidth</span> <span class="operator">+</span> <span class="number">120</span>
+                      <span class="name">Layout</span>.alignment: <span class="name">Qt</span>.<span class="name">AlignHCenter</span> <span class="operator">|</span> <span class="name">Qt</span>.<span class="name">AlignVCenter</span>
+
+                      <span class="name">border</span>.color: <span class="string">&quot;gray&quot;</span>
+                      <span class="name">border</span>.width: <span class="number">1</span>
+                      <span class="name">radius</span>: <span class="number">4</span>
+
+                      <span class="type"><a href="../qtquick/qml-qtquick-layouts-rowlayout.html">RowLayout</a></span> {
+                          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                          <span class="name">anchors</span>.margins: <span class="name">parent</span>.<span class="name">border</span>.<span class="name">width</span> <span class="operator">+</span> <span class="number">1</span>
+
+                          <span class="type">Slider</span> {
+                              <span class="name">id</span>: <span class="name">frequencySlider</span>
+                              <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">Layout</span>.alignment: <span class="name">Qt</span>.<span class="name">AlignHCenter</span> <span class="operator">|</span> <span class="name">Qt</span>.<span class="name">AlignVCenter</span>
+                              <span class="name">Layout</span>.minimumWidth: <span class="number">80</span>
+                              <span class="name">minimumValue</span>: <span class="number">2</span>
+                              <span class="name">maximumValue</span>: <span class="number">60</span>
+                              <span class="name">stepSize</span>: <span class="number">2</span>
+                              <span class="name">updateValueWhileDragging</span>: <span class="number">true</span>
+                              <span class="name">value</span>: <span class="number">30</span>
+                          }
+
+                          <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+                              <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">Layout</span>.minimumWidth: <span class="name">frequencyText</span>.<span class="name">implicitWidth</span> <span class="operator">+</span> <span class="number">10</span>
+                              <span class="name">Layout</span>.maximumWidth: <span class="name">frequencyText</span>.<span class="name">implicitWidth</span> <span class="operator">+</span> <span class="number">10</span>
+                              <span class="name">Layout</span>.alignment: <span class="name">Qt</span>.<span class="name">AlignHCenter</span> <span class="operator">|</span> <span class="name">Qt</span>.<span class="name">AlignVCenter</span>
+
+                              <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                                  <span class="name">id</span>: <span class="name">frequencyText</span>
+                                  <span class="name">text</span>: <span class="string">&quot;Freq: &quot;</span> <span class="operator">+</span> <span class="name">frequencySlider</span>.<span class="name">value</span> <span class="operator">+</span> <span class="string">&quot; Hz&quot;</span>
+                                  <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                                  <span class="name">verticalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignVCenter</span>
+                                  <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                              }
+                          }
+                      }
+                  }
+
+                  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+                      <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+                      <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                      <span class="name">Layout</span>.minimumWidth: <span class="name">fpsText</span>.<span class="name">implicitWidth</span> <span class="operator">+</span> <span class="number">10</span>
+                      <span class="name">Layout</span>.maximumWidth: <span class="name">fpsText</span>.<span class="name">implicitWidth</span> <span class="operator">+</span> <span class="number">10</span>
+                      <span class="name">Layout</span>.alignment: <span class="name">Qt</span>.<span class="name">AlignHCenter</span> <span class="operator">|</span> <span class="name">Qt</span>.<span class="name">AlignVCenter</span>
+
+                      <span class="name">border</span>.color: <span class="string">&quot;gray&quot;</span>
+                      <span class="name">border</span>.width: <span class="number">1</span>
+                      <span class="name">radius</span>: <span class="number">4</span>
+
+                      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                          <span class="name">id</span>: <span class="name">fpsText</span>
+                          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                          <span class="name">verticalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignVCenter</span>
+                          <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                      }
+                  }
+
+                  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+                      <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+                      <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                      <span class="name">Layout</span>.minimumWidth: <span class="name">selectionText</span>.<span class="name">implicitWidth</span> <span class="operator">+</span> <span class="number">10</span>
+                      <span class="name">Layout</span>.alignment: <span class="name">Qt</span>.<span class="name">AlignHCenter</span> <span class="operator">|</span> <span class="name">Qt</span>.<span class="name">AlignVCenter</span>
+
+                      <span class="name">border</span>.color: <span class="string">&quot;gray&quot;</span>
+                      <span class="name">border</span>.width: <span class="number">1</span>
+                      <span class="name">radius</span>: <span class="number">4</span>
+
+                      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                          <span class="name">id</span>: <span class="name">selectionText</span>
+                          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                          <span class="name">verticalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignVCenter</span>
+                          <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          <span class="name">text</span>: <span class="string">&quot;No selection&quot;</span>
+                      }
+                  }
+              }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-layouts-rowlayout.html">RowLayout</a></span> {
+                  <span class="name">id</span>: <span class="name">buttonLayout</span>
+                  <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+                  <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                  <span class="name">Layout</span>.minimumHeight: <span class="name">flatShadingToggle</span>.<span class="name">height</span>
+                  <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+                  <span class="name">spacing</span>: <span class="number">0</span>
+
+                  <span class="type">NewButton</span> {
+                      <span class="name">id</span>: <span class="name">flatShadingToggle</span>
+                      <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+                      <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+
+                      <span class="name">text</span>: <span class="name">surfaceSeries</span>.<span class="name">flatShadingSupported</span> ? <span class="string">&quot;Show Flat&quot;</span> : <span class="string">&quot;Flat not supported&quot;</span>
+                      <span class="name">enabled</span>: <span class="name">surfaceSeries</span>.<span class="name">flatShadingSupported</span>
+
+                      <span class="name">onClicked</span>: {
+                          <span class="keyword">if</span> (<span class="name">surfaceSeries</span>.<span class="name">flatShadingEnabled</span> <span class="operator">===</span> <span class="number">true</span>) {
+                              <span class="name">surfaceSeries</span>.<span class="name">flatShadingEnabled</span> <span class="operator">=</span> <span class="number">false</span>;
+                              <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Show Flat&quot;</span>
+                          } <span class="keyword">else</span> {
+                              <span class="name">surfaceSeries</span>.<span class="name">flatShadingEnabled</span> <span class="operator">=</span> <span class="number">true</span>;
+                              <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Show Smooth&quot;</span>
+                          }
+                      }
+                  }
+
+                  <span class="type">NewButton</span> {
+                      <span class="name">id</span>: <span class="name">surfaceGridToggle</span>
+                      <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+                      <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+
+                      <span class="name">text</span>: <span class="string">&quot;Show Surface Grid&quot;</span>
+
+                      <span class="name">onClicked</span>: {
+                          <span class="keyword">if</span> (<span class="name">surfaceSeries</span>.<span class="name">drawMode</span> <span class="operator">&amp;</span> <span class="name">Surface3DSeries</span>.<span class="name">DrawWireframe</span>) {
+                              <span class="name">surfaceSeries</span>.<span class="name">drawMode</span> <span class="operator">&amp;=</span> ~<span class="name">Surface3DSeries</span>.<span class="name">DrawWireframe</span>;
+                              <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Show Surface Grid&quot;</span>
+                          } <span class="keyword">else</span> {
+                              <span class="name">surfaceSeries</span>.<span class="name">drawMode</span> <span class="operator">|=</span> <span class="name">Surface3DSeries</span>.<span class="name">DrawWireframe</span>;
+                              <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Hide Surface Grid&quot;</span>
+                          }
+                      }
+                  }
+
+                  <span class="type">NewButton</span> {
+                      <span class="name">id</span>: <span class="name">exitButton</span>
+                      <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+                      <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+
+                      <span class="name">text</span>: <span class="string">&quot;Quit&quot;</span>
+
+                      <span class="name">onClicked</span>: <span class="name">Qt</span>.<span class="name">quit</span>(<span class="number">0</span>);
+                  }
+              }
+          }
+
+      }
+
+      <span class="keyword">function</span> <span class="name">generateData</span>() {
+          <span class="name">dataSource</span>.<span class="name">generateData</span>(<span class="name">mainView</span>.<span class="name">sampleCache</span>, <span class="name">mainView</span>.<span class="name">sampleRows</span>,
+                                  <span class="name">mainView</span>.<span class="name">sampleColumns</span>, <span class="name">surfaceGraph</span>.<span class="name">axisX</span>.<span class="name">min</span>,
+                                  <span class="name">surfaceGraph</span>.<span class="name">axisX</span>.<span class="name">max</span>, <span class="name">surfaceGraph</span>.<span class="name">axisY</span>.<span class="name">min</span>,
+                                  <span class="name">surfaceGraph</span>.<span class="name">axisY</span>.<span class="name">max</span>, <span class="name">surfaceGraph</span>.<span class="name">axisZ</span>.<span class="name">min</span>,
+                                  <span class="name">surfaceGraph</span>.<span class="name">axisZ</span>.<span class="name">max</span>)
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@qmloscilloscope/qml/qmloscilloscope/main.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

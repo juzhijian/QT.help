@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mapviewer.qml Example File | Qt Location 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-mapviewer-example.html">Map Viewer (QML)</a></td><td >mapviewer.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mapviewer.qml Example File</h1>
+<span class="subtitle">mapviewer/mapviewer.qml</span>
+<!-- $$$mapviewer/mapviewer.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.5
+  import QtQuick.Controls 1.4
+  import QtLocation 5.6
+  import QtPositioning 5.5
+  import &quot;map&quot;
+  import &quot;menus&quot;
+  import &quot;helper.js&quot; as Helper
+
+  <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls-applicationwindow.html">ApplicationWindow</a></span> {
+      <span class="name">id</span>: <span class="name">appWindow</span>
+      property <span class="type">variant</span> <span class="name">map</span>
+      property <span class="type">variant</span> <span class="name">minimap</span>
+      property <span class="type">variant</span> <span class="name">parameters</span>
+
+      <span class="comment">//defaults</span>
+      property <span class="type">variant</span> <span class="name">fromCoordinate</span>: <span class="name">QtPositioning</span>.<span class="name">coordinate</span>(<span class="number">59.9483</span>, <span class="number">10.7695</span>)
+      property <span class="type">variant</span> <span class="name">toCoordinate</span>: <span class="name">QtPositioning</span>.<span class="name">coordinate</span>(<span class="number">59.9645</span>, <span class="number">10.671</span>)
+
+      <span class="keyword">function</span> <span class="name">createMap</span>(<span class="name">provider</span>)
+      {
+          var <span class="name">plugin</span>
+
+          <span class="keyword">if</span> (<span class="name">parameters</span> <span class="operator">&amp;&amp;</span> <span class="name">parameters</span>.<span class="name">length</span><span class="operator">&gt;</span><span class="number">0</span>)
+              <span class="name">plugin</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">createQmlObject</span> (<span class="string">'import QtLocation 5.6; Plugin{ name:&quot;'</span> <span class="operator">+</span> <span class="name">provider</span> <span class="operator">+</span> <span class="string">'&quot;; parameters: appWindow.parameters}'</span>, <span class="name">appWindow</span>)
+          <span class="keyword">else</span>
+              <span class="name">plugin</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">createQmlObject</span> (<span class="string">'import QtLocation 5.6; Plugin{ name:&quot;'</span> <span class="operator">+</span> <span class="name">provider</span> <span class="operator">+</span> <span class="string">'&quot;}'</span>, <span class="name">appWindow</span>)
+
+          <span class="keyword">if</span> (<span class="name">minimap</span>) {
+              <span class="name">minimap</span>.<span class="name">destroy</span>()
+              <span class="name">minimap</span> <span class="operator">=</span> <span class="number">null</span>
+          }
+
+          var <span class="name">zoomLevel</span> = <span class="number">null</span>
+          var <span class="name">center</span> = <span class="number">null</span>
+          <span class="keyword">if</span> (<span class="name">map</span>) {
+              <span class="name">zoomLevel</span> <span class="operator">=</span> <span class="name">map</span>.<span class="name">zoomLevel</span>
+              <span class="name">center</span> <span class="operator">=</span> <span class="name">map</span>.<span class="name">center</span>
+              <span class="name">map</span>.<span class="name">destroy</span>()
+          }
+
+          <span class="name">map</span> <span class="operator">=</span> <span class="name">mapComponent</span>.<span class="name">createObject</span>(<span class="name">page</span>);
+          <span class="name">map</span>.<span class="name">plugin</span> <span class="operator">=</span> <span class="name">plugin</span>;
+          <span class="keyword">if</span> (<span class="name">zoomLevel</span> <span class="operator">!=</span> <span class="number">null</span>) {
+              <span class="name">map</span>.<span class="name">zoomLevel</span> <span class="operator">=</span> <span class="name">zoomLevel</span>
+              <span class="name">map</span>.<span class="name">center</span> <span class="operator">=</span> <span class="name">center</span>
+          } <span class="keyword">else</span> {
+              <span class="name">map</span>.<span class="name">zoomLevel</span> <span class="operator">=</span> (<span class="name">map</span>.<span class="name">maximumZoomLevel</span> <span class="operator">-</span> <span class="name">map</span>.<span class="name">minimumZoomLevel</span>)<span class="operator">/</span><span class="number">2</span>
+          }
+
+          <span class="name">map</span>.<span class="name">forceActiveFocus</span>()
+      }
+
+      <span class="keyword">function</span> <span class="name">getPlugins</span>()
+      {
+          var <span class="name">plugin</span> = <span class="name">Qt</span>.<span class="name">createQmlObject</span> (<span class="string">'import QtLocation 5.6; Plugin {}'</span>, <span class="name">appWindow</span>)
+          var <span class="name">myArray</span> = new <span class="name">Array</span>()
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span><span class="operator">&lt;</span><span class="name">plugin</span>.<span class="name">availableServiceProviders</span>.<span class="name">length</span>; i++) {
+              var <span class="name">tempPlugin</span> = <span class="name">Qt</span>.<span class="name">createQmlObject</span> (<span class="string">'import QtLocation 5.6; Plugin {name: &quot;'</span> <span class="operator">+</span> <span class="name">plugin</span>.<span class="name">availableServiceProviders</span>[<span class="name">i</span>]<span class="operator">+</span> <span class="string">'&quot;}'</span>, <span class="name">appWindow</span>)
+              <span class="keyword">if</span> (<span class="name">tempPlugin</span>.<span class="name">supportsMapping</span>())
+                  <span class="name">myArray</span>.<span class="name">push</span>(<span class="name">tempPlugin</span>.<span class="name">name</span>)
+          }
+          <span class="name">myArray</span>.<span class="name">sort</span>()
+          <span class="keyword">return</span> <span class="name">myArray</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">initializeProviders</span>(<span class="name">pluginParameters</span>)
+      {
+          var <span class="name">parameters</span> = new <span class="name">Array</span>()
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">prop</span> in <span class="name">pluginParameters</span>){
+              var <span class="name">parameter</span> = <span class="name">Qt</span>.<span class="name">createQmlObject</span>(<span class="string">'import QtLocation 5.6; PluginParameter{ name: &quot;'</span><span class="operator">+</span> <span class="name">prop</span> <span class="operator">+</span> <span class="string">'&quot;; value: &quot;'</span> <span class="operator">+</span> <span class="name">pluginParameters</span>[<span class="name">prop</span>]<span class="operator">+</span><span class="string">'&quot;}'</span>,<span class="name">appWindow</span>)
+              <span class="name">parameters</span>.<span class="name">push</span>(<span class="name">parameter</span>)
+          }
+          <span class="name">appWindow</span>.<span class="name">parameters</span> <span class="operator">=</span> <span class="name">parameters</span>
+          var <span class="name">plugins</span> = <span class="name">getPlugins</span>()
+          <span class="name">mainMenu</span>.<span class="name">providerMenu</span>.<span class="name">createMenu</span>(<span class="name">plugins</span>)
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span><span class="operator">&lt;</span><span class="name">plugins</span>.<span class="name">length</span>; i++) {
+              <span class="keyword">if</span> (<span class="name">plugins</span>[<span class="name">i</span>] <span class="operator">===</span> <span class="string">&quot;osm&quot;</span>)
+                  <span class="name">mainMenu</span>.<span class="name">selectProvider</span>(<span class="name">plugins</span>[<span class="name">i</span>])
+          }
+      }
+
+      <span class="name">title</span>: <span class="name">qsTr</span>(<span class="string">&quot;Mapviewer&quot;</span>)
+      <span class="name">height</span>: <span class="number">640</span>
+      <span class="name">width</span>: <span class="number">360</span>
+      <span class="name">visible</span>: <span class="number">true</span>
+      <span class="name">menuBar</span>: <span class="name">mainMenu</span>
+
+      <span class="type"><a href="../qtpositioning/qml-qtpositioning-address.html">Address</a></span> {
+          <span class="name">id</span> :<span class="name">fromAddress</span>
+          <span class="name">street</span>: <span class="string">&quot;Sandakerveien 116&quot;</span>
+          <span class="name">city</span>: <span class="string">&quot;Oslo&quot;</span>
+          <span class="name">country</span>: <span class="string">&quot;Norway&quot;</span>
+          <span class="name">state</span> : <span class="string">&quot;&quot;</span>
+          <span class="name">postalCode</span>: <span class="string">&quot;0484&quot;</span>
+      }
+
+      <span class="type"><a href="../qtpositioning/qml-qtpositioning-address.html">Address</a></span> {
+          <span class="name">id</span>: <span class="name">toAddress</span>
+          <span class="name">street</span>: <span class="string">&quot;Holmenkollveien 140&quot;</span>
+          <span class="name">city</span>: <span class="string">&quot;Oslo&quot;</span>
+          <span class="name">country</span>: <span class="string">&quot;Norway&quot;</span>
+          <span class="name">postalCode</span>: <span class="string">&quot;0791&quot;</span>
+      }
+
+      <span class="type">MainMenu</span> {
+          <span class="name">id</span>: <span class="name">mainMenu</span>
+
+          <span class="keyword">function</span> <span class="name">toggleMiniMapState</span>()
+          {
+              <span class="keyword">if</span> (<span class="name">minimap</span>) {
+                  <span class="name">minimap</span>.<span class="name">destroy</span>()
+                  <span class="name">minimap</span> <span class="operator">=</span> <span class="number">null</span>
+              } <span class="keyword">else</span> {
+                  <span class="name">minimap</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">createQmlObject</span> (<span class="string">'import &quot;map&quot;; MiniMap{ z: map.z + 2 }'</span>, <span class="name">map</span>)
+              }
+          }
+
+          <span class="keyword">function</span> <span class="name">setLanguage</span>(<span class="name">lang</span>)
+          {
+              <span class="name">map</span>.<span class="name">plugin</span>.<span class="name">locales</span> <span class="operator">=</span> <span class="name">lang</span>;
+              <span class="name">stackView</span>.<span class="name">pop</span>(<span class="name">page</span>)
+          }
+
+          <span class="name">onSelectProvider</span>: {
+              <span class="name">stackView</span>.<span class="name">pop</span>()
+              <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">providerMenu</span>.<span class="name">items</span>.<span class="name">length</span>; i++) {
+                  <span class="name">providerMenu</span>.<span class="name">items</span>[<span class="name">i</span>].<span class="name">checked</span> <span class="operator">=</span> <span class="name">providerMenu</span>.<span class="name">items</span>[<span class="name">i</span>].<span class="name">text</span> <span class="operator">===</span> <span class="name">providerName</span>
+              }
+
+              <span class="name">createMap</span>(<span class="name">providerName</span>)
+              <span class="keyword">if</span> (<span class="name">map</span>.<span class="name">error</span> <span class="operator">===</span> <span class="name">Map</span>.<span class="name">NoError</span>) {
+                  <span class="name">selectMapType</span>(<span class="name">map</span>.<span class="name">activeMapType</span>)
+                  <span class="name">toolsMenu</span>.<span class="name">createMenu</span>(<span class="name">map</span>);
+              } <span class="keyword">else</span> {
+                  <span class="name">mapTypeMenu</span>.<span class="name">clear</span>();
+                  <span class="name">toolsMenu</span>.<span class="name">clear</span>();
+              }
+          }
+
+          <span class="name">onSelectMapType</span>: {
+              <span class="name">stackView</span>.<span class="name">pop</span>(<span class="name">page</span>)
+              <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">mapTypeMenu</span>.<span class="name">items</span>.<span class="name">length</span>; i++) {
+                  <span class="name">mapTypeMenu</span>.<span class="name">items</span>[<span class="name">i</span>].<span class="name">checked</span> <span class="operator">=</span> <span class="name">mapTypeMenu</span>.<span class="name">items</span>[<span class="name">i</span>].<span class="name">text</span> <span class="operator">===</span> <span class="name">mapType</span>.<span class="name">name</span>
+              }
+              <span class="name">map</span>.<span class="name">activeMapType</span> <span class="operator">=</span> <span class="name">mapType</span>
+          }
+
+          <span class="name">onSelectTool</span>: {
+              <span class="keyword">switch</span> (<span class="name">tool</span>) {
+              <span class="keyword">case</span> <span class="string">&quot;AddressRoute&quot;</span>:
+                  <span class="name">stackView</span>.<span class="name">pop</span>({item:<span class="name">page</span>, immediate: <span class="number">true</span>})
+                  <span class="name">stackView</span>.<span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;forms/RouteAddress.qml&quot;</span>) ,
+                                     properties: { &quot;plugin&quot;: <span class="name">map</span>.<span class="name">plugin</span>,
+                                         &quot;toAddress&quot;: <span class="name">toAddress</span>,
+                                         &quot;fromAddress&quot;: <span class="name">fromAddress</span>}})
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">showRoute</span>.<span class="name">connect</span>(<span class="name">map</span>.<span class="name">calculateCoordinateRoute</span>)
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">showMessage</span>.<span class="name">connect</span>(<span class="name">stackView</span>.<span class="name">showMessage</span>)
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">closeForm</span>.<span class="name">connect</span>(<span class="name">stackView</span>.<span class="name">closeForm</span>)
+                  <span class="keyword">break</span>
+              <span class="keyword">case</span> <span class="string">&quot;CoordinateRoute&quot;</span>:
+                  <span class="name">stackView</span>.<span class="name">pop</span>({item:<span class="name">page</span>, immediate: <span class="number">true</span>})
+                  <span class="name">stackView</span>.<span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;forms/RouteCoordinate.qml&quot;</span>) ,
+                                     properties: { &quot;toCoordinate&quot;: <span class="name">toCoordinate</span>,
+                                         &quot;fromCoordinate&quot;: <span class="name">fromCoordinate</span>}})
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">showRoute</span>.<span class="name">connect</span>(<span class="name">map</span>.<span class="name">calculateCoordinateRoute</span>)
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">closeForm</span>.<span class="name">connect</span>(<span class="name">stackView</span>.<span class="name">closeForm</span>)
+                  <span class="keyword">break</span>
+              <span class="keyword">case</span> <span class="string">&quot;Geocode&quot;</span>:
+                  <span class="name">stackView</span>.<span class="name">pop</span>({item:<span class="name">page</span>, immediate: <span class="number">true</span>})
+                  <span class="name">stackView</span>.<span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;forms/Geocode.qml&quot;</span>) ,
+                                     properties: { &quot;address&quot;: <span class="name">fromAddress</span>}})
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">showPlace</span>.<span class="name">connect</span>(<span class="name">map</span>.<span class="name">geocode</span>)
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">closeForm</span>.<span class="name">connect</span>(<span class="name">stackView</span>.<span class="name">closeForm</span>)
+                  <span class="keyword">break</span>
+              <span class="keyword">case</span> <span class="string">&quot;RevGeocode&quot;</span>:
+                  <span class="name">stackView</span>.<span class="name">pop</span>({item:<span class="name">page</span>, immediate: <span class="number">true</span>})
+                  <span class="name">stackView</span>.<span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;forms/ReverseGeocode.qml&quot;</span>) ,
+                                     properties: { &quot;coordinate&quot;: <span class="name">fromCoordinate</span>}})
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">showPlace</span>.<span class="name">connect</span>(<span class="name">map</span>.<span class="name">geocode</span>)
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">closeForm</span>.<span class="name">connect</span>(<span class="name">stackView</span>.<span class="name">closeForm</span>)
+                  <span class="keyword">break</span>
+              <span class="keyword">case</span> <span class="string">&quot;Language&quot;</span>:
+                  <span class="name">stackView</span>.<span class="name">pop</span>({item:<span class="name">page</span>, immediate: <span class="number">true</span>})
+                  <span class="name">stackView</span>.<span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;forms/Locale.qml&quot;</span>) ,
+                                     properties: { &quot;locale&quot;:  <span class="name">map</span>.<span class="name">plugin</span>.<span class="name">locales</span>[<span class="number">0</span>]}})
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">selectLanguage</span>.<span class="name">connect</span>(<span class="name">setLanguage</span>)
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">closeForm</span>.<span class="name">connect</span>(<span class="name">stackView</span>.<span class="name">closeForm</span>)
+                  <span class="keyword">break</span>
+              <span class="keyword">case</span> <span class="string">&quot;Clear&quot;</span>:
+                  <span class="name">map</span>.<span class="name">clearData</span>()
+                  <span class="keyword">break</span>
+              <span class="keyword">case</span> <span class="string">&quot;Prefetch&quot;</span>:
+                  <span class="name">map</span>.<span class="name">prefetchData</span>()
+                  <span class="keyword">break</span>
+              <span class="keyword">default</span>:
+                  <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Unsupported operation&quot;</span>)
+              }
+          }
+
+          <span class="name">onToggleMapState</span>: {
+              <span class="name">stackView</span>.<span class="name">pop</span>(<span class="name">page</span>)
+              <span class="keyword">switch</span> (<span class="name">state</span>) {
+              <span class="keyword">case</span> <span class="string">&quot;FollowMe&quot;</span>:
+                  <span class="name">map</span>.<span class="name">followme</span> <span class="operator">=</span> !<span class="name">map</span>.<span class="name">followme</span>
+                  <span class="keyword">break</span>
+              <span class="keyword">case</span> <span class="string">&quot;MiniMap&quot;</span>:
+                  <span class="name">toggleMiniMapState</span>()
+                  <span class="name">isMiniMap</span> <span class="operator">=</span> <span class="name">minimap</span>
+                  <span class="keyword">break</span>
+              <span class="keyword">default</span>:
+                  <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Unsupported operation&quot;</span>)
+              }
+          }
+      }
+
+      <span class="type">MapPopupMenu</span> {
+          <span class="name">id</span>: <span class="name">mapPopupMenu</span>
+
+          <span class="keyword">function</span> <span class="name">show</span>(<span class="name">coordinate</span>)
+          {
+              <span class="name">stackView</span>.<span class="name">pop</span>(<span class="name">page</span>)
+              <span class="name">mapPopupMenu</span>.<span class="name">coordinate</span> <span class="operator">=</span> <span class="name">coordinate</span>
+              <span class="name">mapPopupMenu</span>.<span class="name">markersCount</span> <span class="operator">=</span> <span class="name">map</span>.<span class="name">markers</span>.<span class="name">length</span>
+              <span class="name">mapPopupMenu</span>.<span class="name">mapItemsCount</span> <span class="operator">=</span> <span class="name">map</span>.<span class="name">mapItems</span>.<span class="name">length</span>
+              <span class="name">mapPopupMenu</span>.<span class="name">update</span>()
+              <span class="name">mapPopupMenu</span>.<span class="name">popup</span>()
+          }
+
+          <span class="name">onItemClicked</span>: {
+              <span class="name">stackView</span>.<span class="name">pop</span>(<span class="name">page</span>)
+              <span class="keyword">switch</span> (<span class="name">item</span>) {
+              <span class="keyword">case</span> <span class="string">&quot;addMarker&quot;</span>:
+                  <span class="name">map</span>.<span class="name">addMarker</span>()
+                  <span class="keyword">break</span>
+              <span class="keyword">case</span> <span class="string">&quot;getCoordinate&quot;</span>:
+                  <span class="name">map</span>.<span class="name">coordinatesCaptured</span>(<span class="name">coordinate</span>.<span class="name">latitude</span>, <span class="name">coordinate</span>.<span class="name">longitude</span>)
+                  <span class="keyword">break</span>
+              <span class="keyword">case</span> <span class="string">&quot;fitViewport&quot;</span>:
+                  <span class="name">map</span>.<span class="name">fitViewportToMapItems</span>()
+                  <span class="keyword">break</span>
+              <span class="keyword">case</span> <span class="string">&quot;deleteMarkers&quot;</span>:
+                  <span class="name">map</span>.<span class="name">deleteMarkers</span>()
+                  <span class="keyword">break</span>
+              <span class="keyword">case</span> <span class="string">&quot;deleteItems&quot;</span>:
+                  <span class="name">map</span>.<span class="name">deleteMapItems</span>()
+                  <span class="keyword">break</span>
+              <span class="keyword">default</span>:
+                  <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Unsupported operation&quot;</span>)
+              }
+          }
+      }
+
+      <span class="type">MarkerPopupMenu</span> {
+          <span class="name">id</span>: <span class="name">markerPopupMenu</span>
+
+          <span class="keyword">function</span> <span class="name">show</span>(<span class="name">coordinate</span>)
+          {
+              <span class="name">stackView</span>.<span class="name">pop</span>(<span class="name">page</span>)
+              <span class="name">markerPopupMenu</span>.<span class="name">markersCount</span> <span class="operator">=</span> <span class="name">map</span>.<span class="name">markers</span>.<span class="name">length</span>
+              <span class="name">markerPopupMenu</span>.<span class="name">update</span>()
+              <span class="name">markerPopupMenu</span>.<span class="name">popup</span>()
+          }
+
+          <span class="keyword">function</span> <span class="name">askForCoordinate</span>()
+          {
+              <span class="name">stackView</span>.<span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;forms/ReverseGeocode.qml&quot;</span>) ,
+                                 properties: { &quot;title&quot;: <span class="name">qsTr</span>(<span class="string">&quot;New Coordinate&quot;</span>),
+                                     &quot;coordinate&quot;:   <span class="name">map</span>.<span class="name">markers</span>[<span class="name">map</span>.<span class="name">currentMarker</span>].<span class="name">coordinate</span>}})
+              <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">showPlace</span>.<span class="name">connect</span>(<span class="name">moveMarker</span>)
+              <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">closeForm</span>.<span class="name">connect</span>(<span class="name">stackView</span>.<span class="name">closeForm</span>)
+          }
+
+          <span class="keyword">function</span> <span class="name">moveMarker</span>(<span class="name">coordinate</span>)
+          {
+              <span class="name">map</span>.<span class="name">markers</span>[<span class="name">map</span>.<span class="name">currentMarker</span>].<span class="name">coordinate</span> <span class="operator">=</span> <span class="name">coordinate</span>;
+              <span class="name">map</span>.<span class="name">center</span> <span class="operator">=</span> <span class="name">coordinate</span>;
+              <span class="name">stackView</span>.<span class="name">pop</span>(<span class="name">page</span>)
+          }
+
+          <span class="name">onItemClicked</span>: {
+              <span class="name">stackView</span>.<span class="name">pop</span>(<span class="name">page</span>)
+              <span class="keyword">switch</span> (<span class="name">item</span>) {
+              <span class="keyword">case</span> <span class="string">&quot;deleteMarker&quot;</span>:
+                  <span class="name">map</span>.<span class="name">deleteMarker</span>(<span class="name">map</span>.<span class="name">currentMarker</span>)
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="string">&quot;getMarkerCoordinate&quot;</span>:
+                  <span class="name">map</span>.<span class="name">coordinatesCaptured</span>(<span class="name">map</span>.<span class="name">markers</span>[<span class="name">map</span>.<span class="name">currentMarker</span>].<span class="name">coordinate</span>.<span class="name">latitude</span>, <span class="name">map</span>.<span class="name">markers</span>[<span class="name">map</span>.<span class="name">currentMarker</span>].<span class="name">coordinate</span>.<span class="name">longitude</span>)
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="string">&quot;moveMarkerTo&quot;</span>:
+                  <span class="name">askForCoordinate</span>()
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="string">&quot;routeToNextPoint&quot;</span>:
+              <span class="keyword">case</span> <span class="string">&quot;routeToNextPoints&quot;</span>:
+                  <span class="name">map</span>.<span class="name">calculateMarkerRoute</span>()
+                  <span class="keyword">break</span>
+              <span class="keyword">case</span> <span class="string">&quot;distanceToNextPoint&quot;</span>:
+                  var <span class="name">coordinate1</span> = <span class="name">map</span>.<span class="name">markers</span>[<span class="name">currentMarker</span>].<span class="name">coordinate</span>;
+                  var <span class="name">coordinate2</span> = <span class="name">map</span>.<span class="name">markers</span>[<span class="name">currentMarker</span><span class="operator">+</span><span class="number">1</span>].<span class="name">coordinate</span>;
+                  var <span class="name">distance</span> = <span class="name">Helper</span>.<span class="name">formatDistance</span>(<span class="name">coordinate1</span>.<span class="name">distanceTo</span>(<span class="name">coordinate2</span>));
+                  <span class="name">stackView</span>.<span class="name">showMessage</span>(<span class="name">qsTr</span>(<span class="string">&quot;Distance&quot;</span>),<span class="string">&quot;&lt;b&gt;&quot;</span> <span class="operator">+</span> <span class="name">qsTr</span>(<span class="string">&quot;Distance:&quot;</span>) <span class="operator">+</span> <span class="string">&quot;&lt;/b&gt; &quot;</span> <span class="operator">+</span> <span class="name">distance</span>)
+                  <span class="keyword">break</span>
+              <span class="keyword">case</span> <span class="string">&quot;drawImage&quot;</span>:
+                  <span class="name">map</span>.<span class="name">addGeoItem</span>(<span class="string">&quot;ImageItem&quot;</span>)
+                  <span class="keyword">break</span>
+              <span class="keyword">case</span> <span class="string">&quot;drawRectangle&quot;</span>:
+                  <span class="name">map</span>.<span class="name">addGeoItem</span>(<span class="string">&quot;RectangleItem&quot;</span>)
+                  <span class="keyword">break</span>
+              <span class="keyword">case</span> <span class="string">&quot;drawCircle&quot;</span>:
+                  <span class="name">map</span>.<span class="name">addGeoItem</span>(<span class="string">&quot;CircleItem&quot;</span>)
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="string">&quot;drawPolyline&quot;</span>:
+                  <span class="name">map</span>.<span class="name">addGeoItem</span>(<span class="string">&quot;PolylineItem&quot;</span>)
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="string">&quot;drawPolygonMenu&quot;</span>:
+                  <span class="name">map</span>.<span class="name">addGeoItem</span>(<span class="string">&quot;PolygonItem&quot;</span>)
+                  <span class="keyword">break</span>
+              <span class="keyword">default</span>:
+                  <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Unsupported operation&quot;</span>)
+              }
+          }
+      }
+
+      <span class="type">ItemPopupMenu</span> {
+          <span class="name">id</span>: <span class="name">itemPopupMenu</span>
+
+          <span class="keyword">function</span> <span class="name">show</span>(<span class="name">type</span>,coordinate)
+          {
+              <span class="name">stackView</span>.<span class="name">pop</span>(<span class="name">page</span>)
+              <span class="name">itemPopupMenu</span>.<span class="name">type</span> <span class="operator">=</span> <span class="name">type</span>
+              <span class="name">itemPopupMenu</span>.<span class="name">update</span>()
+              <span class="name">itemPopupMenu</span>.<span class="name">popup</span>()
+          }
+
+          <span class="name">onItemClicked</span>: {
+              <span class="name">stackView</span>.<span class="name">pop</span>(<span class="name">page</span>)
+              <span class="keyword">switch</span> (<span class="name">item</span>) {
+              <span class="keyword">case</span> <span class="string">&quot;showRouteInfo&quot;</span>:
+                  <span class="name">stackView</span>.<span class="name">showRouteListPage</span>()
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="string">&quot;deleteRoute&quot;</span>:
+                  <span class="name">map</span>.<span class="name">routeModel</span>.<span class="name">reset</span>();
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="string">&quot;showPointInfo&quot;</span>:
+                  <span class="name">map</span>.<span class="name">showGeocodeInfo</span>()
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="string">&quot;deletePoint&quot;</span>:
+                  <span class="name">map</span>.<span class="name">geocodeModel</span>.<span class="name">reset</span>()
+                  <span class="keyword">break</span>;
+              <span class="keyword">default</span>:
+                  <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Unsupported operation&quot;</span>)
+              }
+          }
+      }
+
+      <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls-stackview.html">StackView</a></span> {
+          <span class="name">id</span>: <span class="name">stackView</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">focus</span>: <span class="number">true</span>
+          <span class="name">initialItem</span>: <span class="name">Item</span> {
+              <span class="name">id</span>: <span class="name">page</span>
+          }
+
+          <span class="keyword">function</span> <span class="name">showMessage</span>(<span class="name">title</span>,message,backPage)
+          {
+              <span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;forms/Message.qml&quot;</span>) ,
+                                 properties: {
+                                     &quot;title&quot; : <span class="name">title</span>,
+                                     &quot;message&quot; : <span class="name">message</span>,
+                                     &quot;backPage&quot; : <span class="name">backPage</span>
+                                 }})
+              <span class="name">currentItem</span>.<span class="name">closeForm</span>.<span class="name">connect</span>(<span class="name">closeMessage</span>)
+          }
+
+          <span class="keyword">function</span> <span class="name">closeMessage</span>(<span class="name">backPage</span>)
+          {
+              <span class="name">pop</span>(<span class="name">backPage</span>)
+          }
+
+          <span class="keyword">function</span> <span class="name">closeForm</span>()
+          {
+              <span class="name">pop</span>(<span class="name">page</span>)
+          }
+
+          <span class="keyword">function</span> <span class="name">showRouteListPage</span>()
+          {
+              <span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;forms/RouteList.qml&quot;</span>) ,
+                                 properties: {
+                                     &quot;routeModel&quot; : <span class="name">map</span>.<span class="name">routeModel</span>
+                                 }})
+              <span class="name">currentItem</span>.<span class="name">closeForm</span>.<span class="name">connect</span>(<span class="name">closeForm</span>)
+          }
+      }
+
+      <span class="type"><a href="../qtqml/qml-qtqml-component.html">Component</a></span> {
+          <span class="name">id</span>: <span class="name">mapComponent</span>
+
+          <span class="type">MapComponent</span>{
+              <span class="name">width</span>: <span class="name">page</span>.<span class="name">width</span>
+              <span class="name">height</span>: <span class="name">page</span>.<span class="name">height</span>
+              <span class="name">onFollowmeChanged</span>: <span class="name">mainMenu</span>.<span class="name">isFollowMe</span> <span class="operator">=</span> <span class="name">map</span>.<span class="name">followme</span>
+              <span class="name">onSupportedMapTypesChanged</span>: <span class="name">mainMenu</span>.<span class="name">mapTypeMenu</span>.<span class="name">createMenu</span>(<span class="name">map</span>)
+              <span class="name">onCoordinatesCaptured</span>: {
+                  var <span class="name">text</span> = <span class="string">&quot;&lt;b&gt;&quot;</span> <span class="operator">+</span> <span class="name">qsTr</span>(<span class="string">&quot;Latitude:&quot;</span>) <span class="operator">+</span> <span class="string">&quot;&lt;/b&gt; &quot;</span> <span class="operator">+</span> <span class="name">Helper</span>.<span class="name">roundNumber</span>(<span class="name">latitude</span>,<span class="number">4</span>) <span class="operator">+</span> <span class="string">&quot;&lt;br/&gt;&lt;b&gt;&quot;</span> <span class="operator">+</span> <span class="name">qsTr</span>(<span class="string">&quot;Longitude:&quot;</span>) <span class="operator">+</span> <span class="string">&quot;&lt;/b&gt; &quot;</span> <span class="operator">+</span> <span class="name">Helper</span>.<span class="name">roundNumber</span>(<span class="name">longitude</span>,<span class="number">4</span>)
+                  <span class="name">stackView</span>.<span class="name">showMessage</span>(<span class="name">qsTr</span>(<span class="string">&quot;Coordinates&quot;</span>),<span class="name">text</span>);
+              }
+              <span class="name">onGeocodeFinished</span>:{
+                  <span class="keyword">if</span> (<span class="name">map</span>.<span class="name">geocodeModel</span>.<span class="name">status</span> <span class="operator">==</span> <span class="name">GeocodeModel</span>.<span class="name">Ready</span>) {
+                      <span class="keyword">if</span> (<span class="name">map</span>.<span class="name">geocodeModel</span>.<span class="name">count</span> <span class="operator">==</span> <span class="number">0</span>) {
+                          <span class="name">stackView</span>.<span class="name">showMessage</span>(<span class="name">qsTr</span>(<span class="string">&quot;Geocode Error&quot;</span>),<span class="name">qsTr</span>(<span class="string">&quot;Unsuccessful geocode&quot;</span>))
+                      } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">map</span>.<span class="name">geocodeModel</span>.<span class="name">count</span> <span class="operator">&gt;</span> <span class="number">1</span>) {
+                          <span class="name">stackView</span>.<span class="name">showMessage</span>(<span class="name">qsTr</span>(<span class="string">&quot;Ambiguous geocode&quot;</span>), <span class="name">map</span>.<span class="name">geocodeModel</span>.<span class="name">count</span> <span class="operator">+</span> <span class="string">&quot; &quot;</span> <span class="operator">+</span>
+                                                <span class="name">qsTr</span>(<span class="string">&quot;results found for the given address, please specify location&quot;</span>))
+                      } <span class="keyword">else</span> {
+                          <span class="name">stackView</span>.<span class="name">showMessage</span>(<span class="name">qsTr</span>(<span class="string">&quot;Location&quot;</span>), <span class="name">geocodeMessage</span>(),<span class="name">page</span>)
+                      }
+                  } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">map</span>.<span class="name">geocodeModel</span>.<span class="name">status</span> <span class="operator">==</span> <span class="name">GeocodeModel</span>.<span class="name">Error</span>) {
+                      <span class="name">stackView</span>.<span class="name">showMessage</span>(<span class="name">qsTr</span>(<span class="string">&quot;Geocode Error&quot;</span>),<span class="name">qsTr</span>(<span class="string">&quot;Unsuccessful geocode&quot;</span>))
+                  }
+              }
+              <span class="name">onRouteError</span>: <span class="name">stackView</span>.<span class="name">showMessage</span>(<span class="name">qsTr</span>(<span class="string">&quot;Route Error&quot;</span>),<span class="name">qsTr</span>(<span class="string">&quot;Unable to find a route for the given points&quot;</span>),<span class="name">page</span>)
+
+              <span class="name">onShowGeocodeInfo</span>: <span class="name">stackView</span>.<span class="name">showMessage</span>(<span class="name">qsTr</span>(<span class="string">&quot;Location&quot;</span>),<span class="name">geocodeMessage</span>(),<span class="name">page</span>)
+
+              <span class="name">onErrorChanged</span>: {
+                  <span class="keyword">if</span> (<span class="name">map</span>.<span class="name">error</span> <span class="operator">!=</span> <span class="name">Map</span>.<span class="name">NoError</span>) {
+                      var <span class="name">title</span> = <span class="name">qsTr</span>(<span class="string">&quot;ProviderError&quot;</span>)
+                      var <span class="name">message</span> =  <span class="name">map</span>.<span class="name">errorString</span> <span class="operator">+</span> <span class="string">&quot;&lt;br/&gt;&lt;br/&gt;&lt;b&gt;&quot;</span> <span class="operator">+</span> <span class="name">qsTr</span>(<span class="string">&quot;Try to select other provider&quot;</span>) <span class="operator">+</span> <span class="string">&quot;&lt;/b&gt;&quot;</span>
+                      <span class="keyword">if</span> (<span class="name">map</span>.<span class="name">error</span> <span class="operator">==</span> <span class="name">Map</span>.<span class="name">MissingRequiredParameterError</span>)
+                          <span class="name">message</span> <span class="operator">+=</span> <span class="string">&quot;&lt;br/&gt;&quot;</span> <span class="operator">+</span> <span class="name">qsTr</span>(<span class="string">&quot;or see&quot;</span>) <span class="operator">+</span> <span class="string">&quot; \'mapviewer --help\' &quot;</span>
+                                  <span class="operator">+</span> <span class="name">qsTr</span>(<span class="string">&quot;how to pass plugin parameters.&quot;</span>)
+                      <span class="name">stackView</span>.<span class="name">showMessage</span>(<span class="name">title</span>,<span class="name">message</span>);
+                  }
+              }
+              <span class="name">onShowMainMenu</span>: <span class="name">mapPopupMenu</span>.<span class="name">show</span>(<span class="name">coordinate</span>)
+              <span class="name">onShowMarkerMenu</span>: <span class="name">markerPopupMenu</span>.<span class="name">show</span>(<span class="name">coordinate</span>)
+              <span class="name">onShowRouteMenu</span>: <span class="name">itemPopupMenu</span>.<span class="name">show</span>(<span class="string">&quot;Route&quot;</span>,<span class="name">coordinate</span>)
+              <span class="name">onShowPointMenu</span>: <span class="name">itemPopupMenu</span>.<span class="name">show</span>(<span class="string">&quot;Point&quot;</span>,<span class="name">coordinate</span>)
+              <span class="name">onShowRouteList</span>: <span class="name">stackView</span>.<span class="name">showRouteListPage</span>()
+          }
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@mapviewer/mapviewer.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

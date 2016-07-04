@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>node.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-graphicsview-elasticnodes-example.html">Elastic Nodes Example</a></td><td >node.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">node.cpp Example File</h1>
+<span class="subtitle">graphicsview/elasticnodes/node.cpp</span>
+<!-- $$$graphicsview/elasticnodes/node.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;edge.h&quot;</span>
+  <span class="preprocessor">#include &quot;node.h&quot;</span>
+  <span class="preprocessor">#include &quot;graphwidget.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QGraphicsScene&gt;</span>
+  <span class="preprocessor">#include &lt;QGraphicsSceneMouseEvent&gt;</span>
+  <span class="preprocessor">#include &lt;QPainter&gt;</span>
+  <span class="preprocessor">#include &lt;QStyleOption&gt;</span>
+
+  Node<span class="operator">::</span>Node(GraphWidget <span class="operator">*</span>graphWidget)
+      : graph(graphWidget)
+  {
+      setFlag(ItemIsMovable);
+      setFlag(ItemSendsGeometryChanges);
+      setCacheMode(DeviceCoordinateCache);
+      setZValue(<span class="operator">-</span><span class="number">1</span>);
+  }
+
+  <span class="type">void</span> Node<span class="operator">::</span>addEdge(Edge <span class="operator">*</span>edge)
+  {
+      edgeList <span class="operator">&lt;</span><span class="operator">&lt;</span> edge;
+      edge<span class="operator">-</span><span class="operator">&gt;</span>adjust();
+  }
+
+  <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>Edge <span class="operator">*</span><span class="operator">&gt;</span> Node<span class="operator">::</span>edges() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> edgeList;
+  }
+
+  <span class="type">void</span> Node<span class="operator">::</span>calculateForces()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>scene() <span class="operator">|</span><span class="operator">|</span> scene()<span class="operator">-</span><span class="operator">&gt;</span>mouseGrabberItem() <span class="operator">=</span><span class="operator">=</span> <span class="keyword">this</span>) {
+          newPos <span class="operator">=</span> pos();
+          <span class="keyword">return</span>;
+      }
+
+      <span class="comment">// Sum up all forces pushing this item away</span>
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> xvel <span class="operator">=</span> <span class="number">0</span>;
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> yvel <span class="operator">=</span> <span class="number">0</span>;
+      foreach (<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span>item<span class="operator">,</span> scene()<span class="operator">-</span><span class="operator">&gt;</span>items()) {
+          Node <span class="operator">*</span>node <span class="operator">=</span> qgraphicsitem_cast<span class="operator">&lt;</span>Node <span class="operator">*</span><span class="operator">&gt;</span>(item);
+          <span class="keyword">if</span> (<span class="operator">!</span>node)
+              <span class="keyword">continue</span>;
+
+          <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> vec <span class="operator">=</span> mapToItem(node<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> dx <span class="operator">=</span> vec<span class="operator">.</span>x();
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> dy <span class="operator">=</span> vec<span class="operator">.</span>y();
+          <span class="type">double</span> l <span class="operator">=</span> <span class="number">2.0</span> <span class="operator">*</span> (dx <span class="operator">*</span> dx <span class="operator">+</span> dy <span class="operator">*</span> dy);
+          <span class="keyword">if</span> (l <span class="operator">&gt;</span> <span class="number">0</span>) {
+              xvel <span class="operator">+</span><span class="operator">=</span> (dx <span class="operator">*</span> <span class="number">150.0</span>) <span class="operator">/</span> l;
+              yvel <span class="operator">+</span><span class="operator">=</span> (dy <span class="operator">*</span> <span class="number">150.0</span>) <span class="operator">/</span> l;
+          }
+      }
+
+      <span class="comment">// Now subtract all forces pulling items together</span>
+      <span class="type">double</span> weight <span class="operator">=</span> (edgeList<span class="operator">.</span>size() <span class="operator">+</span> <span class="number">1</span>) <span class="operator">*</span> <span class="number">10</span>;
+      foreach (Edge <span class="operator">*</span>edge<span class="operator">,</span> edgeList) {
+          <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> vec;
+          <span class="keyword">if</span> (edge<span class="operator">-</span><span class="operator">&gt;</span>sourceNode() <span class="operator">=</span><span class="operator">=</span> <span class="keyword">this</span>)
+              vec <span class="operator">=</span> mapToItem(edge<span class="operator">-</span><span class="operator">&gt;</span>destNode()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+          <span class="keyword">else</span>
+              vec <span class="operator">=</span> mapToItem(edge<span class="operator">-</span><span class="operator">&gt;</span>sourceNode()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+          xvel <span class="operator">-</span><span class="operator">=</span> vec<span class="operator">.</span>x() <span class="operator">/</span> weight;
+          yvel <span class="operator">-</span><span class="operator">=</span> vec<span class="operator">.</span>y() <span class="operator">/</span> weight;
+      }
+
+      <span class="keyword">if</span> (<a href="../qtcore/qtglobal.html#qAbs">qAbs</a>(xvel) <span class="operator">&lt;</span> <span class="number">0.1</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> <a href="../qtcore/qtglobal.html#qAbs">qAbs</a>(yvel) <span class="operator">&lt;</span> <span class="number">0.1</span>)
+          xvel <span class="operator">=</span> yvel <span class="operator">=</span> <span class="number">0</span>;
+
+      <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> sceneRect <span class="operator">=</span> scene()<span class="operator">-</span><span class="operator">&gt;</span>sceneRect();
+      newPos <span class="operator">=</span> pos() <span class="operator">+</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>(xvel<span class="operator">,</span> yvel);
+      newPos<span class="operator">.</span>setX(<a href="../qtcore/qtglobal.html#qMin">qMin</a>(<a href="../qtcore/qtglobal.html#qMax">qMax</a>(newPos<span class="operator">.</span>x()<span class="operator">,</span> sceneRect<span class="operator">.</span>left() <span class="operator">+</span> <span class="number">10</span>)<span class="operator">,</span> sceneRect<span class="operator">.</span>right() <span class="operator">-</span> <span class="number">10</span>));
+      newPos<span class="operator">.</span>setY(<a href="../qtcore/qtglobal.html#qMin">qMin</a>(<a href="../qtcore/qtglobal.html#qMax">qMax</a>(newPos<span class="operator">.</span>y()<span class="operator">,</span> sceneRect<span class="operator">.</span>top() <span class="operator">+</span> <span class="number">10</span>)<span class="operator">,</span> sceneRect<span class="operator">.</span>bottom() <span class="operator">-</span> <span class="number">10</span>));
+  }
+
+  bool Node<span class="operator">::</span>advance()
+  {
+      <span class="keyword">if</span> (newPos <span class="operator">=</span><span class="operator">=</span> pos())
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      setPos(newPos);
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> Node<span class="operator">::</span>boundingRect() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> adjust <span class="operator">=</span> <span class="number">2</span>;
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span>( <span class="operator">-</span><span class="number">10</span> <span class="operator">-</span> adjust<span class="operator">,</span> <span class="operator">-</span><span class="number">10</span> <span class="operator">-</span> adjust<span class="operator">,</span> <span class="number">23</span> <span class="operator">+</span> adjust<span class="operator">,</span> <span class="number">23</span> <span class="operator">+</span> adjust);
+  }
+
+  <span class="type"><a href="../qtgui/qpainterpath.html">QPainterPath</a></span> Node<span class="operator">::</span>shape() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtgui/qpainterpath.html">QPainterPath</a></span> path;
+      path<span class="operator">.</span>addEllipse(<span class="operator">-</span><span class="number">10</span><span class="operator">,</span> <span class="operator">-</span><span class="number">10</span><span class="operator">,</span> <span class="number">20</span><span class="operator">,</span> <span class="number">20</span>);
+      <span class="keyword">return</span> path;
+  }
+
+  <span class="type">void</span> Node<span class="operator">::</span>paint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span>painter<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></span> <span class="operator">*</span>option<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>)
+  {
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoPen);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>darkGray);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawEllipse(<span class="operator">-</span><span class="number">7</span><span class="operator">,</span> <span class="operator">-</span><span class="number">7</span><span class="operator">,</span> <span class="number">20</span><span class="operator">,</span> <span class="number">20</span>);
+
+      <span class="type"><a href="../qtgui/qradialgradient.html">QRadialGradient</a></span> gradient(<span class="operator">-</span><span class="number">3</span><span class="operator">,</span> <span class="operator">-</span><span class="number">3</span><span class="operator">,</span> <span class="number">10</span>);
+      <span class="keyword">if</span> (option<span class="operator">-</span><span class="operator">&gt;</span>state <span class="operator">&amp;</span> <span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>State_Sunken) {
+          gradient<span class="operator">.</span>setCenter(<span class="number">3</span><span class="operator">,</span> <span class="number">3</span>);
+          gradient<span class="operator">.</span>setFocalPoint(<span class="number">3</span><span class="operator">,</span> <span class="number">3</span>);
+          gradient<span class="operator">.</span>setColorAt(<span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>yellow)<span class="operator">.</span>light(<span class="number">120</span>));
+          gradient<span class="operator">.</span>setColorAt(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>darkYellow)<span class="operator">.</span>light(<span class="number">120</span>));
+      } <span class="keyword">else</span> {
+          gradient<span class="operator">.</span>setColorAt(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>yellow);
+          gradient<span class="operator">.</span>setColorAt(<span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>darkYellow);
+      }
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(gradient);
+
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setPen(<span class="type"><a href="../qtgui/qpen.html">QPen</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black<span class="operator">,</span> <span class="number">0</span>));
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawEllipse(<span class="operator">-</span><span class="number">10</span><span class="operator">,</span> <span class="operator">-</span><span class="number">10</span><span class="operator">,</span> <span class="number">20</span><span class="operator">,</span> <span class="number">20</span>);
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> Node<span class="operator">::</span>itemChange(GraphicsItemChange change<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> <span class="operator">&amp;</span>value)
+  {
+      <span class="keyword">switch</span> (change) {
+      <span class="keyword">case</span> ItemPositionHasChanged:
+          foreach (Edge <span class="operator">*</span>edge<span class="operator">,</span> edgeList)
+              edge<span class="operator">-</span><span class="operator">&gt;</span>adjust();
+          graph<span class="operator">-</span><span class="operator">&gt;</span>itemMoved();
+          <span class="keyword">break</span>;
+      <span class="keyword">default</span>:
+          <span class="keyword">break</span>;
+      };
+
+      <span class="keyword">return</span> <span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span><span class="operator">::</span>itemChange(change<span class="operator">,</span> value);
+  }
+
+  <span class="type">void</span> Node<span class="operator">::</span>mousePressEvent(<span class="type"><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      update();
+      <span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span><span class="operator">::</span>mousePressEvent(event);
+  }
+
+  <span class="type">void</span> Node<span class="operator">::</span>mouseReleaseEvent(<span class="type"><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      update();
+      <span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span><span class="operator">::</span>mouseReleaseEvent(event);
+  }
+
+</pre>
+</div>
+<!-- @@@graphicsview/elasticnodes/node.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

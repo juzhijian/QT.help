@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtwebkitportingguide.qdoc -->
+  <title>Porting from Qt WebKit to Qt WebEngine | Qt WebEngine 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwebengine-index.html">Qt WebEngine</a></td><td >Porting from Qt WebKit to Qt WebEngine</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#class-names">Class Names</a></li>
+<li class="level1"><a href="#qt-module-name">Qt Module Name</a></li>
+<li class="level2"><a href="#in-qmake-project-files">In qmake Project Files</a></li>
+<li class="level2"><a href="#including-the-module-in-source-files">Including the Module in Source Files</a></li>
+<li class="level1"><a href="#qwebframe-has-been-merged-into-qwebenginepage">QWebFrame Has Been Merged into QWebEnginePage</a></li>
+<li class="level1"><a href="#some-methods-now-return-their-result-asynchronously">Some Methods Now Return Their Result Asynchronously</a></li>
+<li class="level1"><a href="#qt-webengine-does-not-interact-with-qnetworkaccessmanager">Qt WebEngine Does Not Interact with QNetworkAccessManager</a></li>
+<li class="level1"><a href="#notes-about-individual-methods">Notes About Individual Methods</a></li>
+<li class="level2"><a href="#evaluatejavascript">evaluateJavaScript</a></li>
+<li class="level2"><a href="#sethtml-and-setcontent">setHtml and setContent</a></li>
+<li class="level2"><a href="#setcontenteditable">setContentEditable</a></li>
+<li class="level1"><a href="#unavailable-qt-webkit-api">Unavailable Qt WebKit API</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Porting from Qt WebKit to Qt WebEngine</h1>
+<span class="subtitle"></span>
+<!-- $$$qtwebenginewidgets-qtwebkitportingguide.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The following sections contain information about porting an application that uses the <a href="http://doc.qt.io/archives/qt-5.3/qtwebkit-index.html">Qt WebKit</a> <a href="http://doc.qt.io/archives/qt-5.3/qml-qtwebkit-webview.html">QWebView API</a> to use the <a href="qtwebengine-index.html">Qt WebEngine</a> <a href="qwebengineview.html">QWebEngineView</a>.</p>
+<a name="class-names"></a>
+<h2 id="class-names">Class Names</h2>
+<p>The Qt WebEngine equivalent of Qt WebKit C++ classes are prefixed by &quot;<i>QWebEngine&quot;</i> instead of &quot;<i>QWeb&quot;</i>.</p>
+<p><b>Qt WebKit</b></p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QWebHistory&gt;</span>
+  <span class="preprocessor">#include &lt;QWebHistoryItem&gt;</span>
+  <span class="preprocessor">#include &lt;QWebPage&gt;</span>
+  <span class="preprocessor">#include &lt;QWebView&gt;</span>
+
+  <span class="type">QWebHistory</span>
+  <span class="type">QWebHistoryItem</span>
+  <span class="type">QWebPage</span>
+  <span class="type"><a href="../qtwebview/qwebview.html">QWebView</a></span>
+
+</pre>
+<p><b>Qt WebEngine</b></p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QWebEngineHistory&gt;</span>
+  <span class="preprocessor">#include &lt;QWebEngineHistoryItem&gt;</span>
+  <span class="preprocessor">#include &lt;QWebEnginePage&gt;</span>
+  <span class="preprocessor">#include &lt;QWebEngineView&gt;</span>
+
+  <span class="type"><a href="qwebenginehistory.html">QWebEngineHistory</a></span>
+  <span class="type"><a href="qwebenginehistoryitem.html">QWebEngineHistoryItem</a></span>
+  <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span>
+  <span class="type"><a href="qwebengineview.html">QWebEngineView</a></span>
+
+</pre>
+<a name="qt-module-name"></a>
+<h2 id="qt-module-name">Qt Module Name</h2>
+<a name="in-qmake-project-files"></a>
+<h3 >In qmake Project Files</h3>
+<p><b>Qt WebKit</b></p>
+<pre class="cpp">
+
+  QT <span class="operator">+</span><span class="operator">=</span> webkitwidgets
+
+</pre>
+<p><b>Qt WebEngine</b></p>
+<pre class="cpp">
+
+  QT <span class="operator">+</span><span class="operator">=</span> webenginewidgets
+
+</pre>
+<a name="including-the-module-in-source-files"></a>
+<h3 >Including the Module in Source Files</h3>
+<p><b>Qt WebKit</b></p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QtWebKit/QtWebKit&gt;</span>
+  <span class="preprocessor">#include &lt;QtWebKitWidgets/QtWebKitWidgets&gt; // With Qt &gt;= 4.8</span>
+
+</pre>
+<p><b>Qt WebEngine</b></p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QtWebEngineWidgets/QtWebEngineWidgets&gt;</span>
+
+</pre>
+<a name="qwebframe-has-been-merged-into-qwebenginepage"></a>
+<h2 id="qwebframe-has-been-merged-into-qwebenginepage">QWebFrame Has Been Merged into QWebEnginePage</h2>
+<p>HTML frames can be used to divide web pages into several areas where the content can be represented individually.</p>
+<p>In Qt WebKit, QWebFrame represents a frame inside a web page. Each QWebPage object contains at least one frame, the main frame, obtained using QWebPage::mainFrame(). Additional frames will be created for the HTML <code>&lt;frame&gt;</code> element, which defines the appearance and contents of a single frame, or the <code>&lt;iframe&gt;</code> element, which inserts a frame within a block of text.</p>
+<p>In Qt WebEngine, frame handling has been merged into the <a href="qwebenginepage.html">QWebEnginePage</a> class. All child frames are now considered part of the content, and only accessible through JavaScript. Methods of the QWebFrame class, such as <code>load()</code> are now available directly through the <a href="qwebenginepage.html">QWebEnginePage</a> itself.</p>
+<p><b>Qt WebKit</b></p>
+<pre class="cpp">
+
+  <span class="type">QWebPage</span> page;
+  connect(page<span class="operator">.</span>mainFrame()<span class="operator">,</span> SIGNAL(urlChanged(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">&amp;</span>))<span class="operator">,</span> SLOT(mySlotName()));
+  page<span class="operator">.</span>mainFrame()<span class="operator">-</span><span class="operator">&gt;</span>load(url);
+
+</pre>
+<p><b>Qt WebEngine</b></p>
+<pre class="cpp">
+
+  <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span> page;
+  connect(<span class="operator">&amp;</span>page<span class="operator">,</span> SIGNAL(urlChanged(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">&amp;</span>))<span class="operator">,</span> SLOT(mySlotName()));
+  page<span class="operator">.</span>load(url);
+
+</pre>
+<a name="some-methods-now-return-their-result-asynchronously"></a>
+<h2 id="some-methods-now-return-their-result-asynchronously">Some Methods Now Return Their Result Asynchronously</h2>
+<p>Because Qt WebEngine uses a multi-process architecture, calls to some methods from applications will return immediately, while the results should be received asynchronously via a callback mechanism. A function pointer, a functor, or a lambda expression must be provided to handle the results when they become available.</p>
+<p><b>Qt WebKit</b></p>
+<pre class="cpp">
+
+  <span class="type">QWebPage</span> <span class="operator">*</span>page <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QWebPage</span>;
+  <span class="type"><a href="../qtwidgets/qtextedit.html">QTextEdit</a></span> <span class="operator">*</span>textEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtextedit.html">QTextEdit</a></span>;
+  <span class="comment">// *textEdit is modified immediately.</span>
+  textEdit<span class="operator">-</span><span class="operator">&gt;</span>setPlainText(page<span class="operator">-</span><span class="operator">&gt;</span>toHtml());
+  textEdit<span class="operator">-</span><span class="operator">&gt;</span>setPlainText(page<span class="operator">-</span><span class="operator">&gt;</span>toPlainText());
+
+</pre>
+<p><b>Qt WebEngine (with a lambda function in C++11)</b></p>
+<pre class="cpp">
+
+  <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span> <span class="operator">*</span>page <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span>;
+  <span class="type"><a href="../qtwidgets/qtextedit.html">QTextEdit</a></span> <span class="operator">*</span>textEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtextedit.html">QTextEdit</a></span>;
+  <span class="comment">// *textEdit must remain valid until the lambda function is called.</span>
+  page<span class="operator">-</span><span class="operator">&gt;</span>toHtml(<span class="operator">[</span>textEdit<span class="operator">]</span>(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>result){ textEdit<span class="operator">-</span><span class="operator">&gt;</span>setPlainText(result); });
+  page<span class="operator">-</span><span class="operator">&gt;</span>toPlainText(<span class="operator">[</span>textEdit<span class="operator">]</span>(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>result){ textEdit<span class="operator">-</span><span class="operator">&gt;</span>setPlainText(result); });
+
+</pre>
+<p><b>Qt WebEngine (with a functor template wrapping a member function)</b></p>
+<pre class="cpp">
+
+  <span class="keyword">template</span><span class="operator">&lt;</span><span class="keyword">typename</span> Arg<span class="operator">,</span> <span class="keyword">typename</span> R<span class="operator">,</span> <span class="keyword">typename</span> C<span class="operator">&gt;</span>
+  <span class="keyword">struct</span> InvokeWrapper {
+      R <span class="operator">*</span>receiver;
+      <span class="type">void</span> (C<span class="operator">::</span><span class="operator">*</span>memberFun)(Arg);
+      <span class="type">void</span> <span class="keyword">operator</span>()(Arg result) {
+          (receiver<span class="operator">-</span><span class="operator">&gt;</span><span class="operator">*</span>memberFun)(result);
+      }
+  };
+
+  <span class="keyword">template</span><span class="operator">&lt;</span><span class="keyword">typename</span> Arg<span class="operator">,</span> <span class="keyword">typename</span> R<span class="operator">,</span> <span class="keyword">typename</span> C<span class="operator">&gt;</span>
+  InvokeWrapper<span class="operator">&lt;</span>Arg<span class="operator">,</span> R<span class="operator">,</span> C<span class="operator">&gt;</span> invoke(R <span class="operator">*</span>receiver<span class="operator">,</span> <span class="type">void</span> (C<span class="operator">::</span><span class="operator">*</span>memberFun)(Arg))
+  {
+      InvokeWrapper<span class="operator">&lt;</span>Arg<span class="operator">,</span> R<span class="operator">,</span> C<span class="operator">&gt;</span> wrapper <span class="operator">=</span> {receiver<span class="operator">,</span> memberFun};
+      <span class="keyword">return</span> wrapper;
+  }
+
+  <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span> <span class="operator">*</span>page <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span>;
+  <span class="type"><a href="../qtwidgets/qtextedit.html">QTextEdit</a></span> <span class="operator">*</span>textEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtextedit.html">QTextEdit</a></span>;
+  <span class="comment">// *textEdit must remain valid until the functor is called.</span>
+  page<span class="operator">-</span><span class="operator">&gt;</span>toHtml(invoke(textEdit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qtextedit.html">QTextEdit</a></span><span class="operator">::</span>setPlainText));
+  page<span class="operator">-</span><span class="operator">&gt;</span>toPlainText(invoke(textEdit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qtextedit.html">QTextEdit</a></span><span class="operator">::</span>setPlainText));
+
+</pre>
+<p><b>Qt WebEngine (with a regular functor)</b></p>
+<pre class="cpp">
+
+  <span class="keyword">struct</span> SetPlainTextFunctor {
+      <span class="type"><a href="../qtwidgets/qtextedit.html">QTextEdit</a></span> <span class="operator">*</span>textEdit;
+      SetPlainTextFunctor(<span class="type"><a href="../qtwidgets/qtextedit.html">QTextEdit</a></span> <span class="operator">*</span>textEdit) : textEdit(textEdit) { }
+      <span class="type">void</span> <span class="keyword">operator</span>()(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>result) {
+          textEdit<span class="operator">-</span><span class="operator">&gt;</span>setPlainText(result);
+      }
+  };
+
+  <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span> <span class="operator">*</span>page <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span>;
+  <span class="type"><a href="../qtwidgets/qtextedit.html">QTextEdit</a></span> <span class="operator">*</span>textEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtextedit.html">QTextEdit</a></span>;
+  <span class="comment">// *textEdit must remain valid until the functor is called.</span>
+  page<span class="operator">-</span><span class="operator">&gt;</span>toHtml(SetPlainTextFunctor(textEdit));
+  page<span class="operator">-</span><span class="operator">&gt;</span>toPlainText(SetPlainTextFunctor(textEdit));
+
+</pre>
+<a name="qt-webengine-does-not-interact-with-qnetworkaccessmanager"></a>
+<h2 id="qt-webengine-does-not-interact-with-qnetworkaccessmanager">Qt WebEngine Does Not Interact with QNetworkAccessManager</h2>
+<p>Some classes of Qt Network such as <a href="../qtnetwork/qauthenticator.html">QAuthenticator</a> were reused for their interface but, unlike Qt WebKit, Qt WebEngine has its own HTTP implementation and cannot go through a <a href="../qtnetwork/qnetworkaccessmanager.html">QNetworkAccessManager</a>.</p>
+<p>The signals and methods of <a href="../qtnetwork/qnetworkaccessmanager.html">QNetworkAccessManager</a> that are still supported were moved to the <a href="qwebenginepage.html">QWebEnginePage</a> class.</p>
+<p><b>Qt WebKit</b></p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtnetwork/qnetworkaccessmanager.html">QNetworkAccessManager</a></span> qnam;
+  <span class="type">QWebPage</span> page;
+  page<span class="operator">.</span>setNetworkAccessManager(<span class="operator">&amp;</span>qnam);
+  connect(<span class="operator">&amp;</span>qnam<span class="operator">,</span> SIGNAL(authenticationRequired(<span class="type"><a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a></span><span class="operator">*</span><span class="operator">,</span><span class="type"><a href="../qtnetwork/qauthenticator.html">QAuthenticator</a></span><span class="operator">*</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(authenticate(<span class="type"><a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a></span><span class="operator">*</span><span class="operator">,</span><span class="type"><a href="../qtnetwork/qauthenticator.html">QAuthenticator</a></span><span class="operator">*</span>)));
+
+</pre>
+<p><b>Qt WebEngine</b></p>
+<pre class="cpp">
+
+  <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span> page;
+  connect(<span class="operator">&amp;</span>page<span class="operator">,</span> SIGNAL(authenticationRequired(<span class="type"><a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a></span><span class="operator">*</span><span class="operator">,</span><span class="type"><a href="../qtnetwork/qauthenticator.html">QAuthenticator</a></span><span class="operator">*</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(authenticate(<span class="type"><a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a></span><span class="operator">*</span><span class="operator">,</span><span class="type"><a href="../qtnetwork/qauthenticator.html">QAuthenticator</a></span><span class="operator">*</span>)));
+
+</pre>
+<p>This also affects the way in which certificates are managed. For more information, see <a href="qtwebengine-overview.html#managing-certificates">Managing Certificates</a>.</p>
+<a name="notes-about-individual-methods"></a>
+<h2 id="notes-about-individual-methods">Notes About Individual Methods</h2>
+<a name="evaluatejavascript"></a>
+<h3 >evaluateJavaScript</h3>
+<p>QWebFrame::evaluateJavaScript was moved and renamed as <a href="qwebenginepage.html#runJavaScript">QWebEnginePage::runJavaScript</a>. It is currently only possible to run JavaScript on the main frame of a page and the result is returned asynchronously to the provided functor.</p>
+<p><b>Qt WebKit</b></p>
+<pre class="cpp">
+
+  <span class="type">QWebPage</span> <span class="operator">*</span>page <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QWebPage</span>;
+  <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> page<span class="operator">-</span><span class="operator">&gt;</span>mainFrame()<span class="operator">-</span><span class="operator">&gt;</span>evaluateJavaScript(<span class="string">&quot;'Java' + 'Script'&quot;</span>);
+
+</pre>
+<p><b>Qt WebEngine (with lambda expressions in C++11)</b></p>
+<pre class="cpp">
+
+  <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span> <span class="operator">*</span>page <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span>;
+  page<span class="operator">-</span><span class="operator">&gt;</span>runJavaScript(<span class="string">&quot;'Java' + 'Script'&quot;</span><span class="operator">,</span> <span class="operator">[</span><span class="operator">]</span>(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> <span class="operator">&amp;</span>result){ <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> result; });
+
+</pre>
+<a name="sethtml-and-setcontent"></a>
+<h3 >setHtml and setContent</h3>
+<p><a href="qwebenginepage.html#setHtml">QWebEnginePage::setHtml</a> and <a href="qwebenginepage.html#setContent">QWebEnginePage::setContent</a> perform asynchronously the same way as a normal HTTP load would, unlike their QWebPage counterparts.</p>
+<a name="setcontenteditable"></a>
+<h3 >setContentEditable</h3>
+<p>QWebPage::setContentEditable has no equivalent since any document element can be made editable through the contentEditable attribute in the latest HTML standard. Therefore, <a href="qwebenginepage.html#runJavaScript">QWebEnginePage::runJavaScript</a> is all that is needed.</p>
+<p><b>Qt WebKit</b></p>
+<pre class="cpp">
+
+  <span class="type">QWebPage</span> page;
+  page<span class="operator">.</span>setContentEditable(<span class="keyword">true</span>);
+
+</pre>
+<p><b>Qt WebEngine</b></p>
+<pre class="cpp">
+
+  <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span> page;
+  page<span class="operator">.</span>runJavascript(<span class="string">&quot;document.documentElement.contentEditable = true&quot;</span>);
+
+</pre>
+<a name="unavailable-qt-webkit-api"></a>
+<h2 id="unavailable-qt-webkit-api">Unavailable Qt WebKit API</h2>
+<p>The Qt WebKit classes and methods in this list will not be available in Qt WebEngine.</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td >QGraphicsWebView</td><td >Qt WebEngine is designed for being used with hardware acceleration. Because we could not support a web view class in a <a href="../qtwidgets/qgraphicsview.html">QGraphicsView</a> unless it would be attached to a QGLWidget viewport, this feature is out of scope.</td></tr>
+<tr valign="top" class="even"><td >QWebElement</td><td >Qt WebEngine uses a multi-process architecture and this means that any access to the internal structure of the page has to be done asynchronously, any query result must be returned through callbacks. The QWebElement API was designed for synchronous access and this would require a complete redesign.</td></tr>
+<tr valign="top" class="odd"><td >QWebDatabase</td><td >The Web SQL Database feature that this API was wrapping in Qt WebKit was dropped from the HTML5 standard.</td></tr>
+<tr valign="top" class="even"><td >QWebPluginDatabase, QWebPluginFactory, QWebPluginInfo, QWebPage::setPalette, QWebView::setRenderHints</td><td >Qt WebEngine renders web pages using Skia and is not using <a href="../qtgui/qpainter.html">QPainter</a> or Qt for this purpose. The HTML5 standard also now offers much better alternatives that were not available when native controls plugins were introduced in Qt WebKit.</td></tr>
+<tr valign="top" class="odd"><td >QWebHistoryInterface</td><td >Visited links are persisted automatically by Qt WebEngine.</td></tr>
+<tr valign="top" class="even"><td >QWebPage::setContentEditable</td><td >In the latest HTML standard, any document element can be made editable through the <code>contentEditable</code> attribute. So <code>runJavaScript</code> is all that is needed: <code>page-&gt;runJavascript(&quot;document.documentElement.contentEditable = true&quot;)</code></td></tr>
+<tr valign="top" class="odd"><td >QWebPage::setLinkDelegationPolicy</td><td >There is no way to connect a signal to run C++ code when a link is clicked. However, link clicks can be delegated to the Qt application instead of having the HTML handler engine process them by overloading the <a href="qwebenginepage.html#acceptNavigationRequest">QWebEnginePage::acceptNavigationRequest</a>() function. This is necessary when an HTML document is used as part of the user interface, and not to display external data, for example, when displaying a list of results.</td></tr>
+</table></div>
+</div>
+<!-- @@@qtwebenginewidgets-qtwebkitportingguide.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

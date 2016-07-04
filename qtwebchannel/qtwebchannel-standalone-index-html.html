@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>index.html Example File | Qt WebChannel 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwebchannel-index.html">Qt WebChannel</a></td><td ><a href="qtwebchannel-standalone-example.html">Qt WebChannel Standalone Example</a></td><td >index.html Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">index.html Example File</h1>
+<span class="subtitle">standalone/index.html</span>
+<!-- $$$standalone/index.html-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  &lt;!DOCTYPE html&gt;
+  &lt;html&gt;
+      &lt;head&gt;
+          &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+          &lt;script type=&quot;text/javascript&quot; src=&quot;./qwebchannel.js&quot;&gt;&lt;/script&gt;
+          &lt;script type=&quot;text/javascript&quot;&gt;
+              //BEGIN SETUP
+              function output(message)
+              {
+                  var output = document.getElementById(&quot;output&quot;);
+                  output.innerHTML = output.innerHTML + message + &quot;\n&quot;;
+              }
+              window.onload = function() {
+                  if (location.search != &quot;&quot;)
+                      var baseUrl = (/[?&amp;]webChannelBaseUrl=([A-Za-z0-9\-:/\.]+)/.exec(location.search)[1]);
+                  else
+                      var baseUrl = &quot;ws://localhost:12345&quot;;
+
+                  output(&quot;Connecting to WebSocket server at &quot; + baseUrl + &quot;.&quot;);
+                  var socket = new WebSocket(baseUrl);
+
+                  socket.onclose = function()
+                  {
+                      console.error(&quot;web channel closed&quot;);
+                  };
+                  socket.onerror = function(error)
+                  {
+                      console.error(&quot;web channel error: &quot; + error);
+                  };
+                  socket.onopen = function()
+                  {
+                      output(&quot;WebSocket connected, setting up QWebChannel.&quot;);
+                      new QWebChannel(socket, function(channel) {
+                          // make dialog object accessible globally
+                          window.dialog = channel.objects.dialog;
+
+                          document.getElementById(&quot;send&quot;).onclick = function() {
+                              var input = document.getElementById(&quot;input&quot;);
+                              var text = input.value;
+                              if (!text) {
+                                  return;
+                              }
+
+                              output(&quot;Sent message: &quot; + text);
+                              input.value = &quot;&quot;;
+                              dialog.receiveText(text);
+                          }
+
+                          dialog.sendText.connect(function(message) {
+                              output(&quot;Received message: &quot; + message);
+                          });
+
+                          dialog.receiveText(&quot;Client connected, ready to send/receive messages!&quot;);
+                          output(&quot;Connected to WebChannel, ready to send/receive messages!&quot;);
+                      });
+                  }
+              }
+              //END SETUP
+          &lt;/script&gt;
+          &lt;style type=&quot;text/css&quot;&gt;
+              html {
+                  height: 100%;
+                  width: 100%;
+              }
+              #input {
+                  width: 400px;
+                  margin: 0 10px 0 0;
+              }
+              #send {
+                  width: 90px;
+                  margin: 0;
+              }
+              #output {
+                  width: 500px;
+                  height: 300px;
+              }
+          &lt;/style&gt;
+      &lt;/head&gt;
+      &lt;body&gt;
+          &lt;textarea id=&quot;output&quot;&gt;&lt;/textarea&gt;&lt;br /&gt;
+          &lt;input id=&quot;input&quot; /&gt;&lt;input type=&quot;submit&quot; id=&quot;send&quot; value=&quot;Send&quot; onclick=&quot;javascript:click();&quot; /&gt;
+      &lt;/body&gt;
+  &lt;/html&gt;
+
+</pre>
+</div>
+<!-- @@@standalone/index.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

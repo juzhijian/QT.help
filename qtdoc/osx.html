@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- osx.qdoc -->
+  <title>Qt for OS X | Qt 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.7</a></td><td >Qt for OS X</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#downloading-and-installing-qt">Downloading and Installing Qt</a></li>
+<li class="level2"><a href="#building-qt-5-from-source">Building Qt 5 from Source</a></li>
+<li class="level1"><a href="#os-x-versions">OS X Versions</a></li>
+<li class="level1"><a href="#additional-command-line-options">Additional Command-Line Options</a></li>
+<li class="level1"><a href="#deploying-applications-on-os-x">Deploying Applications on OS X</a></li>
+<li class="level1"><a href="#os-x-issues">OS X Issues</a></li>
+<li class="level1"><a href="#where-to-go-from-here">Where to Go from Here</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt for OS X</h1>
+<span class="subtitle"></span>
+<!-- $$$osx.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>OS X is a UNIX platform and behaves similarly to other Unix-like platforms. The main difference is that X11 is not used as the windowing system. Instead, OS X uses its own native windowing system that is accessible through the Cocoa API. Application development on OS X is done using Xcode, which is available from <a href="https://developer.apple.com/xcode/">https://developer.apple.com/xcode/</a>.</p>
+<a name="downloading-and-installing-qt"></a>
+<h2 id="downloading-and-installing-qt">Downloading and Installing Qt</h2>
+<p>There are two ways to install Qt:</p>
+<ol class="1" type="1"><li>through the <i>Qt Installers</i> - downloads and installs Qt</li>
+<li>through the <i>Qt sources</i>.</li>
+</ol>
+<p>You can download the Qt 5 installers and sources from the <a href="http://qt.io/download">Downloads</a> page. For more information, visit the <a href="gettingstarted.html">Getting Started with Qt</a> page.</p>
+<a name="building-qt-5-from-source"></a>
+<h3 >Building Qt 5 from Source</h3>
+<p>Below, you will find more information about building Qt from source.</p>
+<ul>
+<li><a href="osx-building.html">Qt for OS X - Building from Source</a> - building and installing from source</li>
+</ul>
+<p><b>Note: </b>Qt 5 uses Cocoa, therefore, building for Carbon is not possible.</p><a name="os-x-versions"></a>
+<h2 id="os-x-versions">OS X Versions</h2>
+<p>See <a href="supported-platforms.html">Supported Platforms</a> for the list of OS X versions supported by Qt.</p>
+<p>Qt can be built for either x86 or x86_64. 64-bit is used by default. To select a 32-bit build, use the <code>macx-clang-32</code> or <code>macx-g++32</code> mkspec. This is selectable at configure time:</p>
+<pre class="cpp">
+
+  <span class="operator">.</span><span class="operator">/</span>configure <span class="operator">-</span>platform macx<span class="operator">-</span>clang<span class="operator">-</span><span class="number">32</span>
+
+</pre>
+<p>The Qt build system does not support building unversal binaries directly. Instead, use the <code>lipo</code> tool to glue two Qt builds together.</p>
+<p><b>Note: </b>Qt 5 does not support OS X on PowerPC.</p><p><b>Note: </b>Static builds are not tested.</p><a name="additional-command-line-options"></a>
+<h2 id="additional-command-line-options">Additional Command-Line Options</h2>
+<p>On the command-line, applications can be built using <code>qmake</code> and <code>make</code>. Optionally, <code>qmake</code> can generate project files for Xcode with <code>-spec macx-xcode</code>. If you are using the binary package, <code>qmake</code> generates Xcode projects by default; use <code>-spec macx-gcc</code> to generate makefiles. For example:</p>
+<pre class="cpp">
+
+  qmake <span class="operator">-</span>spec macx<span class="operator">-</span>xcode project<span class="operator">.</span>pro
+
+</pre>
+<p>Configuring with <code>-spec macx-xcode</code> generates an Xcode project file from project.pro. With <a href="../qmake/qmake-manual.html">qmake</a> you do not have to worry about rules for Qt's preprocessors (<a href="moc.html">moc</a> and <a href="uic.html">uic</a>) since <a href="../qmake/qmake-manual.html">qmake</a> automatically handles them and ensures that everything necessary is linked into your application.</p>
+<p>Qt does not entirely interact with the development environment (for example plugins to set a file to &quot;mocable&quot; from within the Xcode user interface).</p>
+<p>The result of the build process is an application bundle, which is a directory structure that contains the actual application executable. The application can be launched by double-clicking it in Finder, or by referring directly to its executable from the command line, for example, <code>myApp.app/Contents/MacOS/myApp</code>.</p>
+<p>If you wish to have a command-line tool that does not use the GUI for example, <code>moc</code>, <code>uic</code> or <code>ls</code>, you can tell qmake to disable bundle creation from the <code>CONFIG</code> variable in the project file:</p>
+<pre class="cpp">
+
+  CONFIG <span class="operator">-</span><span class="operator">=</span> app_bundle
+
+</pre>
+<a name="deploying-applications-on-os-x"></a>
+<h2 id="deploying-applications-on-os-x">Deploying Applications on OS X</h2>
+<p>In general, Qt supports building on one OS X version and deploying to earlier or later OS X versions. The recommended way is to build on the latest version and deploy to an earlier OS X version.</p>
+<p>OS X applications are typically deployed as self-contained application bundles. The application bundle contains the application executable as well as dependencies such as the Qt libraries, plugins, translations and other resources you may need. Third party libraries like Qt are normally not installed system-wide; each application provides its own copy.</p>
+<p>A common way to distribute applications is to provide a compressed disk image (.dmg file) that the user can mount in Finder. The deployment tool, <code>macdeployqt</code> (available from the OS X installers), can be used to create the self-contained bundles, and optionally also create a .dmg archive. Applications can also be distributed through the Mac App Store. Qt 5 aims to stay within the app store sandbox rules. macdeployqt (bin/macdeployqt) can be used as a starting point for app store deployment.</p>
+<ul>
+<li><a href="osx-deployment.html">Qt for OS X - Deployment</a></li>
+</ul>
+<a name="os-x-issues"></a>
+<h2 id="os-x-issues">OS X Issues</h2>
+<p>The page below covers specific issues and recommendations for creating OS X applications.</p>
+<ul>
+<li><a href="osx-issues.html">Qt for OS X - Specific Issues</a></li>
+</ul>
+<a name="where-to-go-from-here"></a>
+<h2 id="where-to-go-from-here">Where to Go from Here</h2>
+<p>We invite you to explore the rest of Qt. We prepared overviews to help you decide which APIs to use and our examples demonstrate how to use our API.</p>
+<ul>
+<li><a href="overviews-main.html">Qt Overviews</a> - list of topics about application development</li>
+<li><a href="qtexamplesandtutorials.html">Examples and Tutorials</a> - code samples and tutorials</li>
+<li><a href="reference-overview.html">Qt Reference Pages</a> - a listing of C++ and QML APIs</li>
+</ul>
+<p>Qt's vibrant and active community site, <a href="http://qt.io">http://qt.io</a> houses a wiki, a forum, and additional learning guides and presentations.</p>
+</div>
+<!-- @@@osx.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

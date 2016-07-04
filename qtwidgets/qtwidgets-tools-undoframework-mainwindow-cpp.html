@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mainwindow.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-tools-undoframework-example.html">Undo Framework Example</a></td><td >mainwindow.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mainwindow.cpp Example File</h1>
+<span class="subtitle">tools/undoframework/mainwindow.cpp</span>
+<!-- $$$tools/undoframework/mainwindow.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+
+  <span class="preprocessor">#include &quot;mainwindow.h&quot;</span>
+  <span class="preprocessor">#include &quot;diagramscene.h&quot;</span>
+  <span class="preprocessor">#include &quot;diagramitem.h&quot;</span>
+  <span class="preprocessor">#include &quot;commands.h&quot;</span>
+
+  MainWindow<span class="operator">::</span>MainWindow()
+  {
+      undoStack <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qundostack.html">QUndoStack</a></span>(<span class="keyword">this</span>);
+
+      createActions();
+      createMenus();
+
+      createUndoView();
+
+      diagramScene <span class="operator">=</span> <span class="keyword">new</span> DiagramScene();
+      <span class="type"><a href="../qtgui/qbrush.html">QBrush</a></span> pixmapBrush(<span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>(<span class="string">&quot;:/images/cross.png&quot;</span>)<span class="operator">.</span>scaled(<span class="number">30</span><span class="operator">,</span> <span class="number">30</span>));
+      diagramScene<span class="operator">-</span><span class="operator">&gt;</span>setBackgroundBrush(pixmapBrush);
+      diagramScene<span class="operator">-</span><span class="operator">&gt;</span>setSceneRect(<span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">500</span><span class="operator">,</span> <span class="number">500</span>));
+
+      connect(diagramScene<span class="operator">,</span> SIGNAL(itemMoved(DiagramItem<span class="operator">*</span><span class="operator">,</span><span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(itemMoved(DiagramItem<span class="operator">*</span><span class="operator">,</span><span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>)));
+
+      setWindowTitle(<span class="string">&quot;Undo Framework&quot;</span>);
+      <span class="type"><a href="qgraphicsview.html">QGraphicsView</a></span> <span class="operator">*</span>view <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgraphicsview.html">QGraphicsView</a></span>(diagramScene);
+      setCentralWidget(view);
+      resize(<span class="number">700</span><span class="operator">,</span> <span class="number">500</span>);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>createUndoView()
+  {
+      undoView <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qundoview.html">QUndoView</a></span>(undoStack);
+      undoView<span class="operator">-</span><span class="operator">&gt;</span>setWindowTitle(tr(<span class="string">&quot;Command List&quot;</span>));
+      undoView<span class="operator">-</span><span class="operator">&gt;</span>show();
+      undoView<span class="operator">-</span><span class="operator">&gt;</span>setAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WA_QuitOnClose<span class="operator">,</span> <span class="keyword">false</span>);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>createActions()
+  {
+      deleteAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;&amp;Delete Item&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      deleteAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(tr(<span class="string">&quot;Del&quot;</span>));
+      connect(deleteAction<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(deleteItem()));
+
+      addBoxAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Add &amp;Box&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      addBoxAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(tr(<span class="string">&quot;Ctrl+O&quot;</span>));
+      connect(addBoxAction<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(addBox()));
+
+      addTriangleAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Add &amp;Triangle&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      addTriangleAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(tr(<span class="string">&quot;Ctrl+T&quot;</span>));
+      connect(addTriangleAction<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(addTriangle()));
+
+      undoAction <span class="operator">=</span> undoStack<span class="operator">-</span><span class="operator">&gt;</span>createUndoAction(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;&amp;Undo&quot;</span>));
+      undoAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Undo);
+
+      redoAction <span class="operator">=</span> undoStack<span class="operator">-</span><span class="operator">&gt;</span>createRedoAction(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;&amp;Redo&quot;</span>));
+      redoAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Redo);
+
+      exitAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;E&amp;xit&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      exitAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Quit);
+      connect(exitAction<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(close()));
+
+      aboutAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;&amp;About&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">&gt;</span> aboutShortcuts;
+      aboutShortcuts <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Ctrl+A&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Ctrl+B&quot;</span>);
+      aboutAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(aboutShortcuts);
+      connect(aboutAction<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(about()));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>createMenus()
+  {
+      fileMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;File&quot;</span>));
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(exitAction);
+
+      editMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Edit&quot;</span>));
+      editMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(undoAction);
+      editMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(redoAction);
+      editMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      editMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(deleteAction);
+      connect(editMenu<span class="operator">,</span> SIGNAL(aboutToShow())<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(itemMenuAboutToShow()));
+      connect(editMenu<span class="operator">,</span> SIGNAL(aboutToHide())<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(itemMenuAboutToHide()));
+
+      itemMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Item&quot;</span>));
+      itemMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(addBoxAction);
+      itemMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(addTriangleAction);
+
+      helpMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;About&quot;</span>));
+      helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(aboutAction);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>itemMoved(DiagramItem <span class="operator">*</span>movedItem<span class="operator">,</span>
+                             <span class="keyword">const</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> <span class="operator">&amp;</span>oldPosition)
+  {
+      undoStack<span class="operator">-</span><span class="operator">&gt;</span>push(<span class="keyword">new</span> MoveCommand(movedItem<span class="operator">,</span> oldPosition));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>deleteItem()
+  {
+      <span class="keyword">if</span> (diagramScene<span class="operator">-</span><span class="operator">&gt;</span>selectedItems()<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="qundocommand.html">QUndoCommand</a></span> <span class="operator">*</span>deleteCommand <span class="operator">=</span> <span class="keyword">new</span> DeleteCommand(diagramScene);
+      undoStack<span class="operator">-</span><span class="operator">&gt;</span>push(deleteCommand);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>itemMenuAboutToHide()
+  {
+      deleteAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>itemMenuAboutToShow()
+  {
+      deleteAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="operator">!</span>diagramScene<span class="operator">-</span><span class="operator">&gt;</span>selectedItems()<span class="operator">.</span>isEmpty());
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>addBox()
+  {
+      <span class="type"><a href="qundocommand.html">QUndoCommand</a></span> <span class="operator">*</span>addCommand <span class="operator">=</span> <span class="keyword">new</span> AddCommand(DiagramItem<span class="operator">::</span>Box<span class="operator">,</span> diagramScene);
+      undoStack<span class="operator">-</span><span class="operator">&gt;</span>push(addCommand);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>addTriangle()
+  {
+      <span class="type"><a href="qundocommand.html">QUndoCommand</a></span> <span class="operator">*</span>addCommand <span class="operator">=</span> <span class="keyword">new</span> AddCommand(DiagramItem<span class="operator">::</span>Triangle<span class="operator">,</span>
+                                                diagramScene);
+      undoStack<span class="operator">-</span><span class="operator">&gt;</span>push(addCommand);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>about()
+  {
+      <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>about(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;About Undo&quot;</span>)<span class="operator">,</span>
+                         tr(<span class="string">&quot;The &lt;b&gt;Undo&lt;/b&gt; example demonstrates how to &quot;</span>
+                            <span class="string">&quot;use Qt's undo framework.&quot;</span>));
+  }
+
+</pre>
+</div>
+<!-- @@@tools/undoframework/mainwindow.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

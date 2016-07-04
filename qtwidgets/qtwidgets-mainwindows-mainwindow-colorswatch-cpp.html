@@ -1,0 +1,778 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>colorswatch.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-mainwindows-mainwindow-example.html">Main Window</a></td><td >colorswatch.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">colorswatch.cpp Example File</h1>
+<span class="subtitle">mainwindows/mainwindow/colorswatch.cpp</span>
+<!-- $$$mainwindows/mainwindow/colorswatch.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;colorswatch.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QAction&gt;</span>
+  <span class="preprocessor">#include &lt;QtEvents&gt;</span>
+  <span class="preprocessor">#include &lt;QFrame&gt;</span>
+  <span class="preprocessor">#include &lt;QMainWindow&gt;</span>
+  <span class="preprocessor">#include &lt;QMenu&gt;</span>
+  <span class="preprocessor">#include &lt;QPainter&gt;</span>
+  <span class="preprocessor">#include &lt;QImage&gt;</span>
+  <span class="preprocessor">#include &lt;QColor&gt;</span>
+  <span class="preprocessor">#include &lt;QDialog&gt;</span>
+  <span class="preprocessor">#include &lt;QDialogButtonBox&gt;</span>
+  <span class="preprocessor">#include &lt;QGridLayout&gt;</span>
+  <span class="preprocessor">#include &lt;QSpinBox&gt;</span>
+  <span class="preprocessor">#include &lt;QLabel&gt;</span>
+  <span class="preprocessor">#include &lt;QPainterPath&gt;</span>
+  <span class="preprocessor">#include &lt;QPushButton&gt;</span>
+  <span class="preprocessor">#include &lt;QHBoxLayout&gt;</span>
+  <span class="preprocessor">#include &lt;QBitmap&gt;</span>
+  <span class="preprocessor">#include &lt;QtDebug&gt;</span>
+
+  <span class="preprocessor">#undef DEBUG_SIZEHINTS</span>
+
+  <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> bgColorForName(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>name)
+  {
+      <span class="keyword">if</span> (name <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;Black&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="string">&quot;#D8D8D8&quot;</span>);
+      <span class="keyword">if</span> (name <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;White&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="string">&quot;#F1F1F1&quot;</span>);
+      <span class="keyword">if</span> (name <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;Red&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="string">&quot;#F1D8D8&quot;</span>);
+      <span class="keyword">if</span> (name <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;Green&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="string">&quot;#D8E4D8&quot;</span>);
+      <span class="keyword">if</span> (name <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;Blue&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="string">&quot;#D8D8F1&quot;</span>);
+      <span class="keyword">if</span> (name <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;Yellow&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="string">&quot;#F1F0D8&quot;</span>);
+      <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(name)<span class="operator">.</span>light(<span class="number">110</span>);
+  }
+
+  <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> fgColorForName(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>name)
+  {
+      <span class="keyword">if</span> (name <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;Black&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="string">&quot;#6C6C6C&quot;</span>);
+      <span class="keyword">if</span> (name <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;White&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="string">&quot;#F8F8F8&quot;</span>);
+      <span class="keyword">if</span> (name <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;Red&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="string">&quot;#F86C6C&quot;</span>);
+      <span class="keyword">if</span> (name <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;Green&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="string">&quot;#6CB26C&quot;</span>);
+      <span class="keyword">if</span> (name <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;Blue&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="string">&quot;#6C6CF8&quot;</span>);
+      <span class="keyword">if</span> (name <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;Yellow&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="string">&quot;#F8F76C&quot;</span>);
+      <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(name);
+  }
+
+  <span class="keyword">class</span> ColorDock : <span class="keyword">public</span> <span class="type"><a href="qframe.html">QFrame</a></span>
+  {
+      Q_OBJECT
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> ColorDock(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>c<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent);
+
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> sizeHint() <span class="keyword">const</span> Q_DECL_OVERRIDE { <span class="keyword">return</span> szHint; }
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> minimumSizeHint() <span class="keyword">const</span> Q_DECL_OVERRIDE { <span class="keyword">return</span> minSzHint; }
+
+      <span class="type">void</span> setCustomSizeHint(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> <span class="operator">&amp;</span>size);
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> changeSizeHints();
+
+  <span class="keyword">protected</span>:
+      <span class="type">void</span> paintEvent(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> <span class="operator">*</span>) Q_DECL_OVERRIDE;
+
+  <span class="keyword">private</span>:
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> color;
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> szHint;
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> minSzHint;
+  };
+
+  ColorDock<span class="operator">::</span>ColorDock(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>c<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qframe.html">QFrame</a></span>(parent)
+      <span class="operator">,</span> color(c)
+      <span class="operator">,</span> szHint(<span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span>)
+      <span class="operator">,</span> minSzHint(<span class="number">125</span><span class="operator">,</span> <span class="number">75</span>)
+  {
+      <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> font <span class="operator">=</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>font();
+      font<span class="operator">.</span>setPointSize(<span class="number">8</span>);
+      setFont(font);
+  }
+
+  <span class="type">void</span> ColorDock<span class="operator">::</span>paintEvent(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> <span class="operator">*</span>)
+  {
+      <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> p(<span class="keyword">this</span>);
+      p<span class="operator">.</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing);
+      p<span class="operator">.</span>fillRect(rect()<span class="operator">,</span> bgColorForName(color));
+
+      p<span class="operator">.</span>save();
+
+      <span class="keyword">extern</span> <span class="type">void</span> render_qt_text(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span><span class="operator">,</span> <span class="type">int</span><span class="operator">,</span> <span class="type">int</span><span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>);
+      render_qt_text(<span class="operator">&amp;</span>p<span class="operator">,</span> width()<span class="operator">,</span> height()<span class="operator">,</span> fgColorForName(color));
+
+      p<span class="operator">.</span>restore();
+
+  <span class="preprocessor">#ifdef DEBUG_SIZEHINTS</span>
+      p<span class="operator">.</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing<span class="operator">,</span> <span class="keyword">false</span>);
+
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> sz <span class="operator">=</span> size();
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> szHint <span class="operator">=</span> sizeHint();
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> minSzHint <span class="operator">=</span> minimumSizeHint();
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> maxSz <span class="operator">=</span> maximumSize();
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> text <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>fromLatin1(<span class="string">&quot;sz: %1x%2\nszHint: %3x%4\nminSzHint: %5x%6\n&quot;</span>
+                                          <span class="string">&quot;maxSz: %8x%9&quot;</span>)
+                      <span class="operator">.</span>arg(sz<span class="operator">.</span>width())<span class="operator">.</span>arg(sz<span class="operator">.</span>height())
+                      <span class="operator">.</span>arg(szHint<span class="operator">.</span>width())<span class="operator">.</span>arg(szHint<span class="operator">.</span>height())
+                      <span class="operator">.</span>arg(minSzHint<span class="operator">.</span>width())<span class="operator">.</span>arg(minSzHint<span class="operator">.</span>height())
+                      <span class="operator">.</span>arg(maxSz<span class="operator">.</span>width())<span class="operator">.</span>arg(maxSz<span class="operator">.</span>height());
+
+      <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> r <span class="operator">=</span> fontMetrics()<span class="operator">.</span>boundingRect(rect()<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignLeft<span class="operator">|</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignTop<span class="operator">,</span> text);
+      r<span class="operator">.</span>adjust(<span class="operator">-</span><span class="number">2</span><span class="operator">,</span> <span class="operator">-</span><span class="number">2</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+      p<span class="operator">.</span>translate(<span class="number">4</span><span class="operator">,</span> <span class="number">4</span>);
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> bg <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>yellow;
+      bg<span class="operator">.</span>setAlpha(<span class="number">120</span>);
+      p<span class="operator">.</span>setBrush(bg);
+      p<span class="operator">.</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black);
+      p<span class="operator">.</span>drawRect(r);
+      p<span class="operator">.</span>drawText(rect()<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignLeft<span class="operator">|</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignTop<span class="operator">,</span> text);
+  <span class="preprocessor">#endif // DEBUG_SIZEHINTS</span>
+  }
+
+  <span class="keyword">static</span> <span class="type"><a href="qspinbox.html">QSpinBox</a></span> <span class="operator">*</span>createSpinBox(<span class="type">int</span> value<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent<span class="operator">,</span> <span class="type">int</span> max <span class="operator">=</span> <span class="number">1000</span>)
+  {
+      <span class="type"><a href="qspinbox.html">QSpinBox</a></span> <span class="operator">*</span>result <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qspinbox.html">QSpinBox</a></span>(parent);
+      result<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(<span class="operator">-</span><span class="number">1</span>);
+      result<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(max);
+      result<span class="operator">-</span><span class="operator">&gt;</span>setValue(value);
+      <span class="keyword">return</span> result;
+  }
+
+  <span class="type">void</span> ColorDock<span class="operator">::</span>changeSizeHints()
+  {
+      <span class="type"><a href="qdialog.html">QDialog</a></span> dialog(<span class="keyword">this</span>);
+      dialog<span class="operator">.</span>setWindowFlags(dialog<span class="operator">.</span>windowFlags() <span class="operator">&amp;</span> <span class="operator">~</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowContextHelpButtonHint);
+      dialog<span class="operator">.</span>setWindowTitle(color);
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>topLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>(<span class="operator">&amp;</span>dialog);
+
+      <span class="type"><a href="qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>inputLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>();
+      topLayout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(inputLayout);
+
+      inputLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(<span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Size Hint:&quot;</span>)<span class="operator">,</span> <span class="operator">&amp;</span>dialog)<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      inputLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(<span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Min Size Hint:&quot;</span>)<span class="operator">,</span> <span class="operator">&amp;</span>dialog)<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+      inputLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(<span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Max Size:&quot;</span>)<span class="operator">,</span> <span class="operator">&amp;</span>dialog)<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">0</span>);
+      inputLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(<span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Dock Widget Max Size:&quot;</span>)<span class="operator">,</span> <span class="operator">&amp;</span>dialog)<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">0</span>);
+
+      <span class="type"><a href="qspinbox.html">QSpinBox</a></span> <span class="operator">*</span>szHintW <span class="operator">=</span> createSpinBox(szHint<span class="operator">.</span>width()<span class="operator">,</span> <span class="operator">&amp;</span>dialog);
+      inputLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(szHintW<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+      <span class="type"><a href="qspinbox.html">QSpinBox</a></span> <span class="operator">*</span>szHintH <span class="operator">=</span> createSpinBox(szHint<span class="operator">.</span>height()<span class="operator">,</span> <span class="operator">&amp;</span>dialog);
+      inputLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(szHintH<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">2</span>);
+
+      <span class="type"><a href="qspinbox.html">QSpinBox</a></span> <span class="operator">*</span>minSzHintW <span class="operator">=</span> createSpinBox(minSzHint<span class="operator">.</span>width()<span class="operator">,</span> <span class="operator">&amp;</span>dialog);
+      inputLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(minSzHintW<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+      <span class="type"><a href="qspinbox.html">QSpinBox</a></span> <span class="operator">*</span>minSzHintH <span class="operator">=</span> createSpinBox(minSzHint<span class="operator">.</span>height()<span class="operator">,</span> <span class="operator">&amp;</span>dialog);
+      inputLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(minSzHintH<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span>);
+
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> maxSz <span class="operator">=</span> maximumSize();
+      <span class="type"><a href="qspinbox.html">QSpinBox</a></span> <span class="operator">*</span>maxSzW <span class="operator">=</span> createSpinBox(maxSz<span class="operator">.</span>width()<span class="operator">,</span> <span class="operator">&amp;</span>dialog<span class="operator">,</span> QWIDGETSIZE_MAX);
+      inputLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(maxSzW<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">1</span>);
+      <span class="type"><a href="qspinbox.html">QSpinBox</a></span> <span class="operator">*</span>maxSzH <span class="operator">=</span> createSpinBox(maxSz<span class="operator">.</span>height()<span class="operator">,</span> <span class="operator">&amp;</span>dialog<span class="operator">,</span> QWIDGETSIZE_MAX);
+      inputLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(maxSzH<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">2</span>);
+
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> dwMaxSz <span class="operator">=</span> parentWidget()<span class="operator">-</span><span class="operator">&gt;</span>maximumSize();
+      <span class="type"><a href="qspinbox.html">QSpinBox</a></span> <span class="operator">*</span>dwMaxSzW <span class="operator">=</span> createSpinBox(dwMaxSz<span class="operator">.</span>width()<span class="operator">,</span> <span class="operator">&amp;</span>dialog<span class="operator">,</span> QWIDGETSIZE_MAX);
+      inputLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(dwMaxSzW<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">1</span>);
+      <span class="type"><a href="qspinbox.html">QSpinBox</a></span> <span class="operator">*</span>dwMaxSzH <span class="operator">=</span> createSpinBox(dwMaxSz<span class="operator">.</span>height()<span class="operator">,</span> <span class="operator">&amp;</span>dialog<span class="operator">,</span> QWIDGETSIZE_MAX);
+      inputLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(dwMaxSzH<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">2</span>);
+
+      inputLayout<span class="operator">-</span><span class="operator">&gt;</span>setColumnStretch(<span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+      inputLayout<span class="operator">-</span><span class="operator">&gt;</span>setColumnStretch(<span class="number">2</span><span class="operator">,</span> <span class="number">1</span>);
+
+      topLayout<span class="operator">-</span><span class="operator">&gt;</span>addStretch();
+
+      <span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span> <span class="operator">*</span>buttonBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span>(<span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>Ok <span class="operator">|</span> <span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>Cancel<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(buttonBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>rejected<span class="operator">,</span> <span class="operator">&amp;</span>dialog<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qdialog.html">QDialog</a></span><span class="operator">::</span>reject);
+      connect(buttonBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>accepted<span class="operator">,</span> <span class="operator">&amp;</span>dialog<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qdialog.html">QDialog</a></span><span class="operator">::</span>reject);
+
+      topLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(buttonBox);
+
+      <span class="keyword">if</span> (dialog<span class="operator">.</span>exec() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted)
+          <span class="keyword">return</span>;
+
+      szHint <span class="operator">=</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(szHintW<span class="operator">-</span><span class="operator">&gt;</span>value()<span class="operator">,</span> szHintH<span class="operator">-</span><span class="operator">&gt;</span>value());
+      minSzHint <span class="operator">=</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(minSzHintW<span class="operator">-</span><span class="operator">&gt;</span>value()<span class="operator">,</span> minSzHintH<span class="operator">-</span><span class="operator">&gt;</span>value());
+      maxSz <span class="operator">=</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(maxSzW<span class="operator">-</span><span class="operator">&gt;</span>value()<span class="operator">,</span> maxSzH<span class="operator">-</span><span class="operator">&gt;</span>value());
+      setMaximumSize(maxSz);
+      dwMaxSz <span class="operator">=</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(dwMaxSzW<span class="operator">-</span><span class="operator">&gt;</span>value()<span class="operator">,</span> dwMaxSzH<span class="operator">-</span><span class="operator">&gt;</span>value());
+      parentWidget()<span class="operator">-</span><span class="operator">&gt;</span>setMaximumSize(dwMaxSz);
+      updateGeometry();
+      update();
+  }
+
+  <span class="type">void</span> ColorDock<span class="operator">::</span>setCustomSizeHint(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> <span class="operator">&amp;</span>size)
+  {
+      <span class="keyword">if</span> (szHint <span class="operator">!</span><span class="operator">=</span> size) {
+          szHint <span class="operator">=</span> size;
+          updateGeometry();
+      }
+  }
+
+  ColorSwatch<span class="operator">::</span>ColorSwatch(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>colorName<span class="operator">,</span> <span class="type"><a href="qmainwindow.html">QMainWindow</a></span> <span class="operator">*</span>parent<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowFlags flags)
+      : <span class="type"><a href="qdockwidget.html">QDockWidget</a></span>(parent<span class="operator">,</span> flags)<span class="operator">,</span> mainWindow(parent)
+  {
+      setObjectName(colorName <span class="operator">+</span> QLatin1String(<span class="string">&quot; Dock Widget&quot;</span>));
+      setWindowTitle(objectName() <span class="operator">+</span> QLatin1String(<span class="string">&quot; [*]&quot;</span>));
+
+      ColorDock <span class="operator">*</span>swatch <span class="operator">=</span> <span class="keyword">new</span> ColorDock(colorName<span class="operator">,</span> <span class="keyword">this</span>);
+      swatch<span class="operator">-</span><span class="operator">&gt;</span>setFrameStyle(<span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Box <span class="operator">|</span> <span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Sunken);
+
+      setWidget(swatch);
+
+      closableAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Closable&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      closableAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(closableAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ColorSwatch<span class="operator">::</span>changeClosable);
+
+      movableAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Movable&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      movableAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(movableAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ColorSwatch<span class="operator">::</span>changeMovable);
+
+      floatableAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Floatable&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      floatableAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(floatableAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ColorSwatch<span class="operator">::</span>changeFloatable);
+
+      verticalTitleBarAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Vertical title bar&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      verticalTitleBarAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(verticalTitleBarAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ColorSwatch<span class="operator">::</span>changeVerticalTitleBar);
+
+      floatingAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Floating&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      floatingAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(floatingAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ColorSwatch<span class="operator">::</span>changeFloating);
+
+      allowedAreasActions <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qactiongroup.html">QActionGroup</a></span>(<span class="keyword">this</span>);
+      allowedAreasActions<span class="operator">-</span><span class="operator">&gt;</span>setExclusive(<span class="keyword">false</span>);
+
+      allowLeftAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Allow on Left&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      allowLeftAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(allowLeftAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ColorSwatch<span class="operator">::</span>allowLeft);
+
+      allowRightAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Allow on Right&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      allowRightAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(allowRightAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ColorSwatch<span class="operator">::</span>allowRight);
+
+      allowTopAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Allow on Top&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      allowTopAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(allowTopAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ColorSwatch<span class="operator">::</span>allowTop);
+
+      allowBottomAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Allow on Bottom&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      allowBottomAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(allowBottomAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ColorSwatch<span class="operator">::</span>allowBottom);
+
+      allowedAreasActions<span class="operator">-</span><span class="operator">&gt;</span>addAction(allowLeftAction);
+      allowedAreasActions<span class="operator">-</span><span class="operator">&gt;</span>addAction(allowRightAction);
+      allowedAreasActions<span class="operator">-</span><span class="operator">&gt;</span>addAction(allowTopAction);
+      allowedAreasActions<span class="operator">-</span><span class="operator">&gt;</span>addAction(allowBottomAction);
+
+      areaActions <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qactiongroup.html">QActionGroup</a></span>(<span class="keyword">this</span>);
+      areaActions<span class="operator">-</span><span class="operator">&gt;</span>setExclusive(<span class="keyword">true</span>);
+
+      leftAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Place on Left&quot;</span>) <span class="operator">,</span> <span class="keyword">this</span>);
+      leftAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(leftAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ColorSwatch<span class="operator">::</span>placeLeft);
+
+      rightAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Place on Right&quot;</span>) <span class="operator">,</span> <span class="keyword">this</span>);
+      rightAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(rightAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ColorSwatch<span class="operator">::</span>placeRight);
+
+      topAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Place on Top&quot;</span>) <span class="operator">,</span> <span class="keyword">this</span>);
+      topAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(topAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ColorSwatch<span class="operator">::</span>placeTop);
+
+      bottomAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Place on Bottom&quot;</span>) <span class="operator">,</span> <span class="keyword">this</span>);
+      bottomAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      connect(bottomAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ColorSwatch<span class="operator">::</span>placeBottom);
+
+      areaActions<span class="operator">-</span><span class="operator">&gt;</span>addAction(leftAction);
+      areaActions<span class="operator">-</span><span class="operator">&gt;</span>addAction(rightAction);
+      areaActions<span class="operator">-</span><span class="operator">&gt;</span>addAction(topAction);
+      areaActions<span class="operator">-</span><span class="operator">&gt;</span>addAction(bottomAction);
+
+      connect(movableAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> areaActions<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qactiongroup.html">QActionGroup</a></span><span class="operator">::</span>setEnabled);
+
+      connect(movableAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> allowedAreasActions<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qactiongroup.html">QActionGroup</a></span><span class="operator">::</span>setEnabled);
+
+      connect(floatableAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> floatingAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>setEnabled);
+
+      connect(floatingAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> floatableAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>setDisabled);
+      connect(movableAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> floatableAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>setEnabled);
+
+      tabMenu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmenu.html">QMenu</a></span>(<span class="keyword">this</span>);
+      tabMenu<span class="operator">-</span><span class="operator">&gt;</span>setTitle(tr(<span class="string">&quot;Tab into&quot;</span>));
+      connect(tabMenu<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qmenu.html">QMenu</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ColorSwatch<span class="operator">::</span>tabInto);
+
+      splitHMenu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmenu.html">QMenu</a></span>(<span class="keyword">this</span>);
+      splitHMenu<span class="operator">-</span><span class="operator">&gt;</span>setTitle(tr(<span class="string">&quot;Split horizontally into&quot;</span>));
+      connect(splitHMenu<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qmenu.html">QMenu</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ColorSwatch<span class="operator">::</span>splitInto);
+
+      splitVMenu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmenu.html">QMenu</a></span>(<span class="keyword">this</span>);
+      splitVMenu<span class="operator">-</span><span class="operator">&gt;</span>setTitle(tr(<span class="string">&quot;Split vertically into&quot;</span>));
+      connect(splitVMenu<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qmenu.html">QMenu</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ColorSwatch<span class="operator">::</span>splitInto);
+
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>windowModifiedAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;Modified&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      windowModifiedAction<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      windowModifiedAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+      connect(windowModifiedAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>toggled<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qwidget.html">QWidget</a></span><span class="operator">::</span>setWindowModified);
+
+      menu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmenu.html">QMenu</a></span>(colorName<span class="operator">,</span> <span class="keyword">this</span>);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(toggleViewAction());
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Raise&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qwidget.html">QWidget</a></span><span class="operator">::</span>raise);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Change Size Hints...&quot;</span>)<span class="operator">,</span> swatch<span class="operator">,</span> <span class="operator">&amp;</span>ColorDock<span class="operator">::</span>changeSizeHints);
+
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(closableAction);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(movableAction);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(floatableAction);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(floatingAction);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(verticalTitleBarAction);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addActions(allowedAreasActions<span class="operator">-</span><span class="operator">&gt;</span>actions());
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addActions(areaActions<span class="operator">-</span><span class="operator">&gt;</span>actions());
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addMenu(splitHMenu);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addMenu(splitVMenu);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tabMenu);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(windowModifiedAction);
+
+      connect(menu<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qmenu.html">QMenu</a></span><span class="operator">::</span>aboutToShow<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ColorSwatch<span class="operator">::</span>updateContextMenu);
+
+      <span class="keyword">if</span> (colorName <span class="operator">=</span><span class="operator">=</span> QLatin1String(<span class="string">&quot;Black&quot;</span>)) {
+          leftAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_W);
+          rightAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_E);
+          toggleViewAction()<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_R);
+      }
+  }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>updateContextMenu()
+  {
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DockWidgetArea area <span class="operator">=</span> mainWindow<span class="operator">-</span><span class="operator">&gt;</span>dockWidgetArea(<span class="keyword">this</span>);
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DockWidgetAreas areas <span class="operator">=</span> allowedAreas();
+
+      closableAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(features() <span class="operator">&amp;</span> <span class="type"><a href="qdockwidget.html">QDockWidget</a></span><span class="operator">::</span>DockWidgetClosable);
+      <span class="keyword">if</span> (windowType() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Drawer) {
+          floatableAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+          floatingAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+          movableAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+          verticalTitleBarAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+      } <span class="keyword">else</span> {
+          floatableAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(features() <span class="operator">&amp;</span> <span class="type"><a href="qdockwidget.html">QDockWidget</a></span><span class="operator">::</span>DockWidgetFloatable);
+          floatingAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(isWindow());
+          <span class="comment">// done after floating, to get 'floatable' correctly initialized</span>
+          movableAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(features() <span class="operator">&amp;</span> <span class="type"><a href="qdockwidget.html">QDockWidget</a></span><span class="operator">::</span>DockWidgetMovable);
+          verticalTitleBarAction
+              <span class="operator">-</span><span class="operator">&gt;</span>setChecked(features() <span class="operator">&amp;</span> <span class="type"><a href="qdockwidget.html">QDockWidget</a></span><span class="operator">::</span>DockWidgetVerticalTitleBar);
+      }
+
+      allowLeftAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(isAreaAllowed(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftDockWidgetArea));
+      allowRightAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(isAreaAllowed(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightDockWidgetArea));
+      allowTopAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(isAreaAllowed(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopDockWidgetArea));
+      allowBottomAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(isAreaAllowed(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BottomDockWidgetArea));
+
+      <span class="keyword">if</span> (allowedAreasActions<span class="operator">-</span><span class="operator">&gt;</span>isEnabled()) {
+          allowLeftAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(area <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftDockWidgetArea);
+          allowRightAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(area <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightDockWidgetArea);
+          allowTopAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(area <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopDockWidgetArea);
+          allowBottomAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(area <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BottomDockWidgetArea);
+      }
+
+      leftAction<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">true</span>);
+      rightAction<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">true</span>);
+      topAction<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">true</span>);
+      bottomAction<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">true</span>);
+
+      leftAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(area <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftDockWidgetArea);
+      rightAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(area <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightDockWidgetArea);
+      topAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(area <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopDockWidgetArea);
+      bottomAction<span class="operator">-</span><span class="operator">&gt;</span>setChecked(area <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BottomDockWidgetArea);
+
+      leftAction<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">false</span>);
+      rightAction<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">false</span>);
+      topAction<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">false</span>);
+      bottomAction<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">false</span>);
+
+      <span class="keyword">if</span> (areaActions<span class="operator">-</span><span class="operator">&gt;</span>isEnabled()) {
+          leftAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(areas <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftDockWidgetArea);
+          rightAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(areas <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightDockWidgetArea);
+          topAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(areas <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopDockWidgetArea);
+          bottomAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(areas <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BottomDockWidgetArea);
+      }
+
+      tabMenu<span class="operator">-</span><span class="operator">&gt;</span>clear();
+      splitHMenu<span class="operator">-</span><span class="operator">&gt;</span>clear();
+      splitVMenu<span class="operator">-</span><span class="operator">&gt;</span>clear();
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>ColorSwatch<span class="operator">*</span><span class="operator">&gt;</span> dock_list <span class="operator">=</span> mainWindow<span class="operator">-</span><span class="operator">&gt;</span>findChildren<span class="operator">&lt;</span>ColorSwatch<span class="operator">*</span><span class="operator">&gt;</span>();
+      foreach (ColorSwatch <span class="operator">*</span>dock<span class="operator">,</span> dock_list) {
+          tabMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(dock<span class="operator">-</span><span class="operator">&gt;</span>objectName());
+          splitHMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(dock<span class="operator">-</span><span class="operator">&gt;</span>objectName());
+          splitVMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(dock<span class="operator">-</span><span class="operator">&gt;</span>objectName());
+      }
+  }
+
+  <span class="keyword">static</span> ColorSwatch <span class="operator">*</span>findByName(<span class="keyword">const</span> <span class="type"><a href="qmainwindow.html">QMainWindow</a></span> <span class="operator">*</span>mainWindow<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>name)
+  {
+      foreach (ColorSwatch <span class="operator">*</span>dock<span class="operator">,</span> mainWindow<span class="operator">-</span><span class="operator">&gt;</span>findChildren<span class="operator">&lt;</span>ColorSwatch<span class="operator">*</span><span class="operator">&gt;</span>()) {
+          <span class="keyword">if</span> (name <span class="operator">=</span><span class="operator">=</span> dock<span class="operator">-</span><span class="operator">&gt;</span>objectName())
+              <span class="keyword">return</span> dock;
+      }
+      <span class="keyword">return</span> Q_NULLPTR;
+  }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>splitInto(<span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action)
+  {
+      ColorSwatch <span class="operator">*</span>target <span class="operator">=</span> findByName(mainWindow<span class="operator">,</span> action<span class="operator">-</span><span class="operator">&gt;</span>text());
+      <span class="keyword">if</span> (<span class="operator">!</span>target)
+          <span class="keyword">return</span>;
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Orientation o <span class="operator">=</span> action<span class="operator">-</span><span class="operator">&gt;</span>parent() <span class="operator">=</span><span class="operator">=</span> splitHMenu
+          <span class="operator">?</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal : <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Vertical;
+      mainWindow<span class="operator">-</span><span class="operator">&gt;</span>splitDockWidget(target<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> o);
+  }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>tabInto(<span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action)
+  {
+      <span class="keyword">if</span> (ColorSwatch <span class="operator">*</span>target <span class="operator">=</span> findByName(mainWindow<span class="operator">,</span> action<span class="operator">-</span><span class="operator">&gt;</span>text()))
+          mainWindow<span class="operator">-</span><span class="operator">&gt;</span>tabifyDockWidget(target<span class="operator">,</span> <span class="keyword">this</span>);
+  }
+
+  <span class="preprocessor">#ifndef QT_NO_CONTEXTMENU</span>
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>contextMenuEvent(<span class="type"><a href="../qtgui/qcontextmenuevent.html">QContextMenuEvent</a></span> <span class="operator">*</span>event)
+  {
+      event<span class="operator">-</span><span class="operator">&gt;</span>accept();
+      menu<span class="operator">-</span><span class="operator">&gt;</span>exec(event<span class="operator">-</span><span class="operator">&gt;</span>globalPos());
+  }
+  <span class="preprocessor">#endif // QT_NO_CONTEXTMENU</span>
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>resizeEvent(<span class="type"><a href="../qtgui/qresizeevent.html">QResizeEvent</a></span> <span class="operator">*</span>e)
+  {
+      <span class="keyword">if</span> (BlueTitleBar <span class="operator">*</span>btb <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span>BlueTitleBar<span class="operator">*</span><span class="operator">&gt;</span>(titleBarWidget()))
+          btb<span class="operator">-</span><span class="operator">&gt;</span>updateMask();
+
+      <span class="type"><a href="qdockwidget.html">QDockWidget</a></span><span class="operator">::</span>resizeEvent(e);
+  }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>allow(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DockWidgetArea area<span class="operator">,</span> bool a)
+  {
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DockWidgetAreas areas <span class="operator">=</span> allowedAreas();
+      areas <span class="operator">=</span> a <span class="operator">?</span> areas <span class="operator">|</span> area : areas <span class="operator">&amp;</span> <span class="operator">~</span>area;
+      setAllowedAreas(areas);
+
+      <span class="keyword">if</span> (areaActions<span class="operator">-</span><span class="operator">&gt;</span>isEnabled()) {
+          leftAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(areas <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftDockWidgetArea);
+          rightAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(areas <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightDockWidgetArea);
+          topAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(areas <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopDockWidgetArea);
+          bottomAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(areas <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BottomDockWidgetArea);
+      }
+  }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>place(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DockWidgetArea area<span class="operator">,</span> bool p)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>p)
+          <span class="keyword">return</span>;
+
+      mainWindow<span class="operator">-</span><span class="operator">&gt;</span>addDockWidget(area<span class="operator">,</span> <span class="keyword">this</span>);
+
+      <span class="keyword">if</span> (allowedAreasActions<span class="operator">-</span><span class="operator">&gt;</span>isEnabled()) {
+          allowLeftAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(area <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftDockWidgetArea);
+          allowRightAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(area <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightDockWidgetArea);
+          allowTopAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(area <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopDockWidgetArea);
+          allowBottomAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(area <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BottomDockWidgetArea);
+      }
+  }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>setCustomSizeHint(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> <span class="operator">&amp;</span>size)
+  {
+      <span class="keyword">if</span> (ColorDock <span class="operator">*</span>dock <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span>ColorDock<span class="operator">*</span><span class="operator">&gt;</span>(widget()))
+          dock<span class="operator">-</span><span class="operator">&gt;</span>setCustomSizeHint(size);
+  }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>changeClosable(bool on)
+  { setFeatures(on <span class="operator">?</span> features() <span class="operator">|</span> DockWidgetClosable : features() <span class="operator">&amp;</span> <span class="operator">~</span>DockWidgetClosable); }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>changeMovable(bool on)
+  { setFeatures(on <span class="operator">?</span> features() <span class="operator">|</span> DockWidgetMovable : features() <span class="operator">&amp;</span> <span class="operator">~</span>DockWidgetMovable); }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>changeFloatable(bool on)
+  { setFeatures(on <span class="operator">?</span> features() <span class="operator">|</span> DockWidgetFloatable : features() <span class="operator">&amp;</span> <span class="operator">~</span>DockWidgetFloatable); }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>changeFloating(bool floating)
+  { setFloating(floating); }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>allowLeft(bool a)
+  { allow(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftDockWidgetArea<span class="operator">,</span> a); }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>allowRight(bool a)
+  { allow(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightDockWidgetArea<span class="operator">,</span> a); }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>allowTop(bool a)
+  { allow(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopDockWidgetArea<span class="operator">,</span> a); }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>allowBottom(bool a)
+  { allow(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BottomDockWidgetArea<span class="operator">,</span> a); }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>placeLeft(bool p)
+  { place(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftDockWidgetArea<span class="operator">,</span> p); }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>placeRight(bool p)
+  { place(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightDockWidgetArea<span class="operator">,</span> p); }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>placeTop(bool p)
+  { place(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopDockWidgetArea<span class="operator">,</span> p); }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>placeBottom(bool p)
+  { place(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BottomDockWidgetArea<span class="operator">,</span> p); }
+
+  <span class="type">void</span> ColorSwatch<span class="operator">::</span>changeVerticalTitleBar(bool on)
+  {
+      setFeatures(on <span class="operator">?</span> features() <span class="operator">|</span> DockWidgetVerticalTitleBar
+                      : features() <span class="operator">&amp;</span> <span class="operator">~</span>DockWidgetVerticalTitleBar);
+  }
+
+  <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> BlueTitleBar<span class="operator">::</span>minimumSizeHint() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="qdockwidget.html">QDockWidget</a></span> <span class="operator">*</span>dw <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qdockwidget.html">QDockWidget</a></span><span class="operator">*</span><span class="operator">&gt;</span>(parentWidget());
+      Q_ASSERT(dw <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>);
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> result(leftPm<span class="operator">.</span>width() <span class="operator">+</span> rightPm<span class="operator">.</span>width()<span class="operator">,</span> centerPm<span class="operator">.</span>height());
+      <span class="keyword">if</span> (dw<span class="operator">-</span><span class="operator">&gt;</span>features() <span class="operator">&amp;</span> <span class="type"><a href="qdockwidget.html">QDockWidget</a></span><span class="operator">::</span>DockWidgetVerticalTitleBar)
+          result<span class="operator">.</span>transpose();
+      <span class="keyword">return</span> result;
+  }
+
+  BlueTitleBar<span class="operator">::</span>BlueTitleBar(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qwidget.html">QWidget</a></span>(parent)
+      <span class="operator">,</span> leftPm(<span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>(<span class="string">&quot;:/res/titlebarLeft.png&quot;</span>))
+      <span class="operator">,</span> centerPm(<span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>(<span class="string">&quot;:/res/titlebarCenter.png&quot;</span>))
+      <span class="operator">,</span> rightPm(<span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>(<span class="string">&quot;:/res/titlebarRight.png&quot;</span>))
+  {
+  }
+
+  <span class="type">void</span> BlueTitleBar<span class="operator">::</span>paintEvent(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span><span class="operator">*</span>)
+  {
+      <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter(<span class="keyword">this</span>);
+      <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> rect <span class="operator">=</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>rect();
+
+      <span class="type"><a href="qdockwidget.html">QDockWidget</a></span> <span class="operator">*</span>dw <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qdockwidget.html">QDockWidget</a></span><span class="operator">*</span><span class="operator">&gt;</span>(parentWidget());
+      Q_ASSERT(dw <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>);
+
+      <span class="keyword">if</span> (dw<span class="operator">-</span><span class="operator">&gt;</span>features() <span class="operator">&amp;</span> <span class="type"><a href="qdockwidget.html">QDockWidget</a></span><span class="operator">::</span>DockWidgetVerticalTitleBar) {
+          <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> s <span class="operator">=</span> rect<span class="operator">.</span>size();
+          s<span class="operator">.</span>transpose();
+          rect<span class="operator">.</span>setSize(s);
+
+          painter<span class="operator">.</span>translate(rect<span class="operator">.</span>left()<span class="operator">,</span> rect<span class="operator">.</span>top() <span class="operator">+</span> rect<span class="operator">.</span>width());
+          painter<span class="operator">.</span>rotate(<span class="operator">-</span><span class="number">90</span>);
+          painter<span class="operator">.</span>translate(<span class="operator">-</span>rect<span class="operator">.</span>left()<span class="operator">,</span> <span class="operator">-</span>rect<span class="operator">.</span>top());
+      }
+
+      painter<span class="operator">.</span>drawPixmap(rect<span class="operator">.</span>topLeft()<span class="operator">,</span> leftPm);
+      painter<span class="operator">.</span>drawPixmap(rect<span class="operator">.</span>topRight() <span class="operator">-</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(rightPm<span class="operator">.</span>width() <span class="operator">-</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>)<span class="operator">,</span> rightPm);
+      <span class="type"><a href="../qtgui/qbrush.html">QBrush</a></span> brush(centerPm);
+      painter<span class="operator">.</span>fillRect(rect<span class="operator">.</span>left() <span class="operator">+</span> leftPm<span class="operator">.</span>width()<span class="operator">,</span> rect<span class="operator">.</span>top()<span class="operator">,</span>
+                          rect<span class="operator">.</span>width() <span class="operator">-</span> leftPm<span class="operator">.</span>width() <span class="operator">-</span> rightPm<span class="operator">.</span>width()<span class="operator">,</span>
+                          centerPm<span class="operator">.</span>height()<span class="operator">,</span> centerPm);
+  }
+
+  <span class="type">void</span> BlueTitleBar<span class="operator">::</span>mouseReleaseEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> pos <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>pos();
+
+      <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> rect <span class="operator">=</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>rect();
+
+      <span class="type"><a href="qdockwidget.html">QDockWidget</a></span> <span class="operator">*</span>dw <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qdockwidget.html">QDockWidget</a></span><span class="operator">*</span><span class="operator">&gt;</span>(parentWidget());
+      Q_ASSERT(dw <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>);
+
+      <span class="keyword">if</span> (dw<span class="operator">-</span><span class="operator">&gt;</span>features() <span class="operator">&amp;</span> <span class="type"><a href="qdockwidget.html">QDockWidget</a></span><span class="operator">::</span>DockWidgetVerticalTitleBar) {
+          <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> p <span class="operator">=</span> pos;
+          pos<span class="operator">.</span>setX(rect<span class="operator">.</span>left() <span class="operator">+</span> rect<span class="operator">.</span>bottom() <span class="operator">-</span> p<span class="operator">.</span>y());
+          pos<span class="operator">.</span>setY(rect<span class="operator">.</span>top() <span class="operator">+</span> p<span class="operator">.</span>x() <span class="operator">-</span> rect<span class="operator">.</span>left());
+
+          <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> s <span class="operator">=</span> rect<span class="operator">.</span>size();
+          s<span class="operator">.</span>transpose();
+          rect<span class="operator">.</span>setSize(s);
+      }
+
+      <span class="keyword">const</span> <span class="type">int</span> buttonRight <span class="operator">=</span> <span class="number">7</span>;
+      <span class="keyword">const</span> <span class="type">int</span> buttonWidth <span class="operator">=</span> <span class="number">20</span>;
+      <span class="type">int</span> right <span class="operator">=</span> rect<span class="operator">.</span>right() <span class="operator">-</span> pos<span class="operator">.</span>x();
+      <span class="type">int</span> button <span class="operator">=</span> (right <span class="operator">-</span> buttonRight)<span class="operator">/</span>buttonWidth;
+      <span class="keyword">switch</span> (button) {
+          <span class="keyword">case</span> <span class="number">0</span>:
+              event<span class="operator">-</span><span class="operator">&gt;</span>accept();
+              dw<span class="operator">-</span><span class="operator">&gt;</span>close();
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="number">1</span>:
+              event<span class="operator">-</span><span class="operator">&gt;</span>accept();
+              dw<span class="operator">-</span><span class="operator">&gt;</span>setFloating(<span class="operator">!</span>dw<span class="operator">-</span><span class="operator">&gt;</span>isFloating());
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="number">2</span>: {
+              event<span class="operator">-</span><span class="operator">&gt;</span>accept();
+              <span class="type"><a href="qdockwidget.html">QDockWidget</a></span><span class="operator">::</span>DockWidgetFeatures features <span class="operator">=</span> dw<span class="operator">-</span><span class="operator">&gt;</span>features();
+              <span class="keyword">if</span> (features <span class="operator">&amp;</span> <span class="type"><a href="qdockwidget.html">QDockWidget</a></span><span class="operator">::</span>DockWidgetVerticalTitleBar)
+                  features <span class="operator">&amp;</span><span class="operator">=</span> <span class="operator">~</span><span class="type"><a href="qdockwidget.html">QDockWidget</a></span><span class="operator">::</span>DockWidgetVerticalTitleBar;
+              <span class="keyword">else</span>
+                  features <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="qdockwidget.html">QDockWidget</a></span><span class="operator">::</span>DockWidgetVerticalTitleBar;
+              dw<span class="operator">-</span><span class="operator">&gt;</span>setFeatures(features);
+              <span class="keyword">break</span>;
+          }
+          <span class="keyword">default</span>:
+              event<span class="operator">-</span><span class="operator">&gt;</span>ignore();
+              <span class="keyword">break</span>;
+      }
+  }
+
+  <span class="type">void</span> BlueTitleBar<span class="operator">::</span>updateMask()
+  {
+      <span class="type"><a href="qdockwidget.html">QDockWidget</a></span> <span class="operator">*</span>dw <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qdockwidget.html">QDockWidget</a></span><span class="operator">*</span><span class="operator">&gt;</span>(parent());
+      Q_ASSERT(dw <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>);
+
+      <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> rect <span class="operator">=</span> dw<span class="operator">-</span><span class="operator">&gt;</span>rect();
+      <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> bitmap(dw<span class="operator">-</span><span class="operator">&gt;</span>size());
+
+      {
+          <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter(<span class="operator">&amp;</span>bitmap);
+
+          <span class="comment">// initialize to transparent</span>
+          painter<span class="operator">.</span>fillRect(rect<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>color0);
+
+          <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> contents <span class="operator">=</span> rect;
+          contents<span class="operator">.</span>setTopLeft(geometry()<span class="operator">.</span>bottomLeft());
+          contents<span class="operator">.</span>setRight(geometry()<span class="operator">.</span>right());
+          contents<span class="operator">.</span>setBottom(contents<span class="operator">.</span>bottom()<span class="operator">-</span>y());
+          painter<span class="operator">.</span>fillRect(contents<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>color1);
+
+          <span class="comment">// let's paint the titlebar</span>
+          <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> titleRect <span class="operator">=</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>geometry();
+
+          <span class="keyword">if</span> (dw<span class="operator">-</span><span class="operator">&gt;</span>features() <span class="operator">&amp;</span> <span class="type"><a href="qdockwidget.html">QDockWidget</a></span><span class="operator">::</span>DockWidgetVerticalTitleBar) {
+              <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> s <span class="operator">=</span> rect<span class="operator">.</span>size();
+              s<span class="operator">.</span>transpose();
+              rect<span class="operator">.</span>setSize(s);
+
+              <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> s2 <span class="operator">=</span> size();
+              s2<span class="operator">.</span>transpose();
+              titleRect<span class="operator">.</span>setSize(s2);
+
+              painter<span class="operator">.</span>translate(rect<span class="operator">.</span>left()<span class="operator">,</span> rect<span class="operator">.</span>top() <span class="operator">+</span> rect<span class="operator">.</span>width());
+              painter<span class="operator">.</span>rotate(<span class="operator">-</span><span class="number">90</span>);
+              painter<span class="operator">.</span>translate(<span class="operator">-</span>rect<span class="operator">.</span>left()<span class="operator">,</span> <span class="operator">-</span>rect<span class="operator">.</span>top());
+          }
+
+          contents<span class="operator">.</span>setTopLeft(titleRect<span class="operator">.</span>bottomLeft());
+          contents<span class="operator">.</span>setRight(titleRect<span class="operator">.</span>right());
+          contents<span class="operator">.</span>setBottom(rect<span class="operator">.</span>bottom()<span class="operator">-</span>y());
+
+          <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> rect <span class="operator">=</span> titleRect;
+
+          painter<span class="operator">.</span>drawPixmap(rect<span class="operator">.</span>topLeft()<span class="operator">,</span> leftPm<span class="operator">.</span>mask());
+          painter<span class="operator">.</span>fillRect(rect<span class="operator">.</span>left() <span class="operator">+</span> leftPm<span class="operator">.</span>width()<span class="operator">,</span> rect<span class="operator">.</span>top()<span class="operator">,</span>
+              rect<span class="operator">.</span>width() <span class="operator">-</span> leftPm<span class="operator">.</span>width() <span class="operator">-</span> rightPm<span class="operator">.</span>width()<span class="operator">,</span>
+              centerPm<span class="operator">.</span>height()<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>color1);
+          painter<span class="operator">.</span>drawPixmap(rect<span class="operator">.</span>topRight() <span class="operator">-</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(rightPm<span class="operator">.</span>width() <span class="operator">-</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>)<span class="operator">,</span> rightPm<span class="operator">.</span>mask());
+
+          painter<span class="operator">.</span>fillRect(contents<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>color1);
+      }
+
+      dw<span class="operator">-</span><span class="operator">&gt;</span>setMask(bitmap);
+  }
+
+  <span class="preprocessor">#include &quot;colorswatch.moc&quot;</span>
+
+</pre>
+</div>
+<!-- @@@mainwindows/mainwindow/colorswatch.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

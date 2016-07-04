@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>satellitemodel.cpp Example File | Qt Positioning 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtpositioning-index.html">Qt Positioning</a></td><td ><a href="qtpositioning-satelliteinfo-example.html">SatelliteInfo (C++/QML)</a></td><td >satellitemodel.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">satellitemodel.cpp Example File</h1>
+<span class="subtitle">satelliteinfo/satellitemodel.cpp</span>
+<!-- $$$satelliteinfo/satellitemodel.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;satellitemodel.h&quot;</span>
+  <span class="preprocessor">#include &lt;QTimer&gt;</span>
+  <span class="preprocessor">#include &lt;QDebug&gt;</span>
+
+  SatelliteModel<span class="operator">::</span>SatelliteModel(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent) :
+      <span class="type"><a href="../qtcore/qabstractlistmodel.html">QAbstractListModel</a></span>(parent)<span class="operator">,</span> source(<span class="number">0</span>)<span class="operator">,</span> m_componentCompleted(<span class="keyword">false</span>)<span class="operator">,</span> m_running(<span class="keyword">false</span>)<span class="operator">,</span>
+      m_runningRequested(<span class="keyword">false</span>)<span class="operator">,</span> demo(<span class="keyword">false</span>)<span class="operator">,</span> isSingle(<span class="keyword">false</span>)<span class="operator">,</span> singleRequestServed(<span class="keyword">false</span>)
+  {
+      source <span class="operator">=</span> <span class="type"><a href="qgeosatelliteinfosource.html">QGeoSatelliteInfoSource</a></span><span class="operator">::</span>createDefaultSource(<span class="keyword">this</span>);
+      <span class="keyword">if</span> (<span class="operator">!</span>demo <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>source) {
+          <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;No satellite data source found. Changing to demo mode.&quot;</span>;
+          demo <span class="operator">=</span> <span class="keyword">true</span>;
+      }
+      <span class="keyword">if</span> (<span class="operator">!</span>demo) {
+          source<span class="operator">-</span><span class="operator">&gt;</span>setUpdateInterval(<span class="number">3000</span>);
+          connect(source<span class="operator">,</span> SIGNAL(satellitesInViewUpdated(<span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span><span class="operator">&gt;</span>))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(satellitesInViewUpdated(<span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span><span class="operator">&gt;</span>)));
+          connect(source<span class="operator">,</span> SIGNAL(satellitesInUseUpdated(<span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span><span class="operator">&gt;</span>))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(satellitesInUseUpdated(<span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span><span class="operator">&gt;</span>)));
+          connect(source<span class="operator">,</span> SIGNAL(error(<span class="type"><a href="qgeosatelliteinfosource.html">QGeoSatelliteInfoSource</a></span><span class="operator">::</span>Error))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(error(<span class="type"><a href="qgeosatelliteinfosource.html">QGeoSatelliteInfoSource</a></span><span class="operator">::</span>Error)));
+      }
+
+      <span class="keyword">if</span> (demo) {
+          timer <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span>(<span class="keyword">this</span>);
+          connect(timer<span class="operator">,</span> SIGNAL(timeout())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateDemoData()));
+          timer<span class="operator">-</span><span class="operator">&gt;</span>start(<span class="number">3000</span>);
+      }
+  }
+
+  <span class="type">int</span> SatelliteModel<span class="operator">::</span>rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      Q_UNUSED(parent);
+      <span class="keyword">if</span> (<span class="operator">!</span>source <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>demo)
+          <span class="keyword">return</span> <span class="number">0</span>;
+
+      <span class="keyword">return</span> knownSatellites<span class="operator">.</span>count();
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> SatelliteModel<span class="operator">::</span>data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>demo <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>source)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid() <span class="operator">|</span><span class="operator">|</span> index<span class="operator">.</span>row() <span class="operator">&lt;</span> <span class="number">0</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+      <span class="keyword">if</span> (index<span class="operator">.</span>row() <span class="operator">&gt;</span><span class="operator">=</span> knownSatellites<span class="operator">.</span>count()) {
+          <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;SatelliteModel: Index out of bound&quot;</span>;
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+      }
+
+      <span class="keyword">const</span> <span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span> <span class="operator">&amp;</span>info <span class="operator">=</span> knownSatellites<span class="operator">.</span>at(index<span class="operator">.</span>row());
+      <span class="keyword">switch</span> (role) {
+      <span class="keyword">case</span> IdentifierRole:
+          <span class="keyword">return</span> info<span class="operator">.</span>satelliteIdentifier();
+      <span class="keyword">case</span> InUseRole:
+          <span class="keyword">return</span> satellitesInUse<span class="operator">.</span>contains(info<span class="operator">.</span>satelliteIdentifier());
+      <span class="keyword">case</span> SignalStrengthRole:
+          <span class="keyword">return</span> info<span class="operator">.</span>signalStrength();
+      <span class="keyword">case</span> ElevationRole:
+          <span class="keyword">if</span> (<span class="operator">!</span>info<span class="operator">.</span>hasAttribute(<span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span><span class="operator">::</span>Elevation))
+              <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+          <span class="keyword">return</span> info<span class="operator">.</span>attribute(<span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span><span class="operator">::</span>Elevation);
+      <span class="keyword">case</span> AzimuthRole:
+          <span class="keyword">if</span> (<span class="operator">!</span>info<span class="operator">.</span>hasAttribute(<span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span><span class="operator">::</span>Azimuth))
+              <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+          <span class="keyword">return</span> info<span class="operator">.</span>attribute(<span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span><span class="operator">::</span>Azimuth);
+      <span class="keyword">default</span>:
+          <span class="keyword">break</span>;
+
+      }
+
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+  }
+
+  <span class="type"><a href="../qtcore/qhash.html">QHash</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> SatelliteModel<span class="operator">::</span>roleNames() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qhash.html">QHash</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> roleNames;
+      roleNames<span class="operator">.</span>insert(IdentifierRole<span class="operator">,</span> <span class="string">&quot;satelliteIdentifier&quot;</span>);
+      roleNames<span class="operator">.</span>insert(InUseRole<span class="operator">,</span> <span class="string">&quot;isInUse&quot;</span>);
+      roleNames<span class="operator">.</span>insert(SignalStrengthRole<span class="operator">,</span> <span class="string">&quot;signalStrength&quot;</span>);
+      roleNames<span class="operator">.</span>insert(ElevationRole<span class="operator">,</span> <span class="string">&quot;elevation&quot;</span>);
+      roleNames<span class="operator">.</span>insert(AzimuthRole<span class="operator">,</span> <span class="string">&quot;azimuth&quot;</span>);
+      <span class="keyword">return</span> roleNames;
+  }
+
+  <span class="type">void</span> SatelliteModel<span class="operator">::</span>componentComplete()
+  {
+      m_componentCompleted <span class="operator">=</span> <span class="keyword">true</span>;
+      <span class="keyword">if</span> (m_runningRequested)
+          setRunning(<span class="keyword">true</span>);
+  }
+
+  bool SatelliteModel<span class="operator">::</span>running() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_running;
+  }
+
+  bool SatelliteModel<span class="operator">::</span>isSingleRequest() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> isSingle;
+  }
+
+  <span class="type">void</span> SatelliteModel<span class="operator">::</span>setSingleRequest(bool single)
+  {
+      <span class="keyword">if</span> (running()) {
+          <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Cannot change single request mode while running&quot;</span>;
+          <span class="keyword">return</span>;
+      }
+
+      <span class="keyword">if</span> (single <span class="operator">!</span><span class="operator">=</span> isSingle) { <span class="comment">//flag changed</span>
+          isSingle <span class="operator">=</span> single;
+          <span class="keyword">emit</span> singleRequestChanged();
+      }
+  }
+
+  <span class="type">void</span> SatelliteModel<span class="operator">::</span>setRunning(bool isActive)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>source <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>demo)
+          <span class="keyword">return</span>;
+
+      <span class="keyword">if</span> (<span class="operator">!</span>m_componentCompleted) {
+          m_runningRequested <span class="operator">=</span> isActive;
+          <span class="keyword">return</span>;
+      }
+
+      <span class="keyword">if</span> (m_running <span class="operator">=</span><span class="operator">=</span> isActive)
+          <span class="keyword">return</span>;
+
+      m_running <span class="operator">=</span> isActive;
+
+      <span class="keyword">if</span> (m_running) {
+          clearModel();
+          <span class="keyword">if</span> (demo)
+              timer<span class="operator">-</span><span class="operator">&gt;</span>start(<span class="number">2000</span>);
+          <span class="keyword">else</span> <span class="keyword">if</span> (isSingleRequest())
+              source<span class="operator">-</span><span class="operator">&gt;</span>requestUpdate(<span class="number">10000</span>);
+          <span class="keyword">else</span>
+              source<span class="operator">-</span><span class="operator">&gt;</span>startUpdates();
+
+          <span class="keyword">if</span> (demo)
+              singleRequestServed <span class="operator">=</span> <span class="keyword">false</span>;
+      } <span class="keyword">else</span> {
+          <span class="keyword">if</span> (demo)
+              timer<span class="operator">-</span><span class="operator">&gt;</span>stop();
+          <span class="keyword">else</span> <span class="keyword">if</span> (<span class="operator">!</span>isSingleRequest())
+              source<span class="operator">-</span><span class="operator">&gt;</span>stopUpdates();
+      }
+
+      Q_EMIT runningChanged();
+  }
+
+  <span class="type">int</span> SatelliteModel<span class="operator">::</span>entryCount() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> knownSatellites<span class="operator">.</span>count();
+  }
+
+  bool SatelliteModel<span class="operator">::</span>canProvideSatelliteInfo() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="operator">!</span>demo;
+  }
+
+  <span class="type">void</span> SatelliteModel<span class="operator">::</span>clearModel()
+  {
+      beginResetModel();
+      knownSatelliteIds<span class="operator">.</span>clear();
+      knownSatellites<span class="operator">.</span>clear();
+      satellitesInUse<span class="operator">.</span>clear();
+      endResetModel();
+  }
+
+  <span class="type">void</span> SatelliteModel<span class="operator">::</span>updateDemoData()
+  {
+      <span class="keyword">static</span> bool flag <span class="operator">=</span> <span class="keyword">true</span>;
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span><span class="operator">&gt;</span> satellites;
+      <span class="keyword">if</span> (flag) {
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i<span class="operator">&lt;</span><span class="number">5</span>; i<span class="operator">+</span><span class="operator">+</span>) {
+              <span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span> info;
+              info<span class="operator">.</span>setSatelliteIdentifier(i);
+              info<span class="operator">.</span>setSignalStrength(<span class="number">20</span> <span class="operator">+</span> <span class="number">20</span><span class="operator">*</span>i);
+              satellites<span class="operator">.</span>append(info);
+          }
+      } <span class="keyword">else</span> {
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i<span class="operator">&lt;</span><span class="number">9</span>; i<span class="operator">+</span><span class="operator">+</span>) {
+              <span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span> info;
+              info<span class="operator">.</span>setSatelliteIdentifier(i<span class="operator">*</span><span class="number">2</span>);
+              info<span class="operator">.</span>setSignalStrength(<span class="number">20</span> <span class="operator">+</span> <span class="number">10</span><span class="operator">*</span>i);
+              satellites<span class="operator">.</span>append(info);
+          }
+      }
+
+      satellitesInViewUpdated(satellites);
+      flag <span class="operator">?</span> satellitesInUseUpdated(<span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span><span class="operator">&gt;</span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> satellites<span class="operator">.</span>at(<span class="number">2</span>))
+           : satellitesInUseUpdated(<span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span><span class="operator">&gt;</span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> satellites<span class="operator">.</span>at(<span class="number">3</span>));
+      flag <span class="operator">=</span> <span class="operator">!</span>flag;
+
+      <span class="keyword">emit</span> errorFound(flag);
+
+      <span class="keyword">if</span> (isSingleRequest() <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>singleRequestServed) {
+          singleRequestServed <span class="operator">=</span> <span class="keyword">true</span>;
+          setRunning(<span class="keyword">false</span>);
+      }
+  }
+
+  <span class="type">void</span> SatelliteModel<span class="operator">::</span>error(<span class="type"><a href="qgeosatelliteinfosource.html">QGeoSatelliteInfoSource</a></span><span class="operator">::</span>Error error)
+  {
+      <span class="keyword">emit</span> errorFound((<span class="type">int</span>)error);
+  }
+
+  <span class="keyword">inline</span> bool <span class="keyword">operator</span><span class="operator">&lt;</span>(<span class="keyword">const</span> <span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span><span class="operator">&amp;</span> a<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span><span class="operator">&amp;</span> b)
+  {
+      <span class="keyword">return</span> a<span class="operator">.</span>satelliteIdentifier() <span class="operator">&lt;</span> b<span class="operator">.</span>satelliteIdentifier();
+  }
+
+  <span class="type">void</span> SatelliteModel<span class="operator">::</span>satellitesInViewUpdated(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span><span class="operator">&gt;</span> <span class="operator">&amp;</span>infos)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>running())
+          <span class="keyword">return</span>;
+
+      <span class="type">int</span> oldEntryCount <span class="operator">=</span> knownSatellites<span class="operator">.</span>count();
+
+      <span class="type"><a href="../qtcore/qset.html">QSet</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span> satelliteIdsInUpdate;
+      foreach (<span class="keyword">const</span> <span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span> <span class="operator">&amp;</span>info<span class="operator">,</span> infos)
+          satelliteIdsInUpdate<span class="operator">.</span>insert(info<span class="operator">.</span>satelliteIdentifier());
+
+      <span class="type"><a href="../qtcore/qset.html">QSet</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span> toBeRemoved <span class="operator">=</span> knownSatelliteIds <span class="operator">-</span> satelliteIdsInUpdate;
+
+      <span class="comment">//We reset the model as in reality just about all entry values change</span>
+      <span class="comment">//and there are generally a lot of inserts and removals each time</span>
+      <span class="comment">//Hence we don't bother with complex model update logic beyond resetModel()</span>
+      beginResetModel();
+
+      knownSatellites <span class="operator">=</span> infos;
+
+      <span class="comment">//sort them for presentation purposes</span>
+      std<span class="operator">::</span>sort(knownSatellites<span class="operator">.</span>begin()<span class="operator">,</span> knownSatellites<span class="operator">.</span>end());
+
+      <span class="comment">//remove old &quot;InUse&quot; data</span>
+      <span class="comment">//new satellites are by default not in &quot;InUse&quot;</span>
+      <span class="comment">//existing satellites keep their &quot;inUse&quot; state</span>
+      satellitesInUse <span class="operator">-</span><span class="operator">=</span> toBeRemoved;
+
+      knownSatelliteIds <span class="operator">=</span> satelliteIdsInUpdate;
+      endResetModel();
+
+      <span class="keyword">if</span> (oldEntryCount <span class="operator">!</span><span class="operator">=</span> knownSatellites<span class="operator">.</span>count())
+          <span class="keyword">emit</span> entryCountChanged();
+  }
+
+  <span class="type">void</span> SatelliteModel<span class="operator">::</span>satellitesInUseUpdated(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span><span class="operator">&gt;</span> <span class="operator">&amp;</span>infos)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>running())
+          <span class="keyword">return</span>;
+
+      beginResetModel();
+
+      satellitesInUse<span class="operator">.</span>clear();
+      foreach (<span class="keyword">const</span> <span class="type"><a href="qgeosatelliteinfo.html">QGeoSatelliteInfo</a></span> <span class="operator">&amp;</span>info<span class="operator">,</span> infos)
+          satellitesInUse<span class="operator">.</span>insert(info<span class="operator">.</span>satelliteIdentifier());
+
+      endResetModel();
+  }
+
+</pre>
+</div>
+<!-- @@@satelliteinfo/satellitemodel.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

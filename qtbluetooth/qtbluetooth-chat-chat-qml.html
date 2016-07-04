@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>chat.qml Example File | Qt Bluetooth 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtbluetooth-index.html">Qt Bluetooth</a></td><td ><a href="qtbluetooth-chat-example.html">Bluetooth QML Chat Example</a></td><td >chat.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">chat.qml Example File</h1>
+<span class="subtitle">chat/chat.qml</span>
+<!-- $$$chat/chat.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the QtBluetooth module.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.2
+  import QtBluetooth 5.3
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">top</span>
+
+      <span class="name">Component</span>.onCompleted: <span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;begin&quot;</span>
+
+      property <span class="type">string</span> <span class="name">remoteDeviceName</span>: <span class="string">&quot;&quot;</span>
+      property <span class="type">bool</span> <span class="name">serviceFound</span>: <span class="number">false</span>
+
+      <span class="type"><a href="qml-qtbluetooth-bluetoothdiscoverymodel.html">BluetoothDiscoveryModel</a></span> {
+          <span class="name">id</span>: <span class="name">btModel</span>
+          <span class="name">running</span>: <span class="number">true</span>
+          <span class="name">discoveryMode</span>: <span class="name">BluetoothDiscoveryModel</span>.<span class="name">MinimalServiceDiscovery</span>
+          <span class="name">onRunningChanged</span> : {
+              <span class="keyword">if</span> (!<span class="name">btModel</span>.<span class="name">running</span> <span class="operator">&amp;&amp;</span> <span class="name">top</span>.<span class="name">state</span> <span class="operator">==</span> <span class="string">&quot;begin&quot;</span> <span class="operator">&amp;&amp;</span> !<span class="name">serviceFound</span>) {
+                  <span class="name">searchBox</span>.<span class="name">animationRunning</span> <span class="operator">=</span> <span class="number">false</span>;
+                  <span class="name">searchBox</span>.<span class="name">appendText</span>(<span class="string">&quot;\nNo service found. \n\nPlease start server\nand restart app.&quot;</span>)
+              }
+          }
+
+          <span class="name">onErrorChanged</span>: {
+              <span class="keyword">if</span> (<span class="name">error</span> <span class="operator">!=</span> <span class="name">BluetoothDiscoveryModel</span>.<span class="name">NoError</span> <span class="operator">&amp;&amp;</span> !<span class="name">btModel</span>.<span class="name">running</span>) {
+                  <span class="name">searchBox</span>.<span class="name">animationRunning</span> <span class="operator">=</span> <span class="number">false</span>
+                  <span class="name">searchBox</span>.<span class="name">appendText</span>(<span class="string">&quot;\n\nDiscovery failed.\nPlease ensure Bluetooth is available.&quot;</span>)
+              }
+          }
+
+          <span class="name">onServiceDiscovered</span>: {
+              <span class="keyword">if</span> (<span class="name">serviceFound</span>)
+                  <span class="keyword">return</span>
+              <span class="name">serviceFound</span> <span class="operator">=</span> <span class="number">true</span>
+              <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Found new service &quot;</span> <span class="operator">+</span> <span class="name">service</span>.<span class="name">deviceAddress</span> <span class="operator">+</span> <span class="string">&quot; &quot;</span> <span class="operator">+</span> <span class="name">service</span>.<span class="name">deviceName</span> <span class="operator">+</span> <span class="string">&quot; &quot;</span> <span class="operator">+</span> <span class="name">service</span>.<span class="name">serviceName</span>);
+              <span class="name">searchBox</span>.<span class="name">appendText</span>(<span class="string">&quot;\nConnecting to server...&quot;</span>)
+              <span class="name">remoteDeviceName</span> <span class="operator">=</span> <span class="name">service</span>.<span class="name">deviceName</span>
+              <span class="name">socket</span>.<span class="name">setService</span>(<span class="name">service</span>)
+          }
+          <span class="name">uuidFilter</span>: <span class="string">&quot;e8e10f95-1a70-4b27-9ccf-02010264e9c8&quot;</span>
+      }
+
+      <span class="type"><a href="qml-qtbluetooth-bluetoothsocket.html">BluetoothSocket</a></span> {
+          <span class="name">id</span>: <span class="name">socket</span>
+          <span class="name">connected</span>: <span class="number">true</span>
+
+          <span class="name">onSocketStateChanged</span>: {
+              <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Connected to server&quot;</span>)
+              <span class="name">top</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;chatActive&quot;</span>
+          }
+          <span class="name">onStringDataChanged</span>: {
+              <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Received data: &quot;</span> )
+              var <span class="name">data</span> = <span class="name">remoteDeviceName</span> <span class="operator">+</span> <span class="string">&quot;: &quot;</span> <span class="operator">+</span> <span class="name">socket</span>.<span class="name">stringData</span>;
+              <span class="name">data</span> <span class="operator">=</span> <span class="name">data</span>.<span class="name">substring</span>(<span class="number">0</span>, <span class="name">data</span>.<span class="name">indexOf</span>(<span class="string">'\n'</span>))
+              <span class="name">chatContent</span>.<span class="name">append</span>({content: <span class="name">data</span>})
+              <span class="name">console</span>.<span class="name">log</span>(<span class="name">data</span>);
+          }
+      }
+
+      <span class="type">ListModel</span> {
+          <span class="name">id</span>: <span class="name">chatContent</span>
+          <span class="type">ListElement</span> {
+              <span class="name">content</span>: <span class="string">&quot;Connected to chat server&quot;</span>
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">background</span>
+          <span class="name">z</span>: <span class="number">0</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">color</span>: <span class="string">&quot;#5d5b59&quot;</span>
+      }
+
+      <span class="type">Search</span> {
+          <span class="name">id</span>: <span class="name">searchBox</span>
+          <span class="name">anchors</span>.centerIn: <span class="name">top</span>
+          <span class="name">opacity</span>: <span class="number">1</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">chatBox</span>
+          <span class="name">opacity</span>: <span class="number">0</span>
+          <span class="name">anchors</span>.centerIn: <span class="name">top</span>
+
+          <span class="name">color</span>: <span class="string">&quot;#5d5b59&quot;</span>
+          <span class="name">border</span>.color: <span class="string">&quot;black&quot;</span>
+          <span class="name">border</span>.width: <span class="number">1</span>
+          <span class="name">radius</span>: <span class="number">5</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+
+          <span class="keyword">function</span> <span class="name">sendMessage</span>()
+          {
+              <span class="comment">// toogle focus to force end of input method composer</span>
+              var <span class="name">hasFocus</span> = <span class="name">input</span>.<span class="name">focus</span>;
+              <span class="name">input</span>.<span class="name">focus</span> <span class="operator">=</span> <span class="number">false</span>;
+
+              var <span class="name">data</span> = <span class="name">input</span>.<span class="name">text</span>
+              <span class="name">input</span>.<span class="name">clear</span>()
+              <span class="name">chatContent</span>.<span class="name">append</span>({content: <span class="string">&quot;Me: &quot;</span> <span class="operator">+</span> <span class="name">data</span>})
+              <span class="name">socket</span>.<span class="name">stringData</span> <span class="operator">=</span> <span class="name">data</span>
+              <span class="name">chatView</span>.<span class="name">positionViewAtEnd</span>()
+
+              <span class="name">input</span>.<span class="name">focus</span> <span class="operator">=</span> <span class="name">hasFocus</span>;
+          }
+
+          <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">anchors</span>.margins: <span class="number">10</span>
+
+              <span class="type">InputBox</span> {
+                  <span class="name">id</span>: <span class="name">input</span>
+                  <span class="name">Keys</span>.onReturnPressed: <span class="name">chatBox</span>.<span class="name">sendMessage</span>()
+                  <span class="name">height</span>: <span class="name">sendButton</span>.<span class="name">height</span>
+                  <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">-</span> <span class="name">sendButton</span>.<span class="name">width</span> <span class="operator">-</span> <span class="number">15</span>
+                  <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+              }
+
+              <span class="type">Button</span> {
+                  <span class="name">id</span>: <span class="name">sendButton</span>
+                  <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+                  <span class="name">label</span>: <span class="string">&quot;Send&quot;</span>
+                  <span class="name">onButtonClick</span>: <span class="name">chatBox</span>.<span class="name">sendMessage</span>()
+              }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+                  <span class="name">height</span>: <span class="name">parent</span>.<span class="name">height</span> <span class="operator">-</span> <span class="name">input</span>.<span class="name">height</span> <span class="operator">-</span> <span class="number">15</span>
+                  <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>;
+                  <span class="name">color</span>: <span class="string">&quot;#d7d6d5&quot;</span>
+                  <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+                  <span class="name">border</span>.color: <span class="string">&quot;black&quot;</span>
+                  <span class="name">border</span>.width: <span class="number">1</span>
+                  <span class="name">radius</span>: <span class="number">5</span>
+
+                  <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+                      <span class="name">id</span>: <span class="name">chatView</span>
+                      <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span><span class="operator">-</span><span class="number">5</span>
+                      <span class="name">height</span>: <span class="name">parent</span>.<span class="name">height</span><span class="operator">-</span><span class="number">5</span>
+                      <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+                      <span class="name">model</span>: <span class="name">chatContent</span>
+                      <span class="name">clip</span>: <span class="number">true</span>
+                      <span class="name">delegate</span>: <span class="name">Component</span> {
+                          <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                              <span class="name">font</span>.pointSize: <span class="number">14</span>
+                              <span class="name">text</span>: <span class="name">modelData</span>
+                          }
+                      }
+                  }
+              }
+          }
+      }
+
+      <span class="name">states</span>: [
+          <span class="type"><a href="../qtquick/qml-qtquick-state.html">State</a></span> {
+              <span class="name">name</span>: <span class="string">&quot;begin&quot;</span>
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">searchBox</span>; <span class="name">opacity</span>: <span class="number">1</span> }
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">chatBox</span>; <span class="name">opacity</span>: <span class="number">0</span> }
+          },
+          <span class="type"><a href="../qtquick/qml-qtquick-state.html">State</a></span> {
+              <span class="name">name</span>: <span class="string">&quot;chatActive&quot;</span>
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">searchBox</span>; <span class="name">opacity</span>: <span class="number">0</span> }
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">chatBox</span>; <span class="name">opacity</span>: <span class="number">1</span> }
+          }
+      ]
+  }
+
+</pre>
+</div>
+<!-- @@@chat/chat.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

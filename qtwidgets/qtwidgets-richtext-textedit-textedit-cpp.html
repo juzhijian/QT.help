@@ -1,0 +1,763 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>textedit.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-richtext-textedit-example.html">Text Edit</a></td><td >textedit.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">textedit.cpp Example File</h1>
+<span class="subtitle">richtext/textedit/textedit.cpp</span>
+<!-- $$$richtext/textedit/textedit.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QAction&gt;</span>
+  <span class="preprocessor">#include &lt;QApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QClipboard&gt;</span>
+  <span class="preprocessor">#include &lt;QColorDialog&gt;</span>
+  <span class="preprocessor">#include &lt;QComboBox&gt;</span>
+  <span class="preprocessor">#include &lt;QFontComboBox&gt;</span>
+  <span class="preprocessor">#include &lt;QFile&gt;</span>
+  <span class="preprocessor">#include &lt;QFileDialog&gt;</span>
+  <span class="preprocessor">#include &lt;QFileInfo&gt;</span>
+  <span class="preprocessor">#include &lt;QFontDatabase&gt;</span>
+  <span class="preprocessor">#include &lt;QMenu&gt;</span>
+  <span class="preprocessor">#include &lt;QMenuBar&gt;</span>
+  <span class="preprocessor">#include &lt;QTextCodec&gt;</span>
+  <span class="preprocessor">#include &lt;QTextEdit&gt;</span>
+  <span class="preprocessor">#include &lt;QStatusBar&gt;</span>
+  <span class="preprocessor">#include &lt;QToolBar&gt;</span>
+  <span class="preprocessor">#include &lt;QTextCursor&gt;</span>
+  <span class="preprocessor">#include &lt;QTextDocumentWriter&gt;</span>
+  <span class="preprocessor">#include &lt;QTextList&gt;</span>
+  <span class="preprocessor">#include &lt;QtDebug&gt;</span>
+  <span class="preprocessor">#include &lt;QCloseEvent&gt;</span>
+  <span class="preprocessor">#include &lt;QMessageBox&gt;</span>
+  <span class="preprocessor">#include &lt;QMimeData&gt;</span>
+  <span class="preprocessor">#ifndef QT_NO_PRINTER</span>
+  <span class="preprocessor">#include &lt;QPrintDialog&gt;</span>
+  <span class="preprocessor">#include &lt;QPrinter&gt;</span>
+  <span class="preprocessor">#include &lt;QPrintPreviewDialog&gt;</span>
+  <span class="preprocessor">#endif</span>
+
+  <span class="preprocessor">#include &quot;textedit.h&quot;</span>
+
+  <span class="preprocessor">#ifdef Q_OS_MAC</span>
+  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> rsrcPath <span class="operator">=</span> <span class="string">&quot;:/images/mac&quot;</span>;
+  <span class="preprocessor">#else</span>
+  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> rsrcPath <span class="operator">=</span> <span class="string">&quot;:/images/win&quot;</span>;
+  <span class="preprocessor">#endif</span>
+
+  TextEdit<span class="operator">::</span>TextEdit(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qmainwindow.html">QMainWindow</a></span>(parent)
+  {
+  <span class="preprocessor">#ifdef Q_OS_OSX</span>
+      setUnifiedTitleAndToolBarOnMac(<span class="keyword">true</span>);
+  <span class="preprocessor">#endif</span>
+      setWindowTitle(<span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>applicationName());
+
+      textEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtextedit.html">QTextEdit</a></span>(<span class="keyword">this</span>);
+      connect(textEdit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qtextedit.html">QTextEdit</a></span><span class="operator">::</span>currentCharFormatChanged<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>currentCharFormatChanged);
+      connect(textEdit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qtextedit.html">QTextEdit</a></span><span class="operator">::</span>cursorPositionChanged<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>cursorPositionChanged);
+      setCentralWidget(textEdit);
+
+      setToolButtonStyle(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ToolButtonFollowStyle);
+      setupFileActions();
+      setupEditActions();
+      setupTextActions();
+
+      {
+          <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>helpMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;Help&quot;</span>));
+          helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;About&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>about);
+          helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;About &amp;Qt&quot;</span>)<span class="operator">,</span> qApp<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>aboutQt);
+      }
+
+      <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> textFont(<span class="string">&quot;Helvetica&quot;</span>);
+      textFont<span class="operator">.</span>setStyleHint(<span class="type"><a href="../qtgui/qfont.html">QFont</a></span><span class="operator">::</span>SansSerif);
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>setFont(textFont);
+      fontChanged(textEdit<span class="operator">-</span><span class="operator">&gt;</span>font());
+      colorChanged(textEdit<span class="operator">-</span><span class="operator">&gt;</span>textColor());
+      alignmentChanged(textEdit<span class="operator">-</span><span class="operator">&gt;</span>alignment());
+
+      connect(textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtgui/qtextdocument.html">QTextDocument</a></span><span class="operator">::</span>modificationChanged<span class="operator">,</span>
+              actionSave<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>setEnabled);
+      connect(textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtgui/qtextdocument.html">QTextDocument</a></span><span class="operator">::</span>modificationChanged<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qwidget.html">QWidget</a></span><span class="operator">::</span>setWindowModified);
+      connect(textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtgui/qtextdocument.html">QTextDocument</a></span><span class="operator">::</span>undoAvailable<span class="operator">,</span>
+              actionUndo<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>setEnabled);
+      connect(textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtgui/qtextdocument.html">QTextDocument</a></span><span class="operator">::</span>redoAvailable<span class="operator">,</span>
+              actionRedo<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>setEnabled);
+
+      setWindowModified(textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">-</span><span class="operator">&gt;</span>isModified());
+      actionSave<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">-</span><span class="operator">&gt;</span>isModified());
+      actionUndo<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">-</span><span class="operator">&gt;</span>isUndoAvailable());
+      actionRedo<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">-</span><span class="operator">&gt;</span>isRedoAvailable());
+
+  <span class="preprocessor">#ifndef QT_NO_CLIPBOARD</span>
+      actionCut<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      actionCopy<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+
+      connect(<span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>clipboard()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtgui/qclipboard.html">QClipboard</a></span><span class="operator">::</span>dataChanged<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>clipboardDataChanged);
+  <span class="preprocessor">#endif</span>
+
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>setFocus();
+      setCurrentFileName(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>());
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>closeEvent(<span class="type"><a href="../qtgui/qcloseevent.html">QCloseEvent</a></span> <span class="operator">*</span>e)
+  {
+      <span class="keyword">if</span> (maybeSave())
+          e<span class="operator">-</span><span class="operator">&gt;</span>accept();
+      <span class="keyword">else</span>
+          e<span class="operator">-</span><span class="operator">&gt;</span>ignore();
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>setupFileActions()
+  {
+      <span class="type"><a href="qtoolbar.html">QToolBar</a></span> <span class="operator">*</span>tb <span class="operator">=</span> addToolBar(tr(<span class="string">&quot;File Actions&quot;</span>));
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>menu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;File&quot;</span>));
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> newIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;document-new&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(rsrcPath <span class="operator">+</span> <span class="string">&quot;/filenew.png&quot;</span>));
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>a <span class="operator">=</span> menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(newIcon<span class="operator">,</span>  tr(<span class="string">&quot;&amp;New&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>fileNew);
+      tb<span class="operator">-</span><span class="operator">&gt;</span>addAction(a);
+      a<span class="operator">-</span><span class="operator">&gt;</span>setPriority(<span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>LowPriority);
+      a<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>New);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> openIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;document-open&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(rsrcPath <span class="operator">+</span> <span class="string">&quot;/fileopen.png&quot;</span>));
+      a <span class="operator">=</span> menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(openIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Open...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>fileOpen);
+      a<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Open);
+      tb<span class="operator">-</span><span class="operator">&gt;</span>addAction(a);
+
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> saveIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;document-save&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(rsrcPath <span class="operator">+</span> <span class="string">&quot;/filesave.png&quot;</span>));
+      actionSave <span class="operator">=</span> menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(saveIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Save&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>fileSave);
+      actionSave<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Save);
+      actionSave<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      tb<span class="operator">-</span><span class="operator">&gt;</span>addAction(actionSave);
+
+      a <span class="operator">=</span> menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Save &amp;As...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>fileSaveAs);
+      a<span class="operator">-</span><span class="operator">&gt;</span>setPriority(<span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>LowPriority);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+
+  <span class="preprocessor">#ifndef QT_NO_PRINTER</span>
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> printIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;document-print&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(rsrcPath <span class="operator">+</span> <span class="string">&quot;/fileprint.png&quot;</span>));
+      a <span class="operator">=</span> menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(printIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Print...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>filePrint);
+      a<span class="operator">-</span><span class="operator">&gt;</span>setPriority(<span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>LowPriority);
+      a<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Print);
+      tb<span class="operator">-</span><span class="operator">&gt;</span>addAction(a);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> filePrintIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;fileprint&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(rsrcPath <span class="operator">+</span> <span class="string">&quot;/fileprint.png&quot;</span>));
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(filePrintIcon<span class="operator">,</span> tr(<span class="string">&quot;Print Preview...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>filePrintPreview);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> exportPdfIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;exportpdf&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(rsrcPath <span class="operator">+</span> <span class="string">&quot;/exportpdf.png&quot;</span>));
+      a <span class="operator">=</span> menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(exportPdfIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Export PDF...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>filePrintPdf);
+      a<span class="operator">-</span><span class="operator">&gt;</span>setPriority(<span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>LowPriority);
+      a<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">+</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_D);
+      tb<span class="operator">-</span><span class="operator">&gt;</span>addAction(a);
+
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+  <span class="preprocessor">#endif</span>
+
+      a <span class="operator">=</span> menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Quit&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qwidget.html">QWidget</a></span><span class="operator">::</span>close);
+      a<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">+</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Q);
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>setupEditActions()
+  {
+      <span class="type"><a href="qtoolbar.html">QToolBar</a></span> <span class="operator">*</span>tb <span class="operator">=</span> addToolBar(tr(<span class="string">&quot;Edit Actions&quot;</span>));
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>menu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Edit&quot;</span>));
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> undoIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;edit-undo&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(rsrcPath <span class="operator">+</span> <span class="string">&quot;/editundo.png&quot;</span>));
+      actionUndo <span class="operator">=</span> menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(undoIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Undo&quot;</span>)<span class="operator">,</span> textEdit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qtextedit.html">QTextEdit</a></span><span class="operator">::</span>undo);
+      actionUndo<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Undo);
+      tb<span class="operator">-</span><span class="operator">&gt;</span>addAction(actionUndo);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> redoIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;edit-redo&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(rsrcPath <span class="operator">+</span> <span class="string">&quot;/editredo.png&quot;</span>));
+      actionRedo <span class="operator">=</span> menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(redoIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Redo&quot;</span>)<span class="operator">,</span> textEdit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qtextedit.html">QTextEdit</a></span><span class="operator">::</span>redo);
+      actionRedo<span class="operator">-</span><span class="operator">&gt;</span>setPriority(<span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>LowPriority);
+      actionRedo<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Redo);
+      tb<span class="operator">-</span><span class="operator">&gt;</span>addAction(actionRedo);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+
+  <span class="preprocessor">#ifndef QT_NO_CLIPBOARD</span>
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> cutIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;edit-cut&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(rsrcPath <span class="operator">+</span> <span class="string">&quot;/editcut.png&quot;</span>));
+      actionCut <span class="operator">=</span> menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(cutIcon<span class="operator">,</span> tr(<span class="string">&quot;Cu&amp;t&quot;</span>)<span class="operator">,</span> textEdit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qtextedit.html">QTextEdit</a></span><span class="operator">::</span>cut);
+      actionCut<span class="operator">-</span><span class="operator">&gt;</span>setPriority(<span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>LowPriority);
+      actionCut<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Cut);
+      tb<span class="operator">-</span><span class="operator">&gt;</span>addAction(actionCut);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> copyIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;edit-copy&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(rsrcPath <span class="operator">+</span> <span class="string">&quot;/editcopy.png&quot;</span>));
+      actionCopy <span class="operator">=</span> menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(copyIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Copy&quot;</span>)<span class="operator">,</span> textEdit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qtextedit.html">QTextEdit</a></span><span class="operator">::</span>copy);
+      actionCopy<span class="operator">-</span><span class="operator">&gt;</span>setPriority(<span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>LowPriority);
+      actionCopy<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Copy);
+      tb<span class="operator">-</span><span class="operator">&gt;</span>addAction(actionCopy);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> pasteIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;edit-paste&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(rsrcPath <span class="operator">+</span> <span class="string">&quot;/editpaste.png&quot;</span>));
+      actionPaste <span class="operator">=</span> menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(pasteIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Paste&quot;</span>)<span class="operator">,</span> textEdit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qtextedit.html">QTextEdit</a></span><span class="operator">::</span>paste);
+      actionPaste<span class="operator">-</span><span class="operator">&gt;</span>setPriority(<span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>LowPriority);
+      actionPaste<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Paste);
+      tb<span class="operator">-</span><span class="operator">&gt;</span>addAction(actionPaste);
+      <span class="keyword">if</span> (<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span> <span class="operator">*</span>md <span class="operator">=</span> <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>clipboard()<span class="operator">-</span><span class="operator">&gt;</span>mimeData())
+          actionPaste<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(md<span class="operator">-</span><span class="operator">&gt;</span>hasText());
+  <span class="preprocessor">#endif</span>
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>setupTextActions()
+  {
+      <span class="type"><a href="qtoolbar.html">QToolBar</a></span> <span class="operator">*</span>tb <span class="operator">=</span> addToolBar(tr(<span class="string">&quot;Format Actions&quot;</span>));
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>menu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;F&amp;ormat&quot;</span>));
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> boldIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;format-text-bold&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(rsrcPath <span class="operator">+</span> <span class="string">&quot;/textbold.png&quot;</span>));
+      actionTextBold <span class="operator">=</span> menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(boldIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Bold&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>textBold);
+      actionTextBold<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">+</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_B);
+      actionTextBold<span class="operator">-</span><span class="operator">&gt;</span>setPriority(<span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>LowPriority);
+      <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> bold;
+      bold<span class="operator">.</span>setBold(<span class="keyword">true</span>);
+      actionTextBold<span class="operator">-</span><span class="operator">&gt;</span>setFont(bold);
+      tb<span class="operator">-</span><span class="operator">&gt;</span>addAction(actionTextBold);
+      actionTextBold<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> italicIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;format-text-italic&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(rsrcPath <span class="operator">+</span> <span class="string">&quot;/textitalic.png&quot;</span>));
+      actionTextItalic <span class="operator">=</span> menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(italicIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Italic&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>textItalic);
+      actionTextItalic<span class="operator">-</span><span class="operator">&gt;</span>setPriority(<span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>LowPriority);
+      actionTextItalic<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">+</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_I);
+      <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> italic;
+      italic<span class="operator">.</span>setItalic(<span class="keyword">true</span>);
+      actionTextItalic<span class="operator">-</span><span class="operator">&gt;</span>setFont(italic);
+      tb<span class="operator">-</span><span class="operator">&gt;</span>addAction(actionTextItalic);
+      actionTextItalic<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> underlineIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;format-text-underline&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(rsrcPath <span class="operator">+</span> <span class="string">&quot;/textunder.png&quot;</span>));
+      actionTextUnderline <span class="operator">=</span> menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(underlineIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Underline&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>textUnderline);
+      actionTextUnderline<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">+</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_U);
+      actionTextUnderline<span class="operator">-</span><span class="operator">&gt;</span>setPriority(<span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>LowPriority);
+      <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> underline;
+      underline<span class="operator">.</span>setUnderline(<span class="keyword">true</span>);
+      actionTextUnderline<span class="operator">-</span><span class="operator">&gt;</span>setFont(underline);
+      tb<span class="operator">-</span><span class="operator">&gt;</span>addAction(actionTextUnderline);
+      actionTextUnderline<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> leftIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;format-justify-left&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(rsrcPath <span class="operator">+</span> <span class="string">&quot;/textleft.png&quot;</span>));
+      actionAlignLeft <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(leftIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Left&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      actionAlignLeft<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">+</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_L);
+      actionAlignLeft<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      actionAlignLeft<span class="operator">-</span><span class="operator">&gt;</span>setPriority(<span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>LowPriority);
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> centerIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;format-justify-center&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(rsrcPath <span class="operator">+</span> <span class="string">&quot;/textcenter.png&quot;</span>));
+      actionAlignCenter <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(centerIcon<span class="operator">,</span> tr(<span class="string">&quot;C&amp;enter&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      actionAlignCenter<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">+</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_E);
+      actionAlignCenter<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      actionAlignCenter<span class="operator">-</span><span class="operator">&gt;</span>setPriority(<span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>LowPriority);
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> rightIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;format-justify-right&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(rsrcPath <span class="operator">+</span> <span class="string">&quot;/textright.png&quot;</span>));
+      actionAlignRight <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(rightIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Right&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      actionAlignRight<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">+</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_R);
+      actionAlignRight<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      actionAlignRight<span class="operator">-</span><span class="operator">&gt;</span>setPriority(<span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>LowPriority);
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> fillIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;format-justify-fill&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(rsrcPath <span class="operator">+</span> <span class="string">&quot;/textjustify.png&quot;</span>));
+      actionAlignJustify <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(fillIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Justify&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      actionAlignJustify<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CTRL <span class="operator">+</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_J);
+      actionAlignJustify<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      actionAlignJustify<span class="operator">-</span><span class="operator">&gt;</span>setPriority(<span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>LowPriority);
+
+      <span class="comment">// Make sure the alignLeft  is always left of the alignRight</span>
+      <span class="type"><a href="qactiongroup.html">QActionGroup</a></span> <span class="operator">*</span>alignGroup <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qactiongroup.html">QActionGroup</a></span>(<span class="keyword">this</span>);
+      connect(alignGroup<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qactiongroup.html">QActionGroup</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>textAlign);
+
+      <span class="keyword">if</span> (<span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>isLeftToRight()) {
+          alignGroup<span class="operator">-</span><span class="operator">&gt;</span>addAction(actionAlignLeft);
+          alignGroup<span class="operator">-</span><span class="operator">&gt;</span>addAction(actionAlignCenter);
+          alignGroup<span class="operator">-</span><span class="operator">&gt;</span>addAction(actionAlignRight);
+      } <span class="keyword">else</span> {
+          alignGroup<span class="operator">-</span><span class="operator">&gt;</span>addAction(actionAlignRight);
+          alignGroup<span class="operator">-</span><span class="operator">&gt;</span>addAction(actionAlignCenter);
+          alignGroup<span class="operator">-</span><span class="operator">&gt;</span>addAction(actionAlignLeft);
+      }
+      alignGroup<span class="operator">-</span><span class="operator">&gt;</span>addAction(actionAlignJustify);
+
+      tb<span class="operator">-</span><span class="operator">&gt;</span>addActions(alignGroup<span class="operator">-</span><span class="operator">&gt;</span>actions());
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addActions(alignGroup<span class="operator">-</span><span class="operator">&gt;</span>actions());
+
+      menu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+
+      <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> pix(<span class="number">16</span><span class="operator">,</span> <span class="number">16</span>);
+      pix<span class="operator">.</span>fill(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black);
+      actionTextColor <span class="operator">=</span> menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(pix<span class="operator">,</span> tr(<span class="string">&quot;&amp;Color...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>textColor);
+      tb<span class="operator">-</span><span class="operator">&gt;</span>addAction(actionTextColor);
+
+      tb <span class="operator">=</span> addToolBar(tr(<span class="string">&quot;Format Actions&quot;</span>));
+      tb<span class="operator">-</span><span class="operator">&gt;</span>setAllowedAreas(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopToolBarArea <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BottomToolBarArea);
+      addToolBarBreak(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TopToolBarArea);
+      addToolBar(tb);
+
+      comboStyle <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcombobox.html">QComboBox</a></span>(tb);
+      tb<span class="operator">-</span><span class="operator">&gt;</span>addWidget(comboStyle);
+      comboStyle<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;Standard&quot;</span>);
+      comboStyle<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;Bullet List (Disc)&quot;</span>);
+      comboStyle<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;Bullet List (Circle)&quot;</span>);
+      comboStyle<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;Bullet List (Square)&quot;</span>);
+      comboStyle<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;Ordered List (Decimal)&quot;</span>);
+      comboStyle<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;Ordered List (Alpha lower)&quot;</span>);
+      comboStyle<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;Ordered List (Alpha upper)&quot;</span>);
+      comboStyle<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;Ordered List (Roman lower)&quot;</span>);
+      comboStyle<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;Ordered List (Roman upper)&quot;</span>);
+
+      <span class="keyword">typedef</span> <span class="type">void</span> (<span class="type"><a href="qcombobox.html">QComboBox</a></span><span class="operator">::</span><span class="operator">*</span><span class="type">QComboIntSignal</span>)(<span class="type">int</span>);
+      connect(comboStyle<span class="operator">,</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type">QComboIntSignal</span><span class="operator">&gt;</span>(<span class="operator">&amp;</span><span class="type"><a href="qcombobox.html">QComboBox</a></span><span class="operator">::</span>activated)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>textStyle);
+
+      <span class="keyword">typedef</span> <span class="type">void</span> (<span class="type"><a href="qcombobox.html">QComboBox</a></span><span class="operator">::</span><span class="operator">*</span><span class="type">QComboStringSignal</span>)(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>);
+      comboFont <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qfontcombobox.html">QFontComboBox</a></span>(tb);
+      tb<span class="operator">-</span><span class="operator">&gt;</span>addWidget(comboFont);
+      connect(comboFont<span class="operator">,</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type">QComboStringSignal</span><span class="operator">&gt;</span>(<span class="operator">&amp;</span><span class="type"><a href="qcombobox.html">QComboBox</a></span><span class="operator">::</span>activated)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>textFamily);
+
+      comboSize <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcombobox.html">QComboBox</a></span>(tb);
+      comboSize<span class="operator">-</span><span class="operator">&gt;</span>setObjectName(<span class="string">&quot;comboSize&quot;</span>);
+      tb<span class="operator">-</span><span class="operator">&gt;</span>addWidget(comboSize);
+      comboSize<span class="operator">-</span><span class="operator">&gt;</span>setEditable(<span class="keyword">true</span>);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span> standardSizes <span class="operator">=</span> <span class="type"><a href="../qtgui/qfontdatabase.html">QFontDatabase</a></span><span class="operator">::</span>standardSizes();
+      foreach (<span class="type">int</span> size<span class="operator">,</span> standardSizes)
+          comboSize<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(size));
+      comboSize<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(standardSizes<span class="operator">.</span>indexOf(<span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>font()<span class="operator">.</span>pointSize()));
+
+      connect(comboSize<span class="operator">,</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type">QComboStringSignal</span><span class="operator">&gt;</span>(<span class="operator">&amp;</span><span class="type"><a href="qcombobox.html">QComboBox</a></span><span class="operator">::</span>activated)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>textSize);
+  }
+
+  bool TextEdit<span class="operator">::</span>load(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>f)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span><span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>exists(f))
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(f);
+      <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>ReadOnly))
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> data <span class="operator">=</span> file<span class="operator">.</span>readAll();
+      <span class="type"><a href="../qtcore/qtextcodec.html">QTextCodec</a></span> <span class="operator">*</span>codec <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>codecForHtml(data);
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> str <span class="operator">=</span> codec<span class="operator">-</span><span class="operator">&gt;</span>toUnicode(data);
+      <span class="keyword">if</span> (<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>mightBeRichText(str)) {
+          textEdit<span class="operator">-</span><span class="operator">&gt;</span>setHtml(str);
+      } <span class="keyword">else</span> {
+          str <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>fromLocal8Bit(data);
+          textEdit<span class="operator">-</span><span class="operator">&gt;</span>setPlainText(str);
+      }
+
+      setCurrentFileName(f);
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  bool TextEdit<span class="operator">::</span>maybeSave()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">-</span><span class="operator">&gt;</span>isModified())
+          <span class="keyword">return</span> <span class="keyword">true</span>;
+
+      <span class="keyword">const</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>StandardButton ret <span class="operator">=</span>
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>applicationName()<span class="operator">,</span>
+                               tr(<span class="string">&quot;The document has been modified.\n&quot;</span>
+                                  <span class="string">&quot;Do you want to save your changes?&quot;</span>)<span class="operator">,</span>
+                               <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Save <span class="operator">|</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Discard <span class="operator">|</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Cancel);
+      <span class="keyword">if</span> (ret <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Save)
+          <span class="keyword">return</span> fileSave();
+      <span class="keyword">else</span> <span class="keyword">if</span> (ret <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Cancel)
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>setCurrentFileName(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>fileName <span class="operator">=</span> fileName;
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">-</span><span class="operator">&gt;</span>setModified(<span class="keyword">false</span>);
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> shownName;
+      <span class="keyword">if</span> (fileName<span class="operator">.</span>isEmpty())
+          shownName <span class="operator">=</span> <span class="string">&quot;untitled.txt&quot;</span>;
+      <span class="keyword">else</span>
+          shownName <span class="operator">=</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span>(fileName)<span class="operator">.</span>fileName();
+
+      setWindowTitle(tr(<span class="string">&quot;%1[*] - %2&quot;</span>)<span class="operator">.</span>arg(shownName<span class="operator">,</span> <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>applicationName()));
+      setWindowModified(<span class="keyword">false</span>);
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>fileNew()
+  {
+      <span class="keyword">if</span> (maybeSave()) {
+          textEdit<span class="operator">-</span><span class="operator">&gt;</span>clear();
+          setCurrentFileName(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>());
+      }
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>fileOpen()
+  {
+      <span class="type"><a href="qfiledialog.html">QFileDialog</a></span> fileDialog(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Open File...&quot;</span>));
+      fileDialog<span class="operator">.</span>setAcceptMode(<span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>AcceptOpen);
+      fileDialog<span class="operator">.</span>setFileMode(<span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>ExistingFile);
+      fileDialog<span class="operator">.</span>setMimeTypeFilters(<span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;text/html&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;text/plain&quot;</span>);
+      <span class="keyword">if</span> (fileDialog<span class="operator">.</span>exec() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted)
+          <span class="keyword">return</span>;
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fn <span class="operator">=</span> fileDialog<span class="operator">.</span>selectedFiles()<span class="operator">.</span>first();
+      <span class="keyword">if</span> (load(fn))
+          statusBar()<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;Opened \&quot;%1\&quot;&quot;</span>)<span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(fn)));
+      <span class="keyword">else</span>
+          statusBar()<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;Could not open \&quot;%1\&quot;&quot;</span>)<span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(fn)));
+  }
+
+  bool TextEdit<span class="operator">::</span>fileSave()
+  {
+      <span class="keyword">if</span> (fileName<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span> fileSaveAs();
+      <span class="keyword">if</span> (fileName<span class="operator">.</span>startsWith(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;:/&quot;</span>)))
+          <span class="keyword">return</span> fileSaveAs();
+
+      <span class="type"><a href="../qtgui/qtextdocumentwriter.html">QTextDocumentWriter</a></span> writer(fileName);
+      bool success <span class="operator">=</span> writer<span class="operator">.</span>write(textEdit<span class="operator">-</span><span class="operator">&gt;</span>document());
+      <span class="keyword">if</span> (success) {
+          textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">-</span><span class="operator">&gt;</span>setModified(<span class="keyword">false</span>);
+          statusBar()<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;Wrote \&quot;%1\&quot;&quot;</span>)<span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(fileName)));
+      } <span class="keyword">else</span> {
+          statusBar()<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;Could not write to file \&quot;%1\&quot;&quot;</span>)
+                                   <span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(fileName)));
+      }
+      <span class="keyword">return</span> success;
+  }
+
+  bool TextEdit<span class="operator">::</span>fileSaveAs()
+  {
+      <span class="type"><a href="qfiledialog.html">QFileDialog</a></span> fileDialog(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Save as...&quot;</span>));
+      fileDialog<span class="operator">.</span>setAcceptMode(<span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>AcceptSave);
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> mimeTypes;
+      mimeTypes <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;application/vnd.oasis.opendocument.text&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;text/html&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;text/plain&quot;</span>;
+      fileDialog<span class="operator">.</span>setMimeTypeFilters(mimeTypes);
+      fileDialog<span class="operator">.</span>setDefaultSuffix(<span class="string">&quot;odt&quot;</span>);
+      <span class="keyword">if</span> (fileDialog<span class="operator">.</span>exec() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted)
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fn <span class="operator">=</span> fileDialog<span class="operator">.</span>selectedFiles()<span class="operator">.</span>first();
+      setCurrentFileName(fn);
+      <span class="keyword">return</span> fileSave();
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>filePrint()
+  {
+  <span class="preprocessor">#if !defined(QT_NO_PRINTER) &amp;&amp; !defined(QT_NO_PRINTDIALOG)</span>
+      <span class="type">QPrinter</span> printer(<span class="type">QPrinter</span><span class="operator">::</span>HighResolution);
+      <span class="type">QPrintDialog</span> <span class="operator">*</span>dlg <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QPrintDialog</span>(<span class="operator">&amp;</span>printer<span class="operator">,</span> <span class="keyword">this</span>);
+      <span class="keyword">if</span> (textEdit<span class="operator">-</span><span class="operator">&gt;</span>textCursor()<span class="operator">.</span>hasSelection())
+          dlg<span class="operator">-</span><span class="operator">&gt;</span>addEnabledOption(<span class="type">QAbstractPrintDialog</span><span class="operator">::</span>PrintSelection);
+      dlg<span class="operator">-</span><span class="operator">&gt;</span>setWindowTitle(tr(<span class="string">&quot;Print Document&quot;</span>));
+      <span class="keyword">if</span> (dlg<span class="operator">-</span><span class="operator">&gt;</span>exec() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted)
+          textEdit<span class="operator">-</span><span class="operator">&gt;</span>print(<span class="operator">&amp;</span>printer);
+      <span class="keyword">delete</span> dlg;
+  <span class="preprocessor">#endif</span>
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>filePrintPreview()
+  {
+  <span class="preprocessor">#if !defined(QT_NO_PRINTER) &amp;&amp; !defined(QT_NO_PRINTDIALOG)</span>
+      <span class="type">QPrinter</span> printer(<span class="type">QPrinter</span><span class="operator">::</span>HighResolution);
+      <span class="type">QPrintPreviewDialog</span> preview(<span class="operator">&amp;</span>printer<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(<span class="operator">&amp;</span>preview<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QPrintPreviewDialog</span><span class="operator">::</span>paintRequested<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>TextEdit<span class="operator">::</span>printPreview);
+      preview<span class="operator">.</span>exec();
+  <span class="preprocessor">#endif</span>
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>printPreview(<span class="type">QPrinter</span> <span class="operator">*</span>printer)
+  {
+  <span class="preprocessor">#ifdef QT_NO_PRINTER</span>
+      Q_UNUSED(printer);
+  <span class="preprocessor">#else</span>
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>print(printer);
+  <span class="preprocessor">#endif</span>
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>filePrintPdf()
+  {
+  <span class="preprocessor">#ifndef QT_NO_PRINTER</span>
+      <span class="type"><a href="qfiledialog.html">QFileDialog</a></span> fileDialog(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Export PDF&quot;</span>));
+      fileDialog<span class="operator">.</span>setAcceptMode(<span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>AcceptSave);
+      fileDialog<span class="operator">.</span>setMimeTypeFilters(<span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span>(<span class="string">&quot;application/pdf&quot;</span>));
+      fileDialog<span class="operator">.</span>setDefaultSuffix(<span class="string">&quot;pdf&quot;</span>);
+      <span class="keyword">if</span> (fileDialog<span class="operator">.</span>exec() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted)
+          <span class="keyword">return</span>;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> fileDialog<span class="operator">.</span>selectedFiles()<span class="operator">.</span>first();
+      <span class="type">QPrinter</span> printer(<span class="type">QPrinter</span><span class="operator">::</span>HighResolution);
+      printer<span class="operator">.</span>setOutputFormat(<span class="type">QPrinter</span><span class="operator">::</span>PdfFormat);
+      printer<span class="operator">.</span>setOutputFileName(fileName);
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">-</span><span class="operator">&gt;</span>print(<span class="operator">&amp;</span>printer);
+      statusBar()<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;Exported \&quot;%1\&quot;&quot;</span>)
+                               <span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(fileName)));
+  <span class="preprocessor">#endif</span>
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>textBold()
+  {
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> fmt;
+      fmt<span class="operator">.</span>setFontWeight(actionTextBold<span class="operator">-</span><span class="operator">&gt;</span>isChecked() <span class="operator">?</span> <span class="type"><a href="../qtgui/qfont.html">QFont</a></span><span class="operator">::</span>Bold : <span class="type"><a href="../qtgui/qfont.html">QFont</a></span><span class="operator">::</span>Normal);
+      mergeFormatOnWordOrSelection(fmt);
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>textUnderline()
+  {
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> fmt;
+      fmt<span class="operator">.</span>setFontUnderline(actionTextUnderline<span class="operator">-</span><span class="operator">&gt;</span>isChecked());
+      mergeFormatOnWordOrSelection(fmt);
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>textItalic()
+  {
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> fmt;
+      fmt<span class="operator">.</span>setFontItalic(actionTextItalic<span class="operator">-</span><span class="operator">&gt;</span>isChecked());
+      mergeFormatOnWordOrSelection(fmt);
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>textFamily(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>f)
+  {
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> fmt;
+      fmt<span class="operator">.</span>setFontFamily(f);
+      mergeFormatOnWordOrSelection(fmt);
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>textSize(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>p)
+  {
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> pointSize <span class="operator">=</span> p<span class="operator">.</span>toFloat();
+      <span class="keyword">if</span> (p<span class="operator">.</span>toFloat() <span class="operator">&gt;</span> <span class="number">0</span>) {
+          <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> fmt;
+          fmt<span class="operator">.</span>setFontPointSize(pointSize);
+          mergeFormatOnWordOrSelection(fmt);
+      }
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>textStyle(<span class="type">int</span> styleIndex)
+  {
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> textEdit<span class="operator">-</span><span class="operator">&gt;</span>textCursor();
+
+      <span class="keyword">if</span> (styleIndex <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>) {
+          <span class="type"><a href="../qtgui/qtextlistformat.html">QTextListFormat</a></span><span class="operator">::</span>Style style <span class="operator">=</span> <span class="type"><a href="../qtgui/qtextlistformat.html">QTextListFormat</a></span><span class="operator">::</span>ListDisc;
+
+          <span class="keyword">switch</span> (styleIndex) {
+              <span class="keyword">default</span>:
+              <span class="keyword">case</span> <span class="number">1</span>:
+                  style <span class="operator">=</span> <span class="type"><a href="../qtgui/qtextlistformat.html">QTextListFormat</a></span><span class="operator">::</span>ListDisc;
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="number">2</span>:
+                  style <span class="operator">=</span> <span class="type"><a href="../qtgui/qtextlistformat.html">QTextListFormat</a></span><span class="operator">::</span>ListCircle;
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="number">3</span>:
+                  style <span class="operator">=</span> <span class="type"><a href="../qtgui/qtextlistformat.html">QTextListFormat</a></span><span class="operator">::</span>ListSquare;
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="number">4</span>:
+                  style <span class="operator">=</span> <span class="type"><a href="../qtgui/qtextlistformat.html">QTextListFormat</a></span><span class="operator">::</span>ListDecimal;
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="number">5</span>:
+                  style <span class="operator">=</span> <span class="type"><a href="../qtgui/qtextlistformat.html">QTextListFormat</a></span><span class="operator">::</span>ListLowerAlpha;
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="number">6</span>:
+                  style <span class="operator">=</span> <span class="type"><a href="../qtgui/qtextlistformat.html">QTextListFormat</a></span><span class="operator">::</span>ListUpperAlpha;
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="number">7</span>:
+                  style <span class="operator">=</span> <span class="type"><a href="../qtgui/qtextlistformat.html">QTextListFormat</a></span><span class="operator">::</span>ListLowerRoman;
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="number">8</span>:
+                  style <span class="operator">=</span> <span class="type"><a href="../qtgui/qtextlistformat.html">QTextListFormat</a></span><span class="operator">::</span>ListUpperRoman;
+                  <span class="keyword">break</span>;
+          }
+
+          cursor<span class="operator">.</span>beginEditBlock();
+
+          <span class="type"><a href="../qtgui/qtextblockformat.html">QTextBlockFormat</a></span> blockFmt <span class="operator">=</span> cursor<span class="operator">.</span>blockFormat();
+
+          <span class="type"><a href="../qtgui/qtextlistformat.html">QTextListFormat</a></span> listFmt;
+
+          <span class="keyword">if</span> (cursor<span class="operator">.</span>currentList()) {
+              listFmt <span class="operator">=</span> cursor<span class="operator">.</span>currentList()<span class="operator">-</span><span class="operator">&gt;</span>format();
+          } <span class="keyword">else</span> {
+              listFmt<span class="operator">.</span>setIndent(blockFmt<span class="operator">.</span>indent() <span class="operator">+</span> <span class="number">1</span>);
+              blockFmt<span class="operator">.</span>setIndent(<span class="number">0</span>);
+              cursor<span class="operator">.</span>setBlockFormat(blockFmt);
+          }
+
+          listFmt<span class="operator">.</span>setStyle(style);
+
+          cursor<span class="operator">.</span>createList(listFmt);
+
+          cursor<span class="operator">.</span>endEditBlock();
+      } <span class="keyword">else</span> {
+          <span class="comment">// ####</span>
+          <span class="type"><a href="../qtgui/qtextblockformat.html">QTextBlockFormat</a></span> bfmt;
+          bfmt<span class="operator">.</span>setObjectIndex(<span class="operator">-</span><span class="number">1</span>);
+          cursor<span class="operator">.</span>mergeBlockFormat(bfmt);
+      }
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>textColor()
+  {
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> col <span class="operator">=</span> <span class="type"><a href="qcolordialog.html">QColorDialog</a></span><span class="operator">::</span>getColor(textEdit<span class="operator">-</span><span class="operator">&gt;</span>textColor()<span class="operator">,</span> <span class="keyword">this</span>);
+      <span class="keyword">if</span> (<span class="operator">!</span>col<span class="operator">.</span>isValid())
+          <span class="keyword">return</span>;
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> fmt;
+      fmt<span class="operator">.</span>setForeground(col);
+      mergeFormatOnWordOrSelection(fmt);
+      colorChanged(col);
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>textAlign(<span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>a)
+  {
+      <span class="keyword">if</span> (a <span class="operator">=</span><span class="operator">=</span> actionAlignLeft)
+          textEdit<span class="operator">-</span><span class="operator">&gt;</span>setAlignment(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignLeft <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignAbsolute);
+      <span class="keyword">else</span> <span class="keyword">if</span> (a <span class="operator">=</span><span class="operator">=</span> actionAlignCenter)
+          textEdit<span class="operator">-</span><span class="operator">&gt;</span>setAlignment(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignHCenter);
+      <span class="keyword">else</span> <span class="keyword">if</span> (a <span class="operator">=</span><span class="operator">=</span> actionAlignRight)
+          textEdit<span class="operator">-</span><span class="operator">&gt;</span>setAlignment(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignRight <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignAbsolute);
+      <span class="keyword">else</span> <span class="keyword">if</span> (a <span class="operator">=</span><span class="operator">=</span> actionAlignJustify)
+          textEdit<span class="operator">-</span><span class="operator">&gt;</span>setAlignment(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignJustify);
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>currentCharFormatChanged(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> <span class="operator">&amp;</span>format)
+  {
+      fontChanged(format<span class="operator">.</span>font());
+      colorChanged(format<span class="operator">.</span>foreground()<span class="operator">.</span>color());
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>cursorPositionChanged()
+  {
+      alignmentChanged(textEdit<span class="operator">-</span><span class="operator">&gt;</span>alignment());
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>clipboardDataChanged()
+  {
+  <span class="preprocessor">#ifndef QT_NO_CLIPBOARD</span>
+      <span class="keyword">if</span> (<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span> <span class="operator">*</span>md <span class="operator">=</span> <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>clipboard()<span class="operator">-</span><span class="operator">&gt;</span>mimeData())
+          actionPaste<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(md<span class="operator">-</span><span class="operator">&gt;</span>hasText());
+  <span class="preprocessor">#endif</span>
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>about()
+  {
+      <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>about(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;About&quot;</span>)<span class="operator">,</span> tr(<span class="string">&quot;This example demonstrates Qt's &quot;</span>
+          <span class="string">&quot;rich text editing facilities in action, providing an example &quot;</span>
+          <span class="string">&quot;document for you to experiment with.&quot;</span>));
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>mergeFormatOnWordOrSelection(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> <span class="operator">&amp;</span>format)
+  {
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> textEdit<span class="operator">-</span><span class="operator">&gt;</span>textCursor();
+      <span class="keyword">if</span> (<span class="operator">!</span>cursor<span class="operator">.</span>hasSelection())
+          cursor<span class="operator">.</span>select(<span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span><span class="operator">::</span>WordUnderCursor);
+      cursor<span class="operator">.</span>mergeCharFormat(format);
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>mergeCurrentCharFormat(format);
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>fontChanged(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> <span class="operator">&amp;</span>f)
+  {
+      comboFont<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(comboFont<span class="operator">-</span><span class="operator">&gt;</span>findText(<span class="type"><a href="../qtgui/qfontinfo.html">QFontInfo</a></span>(f)<span class="operator">.</span>family()));
+      comboSize<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(comboSize<span class="operator">-</span><span class="operator">&gt;</span>findText(<span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(f<span class="operator">.</span>pointSize())));
+      actionTextBold<span class="operator">-</span><span class="operator">&gt;</span>setChecked(f<span class="operator">.</span>bold());
+      actionTextItalic<span class="operator">-</span><span class="operator">&gt;</span>setChecked(f<span class="operator">.</span>italic());
+      actionTextUnderline<span class="operator">-</span><span class="operator">&gt;</span>setChecked(f<span class="operator">.</span>underline());
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>colorChanged(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>c)
+  {
+      <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> pix(<span class="number">16</span><span class="operator">,</span> <span class="number">16</span>);
+      pix<span class="operator">.</span>fill(c);
+      actionTextColor<span class="operator">-</span><span class="operator">&gt;</span>setIcon(pix);
+  }
+
+  <span class="type">void</span> TextEdit<span class="operator">::</span>alignmentChanged(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Alignment a)
+  {
+      <span class="keyword">if</span> (a <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignLeft)
+          actionAlignLeft<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      <span class="keyword">else</span> <span class="keyword">if</span> (a <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignHCenter)
+          actionAlignCenter<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      <span class="keyword">else</span> <span class="keyword">if</span> (a <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignRight)
+          actionAlignRight<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      <span class="keyword">else</span> <span class="keyword">if</span> (a <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignJustify)
+          actionAlignJustify<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+  }
+
+</pre>
+</div>
+<!-- @@@richtext/textedit/textedit.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

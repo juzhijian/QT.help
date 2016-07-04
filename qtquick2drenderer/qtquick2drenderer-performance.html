@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtquick2drenderer-performance.qdoc -->
+  <title>Performance Guide | Qt Quick 2D Renderer 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt Quick 2D Renderer</a></td><td >Performance Guide</td>        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="qtquick2drenderer-limitations.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="qtquick2drenderer-limitations.html">Limitations</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#2d-hardware-acceleration">2D Hardware Acceleration</a></li>
+<li class="level1"><a href="#animation">Animation</a></li>
+<li class="level1"><a href="#transforms">Transforms</a></li>
+<li class="level1"><a href="#hidden-items">Hidden Items</a></li>
+<li class="level1"><a href="#pixel-fill-budget">Pixel Fill Budget</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Performance Guide</h1>
+<span class="subtitle"></span>
+<!-- $$$qtquick2drenderer-performance.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Since Qt Quick 2D Renderer does not use OpenGL, we lose the ability to use many optimizations that can improve rendering speed. To get the most out of Qt Quick 2D Renderer there are some guidelines that should be followed.</p>
+<a name="2d-hardware-acceleration"></a>
+<h2 id="2d-hardware-acceleration">2D Hardware Acceleration</h2>
+<p>Qt Quick 2D Renderer is designed to use operations that can be accelerated by 2D acceleration hardware. 2D hardware acceleration uses platform plugins that take advantage of the QBlitter API (like DirectFB).</p>
+<a name="animation"></a>
+<h2 id="animation">Animation</h2>
+<p>It is important to keep in mind that with Qt Quick 2 the entire window will need to be rendered every time a node in the scene graph is marked dirty. There is no partial update mechanimism that will update only the dirty regions of the window. This means that any animation that is running will be forcing a full repaint of the window, and with Qt Quick 2D Renderer this can cause a heavy CPU load.</p>
+<a name="transforms"></a>
+<h2 id="transforms">Transforms</h2>
+<p>Transformations come with no performance penalty when rendering the scene graph with the OpenGL renderer. This is not the case with Qt Quick 2D Renderer. Translation operations do not come with performance penalties, but scaling and rotation transformations should be avoided whenever possible.</p>
+<a name="hidden-items"></a>
+<h2 id="hidden-items">Hidden Items</h2>
+<p>Qt Quick 2D Renderer will paint all items that are not hidden explicitly with either the visibility property or with an opacity of 0. Without OpenGL there is no depth buffer to check for items completely obscured by opaque items, so everything will be painted - even if it is unnecessary.</p>
+<a name="pixel-fill-budget"></a>
+<h2 id="pixel-fill-budget">Pixel Fill Budget</h2>
+<p>When developing an application that will be using Qt Quick 2D Renderer, it is important to keep in mind your pixel fill budget, or the the amount of pixels you can push to the screen in the time needed for your target framerate. For example, if your goal is to render your application at 60 frames per second, then you have about 16 milliseconds render to the framebuffer before needing to flush the pixels to the screen. Depending on your hardware's performance, you will only be able to handle a finite amount of pixel write operations before the 16 milliseconds expire. The interface you design should take into consideration that each added item subtracts from your pixel fill budget.</p>
+<p>Qt Quick 2D Renderer uses the painters algorithm to paint each item in the scene back-to-front. If you have an interface that stacks many items on top of each other, keep in mind that each layer is painted completely, not just the parts that are visible. It can be very easy to waste your pixel fill budget with too many over-paints.</p>
+</div>
+<!-- @@@qtquick2drenderer-performance.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="qtquick2drenderer-limitations.html">Limitations</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

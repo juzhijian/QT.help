@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>sortfilterproxymodel.cpp Example File | Qt Quick Controls 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquickcontrols-tableview-example.html">Qt Quick Controls - Table View Example</a></td><td >sortfilterproxymodel.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">sortfilterproxymodel.cpp Example File</h1>
+<span class="subtitle">tableview/src/sortfilterproxymodel.cpp</span>
+<!-- $$$tableview/src/sortfilterproxymodel.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;sortfilterproxymodel.h&quot;</span>
+  <span class="preprocessor">#include &lt;QtDebug&gt;</span>
+  <span class="preprocessor">#include &lt;QtQml&gt;</span>
+
+  SortFilterProxyModel<span class="operator">::</span>SortFilterProxyModel(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent) : <span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span>(parent)<span class="operator">,</span> m_complete(<span class="keyword">false</span>)
+  {
+      connect(<span class="keyword">this</span><span class="operator">,</span> SIGNAL(rowsInserted(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SIGNAL(countChanged()));
+      connect(<span class="keyword">this</span><span class="operator">,</span> SIGNAL(rowsRemoved(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SIGNAL(countChanged()));
+  }
+
+  <span class="type">int</span> SortFilterProxyModel<span class="operator">::</span>count() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> rowCount();
+  }
+
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>SortFilterProxyModel<span class="operator">::</span>source() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> sourceModel();
+  }
+
+  <span class="type">void</span> SortFilterProxyModel<span class="operator">::</span>setSource(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>source)
+  {
+      setSourceModel(qobject_cast<span class="operator">&lt;</span><span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(source));
+  }
+
+  <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> SortFilterProxyModel<span class="operator">::</span>sortRole() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_sortRole;
+  }
+
+  <span class="type">void</span> SortFilterProxyModel<span class="operator">::</span>setSortRole(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>role)
+  {
+      <span class="keyword">if</span> (m_sortRole <span class="operator">!</span><span class="operator">=</span> role) {
+          m_sortRole <span class="operator">=</span> role;
+          <span class="keyword">if</span> (m_complete)
+              <span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span><span class="operator">::</span>setSortRole(roleKey(role));
+      }
+  }
+
+  <span class="type">void</span> SortFilterProxyModel<span class="operator">::</span>setSortOrder(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>SortOrder order)
+  {
+      <span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span><span class="operator">::</span>sort(<span class="number">0</span><span class="operator">,</span> order);
+  }
+
+  <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> SortFilterProxyModel<span class="operator">::</span>filterRole() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_filterRole;
+  }
+
+  <span class="type">void</span> SortFilterProxyModel<span class="operator">::</span>setFilterRole(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>role)
+  {
+      <span class="keyword">if</span> (m_filterRole <span class="operator">!</span><span class="operator">=</span> role) {
+          m_filterRole <span class="operator">=</span> role;
+          <span class="keyword">if</span> (m_complete)
+              <span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span><span class="operator">::</span>setFilterRole(roleKey(role));
+      }
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> SortFilterProxyModel<span class="operator">::</span>filterString() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> filterRegExp()<span class="operator">.</span>pattern();
+  }
+
+  <span class="type">void</span> SortFilterProxyModel<span class="operator">::</span>setFilterString(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>filter)
+  {
+      setFilterRegExp(<span class="type"><a href="../qtcore/qregexp.html">QRegExp</a></span>(filter<span class="operator">,</span> filterCaseSensitivity()<span class="operator">,</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qregexp.html">QRegExp</a></span><span class="operator">::</span>PatternSyntax<span class="operator">&gt;</span>(filterSyntax())));
+  }
+
+  SortFilterProxyModel<span class="operator">::</span>FilterSyntax SortFilterProxyModel<span class="operator">::</span>filterSyntax() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>FilterSyntax<span class="operator">&gt;</span>(filterRegExp()<span class="operator">.</span>patternSyntax());
+  }
+
+  <span class="type">void</span> SortFilterProxyModel<span class="operator">::</span>setFilterSyntax(SortFilterProxyModel<span class="operator">::</span>FilterSyntax syntax)
+  {
+      setFilterRegExp(<span class="type"><a href="../qtcore/qregexp.html">QRegExp</a></span>(filterString()<span class="operator">,</span> filterCaseSensitivity()<span class="operator">,</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qregexp.html">QRegExp</a></span><span class="operator">::</span>PatternSyntax<span class="operator">&gt;</span>(syntax)));
+  }
+
+  <span class="type"><a href="../qtqml/qjsvalue.html">QJSValue</a></span> SortFilterProxyModel<span class="operator">::</span>get(<span class="type">int</span> idx) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtqml/qjsengine.html">QJSEngine</a></span> <span class="operator">*</span>engine <span class="operator">=</span> qmlEngine(<span class="keyword">this</span>);
+      <span class="type"><a href="../qtqml/qjsvalue.html">QJSValue</a></span> value <span class="operator">=</span> engine<span class="operator">-</span><span class="operator">&gt;</span>newObject();
+      <span class="keyword">if</span> (idx <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> idx <span class="operator">&lt;</span> count()) {
+          <span class="type"><a href="../qtcore/qhash.html">QHash</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> roles <span class="operator">=</span> roleNames();
+          <span class="type"><a href="../qtcore/qhashiterator.html">QHashIterator</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> it(roles);
+          <span class="keyword">while</span> (it<span class="operator">.</span>hasNext()) {
+              it<span class="operator">.</span>next();
+              value<span class="operator">.</span>setProperty(<span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>fromUtf8(it<span class="operator">.</span>value())<span class="operator">,</span> data(index(idx<span class="operator">,</span> <span class="number">0</span>)<span class="operator">,</span> it<span class="operator">.</span>key())<span class="operator">.</span>toString());
+          }
+      }
+      <span class="keyword">return</span> value;
+  }
+
+  <span class="type">void</span> SortFilterProxyModel<span class="operator">::</span>classBegin()
+  {
+  }
+
+  <span class="type">void</span> SortFilterProxyModel<span class="operator">::</span>componentComplete()
+  {
+      m_complete <span class="operator">=</span> <span class="keyword">true</span>;
+      <span class="keyword">if</span> (<span class="operator">!</span>m_sortRole<span class="operator">.</span>isEmpty())
+          <span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span><span class="operator">::</span>setSortRole(roleKey(m_sortRole));
+      <span class="keyword">if</span> (<span class="operator">!</span>m_filterRole<span class="operator">.</span>isEmpty())
+          <span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span><span class="operator">::</span>setFilterRole(roleKey(m_filterRole));
+  }
+
+  <span class="type">int</span> SortFilterProxyModel<span class="operator">::</span>roleKey(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>role) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qhash.html">QHash</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> roles <span class="operator">=</span> roleNames();
+      <span class="type"><a href="../qtcore/qhashiterator.html">QHashIterator</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> it(roles);
+      <span class="keyword">while</span> (it<span class="operator">.</span>hasNext()) {
+          it<span class="operator">.</span>next();
+          <span class="keyword">if</span> (it<span class="operator">.</span>value() <span class="operator">=</span><span class="operator">=</span> role)
+              <span class="keyword">return</span> it<span class="operator">.</span>key();
+      }
+      <span class="keyword">return</span> <span class="operator">-</span><span class="number">1</span>;
+  }
+
+  <span class="type"><a href="../qtcore/qhash.html">QHash</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> SortFilterProxyModel<span class="operator">::</span>roleNames() <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span> <span class="operator">*</span>source <span class="operator">=</span> sourceModel())
+          <span class="keyword">return</span> source<span class="operator">-</span><span class="operator">&gt;</span>roleNames();
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qhash.html">QHash</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span>();
+  }
+
+  bool SortFilterProxyModel<span class="operator">::</span>filterAcceptsRow(<span class="type">int</span> sourceRow<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>sourceParent) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qregexp.html">QRegExp</a></span> rx <span class="operator">=</span> filterRegExp();
+      <span class="keyword">if</span> (rx<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span> <span class="keyword">true</span>;
+      <span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span> <span class="operator">*</span>model <span class="operator">=</span> sourceModel();
+      <span class="keyword">if</span> (filterRole()<span class="operator">.</span>isEmpty()) {
+          <span class="type"><a href="../qtcore/qhash.html">QHash</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> roles <span class="operator">=</span> roleNames();
+          <span class="type"><a href="../qtcore/qhashiterator.html">QHashIterator</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> it(roles);
+          <span class="keyword">while</span> (it<span class="operator">.</span>hasNext()) {
+              it<span class="operator">.</span>next();
+              <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> sourceIndex <span class="operator">=</span> model<span class="operator">-</span><span class="operator">&gt;</span>index(sourceRow<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> sourceParent);
+              <span class="type"><a href="../qtcore/qstring.html">QString</a></span> key <span class="operator">=</span> model<span class="operator">-</span><span class="operator">&gt;</span>data(sourceIndex<span class="operator">,</span> it<span class="operator">.</span>key())<span class="operator">.</span>toString();
+              <span class="keyword">if</span> (key<span class="operator">.</span>contains(rx))
+                  <span class="keyword">return</span> <span class="keyword">true</span>;
+          }
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      }
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> sourceIndex <span class="operator">=</span> model<span class="operator">-</span><span class="operator">&gt;</span>index(sourceRow<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> sourceParent);
+      <span class="keyword">if</span> (<span class="operator">!</span>sourceIndex<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="keyword">true</span>;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> key <span class="operator">=</span> model<span class="operator">-</span><span class="operator">&gt;</span>data(sourceIndex<span class="operator">,</span> roleKey(filterRole()))<span class="operator">.</span>toString();
+      <span class="keyword">return</span> key<span class="operator">.</span>contains(rx);
+  }
+
+</pre>
+</div>
+<!-- @@@tableview/src/sortfilterproxymodel.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

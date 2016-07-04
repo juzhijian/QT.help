@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- dbus-adaptors.qdoc -->
+  <title>D-Bus Adaptor Example | Qt D-Bus</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdbus-index.html">Qt D-Bus</a></td><td >D-Bus Adaptor Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="qdbustypesystem.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="qdbustypesystem.html">The Qt D-Bus Type System</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#the-header">The Header</a></li>
+<li class="level1"><a href="#the-properties">The Properties</a></li>
+<li class="level1"><a href="#the-constructor">The Constructor</a></li>
+<li class="level1"><a href="#slots-methods">Slots/methods</a></li>
+<li class="level1"><a href="#signals">Signals</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">D-Bus Adaptor Example</h1>
+<span class="subtitle"></span>
+<!-- $$$qdbusadaptorexample.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The following example code shows how a D-Bus interface can be implemented using an adaptor.</p>
+<p>A sample usage of <a href="qdbusabstractadaptor.html">QDBusAbstractAdaptor</a> is as follows:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> MainApplicationAdaptor: <span class="keyword">public</span> <span class="type"><a href="qdbusabstractadaptor.html">QDBusAbstractAdaptor</a></span>
+  {
+      Q_OBJECT
+      Q_CLASSINFO(<span class="string">&quot;D-Bus Interface&quot;</span><span class="operator">,</span> <span class="string">&quot;org.kde.DBus.MainApplication&quot;</span>)
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> caption READ caption WRITE setCaption)
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> organizationName READ organizationName)
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> organizationDomain READ organizationDomain)
+
+  <span class="keyword">private</span>:
+      <span class="type">QApplication</span> <span class="operator">*</span>app;
+
+  <span class="keyword">public</span>:
+      MainApplicationAdaptor(<span class="type">QApplication</span> <span class="operator">*</span>application)
+          : <span class="type"><a href="qdbusabstractadaptor.html">QDBusAbstractAdaptor</a></span>(application)<span class="operator">,</span> app(application)
+      {
+          connect(application<span class="operator">,</span> SIGNAL(aboutToQuit())<span class="operator">,</span> SIGNAL(aboutToQuit()));
+          connect(application<span class="operator">,</span> SIGNAL(focusChanged(<span class="type">QWidget</span><span class="operator">*</span><span class="operator">,</span><span class="type">QWidget</span><span class="operator">*</span>))<span class="operator">,</span>
+                  SLOT(focusChangedSlot(<span class="type">QWidget</span><span class="operator">*</span><span class="operator">,</span><span class="type">QWidget</span><span class="operator">*</span>)));
+      }
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> caption()
+      {
+          <span class="keyword">if</span> (app<span class="operator">-</span><span class="operator">&gt;</span>hasMainWindow())
+              <span class="keyword">return</span> app<span class="operator">-</span><span class="operator">&gt;</span>mainWindow()<span class="operator">-</span><span class="operator">&gt;</span>caption();
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;&quot;</span>); <span class="comment">// must not return a null QString</span>
+      }
+
+      <span class="type">void</span> setCaption(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>newCaption)
+      {
+          <span class="keyword">if</span> (app<span class="operator">-</span><span class="operator">&gt;</span>hasMainWindow())
+              app<span class="operator">-</span><span class="operator">&gt;</span>mainWindow()<span class="operator">-</span><span class="operator">&gt;</span>setCaption(newCaption);
+      }
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> organizationName()
+      {
+          <span class="keyword">return</span> app<span class="operator">-</span><span class="operator">&gt;</span>organizationName();
+      }
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> organizationDomain()
+      {
+          <span class="keyword">return</span> app<span class="operator">-</span><span class="operator">&gt;</span>organizationDomain();
+      }
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      Q_NOREPLY <span class="type">void</span> quit()
+      { app<span class="operator">-</span><span class="operator">&gt;</span>quit(); }
+
+      <span class="type">void</span> reparseConfiguration()
+      { app<span class="operator">-</span><span class="operator">&gt;</span>reparseConfiguration(); }
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> mainWindowObject()
+      {
+          <span class="keyword">if</span> (app<span class="operator">-</span><span class="operator">&gt;</span>hasMainWindow())
+              <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;/%1/mainwindow&quot;</span>)<span class="operator">.</span>arg(app<span class="operator">-</span><span class="operator">&gt;</span>applicationName());
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+      }
+
+      <span class="type">void</span> setSessionManagement(bool enable)
+      {
+          <span class="keyword">if</span> (enable)
+             app<span class="operator">-</span><span class="operator">&gt;</span>enableSessionManagement();
+          <span class="keyword">else</span>
+             app<span class="operator">-</span><span class="operator">&gt;</span>disableSessionManagement();
+      }
+
+  <span class="keyword">private</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> focusChangedSlot(<span class="type">QWidget</span> <span class="operator">*</span><span class="operator">,</span> <span class="type">QWidget</span> <span class="operator">*</span>now)
+      {
+          <span class="keyword">if</span> (now <span class="operator">=</span><span class="operator">=</span> app<span class="operator">-</span><span class="operator">&gt;</span>mainWindow())
+              <span class="keyword">emit</span> mainWindowHasFocus();
+      }
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> aboutToQuit();
+      <span class="type">void</span> mainWindowHasFocus();
+  };
+
+</pre>
+<p>The code above would create an interface that could be represented more or less in the following canonical representation:</p>
+<pre class="cpp">
+
+  interface org<span class="operator">.</span>kde<span class="operator">.</span>DBus<span class="operator">.</span>MainApplication
+  {
+      property readwrite STRING caption
+      property read STRING organizationName
+      property read STRING organizationDomain
+
+      method quit() annotation(<span class="string">&quot;org.freedesktop.DBus.Method.NoReply&quot;</span><span class="operator">,</span> <span class="string">&quot;true&quot;</span>)
+      method reparseConfiguration()
+      method mainWindowObject(out STRING)
+      method disableSessionManagement(in BOOLEAN enable)
+
+      signal aboutToQuit()
+      signal mainWindowHasFocus()
+  }
+
+</pre>
+<p>This adaptor could be used in the application's main function as follows</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span>argv)
+  {
+      <span class="comment">// create the QApplication object</span>
+      <span class="type">QApplication</span> app(argc<span class="operator">,</span> argv);
+
+      <span class="comment">// create the MainApplication adaptor:</span>
+      <span class="keyword">new</span> MainApplicationAdaptor(app);
+
+      <span class="comment">// connect to D-Bus and register as an object:</span>
+      <span class="type"><a href="qdbusconnection.html">QDBusConnection</a></span><span class="operator">::</span>sessionBus()<span class="operator">.</span>registerObject(<span class="string">&quot;/MainApplication&quot;</span><span class="operator">,</span> <span class="operator">&amp;</span>app);
+
+      <span class="comment">// add main window, etc.</span>
+      <span class="operator">[</span><span class="operator">.</span><span class="operator">.</span><span class="operator">.</span><span class="operator">]</span>
+
+      app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>Break-down analysis: </p>
+<a name="the-header"></a>
+<h2 id="the-header">The Header</h2>
+<p>The header of the example is:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> MainApplicationAdaptor: <span class="keyword">public</span> <span class="type"><a href="qdbusabstractadaptor.html">QDBusAbstractAdaptor</a></span>
+  {
+      Q_OBJECT
+      Q_CLASSINFO(<span class="string">&quot;D-Bus Interface&quot;</span><span class="operator">,</span> <span class="string">&quot;org.kde.DBus.MainApplication&quot;</span>)
+
+</pre>
+<p>The code does the following:</p>
+<ul>
+<li>it declares the adaptor MainApplicationAdaptor, which descends from <a href="qdbusabstractadaptor.html">QDBusAbstractAdaptor</a></li>
+<li>it declares the Qt meta-object data using the <a href="../qtcore/qobject.html#Q_OBJECT">Q_OBJECT</a> macro</li>
+<li>it declares the name of the D-Bus interface it implements.</li>
+</ul>
+<a name="the-properties"></a>
+<h2 id="the-properties">The Properties</h2>
+<p>The properties are declared as follows:</p>
+<pre class="cpp">
+
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> caption READ caption WRITE setCaption)
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> organizationName READ organizationName)
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> organizationDomain READ organizationDomain)
+
+</pre>
+<p>And are implemented as follows:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> caption()
+  {
+      <span class="keyword">if</span> (app<span class="operator">-</span><span class="operator">&gt;</span>hasMainWindow())
+          <span class="keyword">return</span> app<span class="operator">-</span><span class="operator">&gt;</span>mainWindow()<span class="operator">-</span><span class="operator">&gt;</span>caption();
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+  }
+
+  <span class="type">void</span> setCaption(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>newCaption)
+  {
+      <span class="keyword">if</span> (app<span class="operator">-</span><span class="operator">&gt;</span>hasMainWindow())
+          app<span class="operator">-</span><span class="operator">&gt;</span>mainWindow()<span class="operator">-</span><span class="operator">&gt;</span>setCaption(newCaption);
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> organizationName()
+  {
+      <span class="keyword">return</span> app<span class="operator">-</span><span class="operator">&gt;</span>organizationName();
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> organizationDomain()
+  {
+      <span class="keyword">return</span> app<span class="operator">-</span><span class="operator">&gt;</span>organizationDomain();
+  }
+
+</pre>
+<p>The code declares three properties: one of them is a read-write property called &quot;caption&quot; of string type. The other two are read-only, also of the string type.</p>
+<p>The properties organizationName and organizationDomain are simple relays of the app object's organizationName and organizationDomain properties. However, the caption property requires verifying if the application has a main window associated with it: if there isn't any, the caption property is empty. Note how it is possible to access data defined in other objects through the getter/setter functions.</p>
+<a name="the-constructor"></a>
+<h2 id="the-constructor">The Constructor</h2>
+<p>The constructor:</p>
+<pre class="cpp">
+
+  MyInterfaceAdaptor(<span class="type">QApplication</span> <span class="operator">*</span>application)
+      : <span class="type"><a href="qdbusabstractadaptor.html">QDBusAbstractAdaptor</a></span>(application)<span class="operator">,</span> app(application)
+  {
+      connect(application<span class="operator">,</span> SIGNAL(aboutToQuit())<span class="operator">,</span> SIGNAL(aboutToQuit());
+      connect(application<span class="operator">,</span> SIGNAL(focusChanged(<span class="type">QWidget</span><span class="operator">*</span><span class="operator">,</span><span class="type">QWidget</span><span class="operator">*</span>))<span class="operator">,</span>
+              SLOT(focusChangedSlot(<span class="type">QWidget</span><span class="operator">*</span><span class="operator">,</span><span class="type">QWidget</span><span class="operator">*</span>)));
+  }
+
+</pre>
+<p>The constructor does the following:</p>
+<ul>
+<li>it initialises its base class (<a href="qdbusabstractadaptor.html">QDBusAbstractAdaptor</a>) with the parent object it is related to.</li>
+<li>it stores the app pointer in a member variable. Note that it would be possible to access the same object using the QDBusAbstractAdaptor::object() function, but it would be necessary to use <i>static_cast&lt;&gt;</i> to properly access the methods in QApplication that are not part of <a href="../qtcore/qobject.html">QObject</a>.</li>
+<li>it connects the application's signal <i>aboutToQuit</i> to its own signal <i>aboutToQuit</i>.</li>
+<li>it connects the application's signal <i>focusChanged</i> to a private slot to do some further processing before emitting a D-Bus signal.</li>
+</ul>
+<p>Note that there is no destructor in the example. An eventual destructor could be used to emit one last signal before the object is destroyed, for instance.</p>
+<a name="slots-methods"></a>
+<h2 id="slots-methods">Slots/methods</h2>
+<p>The public slots in the example (which will be exported as D-Bus methods) are the following:</p>
+<pre class="cpp">
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      Q_NOREPLY <span class="type">void</span> quit()
+      { app<span class="operator">-</span><span class="operator">&gt;</span>quit(); }
+
+      <span class="type">void</span> reparseConfiguration()
+      { app<span class="operator">-</span><span class="operator">&gt;</span>reparseConfiguration(); }
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> mainWindowObject()
+      {
+          <span class="keyword">if</span> (app<span class="operator">-</span><span class="operator">&gt;</span>hasMainWindow())
+              <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;/%1/mainwindow&quot;</span>)<span class="operator">.</span>arg(app<span class="operator">-</span><span class="operator">&gt;</span>applicationName());
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+      }
+
+      <span class="type">void</span> setSessionManagement(bool enable)
+      {
+          <span class="keyword">if</span> (enable)
+             app<span class="operator">-</span><span class="operator">&gt;</span>enableSessionManagement();
+          <span class="keyword">else</span>
+             app<span class="operator">-</span><span class="operator">&gt;</span>disableSessionManagement();
+      }
+
+</pre>
+<p>This snippet of code defines 4 methods with different properties each:</p>
+<ol class="1" type="1"><li><code>quit</code>: this method takes no parameters and is defined to be asynchronous. That is, callers are expected to use &quot;fire-and-forget&quot; mechanism when calling this method, since it provides no useful reply. This is represented in D-Bus by the use of the org.freedesktop.DBus.Method.NoReply annotation. See <a href="qdbusabstractadaptor.html#Q_NOREPLY">Q_NOREPLY</a> for more information on asynchronous methods</li>
+<li><code>reparseConfiguration</code>: this simple method, with no input or output arguments simply relays the call to the application's reparseConfiguration member function.</li>
+<li><code>mainWindowObject</code>: this method takes no input parameter, but returns one string output argument, containing the path to the main window object (if the application has a main window), or an empty string if it has no main window. Note that this method could have also been written: void mainWindowObject(<a href="../qtcore/qstring.html">QString</a> &amp;path).</li>
+<li><code>setSessionManagement</code>: this method takes one input argument (a boolean) and, depending on its value, it calls one function or another in the application.</li>
+</ol>
+<p>See also: <a href="qdbusabstractadaptor.html#Q_NOREPLY">Q_NOREPLY</a>.</p>
+<a name="signals"></a>
+<h2 id="signals">Signals</h2>
+<p>The signals in this example are defined as follows:</p>
+<pre class="cpp">
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> aboutToQuit();
+      <span class="type">void</span> mainWindowHasFocus();
+
+</pre>
+<p>However, signal definition isn't enough: signals have to be emitted. One simple way of emitting signals is to connect another signal to them, so that Qt's signal handling system chains them automatically. This is what is done for the <i>aboutToQuit</i> signal.</p>
+<p>When this is the case, one can use the <a href="qdbusabstractadaptor.html#setAutoRelaySignals">QDBusAbstractAdaptor::setAutoRelaySignals</a> to automatically connect every signal from the real object to the adaptor.</p>
+<p>When simple signal-to-signal connection isn't enough, one can use a private slot do do some work. This is what was done for the mainWindowHasFocus signal:</p>
+<pre class="cpp">
+
+  <span class="keyword">private</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> focusChangedSlot(<span class="type">QWidget</span> <span class="operator">*</span><span class="operator">,</span> <span class="type">QWidget</span> <span class="operator">*</span>now)
+      {
+          <span class="keyword">if</span> (now <span class="operator">=</span><span class="operator">=</span> app<span class="operator">-</span><span class="operator">&gt;</span>mainWindow())
+              <span class="keyword">emit</span> mainWindowHasFocus();
+      }
+
+</pre>
+<p>This private slot (which will not be exported as a method via D-Bus) was connected to the <code>focusChanged</code> signal in the adaptor's constructor. It is therefore able to shape the application's signal into what the interface expects it to be.</p>
+</div>
+<!-- @@@qdbusadaptorexample.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="qdbustypesystem.html">The Qt D-Bus Type System</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

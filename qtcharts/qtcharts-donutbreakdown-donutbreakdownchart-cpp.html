@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>donutbreakdownchart.cpp Example File | Qt Charts 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcharts-index.html">Qt Charts</a></td><td ><a href="qtcharts-donutbreakdown-example.html">Donut Chart Breakdown Example</a></td><td >donutbreakdownchart.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">donutbreakdownchart.cpp Example File</h1>
+<span class="subtitle">donutbreakdown/donutbreakdownchart.cpp</span>
+<!-- $$$donutbreakdown/donutbreakdownchart.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Charts module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+  <span class="preprocessor">#include &quot;donutbreakdownchart.h&quot;</span>
+  <span class="preprocessor">#include &quot;mainslice.h&quot;</span>
+  <span class="preprocessor">#include &lt;QtCharts/QPieSlice&gt;</span>
+  <span class="preprocessor">#include &lt;QtCharts/QPieLegendMarker&gt;</span>
+
+  QT_CHARTS_USE_NAMESPACE
+
+  DonutBreakdownChart<span class="operator">::</span>DonutBreakdownChart(<span class="type"><a href="../qtwidgets/qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span>parent<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowFlags wFlags)
+      : <span class="type"><a href="qchart.html">QChart</a></span>(<span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>ChartTypeCartesian<span class="operator">,</span> parent<span class="operator">,</span> wFlags)
+  {
+      <span class="comment">// create the series for main center pie</span>
+      m_mainSeries <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpieseries.html">QPieSeries</a></span>();
+      m_mainSeries<span class="operator">-</span><span class="operator">&gt;</span>setPieSize(<span class="number">0.7</span>);
+      <span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>addSeries(m_mainSeries);
+  }
+
+  <span class="type">void</span> DonutBreakdownChart<span class="operator">::</span>addBreakdownSeries(<span class="type"><a href="qpieseries.html">QPieSeries</a></span> <span class="operator">*</span>breakdownSeries<span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> color)
+  {
+      <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> font(<span class="string">&quot;Arial&quot;</span><span class="operator">,</span> <span class="number">8</span>);
+
+      <span class="comment">// add breakdown series as a slice to center pie</span>
+      MainSlice <span class="operator">*</span>mainSlice <span class="operator">=</span> <span class="keyword">new</span> MainSlice(breakdownSeries);
+      mainSlice<span class="operator">-</span><span class="operator">&gt;</span>setName(breakdownSeries<span class="operator">-</span><span class="operator">&gt;</span>name());
+      mainSlice<span class="operator">-</span><span class="operator">&gt;</span>setValue(breakdownSeries<span class="operator">-</span><span class="operator">&gt;</span>sum());
+      m_mainSeries<span class="operator">-</span><span class="operator">&gt;</span>append(mainSlice);
+
+      <span class="comment">// customize the slice</span>
+      mainSlice<span class="operator">-</span><span class="operator">&gt;</span>setBrush(color);
+      mainSlice<span class="operator">-</span><span class="operator">&gt;</span>setLabelVisible();
+      mainSlice<span class="operator">-</span><span class="operator">&gt;</span>setLabelColor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white);
+      mainSlice<span class="operator">-</span><span class="operator">&gt;</span>setLabelPosition(<span class="type"><a href="qpieslice.html">QPieSlice</a></span><span class="operator">::</span>LabelInsideHorizontal);
+      mainSlice<span class="operator">-</span><span class="operator">&gt;</span>setLabelFont(font);
+
+      <span class="comment">// position and customize the breakdown series</span>
+      breakdownSeries<span class="operator">-</span><span class="operator">&gt;</span>setPieSize(<span class="number">0.8</span>);
+      breakdownSeries<span class="operator">-</span><span class="operator">&gt;</span>setHoleSize(<span class="number">0.7</span>);
+      breakdownSeries<span class="operator">-</span><span class="operator">&gt;</span>setLabelsVisible();
+      foreach (<span class="type"><a href="qpieslice.html">QPieSlice</a></span> <span class="operator">*</span>slice<span class="operator">,</span> breakdownSeries<span class="operator">-</span><span class="operator">&gt;</span>slices()) {
+          color <span class="operator">=</span> color<span class="operator">.</span>lighter(<span class="number">115</span>);
+          slice<span class="operator">-</span><span class="operator">&gt;</span>setBrush(color);
+          slice<span class="operator">-</span><span class="operator">&gt;</span>setLabelFont(font);
+      }
+
+      <span class="comment">// add the series to the chart</span>
+      <span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>addSeries(breakdownSeries);
+
+      <span class="comment">// recalculate breakdown donut segments</span>
+      recalculateAngles();
+
+      <span class="comment">// update customize legend markers</span>
+      updateLegendMarkers();
+  }
+
+  <span class="type">void</span> DonutBreakdownChart<span class="operator">::</span>recalculateAngles()
+  {
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> angle <span class="operator">=</span> <span class="number">0</span>;
+      foreach (<span class="type"><a href="qpieslice.html">QPieSlice</a></span> <span class="operator">*</span>slice<span class="operator">,</span> m_mainSeries<span class="operator">-</span><span class="operator">&gt;</span>slices()) {
+          <span class="type"><a href="qpieseries.html">QPieSeries</a></span> <span class="operator">*</span>breakdownSeries <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span>MainSlice <span class="operator">*</span><span class="operator">&gt;</span>(slice)<span class="operator">-</span><span class="operator">&gt;</span>breakdownSeries();
+          breakdownSeries<span class="operator">-</span><span class="operator">&gt;</span>setPieStartAngle(angle);
+          angle <span class="operator">+</span><span class="operator">=</span> slice<span class="operator">-</span><span class="operator">&gt;</span>percentage() <span class="operator">*</span> <span class="number">360.0</span>; <span class="comment">// full pie is 360.0</span>
+          breakdownSeries<span class="operator">-</span><span class="operator">&gt;</span>setPieEndAngle(angle);
+      }
+  }
+
+  <span class="type">void</span> DonutBreakdownChart<span class="operator">::</span>updateLegendMarkers()
+  {
+      <span class="comment">// go through all markers</span>
+      foreach (<span class="type"><a href="qabstractseries.html">QAbstractSeries</a></span> <span class="operator">*</span>series<span class="operator">,</span> series()) {
+          foreach (<span class="type"><a href="qlegendmarker.html">QLegendMarker</a></span> <span class="operator">*</span>marker<span class="operator">,</span> legend()<span class="operator">-</span><span class="operator">&gt;</span>markers(series)) {
+              <span class="type"><a href="qpielegendmarker.html">QPieLegendMarker</a></span> <span class="operator">*</span>pieMarker <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qpielegendmarker.html">QPieLegendMarker</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(marker);
+              <span class="keyword">if</span> (series <span class="operator">=</span><span class="operator">=</span> m_mainSeries) {
+                  <span class="comment">// hide markers from main series</span>
+                  pieMarker<span class="operator">-</span><span class="operator">&gt;</span>setVisible(<span class="keyword">false</span>);
+              } <span class="keyword">else</span> {
+                  <span class="comment">// modify markers from breakdown series</span>
+                  pieMarker<span class="operator">-</span><span class="operator">&gt;</span>setLabel(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1 %2%&quot;</span>)
+                                      <span class="operator">.</span>arg(pieMarker<span class="operator">-</span><span class="operator">&gt;</span>slice()<span class="operator">-</span><span class="operator">&gt;</span>label())
+                                      <span class="operator">.</span>arg(pieMarker<span class="operator">-</span><span class="operator">&gt;</span>slice()<span class="operator">-</span><span class="operator">&gt;</span>percentage() <span class="operator">*</span> <span class="number">100</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="char">'f'</span><span class="operator">,</span> <span class="number">2</span>));
+                  pieMarker<span class="operator">-</span><span class="operator">&gt;</span>setFont(<span class="type"><a href="../qtgui/qfont.html">QFont</a></span>(<span class="string">&quot;Arial&quot;</span><span class="operator">,</span> <span class="number">8</span>));
+              }
+          }
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@donutbreakdown/donutbreakdownchart.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

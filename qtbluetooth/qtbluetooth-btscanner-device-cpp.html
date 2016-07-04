@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>device.cpp Example File | Qt Bluetooth 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtbluetooth-index.html">Qt Bluetooth</a></td><td ><a href="qtbluetooth-btscanner-example.html">Bluetooth Scanner Example</a></td><td >device.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">device.cpp Example File</h1>
+<span class="subtitle">btscanner/device.cpp</span>
+<!-- $$$btscanner/device.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the QtBluetooth module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;device.h&quot;</span>
+  <span class="preprocessor">#include &quot;service.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;qbluetoothaddress.h&gt;</span>
+  <span class="preprocessor">#include &lt;qbluetoothdevicediscoveryagent.h&gt;</span>
+  <span class="preprocessor">#include &lt;qbluetoothlocaldevice.h&gt;</span>
+  <span class="preprocessor">#include &lt;QMenu&gt;</span>
+  <span class="preprocessor">#include &lt;QDebug&gt;</span>
+
+  DeviceDiscoveryDialog<span class="operator">::</span>DeviceDiscoveryDialog(<span class="type">QWidget</span> <span class="operator">*</span>parent)
+  :   <span class="type">QDialog</span>(parent)<span class="operator">,</span> localDevice(<span class="keyword">new</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span>)<span class="operator">,</span>
+      ui(<span class="keyword">new</span> Ui_DeviceDiscovery)
+  {
+      ui<span class="operator">-</span><span class="operator">&gt;</span>setupUi(<span class="keyword">this</span>);
+
+      <span class="comment">/*
+       * In case of multiple Bluetooth adapters it is possible to set adapter
+       * which will be used. Example code:
+       *
+       * QBluetoothAddress address(&quot;XX:XX:XX:XX:XX:XX&quot;);
+       * discoveryAgent = new QBluetoothDeviceDiscoveryAgent(address);
+       *
+       **/</span>
+
+      discoveryAgent <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qbluetoothdevicediscoveryagent.html">QBluetoothDeviceDiscoveryAgent</a></span>();
+
+      connect(ui<span class="operator">-</span><span class="operator">&gt;</span>inquiryType<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(setGeneralUnlimited(bool)));
+      connect(ui<span class="operator">-</span><span class="operator">&gt;</span>scan<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(startScan()));
+
+      connect(discoveryAgent<span class="operator">,</span> SIGNAL(deviceDiscovered(<span class="type"><a href="qbluetoothdeviceinfo.html">QBluetoothDeviceInfo</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(addDevice(<span class="type"><a href="qbluetoothdeviceinfo.html">QBluetoothDeviceInfo</a></span>)));
+      connect(discoveryAgent<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(scanFinished()));
+
+      connect(ui<span class="operator">-</span><span class="operator">&gt;</span>list<span class="operator">,</span> SIGNAL(itemActivated(<span class="type">QListWidgetItem</span><span class="operator">*</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(itemActivated(<span class="type">QListWidgetItem</span><span class="operator">*</span>)));
+
+      connect(localDevice<span class="operator">,</span> SIGNAL(hostModeStateChanged(<span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>HostMode))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(hostModeStateChanged(<span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>HostMode)));
+
+      hostModeStateChanged(localDevice<span class="operator">-</span><span class="operator">&gt;</span>hostMode());
+      <span class="comment">// add context menu for devices to be able to pair device</span>
+      ui<span class="operator">-</span><span class="operator">&gt;</span>list<span class="operator">-</span><span class="operator">&gt;</span>setContextMenuPolicy(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CustomContextMenu);
+      connect(ui<span class="operator">-</span><span class="operator">&gt;</span>list<span class="operator">,</span> SIGNAL(customContextMenuRequested(<span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(displayPairingMenu(<span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>)));
+      connect(localDevice<span class="operator">,</span> SIGNAL(pairingFinished(<span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span><span class="operator">,</span><span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Pairing))
+          <span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(pairingDone(<span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span><span class="operator">,</span><span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Pairing)));
+
+  }
+
+  DeviceDiscoveryDialog<span class="operator">::</span><span class="operator">~</span>DeviceDiscoveryDialog()
+  {
+      <span class="keyword">delete</span> discoveryAgent;
+  }
+
+  <span class="type">void</span> DeviceDiscoveryDialog<span class="operator">::</span>addDevice(<span class="keyword">const</span> <span class="type"><a href="qbluetoothdeviceinfo.html">QBluetoothDeviceInfo</a></span> <span class="operator">&amp;</span>info)
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> label <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1 %2&quot;</span>)<span class="operator">.</span>arg(info<span class="operator">.</span>address()<span class="operator">.</span>toString())<span class="operator">.</span>arg(info<span class="operator">.</span>name());
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type">QListWidgetItem</span> <span class="operator">*</span><span class="operator">&gt;</span> items <span class="operator">=</span> ui<span class="operator">-</span><span class="operator">&gt;</span>list<span class="operator">-</span><span class="operator">&gt;</span>findItems(label<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>MatchExactly);
+      <span class="keyword">if</span> (items<span class="operator">.</span>empty()) {
+          <span class="type">QListWidgetItem</span> <span class="operator">*</span>item <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QListWidgetItem</span>(label);
+          <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Pairing pairingStatus <span class="operator">=</span> localDevice<span class="operator">-</span><span class="operator">&gt;</span>pairingStatus(info<span class="operator">.</span>address());
+          <span class="keyword">if</span> (pairingStatus <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Paired <span class="operator">|</span><span class="operator">|</span> pairingStatus <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>AuthorizedPaired )
+              item<span class="operator">-</span><span class="operator">&gt;</span>setTextColor(<span class="type">QColor</span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>green));
+          <span class="keyword">else</span>
+              item<span class="operator">-</span><span class="operator">&gt;</span>setTextColor(<span class="type">QColor</span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black));
+
+          ui<span class="operator">-</span><span class="operator">&gt;</span>list<span class="operator">-</span><span class="operator">&gt;</span>addItem(item);
+      }
+
+  }
+
+  <span class="type">void</span> DeviceDiscoveryDialog<span class="operator">::</span>startScan()
+  {
+      discoveryAgent<span class="operator">-</span><span class="operator">&gt;</span>start();
+      ui<span class="operator">-</span><span class="operator">&gt;</span>scan<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      ui<span class="operator">-</span><span class="operator">&gt;</span>inquiryType<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+  }
+
+  <span class="type">void</span> DeviceDiscoveryDialog<span class="operator">::</span>scanFinished()
+  {
+      ui<span class="operator">-</span><span class="operator">&gt;</span>scan<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+      ui<span class="operator">-</span><span class="operator">&gt;</span>inquiryType<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+  }
+
+  <span class="type">void</span> DeviceDiscoveryDialog<span class="operator">::</span>setGeneralUnlimited(bool unlimited)
+  {
+      <span class="keyword">if</span> (unlimited)
+          discoveryAgent<span class="operator">-</span><span class="operator">&gt;</span>setInquiryType(<span class="type"><a href="qbluetoothdevicediscoveryagent.html">QBluetoothDeviceDiscoveryAgent</a></span><span class="operator">::</span>GeneralUnlimitedInquiry);
+      <span class="keyword">else</span>
+          discoveryAgent<span class="operator">-</span><span class="operator">&gt;</span>setInquiryType(<span class="type"><a href="qbluetoothdevicediscoveryagent.html">QBluetoothDeviceDiscoveryAgent</a></span><span class="operator">::</span>LimitedInquiry);
+  }
+
+  <span class="type">void</span> DeviceDiscoveryDialog<span class="operator">::</span>itemActivated(<span class="type">QListWidgetItem</span> <span class="operator">*</span>item)
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> text <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>text();
+
+      <span class="type">int</span> index <span class="operator">=</span> text<span class="operator">.</span>indexOf(<span class="char">' '</span>);
+
+      <span class="keyword">if</span> (index <span class="operator">=</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span> address(text<span class="operator">.</span>left(index));
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> name(text<span class="operator">.</span>mid(index <span class="operator">+</span> <span class="number">1</span>));
+
+      ServiceDiscoveryDialog d(name<span class="operator">,</span> address);
+      d<span class="operator">.</span>exec();
+  }
+
+  <span class="type">void</span> DeviceDiscoveryDialog<span class="operator">::</span>on_discoverable_clicked(bool clicked)
+  {
+      <span class="keyword">if</span> (clicked)
+          localDevice<span class="operator">-</span><span class="operator">&gt;</span>setHostMode(<span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>HostDiscoverable);
+      <span class="keyword">else</span>
+          localDevice<span class="operator">-</span><span class="operator">&gt;</span>setHostMode(<span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>HostConnectable);
+  }
+
+  <span class="type">void</span> DeviceDiscoveryDialog<span class="operator">::</span>on_power_clicked(bool clicked)
+  {
+      <span class="keyword">if</span> (clicked)
+          localDevice<span class="operator">-</span><span class="operator">&gt;</span>powerOn();
+      <span class="keyword">else</span>
+          localDevice<span class="operator">-</span><span class="operator">&gt;</span>setHostMode(<span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>HostPoweredOff);
+  }
+
+  <span class="type">void</span> DeviceDiscoveryDialog<span class="operator">::</span>hostModeStateChanged(<span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>HostMode mode)
+  {
+      <span class="keyword">if</span> (mode <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>HostPoweredOff)
+          ui<span class="operator">-</span><span class="operator">&gt;</span>power<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      <span class="keyword">else</span>
+         ui<span class="operator">-</span><span class="operator">&gt;</span>power<span class="operator">-</span><span class="operator">&gt;</span>setChecked( <span class="keyword">false</span>);
+
+      <span class="keyword">if</span> (mode <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>HostDiscoverable)
+          ui<span class="operator">-</span><span class="operator">&gt;</span>discoverable<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      <span class="keyword">else</span>
+          ui<span class="operator">-</span><span class="operator">&gt;</span>discoverable<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+
+      bool on <span class="operator">=</span> <span class="operator">!</span>(mode <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>HostPoweredOff);
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>scan<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(on);
+      ui<span class="operator">-</span><span class="operator">&gt;</span>discoverable<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(on);
+  }
+  <span class="type">void</span> DeviceDiscoveryDialog<span class="operator">::</span>displayPairingMenu(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <span class="operator">&amp;</span>pos)
+  {
+      <span class="keyword">if</span> (ui<span class="operator">-</span><span class="operator">&gt;</span>list<span class="operator">-</span><span class="operator">&gt;</span>count() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="keyword">return</span>;
+      <span class="type">QMenu</span> menu(<span class="keyword">this</span>);
+      <span class="type">QAction</span> <span class="operator">*</span>pairAction <span class="operator">=</span> menu<span class="operator">.</span>addAction(<span class="string">&quot;Pair&quot;</span>);
+      <span class="type">QAction</span> <span class="operator">*</span>removePairAction <span class="operator">=</span> menu<span class="operator">.</span>addAction(<span class="string">&quot;Remove Pairing&quot;</span>);
+      <span class="type">QAction</span> <span class="operator">*</span>chosenAction <span class="operator">=</span> menu<span class="operator">.</span>exec(ui<span class="operator">-</span><span class="operator">&gt;</span>list<span class="operator">-</span><span class="operator">&gt;</span>viewport()<span class="operator">-</span><span class="operator">&gt;</span>mapToGlobal(pos));
+      <span class="type">QListWidgetItem</span> <span class="operator">*</span>currentItem <span class="operator">=</span> ui<span class="operator">-</span><span class="operator">&gt;</span>list<span class="operator">-</span><span class="operator">&gt;</span>currentItem();
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> text <span class="operator">=</span> currentItem<span class="operator">-</span><span class="operator">&gt;</span>text();
+      <span class="type">int</span> index <span class="operator">=</span> text<span class="operator">.</span>indexOf(<span class="char">' '</span>);
+      <span class="keyword">if</span> (index <span class="operator">=</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span> address (text<span class="operator">.</span>left(index));
+      <span class="keyword">if</span> (chosenAction <span class="operator">=</span><span class="operator">=</span> pairAction) {
+          localDevice<span class="operator">-</span><span class="operator">&gt;</span>requestPairing(address<span class="operator">,</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Paired);
+      } <span class="keyword">else</span> <span class="keyword">if</span> (chosenAction <span class="operator">=</span><span class="operator">=</span> removePairAction) {
+          localDevice<span class="operator">-</span><span class="operator">&gt;</span>requestPairing(address<span class="operator">,</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Unpaired);
+      }
+  }
+  <span class="type">void</span> DeviceDiscoveryDialog<span class="operator">::</span>pairingDone(<span class="keyword">const</span> <span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span> <span class="operator">&amp;</span>address<span class="operator">,</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Pairing pairing)
+  {
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type">QListWidgetItem</span> <span class="operator">*</span><span class="operator">&gt;</span> items <span class="operator">=</span> ui<span class="operator">-</span><span class="operator">&gt;</span>list<span class="operator">-</span><span class="operator">&gt;</span>findItems(address<span class="operator">.</span>toString()<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>MatchContains);
+
+      <span class="keyword">if</span> (pairing <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Paired <span class="operator">|</span><span class="operator">|</span> pairing <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>AuthorizedPaired ) {
+          <span class="keyword">for</span> (<span class="type">int</span> var <span class="operator">=</span> <span class="number">0</span>; var <span class="operator">&lt;</span> items<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>var) {
+              <span class="type">QListWidgetItem</span> <span class="operator">*</span>item <span class="operator">=</span> items<span class="operator">.</span>at(var);
+              item<span class="operator">-</span><span class="operator">&gt;</span>setTextColor(<span class="type">QColor</span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>green));
+          }
+      } <span class="keyword">else</span> {
+          <span class="keyword">for</span> (<span class="type">int</span> var <span class="operator">=</span> <span class="number">0</span>; var <span class="operator">&lt;</span> items<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>var) {
+              <span class="type">QListWidgetItem</span> <span class="operator">*</span>item <span class="operator">=</span> items<span class="operator">.</span>at(var);
+              item<span class="operator">-</span><span class="operator">&gt;</span>setTextColor(<span class="type">QColor</span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>red));
+          }
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@btscanner/device.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

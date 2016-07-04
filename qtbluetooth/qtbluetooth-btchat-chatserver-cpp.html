@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>chatserver.cpp Example File | Qt Bluetooth 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtbluetooth-index.html">Qt Bluetooth</a></td><td ><a href="qtbluetooth-btchat-example.html">Bluetooth Chat Example</a></td><td >chatserver.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">chatserver.cpp Example File</h1>
+<span class="subtitle">btchat/chatserver.cpp</span>
+<!-- $$$btchat/chatserver.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the QtBluetooth module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;chatserver.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;qbluetoothserver.h&gt;</span>
+  <span class="preprocessor">#include &lt;qbluetoothsocket.h&gt;</span>
+  <span class="preprocessor">#include &lt;qbluetoothlocaldevice.h&gt;</span>
+
+  <span class="keyword">static</span> <span class="keyword">const</span> QLatin1String serviceUuid(<span class="string">&quot;e8e10f95-1a70-4b27-9ccf-02010264e9c8&quot;</span>);
+
+  ChatServer<span class="operator">::</span>ChatServer(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+  :   <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>(parent)<span class="operator">,</span> rfcommServer(<span class="number">0</span>)
+  {
+  }
+
+  ChatServer<span class="operator">::</span><span class="operator">~</span>ChatServer()
+  {
+      stopServer();
+  }
+
+  <span class="type">void</span> ChatServer<span class="operator">::</span>startServer(<span class="keyword">const</span> <span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span><span class="operator">&amp;</span> localAdapter)
+  {
+      <span class="keyword">if</span> (rfcommServer)
+          <span class="keyword">return</span>;
+
+      rfcommServer <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qbluetoothserver.html">QBluetoothServer</a></span>(<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>RfcommProtocol<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(rfcommServer<span class="operator">,</span> SIGNAL(newConnection())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(clientConnected()));
+      bool result <span class="operator">=</span> rfcommServer<span class="operator">-</span><span class="operator">&gt;</span>listen(localAdapter);
+      <span class="keyword">if</span> (<span class="operator">!</span>result) {
+          <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Cannot bind chat server to&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> localAdapter<span class="operator">.</span>toString();
+          <span class="keyword">return</span>;
+      }
+
+      <span class="comment">//serviceInfo.setAttribute(QBluetoothServiceInfo::ServiceRecordHandle, (uint)0x00010010);</span>
+
+      <span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>Sequence classId;
+
+      classId <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>SerialPort));
+      serviceInfo<span class="operator">.</span>setAttribute(<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>BluetoothProfileDescriptorList<span class="operator">,</span>
+                               classId);
+
+      classId<span class="operator">.</span>prepend(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>(serviceUuid)));
+
+      serviceInfo<span class="operator">.</span>setAttribute(<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>ServiceClassIds<span class="operator">,</span> classId);
+      serviceInfo<span class="operator">.</span>setAttribute(<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>BluetoothProfileDescriptorList<span class="operator">,</span>classId);
+
+      serviceInfo<span class="operator">.</span>setAttribute(<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>ServiceName<span class="operator">,</span> tr(<span class="string">&quot;Bt Chat Server&quot;</span>));
+      serviceInfo<span class="operator">.</span>setAttribute(<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>ServiceDescription<span class="operator">,</span>
+                               tr(<span class="string">&quot;Example bluetooth chat server&quot;</span>));
+      serviceInfo<span class="operator">.</span>setAttribute(<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>ServiceProvider<span class="operator">,</span> tr(<span class="string">&quot;qt-project.org&quot;</span>));
+
+      serviceInfo<span class="operator">.</span>setServiceUuid(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>(serviceUuid));
+
+      <span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>Sequence publicBrowse;
+      publicBrowse <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>PublicBrowseGroup));
+      serviceInfo<span class="operator">.</span>setAttribute(<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>BrowseGroupList<span class="operator">,</span>
+                               publicBrowse);
+
+      <span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>Sequence protocolDescriptorList;
+      <span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>Sequence protocol;
+      protocol <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>L2cap));
+      protocolDescriptorList<span class="operator">.</span>append(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(protocol));
+      protocol<span class="operator">.</span>clear();
+      protocol <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>Rfcomm))
+               <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span>(rfcommServer<span class="operator">-</span><span class="operator">&gt;</span>serverPort()));
+      protocolDescriptorList<span class="operator">.</span>append(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(protocol));
+      serviceInfo<span class="operator">.</span>setAttribute(<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>ProtocolDescriptorList<span class="operator">,</span>
+                               protocolDescriptorList);
+
+      serviceInfo<span class="operator">.</span>registerService(localAdapter);
+  }
+
+  <span class="type">void</span> ChatServer<span class="operator">::</span>stopServer()
+  {
+      <span class="comment">// Unregister service</span>
+      serviceInfo<span class="operator">.</span>unregisterService();
+
+      <span class="comment">// Close sockets</span>
+      <a href="../qtcore/qtalgorithms.html#qDeleteAll">qDeleteAll</a>(clientSockets);
+
+      <span class="comment">// Close server</span>
+      <span class="keyword">delete</span> rfcommServer;
+      rfcommServer <span class="operator">=</span> <span class="number">0</span>;
+  }
+
+  <span class="type">void</span> ChatServer<span class="operator">::</span>sendMessage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>message)
+  {
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> text <span class="operator">=</span> message<span class="operator">.</span>toUtf8() <span class="operator">+</span> <span class="char">'\n'</span>;
+
+      foreach (<span class="type"><a href="qbluetoothsocket.html">QBluetoothSocket</a></span> <span class="operator">*</span>socket<span class="operator">,</span> clientSockets)
+          socket<span class="operator">-</span><span class="operator">&gt;</span>write(text);
+  }
+
+  <span class="type">void</span> ChatServer<span class="operator">::</span>clientConnected()
+  {
+      <span class="type"><a href="qbluetoothsocket.html">QBluetoothSocket</a></span> <span class="operator">*</span>socket <span class="operator">=</span> rfcommServer<span class="operator">-</span><span class="operator">&gt;</span>nextPendingConnection();
+      <span class="keyword">if</span> (<span class="operator">!</span>socket)
+          <span class="keyword">return</span>;
+
+      connect(socket<span class="operator">,</span> SIGNAL(readyRead())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(readSocket()));
+      connect(socket<span class="operator">,</span> SIGNAL(disconnected())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(clientDisconnected()));
+      clientSockets<span class="operator">.</span>append(socket);
+      <span class="keyword">emit</span> clientConnected(socket<span class="operator">-</span><span class="operator">&gt;</span>peerName());
+  }
+
+  <span class="type">void</span> ChatServer<span class="operator">::</span>clientDisconnected()
+  {
+      <span class="type"><a href="qbluetoothsocket.html">QBluetoothSocket</a></span> <span class="operator">*</span>socket <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qbluetoothsocket.html">QBluetoothSocket</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(sender());
+      <span class="keyword">if</span> (<span class="operator">!</span>socket)
+          <span class="keyword">return</span>;
+
+      <span class="keyword">emit</span> clientDisconnected(socket<span class="operator">-</span><span class="operator">&gt;</span>peerName());
+
+      clientSockets<span class="operator">.</span>removeOne(socket);
+
+      socket<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+  }
+
+  <span class="type">void</span> ChatServer<span class="operator">::</span>readSocket()
+  {
+      <span class="type"><a href="qbluetoothsocket.html">QBluetoothSocket</a></span> <span class="operator">*</span>socket <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qbluetoothsocket.html">QBluetoothSocket</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(sender());
+      <span class="keyword">if</span> (<span class="operator">!</span>socket)
+          <span class="keyword">return</span>;
+
+      <span class="keyword">while</span> (socket<span class="operator">-</span><span class="operator">&gt;</span>canReadLine()) {
+          <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> line <span class="operator">=</span> socket<span class="operator">-</span><span class="operator">&gt;</span>readLine()<span class="operator">.</span>trimmed();
+          <span class="keyword">emit</span> messageReceived(socket<span class="operator">-</span><span class="operator">&gt;</span>peerName()<span class="operator">,</span>
+                               <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>fromUtf8(line<span class="operator">.</span>constData()<span class="operator">,</span> line<span class="operator">.</span>length()));
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@btchat/chatserver.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

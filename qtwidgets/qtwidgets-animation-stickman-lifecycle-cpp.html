@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>lifecycle.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-animation-stickman-example.html">Stickman Example</a></td><td >lifecycle.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">lifecycle.cpp Example File</h1>
+<span class="subtitle">animation/stickman/lifecycle.cpp</span>
+<!-- $$$animation/stickman/lifecycle.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the QtCore module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;lifecycle.h&quot;</span>
+  <span class="preprocessor">#include &quot;stickman.h&quot;</span>
+  <span class="preprocessor">#include &quot;node.h&quot;</span>
+  <span class="preprocessor">#include &quot;animation.h&quot;</span>
+  <span class="preprocessor">#include &quot;graphicsview.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtCore&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+
+  <span class="keyword">class</span> KeyPressTransition: <span class="keyword">public</span> <span class="type"><a href="../qtcore/qsignaltransition.html">QSignalTransition</a></span>
+  {
+  <span class="keyword">public</span>:
+      KeyPressTransition(GraphicsView <span class="operator">*</span>receiver<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key key)
+          : <span class="type"><a href="../qtcore/qsignaltransition.html">QSignalTransition</a></span>(receiver<span class="operator">,</span> SIGNAL(keyPressed(<span class="type">int</span>)))<span class="operator">,</span> m_key(key)
+      {
+      }
+      KeyPressTransition(GraphicsView <span class="operator">*</span>receiver<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key key<span class="operator">,</span> <span class="type"><a href="../qtcore/qabstractstate.html">QAbstractState</a></span> <span class="operator">*</span>target)
+          : <span class="type"><a href="../qtcore/qsignaltransition.html">QSignalTransition</a></span>(receiver<span class="operator">,</span> SIGNAL(keyPressed(<span class="type">int</span>)))<span class="operator">,</span> m_key(key)
+      {
+          setTargetState(target);
+      }
+
+      <span class="keyword">virtual</span> bool eventTest(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> <span class="operator">*</span>e) Q_DECL_OVERRIDE
+      {
+          <span class="keyword">if</span> (<span class="type"><a href="../qtcore/qsignaltransition.html">QSignalTransition</a></span><span class="operator">::</span>eventTest(e)) {
+              <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> key <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstatemachine.html">QStateMachine</a></span><span class="operator">::</span>SignalEvent<span class="operator">*</span><span class="operator">&gt;</span>(e)<span class="operator">-</span><span class="operator">&gt;</span>arguments()<span class="operator">.</span>at(<span class="number">0</span>);
+              <span class="keyword">return</span> (key<span class="operator">.</span>toInt() <span class="operator">=</span><span class="operator">=</span> <span class="type">int</span>(m_key));
+          }
+
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      }
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key m_key;
+  };
+
+  <span class="keyword">class</span> LightningStrikesTransition: <span class="keyword">public</span> <span class="type"><a href="../qtcore/qeventtransition.html">QEventTransition</a></span>
+  {
+  <span class="keyword">public</span>:
+      LightningStrikesTransition(<span class="type"><a href="../qtcore/qabstractstate.html">QAbstractState</a></span> <span class="operator">*</span>target)
+          : <span class="type"><a href="../qtcore/qeventtransition.html">QEventTransition</a></span>(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>Timer)
+      {
+          setTargetState(target);
+          qsrand((<span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span>)<span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span><span class="operator">::</span>currentDateTime()<span class="operator">.</span>toTime_t());
+          startTimer(<span class="number">1000</span>);
+      }
+
+      <span class="keyword">virtual</span> bool eventTest(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> <span class="operator">*</span>e) Q_DECL_OVERRIDE
+      {
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qeventtransition.html">QEventTransition</a></span><span class="operator">::</span>eventTest(e) <span class="operator">&amp;</span><span class="operator">&amp;</span> ((qrand() <span class="operator">%</span> <span class="number">50</span>) <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>);
+      }
+  };
+
+  LifeCycle<span class="operator">::</span>LifeCycle(StickMan <span class="operator">*</span>stickMan<span class="operator">,</span> GraphicsView <span class="operator">*</span>keyReceiver)
+      : m_stickMan(stickMan)<span class="operator">,</span> m_keyReceiver(keyReceiver)
+  {
+      <span class="comment">// Create animation group to be used for all transitions</span>
+      m_animationGroup <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qparallelanimationgroup.html">QParallelAnimationGroup</a></span>();
+      <span class="keyword">const</span> <span class="type">int</span> stickManNodeCount <span class="operator">=</span> m_stickMan<span class="operator">-</span><span class="operator">&gt;</span>nodeCount();
+      <span class="keyword">for</span> (<span class="type">int</span> i<span class="operator">=</span><span class="number">0</span>; i<span class="operator">&lt;</span>stickManNodeCount; <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span> <span class="operator">*</span>pa <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span>(m_stickMan<span class="operator">-</span><span class="operator">&gt;</span>node(i)<span class="operator">,</span> <span class="string">&quot;pos&quot;</span>);
+          m_animationGroup<span class="operator">-</span><span class="operator">&gt;</span>addAnimation(pa);
+      }
+
+      <span class="comment">// Set up initial state graph</span>
+      m_machine <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstatemachine.html">QStateMachine</a></span>();
+      m_machine<span class="operator">-</span><span class="operator">&gt;</span>addDefaultAnimation(m_animationGroup);
+
+      m_alive <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span>(m_machine);
+      m_alive<span class="operator">-</span><span class="operator">&gt;</span>setObjectName(<span class="string">&quot;alive&quot;</span>);
+
+      <span class="comment">// Make it blink when lightning strikes before entering dead animation</span>
+      <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>lightningBlink <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span>(m_machine);
+      lightningBlink<span class="operator">-</span><span class="operator">&gt;</span>assignProperty(m_stickMan<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">,</span> <span class="string">&quot;backgroundBrush&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white));
+      lightningBlink<span class="operator">-</span><span class="operator">&gt;</span>assignProperty(m_stickMan<span class="operator">,</span> <span class="string">&quot;penColor&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black));
+      lightningBlink<span class="operator">-</span><span class="operator">&gt;</span>assignProperty(m_stickMan<span class="operator">,</span> <span class="string">&quot;fillColor&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white));
+      lightningBlink<span class="operator">-</span><span class="operator">&gt;</span>assignProperty(m_stickMan<span class="operator">,</span> <span class="string">&quot;isDead&quot;</span><span class="operator">,</span> <span class="keyword">true</span>);
+
+      <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span> <span class="operator">*</span>timer <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span>(lightningBlink);
+      timer<span class="operator">-</span><span class="operator">&gt;</span>setSingleShot(<span class="keyword">true</span>);
+      timer<span class="operator">-</span><span class="operator">&gt;</span>setInterval(<span class="number">100</span>);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(lightningBlink<span class="operator">,</span> SIGNAL(entered())<span class="operator">,</span> timer<span class="operator">,</span> SLOT(start()));
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(lightningBlink<span class="operator">,</span> SIGNAL(exited())<span class="operator">,</span> timer<span class="operator">,</span> SLOT(stop()));
+
+      m_dead <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span>(m_machine);
+      m_dead<span class="operator">-</span><span class="operator">&gt;</span>assignProperty(m_stickMan<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">,</span> <span class="string">&quot;backgroundBrush&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black));
+      m_dead<span class="operator">-</span><span class="operator">&gt;</span>assignProperty(m_stickMan<span class="operator">,</span> <span class="string">&quot;penColor&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white));
+      m_dead<span class="operator">-</span><span class="operator">&gt;</span>assignProperty(m_stickMan<span class="operator">,</span> <span class="string">&quot;fillColor&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black));
+      m_dead<span class="operator">-</span><span class="operator">&gt;</span>setObjectName(<span class="string">&quot;dead&quot;</span>);
+
+      <span class="comment">// Idle state (sets no properties)</span>
+      m_idle <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span>(m_alive);
+      m_idle<span class="operator">-</span><span class="operator">&gt;</span>setObjectName(<span class="string">&quot;idle&quot;</span>);
+
+      m_alive<span class="operator">-</span><span class="operator">&gt;</span>setInitialState(m_idle);
+
+      <span class="comment">// Lightning strikes at random</span>
+      m_alive<span class="operator">-</span><span class="operator">&gt;</span>addTransition(<span class="keyword">new</span> LightningStrikesTransition(lightningBlink));
+      lightningBlink<span class="operator">-</span><span class="operator">&gt;</span>addTransition(timer<span class="operator">,</span> SIGNAL(timeout())<span class="operator">,</span> m_dead);
+
+      m_machine<span class="operator">-</span><span class="operator">&gt;</span>setInitialState(m_alive);
+  }
+
+  <span class="type">void</span> LifeCycle<span class="operator">::</span>setDeathAnimation(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>deathAnimation <span class="operator">=</span> makeState(m_dead<span class="operator">,</span> fileName);
+      m_dead<span class="operator">-</span><span class="operator">&gt;</span>setInitialState(deathAnimation);
+  }
+
+  <span class="type">void</span> LifeCycle<span class="operator">::</span>start()
+  {
+      m_machine<span class="operator">-</span><span class="operator">&gt;</span>start();
+  }
+
+  <span class="type">void</span> LifeCycle<span class="operator">::</span>addActivity(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key key<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>sender<span class="operator">,</span> <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>signal)
+  {
+      <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>state <span class="operator">=</span> makeState(m_alive<span class="operator">,</span> fileName);
+      m_alive<span class="operator">-</span><span class="operator">&gt;</span>addTransition(<span class="keyword">new</span> KeyPressTransition(m_keyReceiver<span class="operator">,</span> key<span class="operator">,</span> state));
+
+      <span class="keyword">if</span>((sender <span class="operator">!</span><span class="operator">=</span> NULL) <span class="operator">|</span><span class="operator">|</span> (signal <span class="operator">!</span><span class="operator">=</span> NULL)) {
+          m_alive<span class="operator">-</span><span class="operator">&gt;</span>addTransition(sender<span class="operator">,</span> signal<span class="operator">,</span> state);
+      }
+  }
+
+  <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>LifeCycle<span class="operator">::</span>makeState(<span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>parentState<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>animationFileName)
+  {
+      <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>topLevel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span>(parentState);
+
+      Animation animation;
+      {
+          <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(animationFileName);
+          <span class="keyword">if</span> (file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly))
+              animation<span class="operator">.</span>load(<span class="operator">&amp;</span>file);
+      }
+
+      <span class="keyword">const</span> <span class="type">int</span> frameCount <span class="operator">=</span> animation<span class="operator">.</span>totalFrames();
+      <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>previousState <span class="operator">=</span> <span class="number">0</span>;
+      <span class="keyword">for</span> (<span class="type">int</span> i<span class="operator">=</span><span class="number">0</span>; i<span class="operator">&lt;</span>frameCount; <span class="operator">+</span><span class="operator">+</span>i) {
+          animation<span class="operator">.</span>setCurrentFrame(i);
+
+          <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>frameState <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span>(topLevel);
+          <span class="keyword">const</span> <span class="type">int</span> nodeCount <span class="operator">=</span> animation<span class="operator">.</span>nodeCount();
+          <span class="keyword">for</span> (<span class="type">int</span> j<span class="operator">=</span><span class="number">0</span>; j<span class="operator">&lt;</span>nodeCount; <span class="operator">+</span><span class="operator">+</span>j)
+              frameState<span class="operator">-</span><span class="operator">&gt;</span>assignProperty(m_stickMan<span class="operator">-</span><span class="operator">&gt;</span>node(j)<span class="operator">,</span> <span class="string">&quot;pos&quot;</span><span class="operator">,</span> animation<span class="operator">.</span>nodePos(j));
+
+          frameState<span class="operator">-</span><span class="operator">&gt;</span>setObjectName(<span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>fromLatin1(<span class="string">&quot;frame %0&quot;</span>)<span class="operator">.</span>arg(i));
+          <span class="keyword">if</span> (previousState <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+              topLevel<span class="operator">-</span><span class="operator">&gt;</span>setInitialState(frameState);
+          <span class="keyword">else</span>
+              previousState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(previousState<span class="operator">,</span> SIGNAL(propertiesAssigned())<span class="operator">,</span> frameState);
+
+          previousState <span class="operator">=</span> frameState;
+      }
+
+      <span class="comment">// Loop</span>
+      previousState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(previousState<span class="operator">,</span> SIGNAL(propertiesAssigned())<span class="operator">,</span> topLevel<span class="operator">-</span><span class="operator">&gt;</span>initialState());
+
+      <span class="keyword">return</span> topLevel;
+
+  }
+
+  LifeCycle<span class="operator">::</span><span class="operator">~</span>LifeCycle()
+  {
+      <span class="keyword">delete</span> m_machine;
+      <span class="keyword">delete</span> m_animationGroup;
+  }
+
+</pre>
+</div>
+<!-- @@@animation/stickman/lifecycle.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

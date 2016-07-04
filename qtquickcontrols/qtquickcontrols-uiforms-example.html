@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtquickcontrols-examples.qdoc -->
+  <title>Qt Quick Controls - UI Forms | Qt Quick Controls 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td >Qt Quick Controls - UI Forms</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#exporting-items-from-forms">Exporting Items from Forms</a></li>
+<li class="level1"><a href="#implementing-the-backend-in-a-singleton">Implementing the Backend in a Singleton</a></li>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Quick Controls - UI Forms</h1>
+<span class="subtitle"></span>
+<!-- $$$uiforms-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/qtquickcontrols-example-uiforms.png" alt="" /></p><p><i>UI Forms</i> demonstrates how to separate the application logic from the UI using <i>ui.qml</i> files. The example is a simple interface to a customer database, purely written in QML and JavaScript.</p>
+<p>UI Forms are rigorously split into <i>.qml</i> and <i>.js</i> files that contain the business logic, and <i>.ui.qml</i> files that only contain the purely declarative description of the UI. The <i>.ui.qml</i> files act as forms and they should be only edited in the Design mode of Qt Creator.</p>
+<a name="exporting-items-from-forms"></a>
+<h2 id="exporting-items-from-forms">Exporting Items from Forms</h2>
+<p>In all forms, items that are supposed to interact with the application logic are exported:</p>
+<pre class="qml">
+
+  property alias cancel: cancel
+  property alias save: save
+  property alias textArea: textArea
+
+</pre>
+<p>This is the way the items are exported in <i>NotesForm.ui.qml</i>, so they can be used in <i>Notes.ui.qml</i> to implement the logic as follows:</p>
+<pre class="qml">
+
+  function readData() {
+      CustomerModel.selection.forEach(function (rowIndex) {
+          form.textArea.text = CustomerModel.model.get(rowIndex).notes
+      })
+
+      save.enabled = true
+      cancel.enabled = true
+      form.textArea.enabled = true
+  }
+
+  function writeData() {
+      CustomerModel.selection.forEach(function (rowIndex) {
+          var data = CustomerModel.model.get(rowIndex)
+          data.notes = form.textArea.text
+          CustomerModel.model.set(rowIndex, data)
+      })
+  }
+
+  cancel.onClicked: readData()
+  save.onClicked: writeData()
+
+</pre>
+<a name="implementing-the-backend-in-a-singleton"></a>
+<h2 id="implementing-the-backend-in-a-singleton">Implementing the Backend in a Singleton</h2>
+<p>Because the <a href="../qtqml/qml-qtqml-models-listmodel.html">ListModel</a> is accessed from several different <i>.qml</i> files, we access the <a href="../qtqml/qml-qtqml-models-listmodel.html">ListModel</a> through a singleton defined in <i>CustomerModel.qml</i> and registered in <i>main.ccp</i>. This way we do not have to rely on the QML context scoping rules to access the <a href="../qtqml/qml-qtqml-models-listmodel.html">ListModel</a>.</p>
+<a name="running-the-example"></a>
+<h2 id="running-the-example">Running the Example</h2>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<p>Files:</p>
+<ul>
+<li><a href="qtquickcontrols-uiforms-mainform-ui-qml.html">uiforms/MainForm.ui.qml</a></li>
+<li><a href="qtquickcontrols-uiforms-main-qml.html">uiforms/main.qml</a></li>
+<li><a href="qtquickcontrols-uiforms-qml-customermodel-qml.html">uiforms/qml/CustomerModel.qml</a></li>
+<li><a href="qtquickcontrols-uiforms-qml-history-qml.html">uiforms/qml/History.qml</a></li>
+<li><a href="qtquickcontrols-uiforms-qml-historyform-ui-qml.html">uiforms/qml/HistoryForm.ui.qml</a></li>
+<li><a href="qtquickcontrols-uiforms-qml-notes-qml.html">uiforms/qml/Notes.qml</a></li>
+<li><a href="qtquickcontrols-uiforms-qml-notesform-ui-qml.html">uiforms/qml/NotesForm.ui.qml</a></li>
+<li><a href="qtquickcontrols-uiforms-qml-settings-qml.html">uiforms/qml/Settings.qml</a></li>
+<li><a href="qtquickcontrols-uiforms-qml-settingsform-ui-qml.html">uiforms/qml/SettingsForm.ui.qml</a></li>
+<li><a href="qtquickcontrols-uiforms-main-cpp.html">uiforms/main.cpp</a></li>
+<li><a href="qtquickcontrols-uiforms-uiforms-pro.html">uiforms/uiforms.pro</a></li>
+<li><a href="qtquickcontrols-uiforms-uiforms-qrc.html">uiforms/uiforms.qrc</a></li>
+</ul>
+</div>
+<!-- @@@uiforms -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>renderthread.cpp Example File | Qt Core 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-threads-mandelbrot-example.html">Mandelbrot Example</a></td><td >renderthread.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">renderthread.cpp Example File</h1>
+<span class="subtitle">threads/mandelbrot/renderthread.cpp</span>
+<!-- $$$threads/mandelbrot/renderthread.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;renderthread.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+  <span class="preprocessor">#include &lt;cmath&gt;</span>
+
+  RenderThread<span class="operator">::</span>RenderThread(<span class="type"><a href="qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qthread.html">QThread</a></span>(parent)
+  {
+      restart <span class="operator">=</span> <span class="keyword">false</span>;
+      abort <span class="operator">=</span> <span class="keyword">false</span>;
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> ColormapSize; <span class="operator">+</span><span class="operator">+</span>i)
+          colormap<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> rgbFromWaveLength(<span class="number">380.0</span> <span class="operator">+</span> (i <span class="operator">*</span> <span class="number">400.0</span> <span class="operator">/</span> ColormapSize));
+  }
+
+  RenderThread<span class="operator">::</span><span class="operator">~</span>RenderThread()
+  {
+      mutex<span class="operator">.</span>lock();
+      abort <span class="operator">=</span> <span class="keyword">true</span>;
+      condition<span class="operator">.</span>wakeOne();
+      mutex<span class="operator">.</span>unlock();
+
+      wait();
+  }
+
+  <span class="type">void</span> RenderThread<span class="operator">::</span>render(<span class="type">double</span> centerX<span class="operator">,</span> <span class="type">double</span> centerY<span class="operator">,</span> <span class="type">double</span> scaleFactor<span class="operator">,</span>
+                            <span class="type"><a href="qsize.html">QSize</a></span> resultSize)
+  {
+      <span class="type"><a href="qmutexlocker.html">QMutexLocker</a></span> locker(<span class="operator">&amp;</span>mutex);
+
+      <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>centerX <span class="operator">=</span> centerX;
+      <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>centerY <span class="operator">=</span> centerY;
+      <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>scaleFactor <span class="operator">=</span> scaleFactor;
+      <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>resultSize <span class="operator">=</span> resultSize;
+
+      <span class="keyword">if</span> (<span class="operator">!</span>isRunning()) {
+          start(LowPriority);
+      } <span class="keyword">else</span> {
+          restart <span class="operator">=</span> <span class="keyword">true</span>;
+          condition<span class="operator">.</span>wakeOne();
+      }
+  }
+
+  <span class="type">void</span> RenderThread<span class="operator">::</span>run()
+  {
+      forever {
+          mutex<span class="operator">.</span>lock();
+          <span class="type"><a href="qsize.html">QSize</a></span> resultSize <span class="operator">=</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>resultSize;
+          <span class="type">double</span> scaleFactor <span class="operator">=</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>scaleFactor;
+          <span class="type">double</span> centerX <span class="operator">=</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>centerX;
+          <span class="type">double</span> centerY <span class="operator">=</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>centerY;
+          mutex<span class="operator">.</span>unlock();
+
+          <span class="type">int</span> halfWidth <span class="operator">=</span> resultSize<span class="operator">.</span>width() <span class="operator">/</span> <span class="number">2</span>;
+          <span class="type">int</span> halfHeight <span class="operator">=</span> resultSize<span class="operator">.</span>height() <span class="operator">/</span> <span class="number">2</span>;
+          <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> image(resultSize<span class="operator">,</span> <span class="type"><a href="../qtgui/qimage.html">QImage</a></span><span class="operator">::</span>Format_RGB32);
+
+          <span class="keyword">const</span> <span class="type">int</span> NumPasses <span class="operator">=</span> <span class="number">8</span>;
+          <span class="type">int</span> pass <span class="operator">=</span> <span class="number">0</span>;
+          <span class="keyword">while</span> (pass <span class="operator">&lt;</span> NumPasses) {
+              <span class="keyword">const</span> <span class="type">int</span> MaxIterations <span class="operator">=</span> (<span class="number">1</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> (<span class="number">2</span> <span class="operator">*</span> pass <span class="operator">+</span> <span class="number">6</span>)) <span class="operator">+</span> <span class="number">32</span>;
+              <span class="keyword">const</span> <span class="type">int</span> Limit <span class="operator">=</span> <span class="number">4</span>;
+              bool allBlack <span class="operator">=</span> <span class="keyword">true</span>;
+
+              <span class="keyword">for</span> (<span class="type">int</span> y <span class="operator">=</span> <span class="operator">-</span>halfHeight; y <span class="operator">&lt;</span> halfHeight; <span class="operator">+</span><span class="operator">+</span>y) {
+                  <span class="keyword">if</span> (restart)
+                      <span class="keyword">break</span>;
+                  <span class="keyword">if</span> (abort)
+                      <span class="keyword">return</span>;
+
+                  <span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <span class="operator">*</span>scanLine <span class="operator">=</span>
+                          <span class="keyword">reinterpret_cast</span><span class="operator">&lt;</span><span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(image<span class="operator">.</span>scanLine(y <span class="operator">+</span> halfHeight));
+                  <span class="type">double</span> ay <span class="operator">=</span> centerY <span class="operator">+</span> (y <span class="operator">*</span> scaleFactor);
+
+                  <span class="keyword">for</span> (<span class="type">int</span> x <span class="operator">=</span> <span class="operator">-</span>halfWidth; x <span class="operator">&lt;</span> halfWidth; <span class="operator">+</span><span class="operator">+</span>x) {
+                      <span class="type">double</span> ax <span class="operator">=</span> centerX <span class="operator">+</span> (x <span class="operator">*</span> scaleFactor);
+                      <span class="type">double</span> a1 <span class="operator">=</span> ax;
+                      <span class="type">double</span> b1 <span class="operator">=</span> ay;
+                      <span class="type">int</span> numIterations <span class="operator">=</span> <span class="number">0</span>;
+
+                      <span class="keyword">do</span> {
+                          <span class="operator">+</span><span class="operator">+</span>numIterations;
+                          <span class="type">double</span> a2 <span class="operator">=</span> (a1 <span class="operator">*</span> a1) <span class="operator">-</span> (b1 <span class="operator">*</span> b1) <span class="operator">+</span> ax;
+                          <span class="type">double</span> b2 <span class="operator">=</span> (<span class="number">2</span> <span class="operator">*</span> a1 <span class="operator">*</span> b1) <span class="operator">+</span> ay;
+                          <span class="keyword">if</span> ((a2 <span class="operator">*</span> a2) <span class="operator">+</span> (b2 <span class="operator">*</span> b2) <span class="operator">&gt;</span> Limit)
+                              <span class="keyword">break</span>;
+
+                          <span class="operator">+</span><span class="operator">+</span>numIterations;
+                          a1 <span class="operator">=</span> (a2 <span class="operator">*</span> a2) <span class="operator">-</span> (b2 <span class="operator">*</span> b2) <span class="operator">+</span> ax;
+                          b1 <span class="operator">=</span> (<span class="number">2</span> <span class="operator">*</span> a2 <span class="operator">*</span> b2) <span class="operator">+</span> ay;
+                          <span class="keyword">if</span> ((a1 <span class="operator">*</span> a1) <span class="operator">+</span> (b1 <span class="operator">*</span> b1) <span class="operator">&gt;</span> Limit)
+                              <span class="keyword">break</span>;
+                      } <span class="keyword">while</span> (numIterations <span class="operator">&lt;</span> MaxIterations);
+
+                      <span class="keyword">if</span> (numIterations <span class="operator">&lt;</span> MaxIterations) {
+                          <span class="operator">*</span>scanLine<span class="operator">+</span><span class="operator">+</span> <span class="operator">=</span> colormap<span class="operator">[</span>numIterations <span class="operator">%</span> ColormapSize<span class="operator">]</span>;
+                          allBlack <span class="operator">=</span> <span class="keyword">false</span>;
+                      } <span class="keyword">else</span> {
+                          <span class="operator">*</span>scanLine<span class="operator">+</span><span class="operator">+</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRgb">qRgb</a>(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+                      }
+                  }
+              }
+
+              <span class="keyword">if</span> (allBlack <span class="operator">&amp;</span><span class="operator">&amp;</span> pass <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>) {
+                  pass <span class="operator">=</span> <span class="number">4</span>;
+              } <span class="keyword">else</span> {
+                  <span class="keyword">if</span> (<span class="operator">!</span>restart)
+                      <span class="keyword">emit</span> renderedImage(image<span class="operator">,</span> scaleFactor);
+                  <span class="operator">+</span><span class="operator">+</span>pass;
+              }
+          }
+
+          mutex<span class="operator">.</span>lock();
+          <span class="keyword">if</span> (<span class="operator">!</span>restart)
+              condition<span class="operator">.</span>wait(<span class="operator">&amp;</span>mutex);
+          restart <span class="operator">=</span> <span class="keyword">false</span>;
+          mutex<span class="operator">.</span>unlock();
+      }
+  }
+
+  <span class="type"><a href="qtglobal.html#uint-typedef">uint</a></span> RenderThread<span class="operator">::</span>rgbFromWaveLength(<span class="type">double</span> wave)
+  {
+      <span class="type">double</span> r <span class="operator">=</span> <span class="number">0.0</span>;
+      <span class="type">double</span> g <span class="operator">=</span> <span class="number">0.0</span>;
+      <span class="type">double</span> b <span class="operator">=</span> <span class="number">0.0</span>;
+
+      <span class="keyword">if</span> (wave <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">380.0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> wave <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">440.0</span>) {
+          r <span class="operator">=</span> <span class="operator">-</span><span class="number">1.0</span> <span class="operator">*</span> (wave <span class="operator">-</span> <span class="number">440.0</span>) <span class="operator">/</span> (<span class="number">440.0</span> <span class="operator">-</span> <span class="number">380.0</span>);
+          b <span class="operator">=</span> <span class="number">1.0</span>;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (wave <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">440.0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> wave <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">490.0</span>) {
+          g <span class="operator">=</span> (wave <span class="operator">-</span> <span class="number">440.0</span>) <span class="operator">/</span> (<span class="number">490.0</span> <span class="operator">-</span> <span class="number">440.0</span>);
+          b <span class="operator">=</span> <span class="number">1.0</span>;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (wave <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">490.0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> wave <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">510.0</span>) {
+          g <span class="operator">=</span> <span class="number">1.0</span>;
+          b <span class="operator">=</span> <span class="operator">-</span><span class="number">1.0</span> <span class="operator">*</span> (wave <span class="operator">-</span> <span class="number">510.0</span>) <span class="operator">/</span> (<span class="number">510.0</span> <span class="operator">-</span> <span class="number">490.0</span>);
+      } <span class="keyword">else</span> <span class="keyword">if</span> (wave <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">510.0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> wave <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">580.0</span>) {
+          r <span class="operator">=</span> (wave <span class="operator">-</span> <span class="number">510.0</span>) <span class="operator">/</span> (<span class="number">580.0</span> <span class="operator">-</span> <span class="number">510.0</span>);
+          g <span class="operator">=</span> <span class="number">1.0</span>;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (wave <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">580.0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> wave <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">645.0</span>) {
+          r <span class="operator">=</span> <span class="number">1.0</span>;
+          g <span class="operator">=</span> <span class="operator">-</span><span class="number">1.0</span> <span class="operator">*</span> (wave <span class="operator">-</span> <span class="number">645.0</span>) <span class="operator">/</span> (<span class="number">645.0</span> <span class="operator">-</span> <span class="number">580.0</span>);
+      } <span class="keyword">else</span> <span class="keyword">if</span> (wave <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">645.0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> wave <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">780.0</span>) {
+          r <span class="operator">=</span> <span class="number">1.0</span>;
+      }
+
+      <span class="type">double</span> s <span class="operator">=</span> <span class="number">1.0</span>;
+      <span class="keyword">if</span> (wave <span class="operator">&gt;</span> <span class="number">700.0</span>)
+          s <span class="operator">=</span> <span class="number">0.3</span> <span class="operator">+</span> <span class="number">0.7</span> <span class="operator">*</span> (<span class="number">780.0</span> <span class="operator">-</span> wave) <span class="operator">/</span> (<span class="number">780.0</span> <span class="operator">-</span> <span class="number">700.0</span>);
+      <span class="keyword">else</span> <span class="keyword">if</span> (wave <span class="operator">&lt;</span>  <span class="number">420.0</span>)
+          s <span class="operator">=</span> <span class="number">0.3</span> <span class="operator">+</span> <span class="number">0.7</span> <span class="operator">*</span> (wave <span class="operator">-</span> <span class="number">380.0</span>) <span class="operator">/</span> (<span class="number">420.0</span> <span class="operator">-</span> <span class="number">380.0</span>);
+
+      r <span class="operator">=</span> std<span class="operator">::</span>pow(r <span class="operator">*</span> s<span class="operator">,</span> <span class="number">0.8</span>);
+      g <span class="operator">=</span> std<span class="operator">::</span>pow(g <span class="operator">*</span> s<span class="operator">,</span> <span class="number">0.8</span>);
+      b <span class="operator">=</span> std<span class="operator">::</span>pow(b <span class="operator">*</span> s<span class="operator">,</span> <span class="number">0.8</span>);
+      <span class="keyword">return</span> <a href="../qtgui/qcolor.html#qRgb">qRgb</a>(<span class="type">int</span>(r <span class="operator">*</span> <span class="number">255</span>)<span class="operator">,</span> <span class="type">int</span>(g <span class="operator">*</span> <span class="number">255</span>)<span class="operator">,</span> <span class="type">int</span>(b <span class="operator">*</span> <span class="number">255</span>));
+  }
+
+</pre>
+</div>
+<!-- @@@threads/mandelbrot/renderthread.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

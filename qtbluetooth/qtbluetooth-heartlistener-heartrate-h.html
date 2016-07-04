@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>heartrate.h Example File | Qt Bluetooth 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtbluetooth-index.html">Qt Bluetooth</a></td><td ><a href="qtbluetooth-heartlistener-example.html">Bluetooth Low Energy Heart Listener Example</a></td><td >heartrate.h Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">heartrate.h Example File</h1>
+<span class="subtitle">heartlistener/heartrate.h</span>
+<!-- $$$heartlistener/heartrate.h-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/***************************************************************************
+  **
+  ** Copyright (C) 2014 BlackBerry Limited. All rights reserved.
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the QtBluetooth module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#ifndef HEARTRATE_H</span>
+  <span class="preprocessor">#define HEARTRATE_H</span>
+
+  <span class="preprocessor">#include &quot;deviceinfo.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QString&gt;</span>
+  <span class="preprocessor">#include &lt;QDebug&gt;</span>
+  <span class="preprocessor">#include &lt;QDateTime&gt;</span>
+  <span class="preprocessor">#include &lt;QVector&gt;</span>
+  <span class="preprocessor">#include &lt;QTimer&gt;</span>
+  <span class="preprocessor">#include &lt;QBluetoothDeviceDiscoveryAgent&gt;</span>
+  <span class="preprocessor">#include &lt;QBluetoothDeviceInfo&gt;</span>
+  <span class="preprocessor">#include &lt;QLowEnergyController&gt;</span>
+  <span class="preprocessor">#include &lt;QLowEnergyService&gt;</span>
+
+  QT_USE_NAMESPACE
+  <span class="keyword">class</span> HeartRate: <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+  {
+      Q_OBJECT
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> name READ name NOTIFY nameChanged)
+      Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> message READ message NOTIFY messageChanged)
+      Q_PROPERTY(<span class="type">int</span> hr READ hR NOTIFY hrChanged)
+      Q_PROPERTY(<span class="type">int</span> maxHR READ maxHR NOTIFY averageChanged)
+      Q_PROPERTY(<span class="type">int</span> minHR READ minHR NOTIFY averageChanged)
+      Q_PROPERTY(<span class="type">float</span> average READ average NOTIFY averageChanged)
+      Q_PROPERTY(<span class="type">int</span> time READ time NOTIFY timeChanged)
+      Q_PROPERTY(<span class="type">float</span> calories READ caloriesCalculation NOTIFY caloriesChanged)
+
+  <span class="keyword">public</span>:
+      HeartRate();
+      <span class="operator">~</span>HeartRate();
+      <span class="type">void</span> setMessage(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> message);
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> message() <span class="keyword">const</span>;
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> name();
+      <span class="type">int</span> hR() <span class="keyword">const</span>;
+      <span class="type">int</span> time();
+      <span class="type">float</span> average();
+      <span class="type">int</span> maxHR() <span class="keyword">const</span>;
+      <span class="type">int</span> minHR() <span class="keyword">const</span>;
+      <span class="type">float</span> caloriesCalculation();
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> deviceSearch();
+      <span class="type">void</span> connectToService(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>address);
+      <span class="type">void</span> disconnectService();
+      <span class="type">void</span> startDemo();
+
+      <span class="type">void</span> obtainResults();
+      <span class="type">int</span> measurements(<span class="type">int</span> index) <span class="keyword">const</span>;
+      <span class="type">int</span> measurementsSize() <span class="keyword">const</span>;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> deviceAddress() <span class="keyword">const</span>;
+      <span class="type">int</span> numDevices() <span class="keyword">const</span>;
+
+  <span class="keyword">private</span> <span class="keyword">slots</span>:
+      <span class="comment">//QBluetothDeviceDiscoveryAgent</span>
+      <span class="type">void</span> addDevice(<span class="keyword">const</span> <span class="type"><a href="qbluetoothdeviceinfo.html">QBluetoothDeviceInfo</a></span><span class="operator">&amp;</span>);
+      <span class="type">void</span> scanFinished();
+      <span class="type">void</span> deviceScanError(<span class="type"><a href="qbluetoothdevicediscoveryagent.html">QBluetoothDeviceDiscoveryAgent</a></span><span class="operator">::</span>Error);
+
+      <span class="comment">//QLowEnergyController</span>
+      <span class="type">void</span> serviceDiscovered(<span class="keyword">const</span> <span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span> <span class="operator">&amp;</span>);
+      <span class="type">void</span> serviceScanDone();
+      <span class="type">void</span> controllerError(<span class="type"><a href="qlowenergycontroller.html">QLowEnergyController</a></span><span class="operator">::</span>Error);
+      <span class="type">void</span> deviceConnected();
+      <span class="type">void</span> deviceDisconnected();
+
+      <span class="comment">//QLowEnergyService</span>
+      <span class="type">void</span> serviceStateChanged(<span class="type"><a href="qlowenergyservice.html">QLowEnergyService</a></span><span class="operator">::</span>ServiceState s);
+      <span class="type">void</span> updateHeartRateValue(<span class="keyword">const</span> <span class="type"><a href="qlowenergycharacteristic.html">QLowEnergyCharacteristic</a></span> <span class="operator">&amp;</span>c<span class="operator">,</span>
+                                <span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>value);
+      <span class="type">void</span> confirmedDescriptorWrite(<span class="keyword">const</span> <span class="type"><a href="qlowenergydescriptor.html">QLowEnergyDescriptor</a></span> <span class="operator">&amp;</span>d<span class="operator">,</span>
+                                <span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>value);
+      <span class="type">void</span> serviceError(<span class="type"><a href="qlowenergyservice.html">QLowEnergyService</a></span><span class="operator">::</span>ServiceError e);
+
+      <span class="comment">//DemoMode</span>
+      <span class="type">void</span> receiveDemo();
+
+  Q_SIGNALS:
+      <span class="type">void</span> messageChanged();
+      <span class="type">void</span> nameChanged();
+      <span class="type">void</span> hrChanged();
+      <span class="type">void</span> averageChanged();
+      <span class="type">void</span> timeChanged();
+      <span class="type">void</span> caloriesChanged();
+
+  <span class="keyword">private</span>:
+      <span class="type">int</span> randomPulse() <span class="keyword">const</span>;
+
+      DeviceInfo m_currentDevice;
+      <span class="type"><a href="qbluetoothdevicediscoveryagent.html">QBluetoothDeviceDiscoveryAgent</a></span> <span class="operator">*</span>m_deviceDiscoveryAgent;
+      <span class="type"><a href="qlowenergydescriptor.html">QLowEnergyDescriptor</a></span> m_notificationDesc;
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">*</span><span class="operator">&gt;</span> m_devices;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> m_info;
+      bool foundHeartRateService;
+      <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span><span class="operator">&gt;</span> m_measurements;
+      <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> m_start;
+      <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> m_stop;
+      <span class="type">int</span> m_max;
+      <span class="type">int</span> m_min;
+      <span class="type">float</span> calories;
+      <span class="type"><a href="qlowenergycontroller.html">QLowEnergyController</a></span> <span class="operator">*</span>m_control;
+      <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span> <span class="operator">*</span>timer; <span class="comment">// for demo application</span>
+      <span class="type"><a href="qlowenergyservice.html">QLowEnergyService</a></span> <span class="operator">*</span>m_service;
+  };
+
+  <span class="preprocessor">#endif // HEARTRATE_H</span>
+
+</pre>
+</div>
+<!-- @@@heartlistener/heartrate.h -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

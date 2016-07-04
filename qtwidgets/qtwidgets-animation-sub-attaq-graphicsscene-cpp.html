@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>graphicsscene.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-animation-sub-attaq-example.html">Sub-Attaq</a></td><td >graphicsscene.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">graphicsscene.cpp Example File</h1>
+<span class="subtitle">animation/sub-attaq/graphicsscene.cpp</span>
+<!-- $$$animation/sub-attaq/graphicsscene.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the QtCore module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="comment">//Own</span>
+  <span class="preprocessor">#include &quot;graphicsscene.h&quot;</span>
+  <span class="preprocessor">#include &quot;states.h&quot;</span>
+  <span class="preprocessor">#include &quot;boat.h&quot;</span>
+  <span class="preprocessor">#include &quot;submarine.h&quot;</span>
+  <span class="preprocessor">#include &quot;torpedo.h&quot;</span>
+  <span class="preprocessor">#include &quot;bomb.h&quot;</span>
+  <span class="preprocessor">#include &quot;pixmapitem.h&quot;</span>
+  <span class="preprocessor">#include &quot;animationmanager.h&quot;</span>
+  <span class="preprocessor">#include &quot;qanimationstate.h&quot;</span>
+  <span class="preprocessor">#include &quot;progressitem.h&quot;</span>
+  <span class="preprocessor">#include &quot;textinformationitem.h&quot;</span>
+
+  <span class="comment">//Qt</span>
+  <span class="preprocessor">#include &lt;QtCore/QPropertyAnimation&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QSequentialAnimationGroup&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QParallelAnimationGroup&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QStateMachine&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QFinalState&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QPauseAnimation&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QAction&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QDir&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QMessageBox&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QGraphicsView&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QGraphicsSceneMouseEvent&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QXmlStreamReader&gt;</span>
+
+  GraphicsScene<span class="operator">::</span>GraphicsScene(<span class="type">int</span> x<span class="operator">,</span> <span class="type">int</span> y<span class="operator">,</span> <span class="type">int</span> width<span class="operator">,</span> <span class="type">int</span> height<span class="operator">,</span> Mode mode)
+      : <span class="type"><a href="qgraphicsscene.html">QGraphicsScene</a></span>(x <span class="operator">,</span> y<span class="operator">,</span> width<span class="operator">,</span> height)<span class="operator">,</span> mode(mode)<span class="operator">,</span> boat(<span class="keyword">new</span> Boat)
+  {
+      PixmapItem <span class="operator">*</span>backgroundItem <span class="operator">=</span> <span class="keyword">new</span> PixmapItem(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;background&quot;</span>)<span class="operator">,</span>mode);
+      backgroundItem<span class="operator">-</span><span class="operator">&gt;</span>setZValue(<span class="number">1</span>);
+      backgroundItem<span class="operator">-</span><span class="operator">&gt;</span>setPos(<span class="number">0</span><span class="operator">,</span><span class="number">0</span>);
+      addItem(backgroundItem);
+
+      PixmapItem <span class="operator">*</span>surfaceItem <span class="operator">=</span> <span class="keyword">new</span> PixmapItem(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;surface&quot;</span>)<span class="operator">,</span>mode);
+      surfaceItem<span class="operator">-</span><span class="operator">&gt;</span>setZValue(<span class="number">3</span>);
+      surfaceItem<span class="operator">-</span><span class="operator">&gt;</span>setPos(<span class="number">0</span><span class="operator">,</span>sealLevel() <span class="operator">-</span> surfaceItem<span class="operator">-</span><span class="operator">&gt;</span>boundingRect()<span class="operator">.</span>height()<span class="operator">/</span><span class="number">2</span>);
+      addItem(surfaceItem);
+
+      <span class="comment">//The item that display score and level</span>
+      progressItem <span class="operator">=</span> <span class="keyword">new</span> ProgressItem(backgroundItem);
+
+      textInformationItem <span class="operator">=</span> <span class="keyword">new</span> TextInformationItem(backgroundItem);
+      textInformationItem<span class="operator">-</span><span class="operator">&gt;</span>hide();
+      <span class="comment">//We create the boat</span>
+      addItem(boat);
+      boat<span class="operator">-</span><span class="operator">&gt;</span>setPos(<span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>width()<span class="operator">/</span><span class="number">2</span><span class="operator">,</span> sealLevel() <span class="operator">-</span> boat<span class="operator">-</span><span class="operator">&gt;</span>size()<span class="operator">.</span>height());
+      boat<span class="operator">-</span><span class="operator">&gt;</span>hide();
+
+      <span class="comment">//parse the xml that contain all data of the game</span>
+      <span class="type"><a href="../qtcore/qxmlstreamreader.html">QXmlStreamReader</a></span> reader;
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(<span class="string">&quot;:data.xml&quot;</span>);
+      file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly);
+      reader<span class="operator">.</span>setDevice(<span class="operator">&amp;</span>file);
+      LevelDescription currentLevel;
+      <span class="keyword">while</span> (<span class="operator">!</span>reader<span class="operator">.</span>atEnd()) {
+           reader<span class="operator">.</span>readNext();
+           <span class="keyword">if</span> (reader<span class="operator">.</span>tokenType() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qxmlstreamreader.html">QXmlStreamReader</a></span><span class="operator">::</span>StartElement) {
+               <span class="keyword">if</span> (reader<span class="operator">.</span>name() <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;submarine&quot;</span>) {
+                   SubmarineDescription desc;
+                   desc<span class="operator">.</span>name <span class="operator">=</span> reader<span class="operator">.</span>attributes()<span class="operator">.</span>value(<span class="string">&quot;name&quot;</span>)<span class="operator">.</span>toString();
+                   desc<span class="operator">.</span>points <span class="operator">=</span> reader<span class="operator">.</span>attributes()<span class="operator">.</span>value(<span class="string">&quot;points&quot;</span>)<span class="operator">.</span>toString()<span class="operator">.</span>toInt();
+                   desc<span class="operator">.</span>type <span class="operator">=</span> reader<span class="operator">.</span>attributes()<span class="operator">.</span>value(<span class="string">&quot;type&quot;</span>)<span class="operator">.</span>toString()<span class="operator">.</span>toInt();
+                   submarinesData<span class="operator">.</span>append(desc);
+               } <span class="keyword">else</span> <span class="keyword">if</span> (reader<span class="operator">.</span>name() <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;level&quot;</span>) {
+                   currentLevel<span class="operator">.</span>id <span class="operator">=</span> reader<span class="operator">.</span>attributes()<span class="operator">.</span>value(<span class="string">&quot;id&quot;</span>)<span class="operator">.</span>toString()<span class="operator">.</span>toInt();
+                   currentLevel<span class="operator">.</span>name <span class="operator">=</span> reader<span class="operator">.</span>attributes()<span class="operator">.</span>value(<span class="string">&quot;name&quot;</span>)<span class="operator">.</span>toString();
+               } <span class="keyword">else</span> <span class="keyword">if</span> (reader<span class="operator">.</span>name() <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;subinstance&quot;</span>) {
+                   currentLevel<span class="operator">.</span>submarines<span class="operator">.</span>append(<a href="../qtcore/qpair.html#qMakePair">qMakePair</a>(reader<span class="operator">.</span>attributes()<span class="operator">.</span>value(<span class="string">&quot;type&quot;</span>)<span class="operator">.</span>toString()<span class="operator">.</span>toInt()<span class="operator">,</span> reader<span class="operator">.</span>attributes()<span class="operator">.</span>value(<span class="string">&quot;nb&quot;</span>)<span class="operator">.</span>toString()<span class="operator">.</span>toInt()));
+               }
+           } <span class="keyword">else</span> <span class="keyword">if</span> (reader<span class="operator">.</span>tokenType() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qxmlstreamreader.html">QXmlStreamReader</a></span><span class="operator">::</span>EndElement) {
+              <span class="keyword">if</span> (reader<span class="operator">.</span>name() <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;level&quot;</span>) {
+                  levelsData<span class="operator">.</span>insert(currentLevel<span class="operator">.</span>id<span class="operator">,</span> currentLevel);
+                  currentLevel<span class="operator">.</span>submarines<span class="operator">.</span>clear();
+              }
+           }
+     }
+  }
+
+  <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> GraphicsScene<span class="operator">::</span>sealLevel() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> (mode <span class="operator">=</span><span class="operator">=</span> Big) <span class="operator">?</span> <span class="number">220</span> : <span class="number">160</span>;
+  }
+
+  <span class="type">void</span> GraphicsScene<span class="operator">::</span>setupScene(<span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>newAction<span class="operator">,</span> <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>quitAction)
+  {
+      <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">int</span> nLetters <span class="operator">=</span> <span class="number">10</span>;
+      <span class="keyword">static</span> <span class="keyword">struct</span> {
+          <span class="type">char</span> <span class="keyword">const</span> <span class="operator">*</span>pix;
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> initX<span class="operator">,</span> initY;
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> destX<span class="operator">,</span> destY;
+      } logoData<span class="operator">[</span>nLetters<span class="operator">]</span> <span class="operator">=</span> {
+          {<span class="string">&quot;s&quot;</span><span class="operator">,</span>   <span class="operator">-</span><span class="number">1000</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1000</span><span class="operator">,</span> <span class="number">300</span><span class="operator">,</span> <span class="number">150</span> }<span class="operator">,</span>
+          {<span class="string">&quot;u&quot;</span><span class="operator">,</span>    <span class="operator">-</span><span class="number">800</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1000</span><span class="operator">,</span> <span class="number">350</span><span class="operator">,</span> <span class="number">150</span> }<span class="operator">,</span>
+          {<span class="string">&quot;b&quot;</span><span class="operator">,</span>    <span class="operator">-</span><span class="number">600</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1000</span><span class="operator">,</span> <span class="number">400</span><span class="operator">,</span> <span class="number">120</span> }<span class="operator">,</span>
+          {<span class="string">&quot;dash&quot;</span><span class="operator">,</span> <span class="operator">-</span><span class="number">400</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1000</span><span class="operator">,</span> <span class="number">460</span><span class="operator">,</span> <span class="number">150</span> }<span class="operator">,</span>
+          {<span class="string">&quot;a&quot;</span><span class="operator">,</span>    <span class="number">1000</span><span class="operator">,</span>  <span class="number">2000</span><span class="operator">,</span> <span class="number">350</span><span class="operator">,</span> <span class="number">250</span> }<span class="operator">,</span>
+          {<span class="string">&quot;t&quot;</span><span class="operator">,</span>     <span class="number">800</span><span class="operator">,</span>  <span class="number">2000</span><span class="operator">,</span> <span class="number">400</span><span class="operator">,</span> <span class="number">250</span> }<span class="operator">,</span>
+          {<span class="string">&quot;t2&quot;</span><span class="operator">,</span>    <span class="number">600</span><span class="operator">,</span>  <span class="number">2000</span><span class="operator">,</span> <span class="number">430</span><span class="operator">,</span> <span class="number">250</span> }<span class="operator">,</span>
+          {<span class="string">&quot;a2&quot;</span><span class="operator">,</span>    <span class="number">400</span><span class="operator">,</span>  <span class="number">2000</span><span class="operator">,</span> <span class="number">465</span><span class="operator">,</span> <span class="number">250</span> }<span class="operator">,</span>
+          {<span class="string">&quot;q&quot;</span><span class="operator">,</span>     <span class="number">200</span><span class="operator">,</span>  <span class="number">2000</span><span class="operator">,</span> <span class="number">510</span><span class="operator">,</span> <span class="number">250</span> }<span class="operator">,</span>
+          {<span class="string">&quot;excl&quot;</span><span class="operator">,</span>    <span class="number">0</span><span class="operator">,</span>  <span class="number">2000</span><span class="operator">,</span> <span class="number">570</span><span class="operator">,</span> <span class="number">220</span> } };
+
+      <span class="type"><a href="../qtcore/qsequentialanimationgroup.html">QSequentialAnimationGroup</a></span> <span class="operator">*</span> lettersGroupMoving <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qsequentialanimationgroup.html">QSequentialAnimationGroup</a></span>(<span class="keyword">this</span>);
+      <span class="type"><a href="../qtcore/qparallelanimationgroup.html">QParallelAnimationGroup</a></span> <span class="operator">*</span> lettersGroupFading <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qparallelanimationgroup.html">QParallelAnimationGroup</a></span>(<span class="keyword">this</span>);
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> nLetters; <span class="operator">+</span><span class="operator">+</span>i) {
+          PixmapItem <span class="operator">*</span>logo <span class="operator">=</span> <span class="keyword">new</span> PixmapItem(QLatin1String(<span class="string">&quot;:/logo-&quot;</span>) <span class="operator">+</span> logoData<span class="operator">[</span>i<span class="operator">]</span><span class="operator">.</span>pix<span class="operator">,</span> <span class="keyword">this</span>);
+          logo<span class="operator">-</span><span class="operator">&gt;</span>setPos(logoData<span class="operator">[</span>i<span class="operator">]</span><span class="operator">.</span>initX<span class="operator">,</span> logoData<span class="operator">[</span>i<span class="operator">]</span><span class="operator">.</span>initY);
+          logo<span class="operator">-</span><span class="operator">&gt;</span>setZValue(i <span class="operator">+</span> <span class="number">3</span>);
+          <span class="comment">//creation of the animations for moving letters</span>
+          <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span> <span class="operator">*</span>moveAnim <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span>(logo<span class="operator">,</span> <span class="string">&quot;pos&quot;</span><span class="operator">,</span> lettersGroupMoving);
+          moveAnim<span class="operator">-</span><span class="operator">&gt;</span>setEndValue(<span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>(logoData<span class="operator">[</span>i<span class="operator">]</span><span class="operator">.</span>destX<span class="operator">,</span> logoData<span class="operator">[</span>i<span class="operator">]</span><span class="operator">.</span>destY));
+          moveAnim<span class="operator">-</span><span class="operator">&gt;</span>setDuration(<span class="number">200</span>);
+          moveAnim<span class="operator">-</span><span class="operator">&gt;</span>setEasingCurve(<span class="type"><a href="../qtcore/qeasingcurve.html">QEasingCurve</a></span><span class="operator">::</span>OutElastic);
+          lettersGroupMoving<span class="operator">-</span><span class="operator">&gt;</span>addPause(<span class="number">50</span>);
+          <span class="comment">//creation of the animations for fading out the letters</span>
+          <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span> <span class="operator">*</span>fadeAnim <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span>(logo<span class="operator">,</span> <span class="string">&quot;opacity&quot;</span><span class="operator">,</span> lettersGroupFading);
+          fadeAnim<span class="operator">-</span><span class="operator">&gt;</span>setDuration(<span class="number">800</span>);
+          fadeAnim<span class="operator">-</span><span class="operator">&gt;</span>setEndValue(<span class="number">0</span>);
+          fadeAnim<span class="operator">-</span><span class="operator">&gt;</span>setEasingCurve(<span class="type"><a href="../qtcore/qeasingcurve.html">QEasingCurve</a></span><span class="operator">::</span>OutQuad);
+      }
+
+      <span class="type"><a href="../qtcore/qstatemachine.html">QStateMachine</a></span> <span class="operator">*</span>machine <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstatemachine.html">QStateMachine</a></span>(<span class="keyword">this</span>);
+
+      <span class="comment">//This state is when the player is playing</span>
+      PlayState <span class="operator">*</span>gameState <span class="operator">=</span> <span class="keyword">new</span> PlayState(<span class="keyword">this</span><span class="operator">,</span> machine);
+
+      <span class="comment">//Final state</span>
+      <span class="type"><a href="../qtcore/qfinalstate.html">QFinalState</a></span> <span class="operator">*</span>final <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qfinalstate.html">QFinalState</a></span>(machine);
+
+      <span class="comment">//Animation when the player enter in the game</span>
+      <span class="type">QAnimationState</span> <span class="operator">*</span>lettersMovingState <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QAnimationState</span>(machine);
+      lettersMovingState<span class="operator">-</span><span class="operator">&gt;</span>setAnimation(lettersGroupMoving);
+
+      <span class="comment">//Animation when the welcome screen disappear</span>
+      <span class="type">QAnimationState</span> <span class="operator">*</span>lettersFadingState <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QAnimationState</span>(machine);
+      lettersFadingState<span class="operator">-</span><span class="operator">&gt;</span>setAnimation(lettersGroupFading);
+
+      <span class="comment">//if new game then we fade out the welcome screen and start playing</span>
+      lettersMovingState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(newAction<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> lettersFadingState);
+      lettersFadingState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(lettersFadingState<span class="operator">,</span> SIGNAL(animationFinished())<span class="operator">,</span> gameState);
+
+      <span class="comment">//New Game is triggered then player start playing</span>
+      gameState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(newAction<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> gameState);
+
+      <span class="comment">//Wanna quit, then connect to CTRL+Q</span>
+      gameState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(quitAction<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> final);
+      lettersMovingState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(quitAction<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> final);
+
+      <span class="comment">//Welcome screen is the initial state</span>
+      machine<span class="operator">-</span><span class="operator">&gt;</span>setInitialState(lettersMovingState);
+
+      machine<span class="operator">-</span><span class="operator">&gt;</span>start();
+
+      <span class="comment">//We reach the final state, then we quit</span>
+      connect(machine<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> qApp<span class="operator">,</span> SLOT(quit()));
+  }
+
+  <span class="type">void</span> GraphicsScene<span class="operator">::</span>addItem(Bomb <span class="operator">*</span>bomb)
+  {
+      bombs<span class="operator">.</span>insert(bomb);
+      connect(bomb<span class="operator">,</span>SIGNAL(bombExecutionFinished())<span class="operator">,</span><span class="keyword">this</span><span class="operator">,</span> SLOT(onBombExecutionFinished()));
+      <span class="type"><a href="qgraphicsscene.html">QGraphicsScene</a></span><span class="operator">::</span>addItem(bomb);
+  }
+
+  <span class="type">void</span> GraphicsScene<span class="operator">::</span>addItem(Torpedo <span class="operator">*</span>torpedo)
+  {
+      torpedos<span class="operator">.</span>insert(torpedo);
+      connect(torpedo<span class="operator">,</span>SIGNAL(torpedoExecutionFinished())<span class="operator">,</span><span class="keyword">this</span><span class="operator">,</span> SLOT(onTorpedoExecutionFinished()));
+      <span class="type"><a href="qgraphicsscene.html">QGraphicsScene</a></span><span class="operator">::</span>addItem(torpedo);
+  }
+
+  <span class="type">void</span> GraphicsScene<span class="operator">::</span>addItem(SubMarine <span class="operator">*</span>submarine)
+  {
+      submarines<span class="operator">.</span>insert(submarine);
+      connect(submarine<span class="operator">,</span>SIGNAL(subMarineExecutionFinished())<span class="operator">,</span><span class="keyword">this</span><span class="operator">,</span> SLOT(onSubMarineExecutionFinished()));
+      <span class="type"><a href="qgraphicsscene.html">QGraphicsScene</a></span><span class="operator">::</span>addItem(submarine);
+  }
+
+  <span class="type">void</span> GraphicsScene<span class="operator">::</span>addItem(<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span>item)
+  {
+      <span class="type"><a href="qgraphicsscene.html">QGraphicsScene</a></span><span class="operator">::</span>addItem(item);
+  }
+
+  <span class="type">void</span> GraphicsScene<span class="operator">::</span>onBombExecutionFinished()
+  {
+      Bomb <span class="operator">*</span>bomb <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span>Bomb <span class="operator">*</span><span class="operator">&gt;</span>(sender());
+      bombs<span class="operator">.</span>remove(bomb);
+      bomb<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+      <span class="keyword">if</span> (boat)
+          boat<span class="operator">-</span><span class="operator">&gt;</span>setBombsLaunched(boat<span class="operator">-</span><span class="operator">&gt;</span>bombsLaunched() <span class="operator">-</span> <span class="number">1</span>);
+  }
+
+  <span class="type">void</span> GraphicsScene<span class="operator">::</span>onTorpedoExecutionFinished()
+  {
+      Torpedo <span class="operator">*</span>torpedo <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span>Torpedo <span class="operator">*</span><span class="operator">&gt;</span>(sender());
+      torpedos<span class="operator">.</span>remove(torpedo);
+      torpedo<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+  }
+
+  <span class="type">void</span> GraphicsScene<span class="operator">::</span>onSubMarineExecutionFinished()
+  {
+      SubMarine <span class="operator">*</span>submarine <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span>SubMarine <span class="operator">*</span><span class="operator">&gt;</span>(sender());
+      submarines<span class="operator">.</span>remove(submarine);
+      <span class="keyword">if</span> (submarines<span class="operator">.</span>count() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="keyword">emit</span> allSubMarineDestroyed(submarine<span class="operator">-</span><span class="operator">&gt;</span>points());
+      <span class="keyword">else</span>
+          <span class="keyword">emit</span> subMarineDestroyed(submarine<span class="operator">-</span><span class="operator">&gt;</span>points());
+      submarine<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+  }
+
+  <span class="type">void</span> GraphicsScene<span class="operator">::</span>clearScene()
+  {
+      foreach (SubMarine <span class="operator">*</span>sub<span class="operator">,</span> submarines) {
+          sub<span class="operator">-</span><span class="operator">&gt;</span>destroy();
+          sub<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+      }
+
+      foreach (Torpedo <span class="operator">*</span>torpedo<span class="operator">,</span> torpedos) {
+          torpedo<span class="operator">-</span><span class="operator">&gt;</span>destroy();
+          torpedo<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+      }
+
+      foreach (Bomb <span class="operator">*</span>bomb<span class="operator">,</span> bombs) {
+          bomb<span class="operator">-</span><span class="operator">&gt;</span>destroy();
+          bomb<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+      }
+
+      submarines<span class="operator">.</span>clear();
+      bombs<span class="operator">.</span>clear();
+      torpedos<span class="operator">.</span>clear();
+
+      AnimationManager<span class="operator">::</span>self()<span class="operator">-</span><span class="operator">&gt;</span>unregisterAllAnimations();
+
+      boat<span class="operator">-</span><span class="operator">&gt;</span>stop();
+      boat<span class="operator">-</span><span class="operator">&gt;</span>hide();
+      boat<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+  }
+
+</pre>
+</div>
+<!-- @@@animation/sub-attaq/graphicsscene.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

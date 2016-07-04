@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- examples-boxplotchart.qdoc -->
+  <title>Box and Whiskers Example | Qt Charts 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcharts-index.html">Qt Charts</a></td><td >Box and Whiskers Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Box and Whiskers Example</h1>
+<span class="subtitle"></span>
+<!-- $$$boxplotchart-description -->
+<div class="descr"> <a name="details"></a>
+<p>The example also shows how to read the non-continuous data from a file, arrange it and find medians needed for box-and-whiskers plotting.</p>
+<p class="centerAlign"><img src="images/examples_boxplotchart.png" alt="" /></p><p>To show the share deviation of two companies we start by creating two <a href="qboxplotseries.html">QBoxPlotSeries</a> to handle monthly data.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qboxplotseries.html">QBoxPlotSeries</a></span> <span class="operator">*</span>acmeSeries <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qboxplotseries.html">QBoxPlotSeries</a></span>();
+  acmeSeries<span class="operator">-</span><span class="operator">&gt;</span>setName(<span class="string">&quot;Acme Ltd&quot;</span>);
+
+  <span class="type"><a href="qboxplotseries.html">QBoxPlotSeries</a></span> <span class="operator">*</span>boxWhiskSeries <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qboxplotseries.html">QBoxPlotSeries</a></span>();
+  boxWhiskSeries<span class="operator">-</span><span class="operator">&gt;</span>setName(<span class="string">&quot;BoxWhisk Inc&quot;</span>);
+
+</pre>
+<p><a href="../qtcore/qfile.html">QFile</a> class is used to open a text file where the non-continuous data is kept. The BoxDataReader is an auxiliary class for reading the text file and finding the extreme and median values from the data. The BoxDataReader is explained in more detail later. The method readBox reads the values and sets them to the <a href="qboxset.html">QBoxSet</a> item which the method returns for the caller. The returned <a href="qboxset.html">QBoxSet</a> item is added to the series.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> acmeData(<span class="string">&quot;:acme&quot;</span>);
+  <span class="keyword">if</span> (<span class="operator">!</span>acmeData<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly <span class="operator">|</span> <span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>Text))
+      <span class="keyword">return</span> <span class="number">1</span>;
+
+  BoxDataReader dataReader(<span class="operator">&amp;</span>acmeData);
+  <span class="keyword">while</span> (<span class="operator">!</span>dataReader<span class="operator">.</span>atEnd()) {
+      <span class="type"><a href="qboxset.html">QBoxSet</a></span> <span class="operator">*</span>set <span class="operator">=</span> dataReader<span class="operator">.</span>readBox();
+      <span class="keyword">if</span> (set)
+          acmeSeries<span class="operator">-</span><span class="operator">&gt;</span>append(set);
+  }
+
+</pre>
+<p>In this section a second file is opened for reading the data for the second company.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> boxwhiskData(<span class="string">&quot;:boxwhisk&quot;</span>);
+  <span class="keyword">if</span> (<span class="operator">!</span>boxwhiskData<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly <span class="operator">|</span> <span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>Text))
+      <span class="keyword">return</span> <span class="number">1</span>;
+
+  dataReader<span class="operator">.</span>readFile(<span class="operator">&amp;</span>boxwhiskData);
+  <span class="keyword">while</span> (<span class="operator">!</span>dataReader<span class="operator">.</span>atEnd()) {
+      <span class="type"><a href="qboxset.html">QBoxSet</a></span> <span class="operator">*</span>set <span class="operator">=</span> dataReader<span class="operator">.</span>readBox();
+      <span class="keyword">if</span> (set)
+          boxWhiskSeries<span class="operator">-</span><span class="operator">&gt;</span>append(set);
+  }
+
+</pre>
+<p>In this code snippet a new <a href="qchart.html">QChart</a> instance is created and previously created series are added to it. The title is also defined and animation is set to be SeriesAnimation.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qchart.html">QChart</a></span> <span class="operator">*</span>chart <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qchart.html">QChart</a></span>();
+  chart<span class="operator">-</span><span class="operator">&gt;</span>addSeries(acmeSeries);
+  chart<span class="operator">-</span><span class="operator">&gt;</span>addSeries(boxWhiskSeries);
+  chart<span class="operator">-</span><span class="operator">&gt;</span>setTitle(<span class="string">&quot;Acme Ltd and BoxWhisk Inc share deviation in 2012&quot;</span>);
+  chart<span class="operator">-</span><span class="operator">&gt;</span>setAnimationOptions(<span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>SeriesAnimations);
+
+</pre>
+<p>Here we ask the chart to create default axes for our presentation. We also set the range for the vertical axis by querying the pointer for the axis from the chart, and then setting the min and max for that axis.</p>
+<pre class="cpp">
+
+  chart<span class="operator">-</span><span class="operator">&gt;</span>createDefaultAxes();
+  chart<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>setMin(<span class="number">15.0</span>);
+  chart<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>setMax(<span class="number">34.0</span>);
+
+</pre>
+<p>In this section we set the legends to be visible and place them at the bottom of the chart.</p>
+<pre class="cpp">
+
+  chart<span class="operator">-</span><span class="operator">&gt;</span>legend()<span class="operator">-</span><span class="operator">&gt;</span>setVisible(<span class="keyword">true</span>);
+  chart<span class="operator">-</span><span class="operator">&gt;</span>legend()<span class="operator">-</span><span class="operator">&gt;</span>setAlignment(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignBottom);
+
+</pre>
+<p>Finally, we add the chart onto a view. We also turn on the antialiasing for the chartView.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qchartview.html">QChartView</a></span> <span class="operator">*</span>chartView <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qchartview.html">QChartView</a></span>(chart);
+  chartView<span class="operator">-</span><span class="operator">&gt;</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing);
+
+</pre>
+<p>The chart is ready to be shown. We set the chart to be the central widget of the window. We also set the size for the chart window and show it.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtwidgets/qmainwindow.html">QMainWindow</a></span> window;
+  window<span class="operator">.</span>setCentralWidget(chartView);
+  window<span class="operator">.</span>resize(<span class="number">800</span><span class="operator">,</span> <span class="number">600</span>);
+  window<span class="operator">.</span>show();
+
+</pre>
+<p>Here the method readBox is explained in detail. Firstly, a line is read from the file and lines starting with # are rejected since they are considered as comment lines.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> line <span class="operator">=</span> readLine();
+  <span class="keyword">if</span> (line<span class="operator">.</span>startsWith(<span class="string">&quot;#&quot;</span>))
+      <span class="keyword">return</span> <span class="number">0</span>;
+
+</pre>
+<p>In this file the data is arranged as number, space, number, or space. On this snippet the line is split into single number strings which are stored on <a href="../qtcore/qstringlist.html">QStringList</a>.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> strList <span class="operator">=</span> line<span class="operator">.</span>split(<span class="string">&quot; &quot;</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>SkipEmptyParts);
+
+</pre>
+<p>The sortedList will hold the numbers in continuous order and in this code segment we show how to do it. First the sortedList is cleared and numbers are read from the strList and stored into sortedList in double format. The qSort method arranges the sortedList into continuous order starting from the smallest.</p>
+<pre class="cpp">
+
+  sortedList<span class="operator">.</span>clear();
+  <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">1</span>; i <span class="operator">&lt;</span> strList<span class="operator">.</span>count(); i<span class="operator">+</span><span class="operator">+</span>)
+      sortedList<span class="operator">.</span>append(strList<span class="operator">.</span>at(i)<span class="operator">.</span>toDouble());
+
+  <a href="../qtcore/qtalgorithms-obsolete.html#qSort-2">qSort</a>(sortedList<span class="operator">.</span>begin()<span class="operator">,</span> sortedList<span class="operator">.</span>end());
+
+</pre>
+<p>Below you will find a code sample showing how to select extremes and medians from the continuous data. Firstly a new <a href="qboxset.html">QBoxSet</a> is created. Lower and upper extremes are simple to select; they are just first and last items on the sortedList. For medians we use a helper method findMedian which is explained later. For the median from the upper half we need to adjust the begin number if the amount of the numbers is even or uneven. The end number for lower half comes naturally from int rounding.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qboxset.html">QBoxSet</a></span> <span class="operator">*</span>box <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qboxset.html">QBoxSet</a></span>(strList<span class="operator">.</span>first());
+  box<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="type"><a href="qboxset.html">QBoxSet</a></span><span class="operator">::</span>LowerExtreme<span class="operator">,</span> sortedList<span class="operator">.</span>first());
+  box<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="type"><a href="qboxset.html">QBoxSet</a></span><span class="operator">::</span>UpperExtreme<span class="operator">,</span> sortedList<span class="operator">.</span>last());
+  box<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="type"><a href="qboxset.html">QBoxSet</a></span><span class="operator">::</span>Median<span class="operator">,</span> findMedian(<span class="number">0</span><span class="operator">,</span> count));
+  box<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="type"><a href="qboxset.html">QBoxSet</a></span><span class="operator">::</span>LowerQuartile<span class="operator">,</span> findMedian(<span class="number">0</span><span class="operator">,</span> count <span class="operator">/</span> <span class="number">2</span>));
+  box<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="type"><a href="qboxset.html">QBoxSet</a></span><span class="operator">::</span>UpperQuartile<span class="operator">,</span> findMedian(count <span class="operator">/</span> <span class="number">2</span> <span class="operator">+</span> (count <span class="operator">%</span> <span class="number">2</span>)<span class="operator">,</span> count));
+
+</pre>
+<p>Below you will find the code sample for the method findMedian. If the amount of numbers is uneven we select the number from the middle. For even amount numbers we take two numbers from the middle and calculate the mean value.</p>
+<pre class="cpp">
+
+  <span class="type">int</span> count <span class="operator">=</span> end <span class="operator">-</span> begin;
+  <span class="keyword">if</span> (count <span class="operator">%</span> <span class="number">2</span>) {
+      <span class="keyword">return</span> sortedList<span class="operator">.</span>at(count <span class="operator">/</span> <span class="number">2</span> <span class="operator">+</span> begin);
+  } <span class="keyword">else</span> {
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> right <span class="operator">=</span> sortedList<span class="operator">.</span>at(count <span class="operator">/</span> <span class="number">2</span> <span class="operator">+</span> begin);
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> left <span class="operator">=</span> sortedList<span class="operator">.</span>at(count <span class="operator">/</span> <span class="number">2</span> <span class="operator">-</span> <span class="number">1</span> <span class="operator">+</span> begin);
+      <span class="keyword">return</span> (right <span class="operator">+</span> left) <span class="operator">/</span> <span class="number">2.0</span>;
+  }
+
+</pre>
+<p>Files:</p>
+<ul>
+<li><a href="qtcharts-boxplotchart-boxdatareader-cpp.html">boxplotchart/boxdatareader.cpp</a></li>
+<li><a href="qtcharts-boxplotchart-boxdatareader-h.html">boxplotchart/boxdatareader.h</a></li>
+<li><a href="qtcharts-boxplotchart-main-cpp.html">boxplotchart/main.cpp</a></li>
+<li><a href="qtcharts-boxplotchart-boxplotchart-pro.html">boxplotchart/boxplotchart.pro</a></li>
+<li><a href="qtcharts-boxplotchart-boxplotdata-qrc.html">boxplotchart/boxplotdata.qrc</a></li>
+</ul>
+</div>
+<!-- @@@boxplotchart -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

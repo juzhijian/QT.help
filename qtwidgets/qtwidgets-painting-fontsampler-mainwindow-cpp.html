@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mainwindow.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-painting-fontsampler-example.html">Font Sampler Example</a></td><td >mainwindow.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mainwindow.cpp Example File</h1>
+<span class="subtitle">painting/fontsampler/mainwindow.cpp</span>
+<!-- $$$painting/fontsampler/mainwindow.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+  <span class="preprocessor">#ifndef QT_NO_PRINTER</span>
+  <span class="preprocessor">#include &lt;QPrinter&gt;</span>
+  <span class="preprocessor">#include &lt;QPrintDialog&gt;</span>
+  <span class="preprocessor">#include &lt;QPrintPreviewDialog&gt;</span>
+  <span class="preprocessor">#endif</span>
+
+  <span class="preprocessor">#include &quot;mainwindow.h&quot;</span>
+
+  MainWindow<span class="operator">::</span>MainWindow(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+     : <span class="type"><a href="qmainwindow.html">QMainWindow</a></span>(parent)
+  {
+      setupUi(<span class="keyword">this</span>);
+
+      sampleSizes <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">32</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">24</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">16</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">14</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">12</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">8</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">4</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">2</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">1</span>;
+      markedCount <span class="operator">=</span> <span class="number">0</span>;
+      setupFontTree();
+
+      connect(quitAction<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> qApp<span class="operator">,</span> SLOT(quit()));
+      connect(fontTree<span class="operator">,</span> SIGNAL(currentItemChanged(<span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span><span class="operator">*</span><span class="operator">,</span><span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span><span class="operator">*</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(showFont(<span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span><span class="operator">*</span>)));
+      connect(fontTree<span class="operator">,</span> SIGNAL(itemChanged(<span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span><span class="operator">*</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(updateStyles(<span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span><span class="operator">*</span><span class="operator">,</span><span class="type">int</span>)));
+
+      fontTree<span class="operator">-</span><span class="operator">&gt;</span>setItemSelected(fontTree<span class="operator">-</span><span class="operator">&gt;</span>topLevelItem(<span class="number">0</span>)<span class="operator">,</span> <span class="keyword">true</span>);
+      showFont(fontTree<span class="operator">-</span><span class="operator">&gt;</span>topLevelItem(<span class="number">0</span>));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>setupFontTree()
+  {
+      <span class="type"><a href="../qtgui/qfontdatabase.html">QFontDatabase</a></span> database;
+      fontTree<span class="operator">-</span><span class="operator">&gt;</span>setColumnCount(<span class="number">1</span>);
+      fontTree<span class="operator">-</span><span class="operator">&gt;</span>setHeaderLabels(<span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Font&quot;</span>));
+
+      foreach (<span class="type"><a href="../qtcore/qstring.html">QString</a></span> family<span class="operator">,</span> database<span class="operator">.</span>families()) {
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> styles <span class="operator">=</span> database<span class="operator">.</span>styles(family);
+          <span class="keyword">if</span> (styles<span class="operator">.</span>isEmpty())
+              <span class="keyword">continue</span>;
+
+          <span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span> <span class="operator">*</span>familyItem <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span>(fontTree);
+          familyItem<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="number">0</span><span class="operator">,</span> family);
+          familyItem<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Unchecked);
+          familyItem<span class="operator">-</span><span class="operator">&gt;</span>setFlags(familyItem<span class="operator">-</span><span class="operator">&gt;</span>flags() <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsAutoTristate);
+
+          foreach (<span class="type"><a href="../qtcore/qstring.html">QString</a></span> style<span class="operator">,</span> styles) {
+              <span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span> <span class="operator">*</span>styleItem <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span>(familyItem);
+              styleItem<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="number">0</span><span class="operator">,</span> style);
+              styleItem<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Unchecked);
+              styleItem<span class="operator">-</span><span class="operator">&gt;</span>setData(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(database<span class="operator">.</span>weight(family<span class="operator">,</span> style)));
+              styleItem<span class="operator">-</span><span class="operator">&gt;</span>setData(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole <span class="operator">+</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(database<span class="operator">.</span>italic(family<span class="operator">,</span> style)));
+          }
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>on_clearAction_triggered()
+  {
+      <span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span> <span class="operator">*</span>currentItem <span class="operator">=</span> fontTree<span class="operator">-</span><span class="operator">&gt;</span>currentItem();
+      foreach (<span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span> <span class="operator">*</span>item<span class="operator">,</span> fontTree<span class="operator">-</span><span class="operator">&gt;</span>selectedItems())
+          fontTree<span class="operator">-</span><span class="operator">&gt;</span>setItemSelected(item<span class="operator">,</span> <span class="keyword">false</span>);
+      fontTree<span class="operator">-</span><span class="operator">&gt;</span>setItemSelected(currentItem<span class="operator">,</span> <span class="keyword">true</span>);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>on_markAction_triggered()
+  {
+      markUnmarkFonts(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>on_unmarkAction_triggered()
+  {
+      markUnmarkFonts(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Unchecked);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>markUnmarkFonts(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CheckState state)
+  {
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span> <span class="operator">*</span><span class="operator">&gt;</span> items <span class="operator">=</span> fontTree<span class="operator">-</span><span class="operator">&gt;</span>selectedItems();
+      foreach (<span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span> <span class="operator">*</span>item<span class="operator">,</span> items) {
+          <span class="keyword">if</span> (item<span class="operator">-</span><span class="operator">&gt;</span>checkState(<span class="number">0</span>) <span class="operator">!</span><span class="operator">=</span> state)
+              item<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="number">0</span><span class="operator">,</span> state);
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>showFont(<span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span> <span class="operator">*</span>item)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>item)
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> family;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> style;
+      <span class="type">int</span> weight;
+      bool italic;
+
+      <span class="keyword">if</span> (item<span class="operator">-</span><span class="operator">&gt;</span>parent()) {
+          family <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>parent()<span class="operator">-</span><span class="operator">&gt;</span>text(<span class="number">0</span>);
+          style <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>text(<span class="number">0</span>);
+          weight <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>data(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole)<span class="operator">.</span>toInt();
+          italic <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>data(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole <span class="operator">+</span> <span class="number">1</span>)<span class="operator">.</span>toBool();
+      } <span class="keyword">else</span> {
+          family <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>text(<span class="number">0</span>);
+          style <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>child(<span class="number">0</span>)<span class="operator">-</span><span class="operator">&gt;</span>text(<span class="number">0</span>);
+          weight <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>child(<span class="number">0</span>)<span class="operator">-</span><span class="operator">&gt;</span>data(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole)<span class="operator">.</span>toInt();
+          italic <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>child(<span class="number">0</span>)<span class="operator">-</span><span class="operator">&gt;</span>data(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole <span class="operator">+</span> <span class="number">1</span>)<span class="operator">.</span>toBool();
+      }
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> oldText <span class="operator">=</span> textEdit<span class="operator">-</span><span class="operator">&gt;</span>toPlainText()<span class="operator">.</span>trimmed();
+      bool modified <span class="operator">=</span> textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">-</span><span class="operator">&gt;</span>isModified();
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>clear();
+      <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> font(family<span class="operator">,</span> <span class="number">32</span><span class="operator">,</span> weight<span class="operator">,</span> italic);
+      font<span class="operator">.</span>setStyleName(style);
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">-</span><span class="operator">&gt;</span>setDefaultFont(font);
+
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> textEdit<span class="operator">-</span><span class="operator">&gt;</span>textCursor();
+      <span class="type"><a href="../qtgui/qtextblockformat.html">QTextBlockFormat</a></span> blockFormat;
+      blockFormat<span class="operator">.</span>setAlignment(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignCenter);
+      cursor<span class="operator">.</span>insertBlock(blockFormat);
+
+      <span class="keyword">if</span> (modified)
+          cursor<span class="operator">.</span>insertText(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(oldText));
+      <span class="keyword">else</span>
+          cursor<span class="operator">.</span>insertText(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1 %2&quot;</span>)<span class="operator">.</span>arg(family)<span class="operator">.</span>arg(style));
+
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">-</span><span class="operator">&gt;</span>setModified(modified);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>updateStyles(<span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span> <span class="operator">*</span>item<span class="operator">,</span> <span class="type">int</span> column)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>item <span class="operator">|</span><span class="operator">|</span> column <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CheckState state <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>checkState(<span class="number">0</span>);
+      <span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span> <span class="operator">*</span>parent <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>parent();
+
+      <span class="keyword">if</span> (parent) {
+          <span class="comment">// Only count style items.</span>
+          <span class="keyword">if</span> (state <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked)
+              <span class="operator">+</span><span class="operator">+</span>markedCount;
+          <span class="keyword">else</span>
+              <span class="operator">-</span><span class="operator">-</span>markedCount;
+      }
+
+      printAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(markedCount <span class="operator">&gt;</span> <span class="number">0</span>);
+      printPreviewAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(markedCount <span class="operator">&gt;</span> <span class="number">0</span>);
+  }
+
+  <span class="type"><a href="../qtcore/qmap.html">QMap</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">,</span> StyleItems<span class="operator">&gt;</span> MainWindow<span class="operator">::</span>currentPageMap()
+  {
+      <span class="type"><a href="../qtcore/qmap.html">QMap</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">,</span> StyleItems<span class="operator">&gt;</span> pageMap;
+
+      <span class="keyword">for</span> (<span class="type">int</span> row <span class="operator">=</span> <span class="number">0</span>; row <span class="operator">&lt;</span> fontTree<span class="operator">-</span><span class="operator">&gt;</span>topLevelItemCount(); <span class="operator">+</span><span class="operator">+</span>row) {
+          <span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span> <span class="operator">*</span>familyItem <span class="operator">=</span> fontTree<span class="operator">-</span><span class="operator">&gt;</span>topLevelItem(row);
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> family;
+
+          <span class="keyword">if</span> (familyItem<span class="operator">-</span><span class="operator">&gt;</span>checkState(<span class="number">0</span>) <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked) {
+              family <span class="operator">=</span> familyItem<span class="operator">-</span><span class="operator">&gt;</span>text(<span class="number">0</span>);
+              pageMap<span class="operator">[</span>family<span class="operator">]</span> <span class="operator">=</span> StyleItems();
+          }
+
+          <span class="keyword">for</span> (<span class="type">int</span> childRow <span class="operator">=</span> <span class="number">0</span>; childRow <span class="operator">&lt;</span> familyItem<span class="operator">-</span><span class="operator">&gt;</span>childCount(); <span class="operator">+</span><span class="operator">+</span>childRow) {
+              <span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span> <span class="operator">*</span>styleItem <span class="operator">=</span> familyItem<span class="operator">-</span><span class="operator">&gt;</span>child(childRow);
+              <span class="keyword">if</span> (styleItem<span class="operator">-</span><span class="operator">&gt;</span>checkState(<span class="number">0</span>) <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked)
+                  pageMap<span class="operator">[</span>family<span class="operator">]</span><span class="operator">.</span>append(styleItem);
+          }
+      }
+
+      <span class="keyword">return</span> pageMap;
+  }
+
+  <span class="preprocessor">#if !defined(QT_NO_PRINTER) &amp;&amp; !defined(QT_NO_PRINTDIALOG)</span>
+  <span class="type">void</span> MainWindow<span class="operator">::</span>on_printAction_triggered()
+  {
+      pageMap <span class="operator">=</span> currentPageMap();
+
+      <span class="keyword">if</span> (pageMap<span class="operator">.</span>count() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="keyword">return</span>;
+
+      <span class="type">QPrinter</span> printer(<span class="type">QPrinter</span><span class="operator">::</span>HighResolution);
+      <span class="type">QPrintDialog</span> dialog(<span class="operator">&amp;</span>printer<span class="operator">,</span> <span class="keyword">this</span>);
+      <span class="keyword">if</span> (dialog<span class="operator">.</span>exec() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted)
+          <span class="keyword">return</span>;
+
+      <span class="type">int</span> from <span class="operator">=</span> printer<span class="operator">.</span>fromPage();
+      <span class="type">int</span> to <span class="operator">=</span> printer<span class="operator">.</span>toPage();
+      <span class="keyword">if</span> (from <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> to <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">0</span>)
+          printer<span class="operator">.</span>setFromTo(<span class="number">1</span><span class="operator">,</span> pageMap<span class="operator">.</span>keys()<span class="operator">.</span>count());
+
+      printDocument(<span class="operator">&amp;</span>printer);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>printDocument(<span class="type">QPrinter</span> <span class="operator">*</span>printer)
+  {
+      printer<span class="operator">-</span><span class="operator">&gt;</span>setFromTo(<span class="number">1</span><span class="operator">,</span> pageMap<span class="operator">.</span>count());
+
+      <span class="type"><a href="qprogressdialog.html">QProgressDialog</a></span> progress(tr(<span class="string">&quot;Preparing font samples...&quot;</span>)<span class="operator">,</span> tr(<span class="string">&quot;&amp;Cancel&quot;</span>)<span class="operator">,</span>
+                               <span class="number">0</span><span class="operator">,</span> pageMap<span class="operator">.</span>count()<span class="operator">,</span> <span class="keyword">this</span>);
+      progress<span class="operator">.</span>setWindowModality(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ApplicationModal);
+      progress<span class="operator">.</span>setWindowTitle(tr(<span class="string">&quot;Font Sampler&quot;</span>));
+      progress<span class="operator">.</span>setMinimum(printer<span class="operator">-</span><span class="operator">&gt;</span>fromPage() <span class="operator">-</span> <span class="number">1</span>);
+      progress<span class="operator">.</span>setMaximum(printer<span class="operator">-</span><span class="operator">&gt;</span>toPage());
+
+      <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter;
+      painter<span class="operator">.</span>begin(printer);
+      bool firstPage <span class="operator">=</span> <span class="keyword">true</span>;
+
+      <span class="keyword">for</span> (<span class="type">int</span> page <span class="operator">=</span> printer<span class="operator">-</span><span class="operator">&gt;</span>fromPage(); page <span class="operator">&lt;</span><span class="operator">=</span> printer<span class="operator">-</span><span class="operator">&gt;</span>toPage(); <span class="operator">+</span><span class="operator">+</span>page) {
+
+          <span class="keyword">if</span> (<span class="operator">!</span>firstPage)
+              printer<span class="operator">-</span><span class="operator">&gt;</span>newPage();
+
+          qApp<span class="operator">-</span><span class="operator">&gt;</span>processEvents();
+          <span class="keyword">if</span> (progress<span class="operator">.</span>wasCanceled())
+              <span class="keyword">break</span>;
+
+          printPage(page <span class="operator">-</span> <span class="number">1</span><span class="operator">,</span> <span class="operator">&amp;</span>painter<span class="operator">,</span> printer);
+          progress<span class="operator">.</span>setValue(page);
+          firstPage <span class="operator">=</span> <span class="keyword">false</span>;
+      }
+
+      painter<span class="operator">.</span>end();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>on_printPreviewAction_triggered()
+  {
+      pageMap <span class="operator">=</span> currentPageMap();
+
+      <span class="keyword">if</span> (pageMap<span class="operator">.</span>count() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="keyword">return</span>;
+
+      <span class="type">QPrinter</span> printer(<span class="type">QPrinter</span><span class="operator">::</span>HighResolution);
+      <span class="type">QPrintPreviewDialog</span> preview(<span class="operator">&amp;</span>printer<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(<span class="operator">&amp;</span>preview<span class="operator">,</span> SIGNAL(paintRequested(<span class="type">QPrinter</span><span class="operator">*</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(printDocument(<span class="type">QPrinter</span><span class="operator">*</span>)));
+      preview<span class="operator">.</span>exec();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>printPage(<span class="type">int</span> index<span class="operator">,</span> <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span>painter<span class="operator">,</span> <span class="type">QPrinter</span> <span class="operator">*</span>printer)
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> family <span class="operator">=</span> pageMap<span class="operator">.</span>keys()<span class="operator">[</span>index<span class="operator">]</span>;
+      StyleItems items <span class="operator">=</span> pageMap<span class="operator">[</span>family<span class="operator">]</span>;
+
+      <span class="comment">// Find the dimensions of the text on each page.</span>
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> width <span class="operator">=</span> <span class="number">0.0</span>;
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> height <span class="operator">=</span> <span class="number">0.0</span>;
+      foreach (<span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span> <span class="operator">*</span>item<span class="operator">,</span> items) {
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> style <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>text(<span class="number">0</span>);
+          <span class="type">int</span> weight <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>data(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole)<span class="operator">.</span>toInt();
+          bool italic <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>data(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole <span class="operator">+</span> <span class="number">1</span>)<span class="operator">.</span>toBool();
+
+          <span class="comment">// Calculate the maximum width and total height of the text.</span>
+          foreach (<span class="type">int</span> size<span class="operator">,</span> sampleSizes) {
+              <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> font(family<span class="operator">,</span> size<span class="operator">,</span> weight<span class="operator">,</span> italic);
+              font<span class="operator">.</span>setStyleName(style);
+              font <span class="operator">=</span> <span class="type"><a href="../qtgui/qfont.html">QFont</a></span>(font<span class="operator">,</span> painter<span class="operator">-</span><span class="operator">&gt;</span>device());
+              <span class="type"><a href="../qtgui/qfontmetricsf.html">QFontMetricsF</a></span> fontMetrics(font);
+              <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> rect <span class="operator">=</span> fontMetrics<span class="operator">.</span>boundingRect(
+              <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1 %2&quot;</span>)<span class="operator">.</span>arg(family)<span class="operator">.</span>arg(style));
+              width <span class="operator">=</span> <a href="../qtcore/qtglobal.html#qMax">qMax</a>(rect<span class="operator">.</span>width()<span class="operator">,</span> width);
+              height <span class="operator">+</span><span class="operator">=</span> rect<span class="operator">.</span>height();
+          }
+      }
+
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> xScale <span class="operator">=</span> printer<span class="operator">-</span><span class="operator">&gt;</span>pageRect()<span class="operator">.</span>width() <span class="operator">/</span> width;
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> yScale <span class="operator">=</span> printer<span class="operator">-</span><span class="operator">&gt;</span>pageRect()<span class="operator">.</span>height() <span class="operator">/</span> height;
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> scale <span class="operator">=</span> <a href="../qtcore/qtglobal.html#qMin">qMin</a>(xScale<span class="operator">,</span> yScale);
+
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> remainingHeight <span class="operator">=</span> printer<span class="operator">-</span><span class="operator">&gt;</span>pageRect()<span class="operator">.</span>height()<span class="operator">/</span>scale <span class="operator">-</span> height;
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> spaceHeight <span class="operator">=</span> (remainingHeight <span class="operator">/</span> <span class="number">4.0</span>) <span class="operator">/</span> (items<span class="operator">.</span>count() <span class="operator">+</span> <span class="number">1</span>);
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> interLineHeight <span class="operator">=</span> (remainingHeight <span class="operator">/</span> <span class="number">4.0</span>) <span class="operator">/</span> (sampleSizes<span class="operator">.</span>count() <span class="operator">*</span> items<span class="operator">.</span>count());
+
+      painter<span class="operator">-</span><span class="operator">&gt;</span>save();
+      painter<span class="operator">-</span><span class="operator">&gt;</span>translate(printer<span class="operator">-</span><span class="operator">&gt;</span>pageRect()<span class="operator">.</span>width() <span class="operator">/</span> <span class="number">2.0</span><span class="operator">,</span> printer<span class="operator">-</span><span class="operator">&gt;</span>pageRect()<span class="operator">.</span>height() <span class="operator">/</span> <span class="number">2.0</span>);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>scale(scale<span class="operator">,</span> scale);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(<span class="type"><a href="../qtgui/qbrush.html">QBrush</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black));
+
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> x <span class="operator">=</span> <span class="operator">-</span>width <span class="operator">/</span> <span class="number">2.0</span>;
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> y <span class="operator">=</span> <span class="operator">-</span>height <span class="operator">/</span> <span class="number">2.0</span> <span class="operator">-</span> remainingHeight <span class="operator">/</span> <span class="number">4.0</span> <span class="operator">+</span> spaceHeight;
+
+      foreach (<span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span> <span class="operator">*</span>item<span class="operator">,</span> items) {
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> style <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>text(<span class="number">0</span>);
+          <span class="type">int</span> weight <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>data(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole)<span class="operator">.</span>toInt();
+          bool italic <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>data(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole <span class="operator">+</span> <span class="number">1</span>)<span class="operator">.</span>toBool();
+
+          <span class="comment">// Draw each line of text.</span>
+          foreach (<span class="type">int</span> size<span class="operator">,</span> sampleSizes) {
+              <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> font(family<span class="operator">,</span> size<span class="operator">,</span> weight<span class="operator">,</span> italic);
+              font<span class="operator">.</span>setStyleName(style);
+              font <span class="operator">=</span> <span class="type"><a href="../qtgui/qfont.html">QFont</a></span>(font<span class="operator">,</span> painter<span class="operator">-</span><span class="operator">&gt;</span>device());
+              <span class="type"><a href="../qtgui/qfontmetricsf.html">QFontMetricsF</a></span> fontMetrics(font);
+              <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> rect <span class="operator">=</span> fontMetrics<span class="operator">.</span>boundingRect(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1 %2&quot;</span>)<span class="operator">.</span>arg(
+                            font<span class="operator">.</span>family())<span class="operator">.</span>arg(style));
+              y <span class="operator">+</span><span class="operator">=</span> rect<span class="operator">.</span>height();
+              painter<span class="operator">-</span><span class="operator">&gt;</span>setFont(font);
+              painter<span class="operator">-</span><span class="operator">&gt;</span>drawText(<span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>(x<span class="operator">,</span> y)<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1 %2&quot;</span>)<span class="operator">.</span>arg(family)<span class="operator">.</span>arg(style));
+              y <span class="operator">+</span><span class="operator">=</span> interLineHeight;
+          }
+          y <span class="operator">+</span><span class="operator">=</span> spaceHeight;
+      }
+
+      painter<span class="operator">-</span><span class="operator">&gt;</span>restore();
+  }
+  <span class="preprocessor">#endif // QT_NO_PRINTER</span>
+
+</pre>
+</div>
+<!-- @@@painting/fontsampler/mainwindow.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

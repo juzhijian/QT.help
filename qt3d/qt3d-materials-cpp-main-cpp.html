@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>main.cpp Example File | Qt 3D 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-materials-cpp-example.html">Qt 3D: Materials C++ Example</a></td><td >main.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">main.cpp Example File</h1>
+<span class="subtitle">materials-cpp/main.cpp</span>
+<!-- $$$materials-cpp/main.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2014 Klaralvdalens Datakonsult AB (KDAB).
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt3D module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QGuiApplication&gt;</span>
+
+  <span class="preprocessor">#include &lt;Qt3DCore/QEntity&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DCore/QAspectEngine&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DRender/QCamera&gt;</span>
+
+  <span class="preprocessor">#include &lt;Qt3DInput/QInputAspect&gt;</span>
+
+  <span class="preprocessor">#include &lt;Qt3DRender/QRenderAspect&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DExtras/QPhongMaterial&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DExtras/QDiffuseMapMaterial&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DExtras/QForwardRenderer&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DRender/QTextureImage&gt;</span>
+
+  <span class="preprocessor">#include &quot;planeentity.h&quot;</span>
+  <span class="preprocessor">#include &quot;rotatingtrefoilknot.h&quot;</span>
+  <span class="preprocessor">#include &quot;barrel.h&quot;</span>
+  <span class="preprocessor">#include &quot;houseplant.h&quot;</span>
+  <span class="preprocessor">#include &lt;Qt3DExtras/qt3dwindow.h&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DExtras/qfirstpersoncameracontroller.h&gt;</span>
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span><span class="operator">*</span> argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">Qt3DWindow</span> view;
+
+      <span class="comment">// Scene Root</span>
+      <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span> <span class="operator">*</span>sceneRoot <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span>();
+
+      <span class="comment">// Scene Camera</span>
+      <span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QCamera</span> <span class="operator">*</span>basicCamera <span class="operator">=</span> view<span class="operator">.</span>camera();
+      basicCamera<span class="operator">-</span><span class="operator">&gt;</span>setProjectionType(<span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QCameraLens</span><span class="operator">::</span>PerspectiveProjection);
+      basicCamera<span class="operator">-</span><span class="operator">&gt;</span>setAspectRatio(view<span class="operator">.</span>width() <span class="operator">/</span> view<span class="operator">.</span>height());
+      basicCamera<span class="operator">-</span><span class="operator">&gt;</span>setUpVector(QVector3D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span>));
+      basicCamera<span class="operator">-</span><span class="operator">&gt;</span>setViewCenter(QVector3D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">3.5f</span><span class="operator">,</span> <span class="number">0.0f</span>));
+      basicCamera<span class="operator">-</span><span class="operator">&gt;</span>setPosition(QVector3D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">3.5f</span><span class="operator">,</span> <span class="number">25.0f</span>));
+      <span class="comment">// For camera controls</span>
+      <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QFirstPersonCameraController</span> <span class="operator">*</span>camController <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QFirstPersonCameraController</span>(sceneRoot);
+      camController<span class="operator">-</span><span class="operator">&gt;</span>setCamera(basicCamera);
+
+      <span class="comment">// Scene floor</span>
+      PlaneEntity <span class="operator">*</span>planeEntity <span class="operator">=</span> <span class="keyword">new</span> PlaneEntity(sceneRoot);
+      planeEntity<span class="operator">-</span><span class="operator">&gt;</span>mesh()<span class="operator">-</span><span class="operator">&gt;</span>setHeight(<span class="number">100.0f</span>);
+      planeEntity<span class="operator">-</span><span class="operator">&gt;</span>mesh()<span class="operator">-</span><span class="operator">&gt;</span>setWidth(<span class="number">100.0f</span>);
+      planeEntity<span class="operator">-</span><span class="operator">&gt;</span>mesh()<span class="operator">-</span><span class="operator">&gt;</span>setMeshResolution(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">20</span><span class="operator">,</span> <span class="number">20</span>));
+
+      <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QNormalDiffuseSpecularMapMaterial</span> <span class="operator">*</span>normalDiffuseSpecularMapMaterial <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QNormalDiffuseSpecularMapMaterial</span>();
+      normalDiffuseSpecularMapMaterial<span class="operator">-</span><span class="operator">&gt;</span>setTextureScale(<span class="number">10.0f</span>);
+      normalDiffuseSpecularMapMaterial<span class="operator">-</span><span class="operator">&gt;</span>setShininess(<span class="number">80.0f</span>);
+      normalDiffuseSpecularMapMaterial<span class="operator">-</span><span class="operator">&gt;</span>setAmbient(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span><span class="operator">::</span>fromRgbF(<span class="number">0.2f</span><span class="operator">,</span> <span class="number">0.2f</span><span class="operator">,</span> <span class="number">0.2f</span><span class="operator">,</span> <span class="number">1.0f</span>));
+
+      <span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QTextureImage</span> <span class="operator">*</span>diffuseImage <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QTextureImage</span>();
+      diffuseImage<span class="operator">-</span><span class="operator">&gt;</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/assets/textures/pattern_09/diffuse.webp&quot;</span>)));
+      normalDiffuseSpecularMapMaterial<span class="operator">-</span><span class="operator">&gt;</span>diffuse()<span class="operator">-</span><span class="operator">&gt;</span>addTextureImage(diffuseImage);
+
+      <span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QTextureImage</span> <span class="operator">*</span>specularImage <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QTextureImage</span>();
+      specularImage<span class="operator">-</span><span class="operator">&gt;</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/assets/textures/pattern_09/specular.webp&quot;</span>)));
+      normalDiffuseSpecularMapMaterial<span class="operator">-</span><span class="operator">&gt;</span>specular()<span class="operator">-</span><span class="operator">&gt;</span>addTextureImage(specularImage);
+
+      <span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QTextureImage</span> <span class="operator">*</span>normalImage <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QTextureImage</span>();
+      normalImage<span class="operator">-</span><span class="operator">&gt;</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>((<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/assets/textures/pattern_09/normal.webp&quot;</span>))));
+      normalDiffuseSpecularMapMaterial<span class="operator">-</span><span class="operator">&gt;</span>normal()<span class="operator">-</span><span class="operator">&gt;</span>addTextureImage(normalImage);
+
+      planeEntity<span class="operator">-</span><span class="operator">&gt;</span>addComponent(normalDiffuseSpecularMapMaterial);
+
+      <span class="comment">// Chest</span>
+      RenderableEntity <span class="operator">*</span>chest <span class="operator">=</span> <span class="keyword">new</span> RenderableEntity(sceneRoot);
+      chest<span class="operator">-</span><span class="operator">&gt;</span>transform()<span class="operator">-</span><span class="operator">&gt;</span>setScale(<span class="number">0.03f</span>);
+      chest<span class="operator">-</span><span class="operator">&gt;</span>mesh()<span class="operator">-</span><span class="operator">&gt;</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/assets/chest/Chest.obj&quot;</span>)));
+      <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QDiffuseMapMaterial</span> <span class="operator">*</span>diffuseMapMaterial <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QDiffuseMapMaterial</span>();
+      diffuseMapMaterial<span class="operator">-</span><span class="operator">&gt;</span>setSpecular(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span><span class="operator">::</span>fromRgbF(<span class="number">0.2f</span><span class="operator">,</span> <span class="number">0.2f</span><span class="operator">,</span> <span class="number">0.2f</span><span class="operator">,</span> <span class="number">1.0f</span>));
+      diffuseMapMaterial<span class="operator">-</span><span class="operator">&gt;</span>setShininess(<span class="number">2.0f</span>);
+
+      <span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QTextureImage</span> <span class="operator">*</span>chestDiffuseImage <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QTextureImage</span>();
+      chestDiffuseImage<span class="operator">-</span><span class="operator">&gt;</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/assets/chest/diffuse.webp&quot;</span>)));
+      diffuseMapMaterial<span class="operator">-</span><span class="operator">&gt;</span>diffuse()<span class="operator">-</span><span class="operator">&gt;</span>addTextureImage(chestDiffuseImage);
+
+      chest<span class="operator">-</span><span class="operator">&gt;</span>addComponent(diffuseMapMaterial);
+
+      <span class="comment">// TrefoilKnot</span>
+      RotatingTrefoilKnot <span class="operator">*</span>trefoil <span class="operator">=</span> <span class="keyword">new</span> RotatingTrefoilKnot(sceneRoot);
+      trefoil<span class="operator">-</span><span class="operator">&gt;</span>setPosition(QVector3D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">3.5f</span><span class="operator">,</span> <span class="number">0.0f</span>));
+      trefoil<span class="operator">-</span><span class="operator">&gt;</span>setScale(<span class="number">0.5f</span>);
+      <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QPhongMaterial</span> <span class="operator">*</span>phongMaterial <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QPhongMaterial</span>();
+      phongMaterial<span class="operator">-</span><span class="operator">&gt;</span>setDiffuse(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="number">204</span><span class="operator">,</span> <span class="number">205</span><span class="operator">,</span> <span class="number">75</span>)); <span class="comment">// Safari Yellow #cccd4b</span>
+      phongMaterial<span class="operator">-</span><span class="operator">&gt;</span>setSpecular(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white);
+      trefoil<span class="operator">-</span><span class="operator">&gt;</span>addComponent(phongMaterial);
+
+      <span class="comment">// Barrels</span>
+      Barrel <span class="operator">*</span>basicBarrel <span class="operator">=</span> <span class="keyword">new</span> Barrel(sceneRoot);
+      basicBarrel<span class="operator">-</span><span class="operator">&gt;</span>transform()<span class="operator">-</span><span class="operator">&gt;</span>setTranslation(QVector3D(<span class="number">8.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span>));
+
+      Barrel <span class="operator">*</span>rustyBarrel <span class="operator">=</span> <span class="keyword">new</span> Barrel(sceneRoot);
+      rustyBarrel<span class="operator">-</span><span class="operator">&gt;</span>setDiffuse(Barrel<span class="operator">::</span>RustDiffuse);
+      rustyBarrel<span class="operator">-</span><span class="operator">&gt;</span>setSpecular(Barrel<span class="operator">::</span>RustSpecular);
+      rustyBarrel<span class="operator">-</span><span class="operator">&gt;</span>setBumps(Barrel<span class="operator">::</span>HardBumps);
+      rustyBarrel<span class="operator">-</span><span class="operator">&gt;</span>transform()<span class="operator">-</span><span class="operator">&gt;</span>setTranslation(QVector3D(<span class="number">10.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span>));
+
+      Barrel <span class="operator">*</span>blueBarrel <span class="operator">=</span> <span class="keyword">new</span> Barrel(sceneRoot);
+      blueBarrel<span class="operator">-</span><span class="operator">&gt;</span>setDiffuse(Barrel<span class="operator">::</span>Blue);
+      blueBarrel<span class="operator">-</span><span class="operator">&gt;</span>setBumps(Barrel<span class="operator">::</span>MiddleBumps);
+      blueBarrel<span class="operator">-</span><span class="operator">&gt;</span>transform()<span class="operator">-</span><span class="operator">&gt;</span>setTranslation(QVector3D(<span class="number">12.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span>));
+
+      Barrel <span class="operator">*</span>greenBarrel <span class="operator">=</span> <span class="keyword">new</span> Barrel(sceneRoot);
+      greenBarrel<span class="operator">-</span><span class="operator">&gt;</span>setDiffuse(Barrel<span class="operator">::</span>Green);
+      greenBarrel<span class="operator">-</span><span class="operator">&gt;</span>setBumps(Barrel<span class="operator">::</span>SoftBumps);
+      greenBarrel<span class="operator">-</span><span class="operator">&gt;</span>transform()<span class="operator">-</span><span class="operator">&gt;</span>setTranslation(QVector3D(<span class="number">14.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span>));
+
+      Barrel <span class="operator">*</span>stainlessBarrel <span class="operator">=</span> <span class="keyword">new</span> Barrel(sceneRoot);
+      stainlessBarrel<span class="operator">-</span><span class="operator">&gt;</span>setDiffuse(Barrel<span class="operator">::</span>StainlessSteelDiffuse);
+      stainlessBarrel<span class="operator">-</span><span class="operator">&gt;</span>setBumps(Barrel<span class="operator">::</span>NoBumps);
+      stainlessBarrel<span class="operator">-</span><span class="operator">&gt;</span>setSpecular(Barrel<span class="operator">::</span>StainlessSteelSpecular);
+      stainlessBarrel<span class="operator">-</span><span class="operator">&gt;</span>setShininess(<span class="number">150.0f</span>);
+      stainlessBarrel<span class="operator">-</span><span class="operator">&gt;</span>transform()<span class="operator">-</span><span class="operator">&gt;</span>setTranslation(QVector3D(<span class="number">16.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span>));
+
+      <span class="comment">// Plants</span>
+      HousePlant <span class="operator">*</span>squareBamboo <span class="operator">=</span> <span class="keyword">new</span> HousePlant(sceneRoot);
+      squareBamboo<span class="operator">-</span><span class="operator">&gt;</span>setPotShape(HousePlant<span class="operator">::</span>Square);
+      squareBamboo<span class="operator">-</span><span class="operator">&gt;</span>setPosition(QVector3D(<span class="number">4.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span>));
+
+      HousePlant <span class="operator">*</span>trianglePalm <span class="operator">=</span> <span class="keyword">new</span> HousePlant(sceneRoot);
+      trianglePalm<span class="operator">-</span><span class="operator">&gt;</span>setPlantType(HousePlant<span class="operator">::</span>Palm);
+      trianglePalm<span class="operator">-</span><span class="operator">&gt;</span>setPotShape(HousePlant<span class="operator">::</span>Triangle);
+      trianglePalm<span class="operator">-</span><span class="operator">&gt;</span>setPosition(QVector3D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">4.0f</span>));
+
+      HousePlant <span class="operator">*</span>spherePine <span class="operator">=</span> <span class="keyword">new</span> HousePlant(sceneRoot);
+      spherePine<span class="operator">-</span><span class="operator">&gt;</span>setPlantType(HousePlant<span class="operator">::</span>Pine);
+      spherePine<span class="operator">-</span><span class="operator">&gt;</span>setPotShape(HousePlant<span class="operator">::</span>Sphere);
+      spherePine<span class="operator">-</span><span class="operator">&gt;</span>setPosition(QVector3D(<span class="operator">-</span><span class="number">4.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span>));
+
+      HousePlant <span class="operator">*</span>crossSpikes <span class="operator">=</span> <span class="keyword">new</span> HousePlant(sceneRoot);
+      crossSpikes<span class="operator">-</span><span class="operator">&gt;</span>setPlantType(HousePlant<span class="operator">::</span>Spikes);
+      crossSpikes<span class="operator">-</span><span class="operator">&gt;</span>setPosition(QVector3D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">4.0f</span>));
+
+      HousePlant <span class="operator">*</span>crossPalm <span class="operator">=</span> <span class="keyword">new</span> HousePlant(sceneRoot);
+      crossPalm<span class="operator">-</span><span class="operator">&gt;</span>setPlantType(HousePlant<span class="operator">::</span>Palm);
+      crossPalm<span class="operator">-</span><span class="operator">&gt;</span>setPosition(QVector3D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">8.0f</span>));
+      crossPalm<span class="operator">-</span><span class="operator">&gt;</span>setScale(<span class="number">0.05f</span>);
+
+      HousePlant <span class="operator">*</span>crossShrub <span class="operator">=</span> <span class="keyword">new</span> HousePlant(sceneRoot);
+      crossShrub<span class="operator">-</span><span class="operator">&gt;</span>setPlantType(HousePlant<span class="operator">::</span>Shrub);
+      crossShrub<span class="operator">-</span><span class="operator">&gt;</span>setPosition(QVector3D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">8.0f</span>));
+      crossShrub<span class="operator">-</span><span class="operator">&gt;</span>setScale(<span class="number">0.05f</span>);
+
+      view<span class="operator">.</span>setRootEntity(sceneRoot);
+      view<span class="operator">.</span>show();
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+</div>
+<!-- @@@materials-cpp/main.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

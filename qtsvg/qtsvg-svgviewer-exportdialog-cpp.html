@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>exportdialog.cpp Example File | Qt SVG 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtsvg-index.html">Qt SVG</a></td><td ><a href="qtsvg-svgviewer-example.html">SVG Viewer Example</a></td><td >exportdialog.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">exportdialog.cpp Example File</h1>
+<span class="subtitle">svgviewer/exportdialog.cpp</span>
+<!-- $$$svgviewer/exportdialog.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;exportdialog.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QDesktopWidget&gt;</span>
+  <span class="preprocessor">#include &lt;QDialogButtonBox&gt;</span>
+  <span class="preprocessor">#include &lt;QFileDialog&gt;</span>
+  <span class="preprocessor">#include &lt;QFormLayout&gt;</span>
+  <span class="preprocessor">#include &lt;QHBoxLayout&gt;</span>
+  <span class="preprocessor">#include &lt;QMessageBox&gt;</span>
+  <span class="preprocessor">#include &lt;QLabel&gt;</span>
+  <span class="preprocessor">#include &lt;QLineEdit&gt;</span>
+  <span class="preprocessor">#include &lt;QPushButton&gt;</span>
+  <span class="preprocessor">#include &lt;QSpinBox&gt;</span>
+  <span class="preprocessor">#include &lt;QToolButton&gt;</span>
+  <span class="preprocessor">#include &lt;QVBoxLayout&gt;</span>
+
+  <span class="preprocessor">#include &lt;QImageWriter&gt;</span>
+
+  <span class="preprocessor">#include &lt;QDebug&gt;</span>
+
+  <span class="preprocessor">#include &lt;QDir&gt;</span>
+  <span class="preprocessor">#include &lt;QFileInfo&gt;</span>
+
+  <span class="keyword">enum</span> { exportMinimumSize <span class="operator">=</span> <span class="number">1</span><span class="operator">,</span> exportMaximumSize <span class="operator">=</span> <span class="number">2000</span> };
+
+  ExportDialog<span class="operator">::</span>ExportDialog(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span>(parent)
+      <span class="operator">,</span> m_fileNameLineEdit(<span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span>(<span class="keyword">this</span>))
+      <span class="operator">,</span> m_widthSpinBox(<span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qspinbox.html">QSpinBox</a></span>(<span class="keyword">this</span>))
+      <span class="operator">,</span> m_heightSpinBox(<span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qspinbox.html">QSpinBox</a></span>(<span class="keyword">this</span>))
+      <span class="operator">,</span> m_aspectRatio(<span class="number">1</span>)
+  {
+      <span class="keyword">typedef</span> <span class="type">void</span> (<span class="type"><a href="../qtwidgets/qspinbox.html">QSpinBox</a></span><span class="operator">::</span><span class="operator">*</span><span class="type">QSpinBoxIntSignal</span>)(<span class="type">int</span>);
+
+      setWindowFlags(windowFlags() <span class="operator">&amp;</span> <span class="operator">~</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowContextHelpButtonHint);
+      setWindowTitle(tr(<span class="string">&quot;Export&quot;</span>));
+
+      <span class="type"><a href="../qtwidgets/qformlayout.html">QFormLayout</a></span> <span class="operator">*</span>formLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qformlayout.html">QFormLayout</a></span>(<span class="keyword">this</span>);
+
+      <span class="type"><a href="../qtwidgets/qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>fileLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qhboxlayout.html">QHBoxLayout</a></span>;
+      fileLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_fileNameLineEdit);
+      m_fileNameLineEdit<span class="operator">-</span><span class="operator">&gt;</span>setMinimumWidth(<span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span><span class="operator">::</span>desktop()<span class="operator">-</span><span class="operator">&gt;</span>availableGeometry(<span class="keyword">this</span>)<span class="operator">.</span>width() <span class="operator">/</span> <span class="number">6</span>);
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>browseButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;Browse...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      fileLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(browseButton);
+      connect(browseButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qabstractbutton.html">QAbstractButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ExportDialog<span class="operator">::</span>browse);
+      formLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;File:&quot;</span>)<span class="operator">,</span> fileLayout);
+
+      <span class="type"><a href="../qtwidgets/qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>sizeLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qhboxlayout.html">QHBoxLayout</a></span>;
+      sizeLayout<span class="operator">-</span><span class="operator">&gt;</span>addStretch();
+      m_widthSpinBox<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(exportMinimumSize);
+      m_widthSpinBox<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(exportMaximumSize);
+      connect(m_widthSpinBox<span class="operator">,</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type">QSpinBoxIntSignal</span><span class="operator">&gt;</span>(<span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qspinbox.html">QSpinBox</a></span><span class="operator">::</span>valueChanged)<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ExportDialog<span class="operator">::</span>exportWidthChanged);
+      sizeLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_widthSpinBox);
+      <span class="comment">//: Multiplication, as in 32x32</span>
+      sizeLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(<span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;x&quot;</span>)));
+      m_heightSpinBox<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(exportMinimumSize);
+      m_heightSpinBox<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(exportMaximumSize);
+      connect(m_heightSpinBox<span class="operator">,</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type">QSpinBoxIntSignal</span><span class="operator">&gt;</span>(<span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qspinbox.html">QSpinBox</a></span><span class="operator">::</span>valueChanged)<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ExportDialog<span class="operator">::</span>exportHeightChanged);
+      sizeLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_heightSpinBox);
+      <span class="type"><a href="../qtwidgets/qtoolbutton.html">QToolButton</a></span> <span class="operator">*</span>resetButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtoolbutton.html">QToolButton</a></span>(<span class="keyword">this</span>);
+      resetButton<span class="operator">-</span><span class="operator">&gt;</span>setIcon(<span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(<span class="string">&quot;:/qt-project.org/styles/commonstyle/images/refresh-32.png&quot;</span>));
+      sizeLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(resetButton);
+      connect(resetButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qabstractbutton.html">QAbstractButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ExportDialog<span class="operator">::</span>resetExportSize);
+      formLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;Size:&quot;</span>)<span class="operator">,</span> sizeLayout);
+
+      <span class="type"><a href="../qtwidgets/qdialogbuttonbox.html">QDialogButtonBox</a></span> <span class="operator">*</span>buttonBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qdialogbuttonbox.html">QDialogButtonBox</a></span>(<span class="type"><a href="../qtwidgets/qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>Ok <span class="operator">|</span> <span class="type"><a href="../qtwidgets/qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>Cancel<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(buttonBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>accepted<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span><span class="operator">::</span>accept);
+      connect(buttonBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>rejected<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span><span class="operator">::</span>reject);
+      formLayout<span class="operator">-</span><span class="operator">&gt;</span>addRow(buttonBox);
+  }
+
+  <span class="type">void</span> ExportDialog<span class="operator">::</span>accept()
+  {
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> exportFileName();
+      <span class="keyword">if</span> (fileName<span class="operator">.</span>isEmpty()) {
+          <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span> windowTitle()<span class="operator">,</span> tr(<span class="string">&quot;Please enter a file name&quot;</span>));
+          <span class="keyword">return</span>;
+      }
+      <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span> fi(fileName);
+      <span class="keyword">if</span> (fi<span class="operator">.</span>exists()) {
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> question <span class="operator">=</span> tr(<span class="string">&quot;%1 already exists.\nWould you like to overwrite it?&quot;</span>)<span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(fileName));
+          <span class="keyword">if</span> (<span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>question(<span class="keyword">this</span><span class="operator">,</span> windowTitle()<span class="operator">,</span> question<span class="operator">,</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Yes <span class="operator">|</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>No) <span class="operator">!</span><span class="operator">=</span>  <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Yes)
+              <span class="keyword">return</span>;
+      }
+      <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span><span class="operator">::</span>accept();
+  }
+
+  <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> ExportDialog<span class="operator">::</span>exportSize() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(m_widthSpinBox<span class="operator">-</span><span class="operator">&gt;</span>value()<span class="operator">,</span> m_heightSpinBox<span class="operator">-</span><span class="operator">&gt;</span>value());
+  }
+
+  <span class="type">void</span> ExportDialog<span class="operator">::</span>setExportSize(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> <span class="operator">&amp;</span>size)
+  {
+      m_defaultSize <span class="operator">=</span> size;
+      <span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span> defaultSizeF(m_defaultSize);
+      m_aspectRatio <span class="operator">=</span> defaultSizeF<span class="operator">.</span>width() <span class="operator">/</span> defaultSizeF<span class="operator">.</span>height();
+      setExportWidthBlocked(size<span class="operator">.</span>width());
+      setExportHeightBlocked(size<span class="operator">.</span>height());
+  }
+
+  <span class="type">void</span> ExportDialog<span class="operator">::</span>resetExportSize()
+  {
+      setExportWidthBlocked(m_defaultSize<span class="operator">.</span>width());
+      setExportHeightBlocked(m_defaultSize<span class="operator">.</span>height());
+  }
+
+  <span class="type">void</span> ExportDialog<span class="operator">::</span>setExportWidthBlocked(<span class="type">int</span> width)
+  {
+      <span class="keyword">if</span> (m_widthSpinBox<span class="operator">-</span><span class="operator">&gt;</span>value() <span class="operator">!</span><span class="operator">=</span> width) {
+          <span class="keyword">const</span> bool blockSignals <span class="operator">=</span> m_widthSpinBox<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">true</span>);
+          m_widthSpinBox<span class="operator">-</span><span class="operator">&gt;</span>setValue(width);
+          m_widthSpinBox<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(blockSignals);
+      }
+  }
+
+  <span class="type">void</span> ExportDialog<span class="operator">::</span>setExportHeightBlocked(<span class="type">int</span> height)
+  {
+      <span class="keyword">if</span> (m_heightSpinBox<span class="operator">-</span><span class="operator">&gt;</span>value() <span class="operator">!</span><span class="operator">=</span> height) {
+          <span class="keyword">const</span> bool blockSignals <span class="operator">=</span> m_heightSpinBox<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">true</span>);
+          m_heightSpinBox<span class="operator">-</span><span class="operator">&gt;</span>setValue(height);
+          m_heightSpinBox<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(blockSignals);
+      }
+  }
+
+  <span class="type">void</span> ExportDialog<span class="operator">::</span>exportWidthChanged(<span class="type">int</span> width)
+  {
+      <span class="keyword">const</span> bool square <span class="operator">=</span> m_defaultSize<span class="operator">.</span>width() <span class="operator">=</span><span class="operator">=</span> m_defaultSize<span class="operator">.</span>height();
+      setExportHeightBlocked(square <span class="operator">?</span> width : <a href="../qtcore/qtglobal.html#qRound">qRound</a>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>(width) <span class="operator">/</span> m_aspectRatio));
+  }
+
+  <span class="type">void</span> ExportDialog<span class="operator">::</span>exportHeightChanged(<span class="type">int</span> height)
+  {
+      <span class="keyword">const</span> bool square <span class="operator">=</span> m_defaultSize<span class="operator">.</span>width() <span class="operator">=</span><span class="operator">=</span> m_defaultSize<span class="operator">.</span>height();
+      setExportWidthBlocked(square <span class="operator">?</span> height : <a href="../qtcore/qtglobal.html#qRound">qRound</a>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>(height) <span class="operator">*</span> m_aspectRatio));
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> ExportDialog<span class="operator">::</span>exportFileName() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>cleanPath(m_fileNameLineEdit<span class="operator">-</span><span class="operator">&gt;</span>text()<span class="operator">.</span>trimmed());
+  }
+
+  <span class="type">void</span> ExportDialog<span class="operator">::</span>setExportFileName(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>f)
+  {
+      m_fileNameLineEdit<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(f));
+  }
+
+  <span class="type">void</span> ExportDialog<span class="operator">::</span>browse()
+  {
+      <span class="type"><a href="../qtwidgets/qfiledialog.html">QFileDialog</a></span> fileDialog(<span class="keyword">this</span>);
+      fileDialog<span class="operator">.</span>setAcceptMode(<span class="type"><a href="../qtwidgets/qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>AcceptSave);
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> exportFileName();
+      <span class="keyword">if</span> (<span class="operator">!</span>fileName<span class="operator">.</span>isEmpty())
+          fileDialog<span class="operator">.</span>setDirectory(<span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span>(fileName)<span class="operator">.</span>absolutePath());
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> mimeTypes;
+      foreach (<span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>mimeType<span class="operator">,</span> <span class="type"><a href="../qtgui/qimagewriter.html">QImageWriter</a></span><span class="operator">::</span>supportedMimeTypes())
+          mimeTypes<span class="operator">.</span>append(QLatin1String(mimeType));
+      fileDialog<span class="operator">.</span>setMimeTypeFilters(mimeTypes);
+      <span class="keyword">const</span> <span class="type">int</span> pngIndex <span class="operator">=</span> mimeTypes<span class="operator">.</span>indexOf(<span class="string">&quot;image/png&quot;</span>);
+      <span class="keyword">if</span> (pngIndex <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span>) {
+          fileDialog<span class="operator">.</span>selectMimeTypeFilter(mimeTypes<span class="operator">.</span>at(pngIndex));
+          fileDialog<span class="operator">.</span>setDefaultSuffix(<span class="string">&quot;png&quot;</span>);
+      }
+      <span class="keyword">if</span> (fileDialog<span class="operator">.</span>exec() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted)
+          setExportFileName(fileDialog<span class="operator">.</span>selectedFiles()<span class="operator">.</span>constFirst());
+  }
+
+</pre>
+</div>
+<!-- @@@svgviewer/exportdialog.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

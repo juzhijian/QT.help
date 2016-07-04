@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mainwidget.cpp Example File | Qt OpenGL</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtopengl-index.html">Qt OpenGL</a></td><td ><a href="qtopengl-cube-example.html">Cube OpenGL ES 2.0 example</a></td><td >mainwidget.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mainwidget.cpp Example File</h1>
+<span class="subtitle">cube/mainwidget.cpp</span>
+<!-- $$$cube/mainwidget.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the QtCore module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;mainwidget.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QMouseEvent&gt;</span>
+
+  <span class="preprocessor">#include &lt;math.h&gt;</span>
+
+  MainWidget<span class="operator">::</span>MainWidget(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent) :
+      <span class="type"><a href="../qtwidgets/qopenglwidget.html">QOpenGLWidget</a></span>(parent)<span class="operator">,</span>
+      geometries(<span class="number">0</span>)<span class="operator">,</span>
+      texture(<span class="number">0</span>)<span class="operator">,</span>
+      angularSpeed(<span class="number">0</span>)
+  {
+  }
+
+  MainWidget<span class="operator">::</span><span class="operator">~</span>MainWidget()
+  {
+      <span class="comment">// Make sure the context is current when deleting the texture</span>
+      <span class="comment">// and the buffers.</span>
+      makeCurrent();
+      <span class="keyword">delete</span> texture;
+      <span class="keyword">delete</span> geometries;
+      doneCurrent();
+  }
+
+  <span class="type">void</span> MainWidget<span class="operator">::</span>mousePressEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>e)
+  {
+      <span class="comment">// Save mouse press position</span>
+      mousePressPosition <span class="operator">=</span> QVector2D(e<span class="operator">-</span><span class="operator">&gt;</span>localPos());
+  }
+
+  <span class="type">void</span> MainWidget<span class="operator">::</span>mouseReleaseEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>e)
+  {
+      <span class="comment">// Mouse release position - mouse press position</span>
+      QVector2D diff <span class="operator">=</span> QVector2D(e<span class="operator">-</span><span class="operator">&gt;</span>localPos()) <span class="operator">-</span> mousePressPosition;
+
+      <span class="comment">// Rotation axis is perpendicular to the mouse position difference</span>
+      <span class="comment">// vector</span>
+      QVector3D n <span class="operator">=</span> QVector3D(diff<span class="operator">.</span>y()<span class="operator">,</span> diff<span class="operator">.</span>x()<span class="operator">,</span> <span class="number">0.0</span>)<span class="operator">.</span>normalized();
+
+      <span class="comment">// Accelerate angular speed relative to the length of the mouse sweep</span>
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> acc <span class="operator">=</span> diff<span class="operator">.</span>length() <span class="operator">/</span> <span class="number">100.0</span>;
+
+      <span class="comment">// Calculate new rotation axis as weighted sum</span>
+      rotationAxis <span class="operator">=</span> (rotationAxis <span class="operator">*</span> angularSpeed <span class="operator">+</span> n <span class="operator">*</span> acc)<span class="operator">.</span>normalized();
+
+      <span class="comment">// Increase angular speed</span>
+      angularSpeed <span class="operator">+</span><span class="operator">=</span> acc;
+  }
+
+  <span class="type">void</span> MainWidget<span class="operator">::</span>timerEvent(<span class="type"><a href="../qtcore/qtimerevent.html">QTimerEvent</a></span> <span class="operator">*</span>)
+  {
+      <span class="comment">// Decrease angular speed (friction)</span>
+      angularSpeed <span class="operator">*</span><span class="operator">=</span> <span class="number">0.99</span>;
+
+      <span class="comment">// Stop rotation when speed goes below threshold</span>
+      <span class="keyword">if</span> (angularSpeed <span class="operator">&lt;</span> <span class="number">0.01</span>) {
+          angularSpeed <span class="operator">=</span> <span class="number">0.0</span>;
+      } <span class="keyword">else</span> {
+          <span class="comment">// Update rotation</span>
+          rotation <span class="operator">=</span> <span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span><span class="operator">::</span>fromAxisAndAngle(rotationAxis<span class="operator">,</span> angularSpeed) <span class="operator">*</span> rotation;
+
+          <span class="comment">// Request an update</span>
+          update();
+      }
+  }
+
+  <span class="type">void</span> MainWidget<span class="operator">::</span>initializeGL()
+  {
+      initializeOpenGLFunctions();
+
+      glClearColor(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+
+      initShaders();
+      initTextures();
+
+      <span class="comment">// Enable depth buffer</span>
+      glEnable(GL_DEPTH_TEST);
+
+      <span class="comment">// Enable back face culling</span>
+      glEnable(GL_CULL_FACE);
+
+      geometries <span class="operator">=</span> <span class="keyword">new</span> GeometryEngine;
+
+      <span class="comment">// Use QBasicTimer because its faster than QTimer</span>
+      timer<span class="operator">.</span>start(<span class="number">12</span><span class="operator">,</span> <span class="keyword">this</span>);
+  }
+
+  <span class="type">void</span> MainWidget<span class="operator">::</span>initShaders()
+  {
+      <span class="comment">// Compile vertex shader</span>
+      <span class="keyword">if</span> (<span class="operator">!</span>program<span class="operator">.</span>addShaderFromSourceFile(<span class="type"><a href="../qtgui/qopenglshader.html">QOpenGLShader</a></span><span class="operator">::</span>Vertex<span class="operator">,</span> <span class="string">&quot;:/vshader.glsl&quot;</span>))
+          close();
+
+      <span class="comment">// Compile fragment shader</span>
+      <span class="keyword">if</span> (<span class="operator">!</span>program<span class="operator">.</span>addShaderFromSourceFile(<span class="type"><a href="../qtgui/qopenglshader.html">QOpenGLShader</a></span><span class="operator">::</span>Fragment<span class="operator">,</span> <span class="string">&quot;:/fshader.glsl&quot;</span>))
+          close();
+
+      <span class="comment">// Link shader pipeline</span>
+      <span class="keyword">if</span> (<span class="operator">!</span>program<span class="operator">.</span>link())
+          close();
+
+      <span class="comment">// Bind shader pipeline for use</span>
+      <span class="keyword">if</span> (<span class="operator">!</span>program<span class="operator">.</span>bind())
+          close();
+  }
+
+  <span class="type">void</span> MainWidget<span class="operator">::</span>initTextures()
+  {
+      <span class="comment">// Load cube.png image</span>
+      texture <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtgui/qopengltexture.html">QOpenGLTexture</a></span>(<span class="type"><a href="../qtgui/qimage.html">QImage</a></span>(<span class="string">&quot;:/cube.png&quot;</span>)<span class="operator">.</span>mirrored());
+
+      <span class="comment">// Set nearest filtering mode for texture minification</span>
+      texture<span class="operator">-</span><span class="operator">&gt;</span>setMinificationFilter(<span class="type"><a href="../qtgui/qopengltexture.html">QOpenGLTexture</a></span><span class="operator">::</span>Nearest);
+
+      <span class="comment">// Set bilinear filtering mode for texture magnification</span>
+      texture<span class="operator">-</span><span class="operator">&gt;</span>setMagnificationFilter(<span class="type"><a href="../qtgui/qopengltexture.html">QOpenGLTexture</a></span><span class="operator">::</span>Linear);
+
+      <span class="comment">// Wrap texture coordinates by repeating</span>
+      <span class="comment">// f.ex. texture coordinate (1.1, 1.2) is same as (0.1, 0.2)</span>
+      texture<span class="operator">-</span><span class="operator">&gt;</span>setWrapMode(<span class="type"><a href="../qtgui/qopengltexture.html">QOpenGLTexture</a></span><span class="operator">::</span>Repeat);
+  }
+
+  <span class="type">void</span> MainWidget<span class="operator">::</span>resizeGL(<span class="type">int</span> w<span class="operator">,</span> <span class="type">int</span> h)
+  {
+      <span class="comment">// Calculate aspect ratio</span>
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> aspect <span class="operator">=</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>(w) <span class="operator">/</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>(h <span class="operator">?</span> h : <span class="number">1</span>);
+
+      <span class="comment">// Set near plane to 3.0, far plane to 7.0, field of view 45 degrees</span>
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> zNear <span class="operator">=</span> <span class="number">3.0</span><span class="operator">,</span> zFar <span class="operator">=</span> <span class="number">7.0</span><span class="operator">,</span> fov <span class="operator">=</span> <span class="number">45.0</span>;
+
+      <span class="comment">// Reset projection</span>
+      projection<span class="operator">.</span>setToIdentity();
+
+      <span class="comment">// Set perspective projection</span>
+      projection<span class="operator">.</span>perspective(fov<span class="operator">,</span> aspect<span class="operator">,</span> zNear<span class="operator">,</span> zFar);
+  }
+
+  <span class="type">void</span> MainWidget<span class="operator">::</span>paintGL()
+  {
+      <span class="comment">// Clear color and depth buffer</span>
+      glClear(GL_COLOR_BUFFER_BIT <span class="operator">|</span> GL_DEPTH_BUFFER_BIT);
+
+      texture<span class="operator">-</span><span class="operator">&gt;</span>bind();
+
+      <span class="comment">// Calculate model view transformation</span>
+      QMatrix4x4 matrix;
+      matrix<span class="operator">.</span>translate(<span class="number">0.0</span><span class="operator">,</span> <span class="number">0.0</span><span class="operator">,</span> <span class="operator">-</span><span class="number">5.0</span>);
+      matrix<span class="operator">.</span>rotate(rotation);
+
+      <span class="comment">// Set modelview-projection matrix</span>
+      program<span class="operator">.</span>setUniformValue(<span class="string">&quot;mvp_matrix&quot;</span><span class="operator">,</span> projection <span class="operator">*</span> matrix);
+
+      <span class="comment">// Use texture unit 0 which contains cube.png</span>
+      program<span class="operator">.</span>setUniformValue(<span class="string">&quot;texture&quot;</span><span class="operator">,</span> <span class="number">0</span>);
+
+      <span class="comment">// Draw cube geometry</span>
+      geometries<span class="operator">-</span><span class="operator">&gt;</span>drawCubeGeometry(<span class="operator">&amp;</span>program);
+  }
+
+</pre>
+</div>
+<!-- @@@cube/mainwidget.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

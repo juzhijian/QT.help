@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- chat.qdoc -->
+  <title>Bluetooth QML Chat Example | Qt Bluetooth 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtbluetooth-index.html">Qt Bluetooth</a></td><td >Bluetooth QML Chat Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+<li class="level1"><a href="#interacting-with-the-server">Interacting with the Server</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Bluetooth QML Chat Example</h1>
+<span class="subtitle"></span>
+<!-- $$$chat-description -->
+<div class="descr"> <a name="details"></a>
+<p><i>Bluetooth QML Chat</i> example shows how to use the <a href="qtbluetooth-index.html">Qt Bluetooth</a> QML API to communicate with another application on a remote device using Bluetooth.</p>
+<p class="centerAlign"><img src="images/chat-view.png" alt="" /></p><p>The Bluetooth QML Chat example implements a simple chat program between two parties. The application acts as client and attempts to connect to a Bluetooth socket server. It uses the <a href="qml-qtbluetooth-bluetoothdiscoverymodel.html">BluetoothDiscoveryModel</a> type to find the server and <a href="qml-qtbluetooth-bluetoothsocket.html">BluetoothSocket</a> type to facilitate the data exchange.</p>
+<a name="running-the-example"></a>
+<h2 id="running-the-example">Running the Example</h2>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<p>The example only works in connection with the <a href="qtbluetooth-btchat-example.html">Bluetooth Chat Example</a>. The Bluetooth Chat example launches the chat service and advertises it via the Bluetooth SDP protocol. It is important that the device running the Bluetooth Chat example actively advertises its SDP services. This can be checked using the <a href="qbluetoothlocaldevice.html#hostMode">QBluetoothLocalDevice::hostMode</a> property.</p>
+<a name="interacting-with-the-server"></a>
+<h2 id="interacting-with-the-server">Interacting with the Server</h2>
+<p>The example application immediately starts the service discovery using the <a href="qml-qtbluetooth-bluetoothdiscoverymodel.html">BluetoothDiscoveryModel</a> type:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtbluetooth-bluetoothdiscoverymodel.html">BluetoothDiscoveryModel</a></span> {
+      <span class="name">id</span>: <span class="name">btModel</span>
+      <span class="name">running</span>: <span class="number">true</span>
+      <span class="name">discoveryMode</span>: <span class="name">BluetoothDiscoveryModel</span>.<span class="name">MinimalServiceDiscovery</span>
+      <span class="name">uuidFilter</span>: <span class="string">&quot;e8e10f95-1a70-4b27-9ccf-02010264e9c8&quot;</span>
+  }
+
+</pre>
+<p>The <a href="qml-qtbluetooth-bluetoothdiscoverymodel.html#uuidFilter-prop">uuidFilter</a> property is used to only search for the chat server UUID and the <a href="qml-qtbluetooth-bluetoothdiscoverymodel.html#running-prop">running</a> property activates the search. Once a service with a matching UUID is found the model emits the <a href="qml-qtbluetooth-bluetoothdiscoverymodel.html#serviceDiscovered-signal">serviceDiscovered(BluetoothService)</a> signal.</p>
+<pre class="qml">
+
+      <span class="name">onServiceDiscovered</span>: {
+          <span class="keyword">if</span> (<span class="name">serviceFound</span>)
+              <span class="keyword">return</span>
+          <span class="name">serviceFound</span> <span class="operator">=</span> <span class="number">true</span>
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Found new service &quot;</span> <span class="operator">+</span> <span class="name">service</span>.<span class="name">deviceAddress</span> <span class="operator">+</span> <span class="string">&quot; &quot;</span> <span class="operator">+</span> <span class="name">service</span>.<span class="name">deviceName</span> <span class="operator">+</span> <span class="string">&quot; &quot;</span> <span class="operator">+</span> <span class="name">service</span>.<span class="name">serviceName</span>);
+          <span class="name">searchBox</span>.<span class="name">appendText</span>(<span class="string">&quot;\nConnecting to server...&quot;</span>)
+          <span class="name">remoteDeviceName</span> <span class="operator">=</span> <span class="name">service</span>.<span class="name">deviceName</span>
+          <span class="name">socket</span>.<span class="name">setService</span>(<span class="name">service</span>)
+      }
+
+</pre>
+<p>The <a href="qml-qtbluetooth-bluetoothservice.html">BluetoothService</a> type encapsulates the details of the found chat server, such as the <a href="qml-qtbluetooth-bluetoothservice.html#serviceName-prop">name</a> and <a href="qml-qtbluetooth-bluetoothservice.html#serviceDescription-prop">description</a> of the service, as well as the <a href="qml-qtbluetooth-bluetoothservice.html#deviceName-prop">name</a> and <a href="qml-qtbluetooth-bluetoothservice.html#deviceAddress-prop">address</a> of the Bluetooth device offering the chat server. It is passed to the <a href="qml-qtbluetooth-bluetoothsocket.html">BluetoothSocket</a> to establish the connection.</p>
+<p>Once the connection is established the chat information is:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtbluetooth-bluetoothsocket.html">BluetoothSocket</a></span> {
+      <span class="name">id</span>: <span class="name">socket</span>
+      <span class="name">connected</span>: <span class="number">true</span>
+
+      <span class="name">onSocketStateChanged</span>: {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Connected to server&quot;</span>)
+          <span class="name">top</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;chatActive&quot;</span>
+      }
+  }
+
+</pre>
+<p>The payload is received via the <a href="qml-qtbluetooth-bluetoothsocket.html#stringData-prop">stringData</a> property:</p>
+<pre class="qml">
+
+      <span class="name">onStringDataChanged</span>: {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Received data: &quot;</span> )
+          var <span class="name">data</span> = <span class="name">remoteDeviceName</span> <span class="operator">+</span> <span class="string">&quot;: &quot;</span> <span class="operator">+</span> <span class="name">socket</span>.<span class="name">stringData</span>;
+          <span class="name">data</span> <span class="operator">=</span> <span class="name">data</span>.<span class="name">substring</span>(<span class="number">0</span>, <span class="name">data</span>.<span class="name">indexOf</span>(<span class="string">'\n'</span>))
+          <span class="name">chatContent</span>.<span class="name">append</span>({content: <span class="name">data</span>})
+      }
+
+</pre>
+<p>And sent by setting the same property:</p>
+<pre class="qml">
+
+  <span class="name">socket</span>.<span class="name">stringData</span> <span class="operator">=</span> <span class="name">data</span>
+
+</pre>
+<p>Files:</p>
+<ul>
+<li><a href="qtbluetooth-chat-button-qml.html">chat/Button.qml</a></li>
+<li><a href="qtbluetooth-chat-inputbox-qml.html">chat/InputBox.qml</a></li>
+<li><a href="qtbluetooth-chat-search-qml.html">chat/Search.qml</a></li>
+<li><a href="qtbluetooth-chat-chat-qml.html">chat/chat.qml</a></li>
+<li><a href="qtbluetooth-chat-qmlchat-cpp.html">chat/qmlchat.cpp</a></li>
+<li><a href="qtbluetooth-chat-chat-pro.html">chat/chat.pro</a></li>
+<li><a href="qtbluetooth-chat-chat-qrc.html">chat/chat.qrc</a></li>
+</ul>
+<p>Images:</p>
+<ul>
+<li><a href="images/used-in-examples/chat/images/clear.png">chat/images/clear.png</a></li>
+<li><a href="images/used-in-examples/chat/images/default.png">chat/images/default.png</a></li>
+<li><a href="images/used-in-examples/chat/images/lineedit-bg.png">chat/images/lineedit-bg.png</a></li>
+</ul>
+</div>
+<!-- @@@chat -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

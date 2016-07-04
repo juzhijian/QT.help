@@ -1,0 +1,666 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>main.qml Example File | Qt Gamepad 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td >Qt 5.7</td><td ><a href="qtgamepad-index.html">Qt Gamepad</a></td><td ><a href="qtgamepad-configurebuttons-example.html">Qt Gamepad Configure Buttons Example</a></td><td >main.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">main.qml Example File</h1>
+<span class="subtitle">configureButtons/main.qml</span>
+<!-- $$$configureButtons/main.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 BogDan Vatra &lt;bogdan@kde.org&gt;
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Gamepad module
+  **
+  ** $QT_BEGIN_LICENSE:LGPL3$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see http://www.qt.io/terms-conditions. For further
+  ** information use the contact form at http://www.qt.io/contact-us.
+  **
+  ** GNU Lesser General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU Lesser
+  ** General Public License version 3 as published by the Free Software
+  ** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+  ** packaging of this file. Please review the following information to
+  ** ensure the GNU Lesser General Public License version 3 requirements
+  ** will be met: https://www.gnu.org/licenses/lgpl.html.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 2.0 or later as published by the Free
+  ** Software Foundation and appearing in the file LICENSE.GPL included in
+  ** the packaging of this file. Please review the following information to
+  ** ensure the GNU General Public License version 2.0 requirements will be
+  ** met: http://www.gnu.org/licenses/gpl-2.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.5
+  import QtQuick.Controls 1.4
+
+  import QtQuick 2.5
+  import QtQuick.Controls 1.4
+  import QtQuick.Layouts 1.2
+  import QtQuick.Window 2.0
+  import QtGamepad 1.0
+
+  <span class="type">ApplicationWindow</span> {
+      <span class="name">visible</span>: <span class="number">true</span>
+      <span class="name">title</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure gamepad&quot;</span>)
+
+      <span class="name">Component</span>.onCompleted: {
+          <span class="keyword">if</span> (<span class="name">Qt</span>.<span class="name">platform</span>.<span class="name">os</span> <span class="operator">===</span> <span class="string">&quot;android&quot;</span>)
+              <span class="name">visibility</span> <span class="operator">=</span> <span class="name">Window</span>.<span class="name">Maximized</span>
+      }
+
+      property <span class="type">Button</span> <span class="name">checkedButton</span>: <span class="number">null</span>
+      <span class="keyword">function</span> <span class="name">pressButton</span>(<span class="name">button</span>)
+      {
+          <span class="keyword">if</span> (<span class="name">checkedButton</span> <span class="operator">!==</span> <span class="number">null</span> <span class="operator">&amp;&amp;</span> <span class="name">button</span> <span class="operator">!==</span> <span class="name">checkedButton</span>)
+              <span class="name">checkedButton</span>.<span class="name">checked</span> <span class="operator">=</span> <span class="number">false</span>;
+          <span class="name">checkedButton</span> <span class="operator">=</span> <span class="name">button</span>
+      }
+
+      <span class="type">Gamepad</span> {
+          <span class="name">id</span>: <span class="name">gamepad</span>
+          <span class="name">deviceId</span>: <span class="name">GamepadManager</span>.<span class="name">connectedGamepads</span>.<span class="name">length</span> <span class="operator">&gt;</span> <span class="number">0</span> ? <span class="name">GamepadManager</span>.<span class="name">connectedGamepads</span>[<span class="number">0</span>] : -<span class="number">1</span>
+          <span class="name">onDeviceIdChanged</span>: <span class="name">GamepadManager</span>.<span class="name">setCancelConfigureButton</span>(<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonStart</span>);
+      }
+
+      <span class="type">Connections</span> {
+          <span class="name">target</span>: <span class="name">GamepadManager</span>
+          <span class="name">onButtonConfigured</span>: <span class="name">pressButton</span>(<span class="number">null</span>)
+          <span class="name">onAxisConfigured</span>: <span class="name">pressButton</span>(<span class="number">null</span>)
+          <span class="name">onConfigurationCanceled</span>: <span class="name">pressButton</span>(<span class="number">null</span>)
+      }
+
+      <span class="type">ColumnLayout</span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+
+          <span class="type">RowLayout</span> {
+              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+              <span class="type">Text</span> {
+                  <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Connected gamepads&quot;</span>)
+              }
+              <span class="type">ComboBox</span> {
+                  <span class="name">model</span>: <span class="name">GamepadManager</span>.<span class="name">connectedGamepads</span>
+                  <span class="name">onCurrentIndexChanged</span>: <span class="name">gamepad</span>.<span class="name">deviceId</span>[<span class="name">GamepadManager</span>.<span class="name">connectedGamepads</span>[<span class="name">currentIndex</span>]]
+              }
+          }
+
+          <span class="type">Text</span> {
+              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Start button cancel's current configuration&quot;</span>)
+          }
+
+          <span class="type">RowLayout</span> {
+              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+              <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+              <span class="type">GroupBox</span> {
+                  <span class="name">title</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure Gamepad Buttons&quot;</span>)
+                  <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                  <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+
+                  <span class="type">ColumnLayout</span> {
+                      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;ButtonA&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">buttonA</span> ? <span class="name">qsTr</span>(<span class="string">&quot;DOWN&quot;</span>) : <span class="name">qsTr</span>(<span class="string">&quot;UP&quot;</span>)
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureButton</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonA</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;ButtonB&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">buttonB</span> ? <span class="name">qsTr</span>(<span class="string">&quot;DOWN&quot;</span>) : <span class="name">qsTr</span>(<span class="string">&quot;UP&quot;</span>)
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureButton</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonB</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;ButtonX&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">buttonX</span> ? <span class="name">qsTr</span>(<span class="string">&quot;DOWN&quot;</span>) : <span class="name">qsTr</span>(<span class="string">&quot;UP&quot;</span>)
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureButton</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonX</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;ButtonY&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">buttonY</span> ? <span class="name">qsTr</span>(<span class="string">&quot;DOWN&quot;</span>) : <span class="name">qsTr</span>(<span class="string">&quot;UP&quot;</span>)
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureButton</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonY</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;ButtonStart&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">buttonStart</span> ? <span class="name">qsTr</span>(<span class="string">&quot;DOWN&quot;</span>) : <span class="name">qsTr</span>(<span class="string">&quot;UP&quot;</span>)
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureButton</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonStart</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;ButtonSelect&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">buttonSelect</span> ? <span class="name">qsTr</span>(<span class="string">&quot;DOWN&quot;</span>) : <span class="name">qsTr</span>(<span class="string">&quot;UP&quot;</span>)
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureButton</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonSelect</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Button L1&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">buttonL1</span> ? <span class="name">qsTr</span>(<span class="string">&quot;DOWN&quot;</span>) : <span class="name">qsTr</span>(<span class="string">&quot;UP&quot;</span>)
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureButton</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonL1</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Button R1&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">buttonR1</span> ? <span class="name">qsTr</span>(<span class="string">&quot;DOWN&quot;</span>) : <span class="name">qsTr</span>(<span class="string">&quot;UP&quot;</span>)
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureButton</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonR1</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Button L2&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">buttonL2</span> ? <span class="name">qsTr</span>(<span class="string">&quot;DOWN&quot;</span>) : <span class="name">qsTr</span>(<span class="string">&quot;UP&quot;</span>)
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureButton</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonL2</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Button R2&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">buttonR2</span> ? <span class="name">qsTr</span>(<span class="string">&quot;DOWN&quot;</span>) : <span class="name">qsTr</span>(<span class="string">&quot;UP&quot;</span>)
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureButton</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonR2</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Button L3&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">buttonL3</span> ? <span class="name">qsTr</span>(<span class="string">&quot;DOWN&quot;</span>) : <span class="name">qsTr</span>(<span class="string">&quot;UP&quot;</span>)
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureButton</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonL3</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Button R3&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">buttonR3</span> ? <span class="name">qsTr</span>(<span class="string">&quot;DOWN&quot;</span>) : <span class="name">qsTr</span>(<span class="string">&quot;UP&quot;</span>)
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureButton</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonR3</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Button Up&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">buttonUp</span> ? <span class="name">qsTr</span>(<span class="string">&quot;DOWN&quot;</span>) : <span class="name">qsTr</span>(<span class="string">&quot;UP&quot;</span>)
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureButton</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonUp</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Button Down&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">buttonDown</span> ? <span class="name">qsTr</span>(<span class="string">&quot;DOWN&quot;</span>) : <span class="name">qsTr</span>(<span class="string">&quot;UP&quot;</span>)
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureButton</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonDown</span>  );
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Button Left&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+                          <span class="type">Text</span> {
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">buttonLeft</span> ? <span class="name">qsTr</span>(<span class="string">&quot;DOWN&quot;</span>) : <span class="name">qsTr</span>(<span class="string">&quot;UP&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureButton</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonLeft</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Button Right&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+                          <span class="type">Text</span> {
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">buttonRight</span> ? <span class="name">qsTr</span>(<span class="string">&quot;DOWN&quot;</span>) : <span class="name">qsTr</span>(<span class="string">&quot;UP&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureButton</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonRight</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Button Center&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+                          <span class="type">Text</span> {
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">buttonCenter</span> ? <span class="name">qsTr</span>(<span class="string">&quot;DOWN&quot;</span>) : <span class="name">qsTr</span>(<span class="string">&quot;UP&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureButton</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonCenter</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Button Guide&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+                          <span class="type">Text</span> {
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">buttonGuide</span> ? <span class="name">qsTr</span>(<span class="string">&quot;DOWN&quot;</span>) : <span class="name">qsTr</span>(<span class="string">&quot;UP&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureButton</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">ButtonGuide</span>);
+                              }
+                          }
+                      }
+                  }
+              }
+              <span class="type">GroupBox</span> {
+                  <span class="name">title</span>: <span class="name">qsTr</span>(<span class="string">&quot;Gamepad Axies&quot;</span>)
+                  <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                  <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+
+                  <span class="type">ColumnLayout</span> {
+                      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;AxisLeftX&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">axisLeftX</span>
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureAxis</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">AxisLeftX</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;AxisLeftY&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">axisLeftY</span>
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureAxis</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">AxisLeftY</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;AxisRightX&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">axisRightX</span>
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureAxis</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">AxisRightX</span>);
+                              }
+                          }
+                      }
+                      <span class="type">RowLayout</span> {
+                          <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;AxisRightY&quot;</span>)
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignRight</span>
+                          }
+
+                          <span class="type">Text</span> {
+                              <span class="name">text</span>: <span class="name">gamepad</span>.<span class="name">axisRightY</span>
+                              <span class="name">Layout</span>.fillWidth: <span class="number">true</span>
+                              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+                          }
+
+                          <span class="type">Button</span> {
+                              <span class="name">text</span>: <span class="name">qsTr</span>(<span class="string">&quot;Configure&quot;</span>)
+                              <span class="name">checkable</span>: <span class="number">true</span>
+                              <span class="name">enabled</span>: !<span class="name">checked</span>
+                              <span class="name">onCheckedChanged</span>: {
+                                  <span class="name">pressButton</span>(this);
+                                  <span class="keyword">if</span> (<span class="name">checked</span>)
+                                      <span class="name">GamepadManager</span>.<span class="name">configureAxis</span>(<span class="name">gamepad</span>.<span class="name">deviceId</span>, <span class="name">GamepadManager</span>.<span class="name">AxisRightY</span>);
+                              }
+                          }
+                      }
+
+                      <span class="type">Item</span> {
+                          <span class="name">Layout</span>.fillHeight: <span class="number">true</span>
+                      }
+                  }
+              }
+          }
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@configureButtons/main.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

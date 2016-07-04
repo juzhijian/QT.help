@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>chart.cpp Example File | Qt Charts 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcharts-index.html">Qt Charts</a></td><td ><a href="qtcharts-dynamicspline-example.html">Dynamic Spline Example</a></td><td >chart.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">chart.cpp Example File</h1>
+<span class="subtitle">dynamicspline/chart.cpp</span>
+<!-- $$$dynamicspline/chart.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Charts module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;chart.h&quot;</span>
+  <span class="preprocessor">#include &lt;QtCharts/QAbstractAxis&gt;</span>
+  <span class="preprocessor">#include &lt;QtCharts/QSplineSeries&gt;</span>
+  <span class="preprocessor">#include &lt;QtCharts/QValueAxis&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QTime&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QDebug&gt;</span>
+
+  Chart<span class="operator">::</span>Chart(<span class="type"><a href="../qtwidgets/qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span>parent<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowFlags wFlags):
+      <span class="type"><a href="qchart.html">QChart</a></span>(<span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>ChartTypeCartesian<span class="operator">,</span> parent<span class="operator">,</span> wFlags)<span class="operator">,</span>
+      m_series(<span class="number">0</span>)<span class="operator">,</span>
+      m_axis(<span class="keyword">new</span> <span class="type"><a href="qvalueaxis.html">QValueAxis</a></span>)<span class="operator">,</span>
+      m_step(<span class="number">0</span>)<span class="operator">,</span>
+      m_x(<span class="number">5</span>)<span class="operator">,</span>
+      m_y(<span class="number">1</span>)
+  {
+      qsrand((<span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span>) <span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime()<span class="operator">.</span>msec());
+
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(<span class="operator">&amp;</span>m_timer<span class="operator">,</span> SIGNAL(timeout())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(handleTimeout()));
+      m_timer<span class="operator">.</span>setInterval(<span class="number">1000</span>);
+
+      m_series <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qsplineseries.html">QSplineSeries</a></span>(<span class="keyword">this</span>);
+      <span class="type"><a href="../qtgui/qpen.html">QPen</a></span> green(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>red);
+      green<span class="operator">.</span>setWidth(<span class="number">3</span>);
+      m_series<span class="operator">-</span><span class="operator">&gt;</span>setPen(green);
+      m_series<span class="operator">-</span><span class="operator">&gt;</span>append(m_x<span class="operator">,</span> m_y);
+
+      addSeries(m_series);
+      createDefaultAxes();
+      setAxisX(m_axis<span class="operator">,</span> m_series);
+      m_axis<span class="operator">-</span><span class="operator">&gt;</span>setTickCount(<span class="number">5</span>);
+      axisX()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="number">0</span><span class="operator">,</span> <span class="number">10</span>);
+      axisY()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span><span class="number">5</span><span class="operator">,</span> <span class="number">10</span>);
+
+      m_timer<span class="operator">.</span>start();
+  }
+
+  Chart<span class="operator">::</span><span class="operator">~</span>Chart()
+  {
+
+  }
+
+  <span class="type">void</span> Chart<span class="operator">::</span>handleTimeout()
+  {
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> x <span class="operator">=</span> plotArea()<span class="operator">.</span>width() <span class="operator">/</span> m_axis<span class="operator">-</span><span class="operator">&gt;</span>tickCount();
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> y <span class="operator">=</span> (m_axis<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">-</span> m_axis<span class="operator">-</span><span class="operator">&gt;</span>min()) <span class="operator">/</span> m_axis<span class="operator">-</span><span class="operator">&gt;</span>tickCount();
+      m_x <span class="operator">+</span><span class="operator">=</span> y;
+      m_y <span class="operator">=</span> qrand() <span class="operator">%</span> <span class="number">5</span> <span class="operator">-</span> <span class="number">2.5</span>;
+      m_series<span class="operator">-</span><span class="operator">&gt;</span>append(m_x<span class="operator">,</span> m_y);
+      scroll(x<span class="operator">,</span> <span class="number">0</span>);
+      <span class="keyword">if</span> (m_x <span class="operator">=</span><span class="operator">=</span> <span class="number">100</span>)
+          m_timer<span class="operator">.</span>stop();
+  }
+
+</pre>
+</div>
+<!-- @@@dynamicspline/chart.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

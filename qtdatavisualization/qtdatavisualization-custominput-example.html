@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- custominput.qdoc -->
+  <title>Custom Input Example | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td >Custom Input Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#replacing-default-input-handling">Replacing default input handling</a></li>
+<li class="level1"><a href="#implementing-custom-selection-handling">Implementing custom selection handling</a></li>
+<li class="level1"><a href="#implementing-custom-zoom-handling">Implementing custom zoom handling</a></li>
+<li class="level1"><a href="#implementing-custom-camera-handling">Implementing custom camera handling</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Custom Input Example</h1>
+<span class="subtitle"></span>
+<!-- $$$custominput-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Custom Input example shows how to customize the 3D graph controls in a widget application using a custom graph input handler to capture and process mouse events. The code in this example shows also how the camera is controlled by using <a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a> to animate the camera and item selection is done on mouseover rather than clicking any mouse buttons. Also the code shows how to implement similar zoom with mouse wheel functionality as the default input handler implements.</p>
+<p class="centerAlign"><img src="images/custominput-example.png" alt="" /></p><a name="replacing-default-input-handling"></a>
+<h2 id="replacing-default-input-handling">Replacing default input handling</h2>
+<p>The default input handling mechanism is replaced by setting the active input handler of <a href="q3dscatter.html">Q3DScatter</a> to <code>CustomInputHandler</code> that implements the custom behavior.</p>
+<pre class="cpp">
+
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>setActiveInputHandler(m_inputHandler);
+
+</pre>
+<a name="implementing-custom-selection-handling"></a>
+<h2 id="implementing-custom-selection-handling">Implementing custom selection handling</h2>
+<p>The on mouseover selection handling is implemented in the <code>CustomInputHandler</code> that captures the mouse events. It then stores the last known coordinates to the <a href="qabstract3dinputhandler.html#inputPosition-prop">QAbstract3DInputHandler::inputPosition</a> property.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> CustomInputHandler<span class="operator">::</span>mouseMoveEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>event<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <span class="operator">&amp;</span>mousePos)
+  {
+      Q_UNUSED(event)
+      setInputPosition(mousePos);
+  }
+
+</pre>
+<p>As the selection is one shot, and is cleared each time a 3D frame is rendered, a timer is setup to retrigger selection so that the selection moves to the item currently under the mouse cursor as the camera animates around the graph even when the mouse cursor is not moving.</p>
+<pre class="cpp">
+
+  m_selectionTimer <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span>(<span class="keyword">this</span>);
+  m_selectionTimer<span class="operator">-</span><span class="operator">&gt;</span>setInterval(<span class="number">10</span>);
+  m_selectionTimer<span class="operator">-</span><span class="operator">&gt;</span>setSingleShot(<span class="keyword">false</span>);
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(m_selectionTimer<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span><span class="operator">::</span>timeout<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span>
+                   <span class="operator">&amp;</span>ScatterDataModifier<span class="operator">::</span>triggerSelection);
+  m_selectionTimer<span class="operator">-</span><span class="operator">&gt;</span>start();
+
+</pre>
+<a name="implementing-custom-zoom-handling"></a>
+<h2 id="implementing-custom-zoom-handling">Implementing custom zoom handling</h2>
+<p>The camera has a zoom factor that represents amount of zoom in percentages. In this example the zoom range is limited between 10% and 500%. This range is then divided to four subranges where <code>angleDelta</code> is scaled to different amount of zoom change based on the current subrange.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> CustomInputHandler<span class="operator">::</span>wheelEvent(<span class="type"><a href="../qtgui/qwheelevent.html">QWheelEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="comment">// Adjust zoom level based on what zoom range we're in.</span>
+      <span class="type">int</span> zoomLevel <span class="operator">=</span> scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">-</span><span class="operator">&gt;</span>zoomLevel();
+      <span class="keyword">if</span> (zoomLevel <span class="operator">&gt;</span> <span class="number">100</span>)
+          zoomLevel <span class="operator">+</span><span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>angleDelta()<span class="operator">.</span>y() <span class="operator">/</span> <span class="number">12</span>;
+      <span class="keyword">else</span> <span class="keyword">if</span> (zoomLevel <span class="operator">&gt;</span> <span class="number">50</span>)
+          zoomLevel <span class="operator">+</span><span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>angleDelta()<span class="operator">.</span>y() <span class="operator">/</span> <span class="number">60</span>;
+      <span class="keyword">else</span>
+          zoomLevel <span class="operator">+</span><span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>angleDelta()<span class="operator">.</span>y() <span class="operator">/</span> <span class="number">120</span>;
+      <span class="keyword">if</span> (zoomLevel <span class="operator">&gt;</span> <span class="number">500</span>)
+          zoomLevel <span class="operator">=</span> <span class="number">500</span>;
+      <span class="keyword">else</span> <span class="keyword">if</span> (zoomLevel <span class="operator">&lt;</span> <span class="number">10</span>)
+          zoomLevel <span class="operator">=</span> <span class="number">10</span>;
+
+      scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">-</span><span class="operator">&gt;</span>setZoomLevel(zoomLevel);
+  }
+
+</pre>
+<a name="implementing-custom-camera-handling"></a>
+<h2 id="implementing-custom-camera-handling">Implementing custom camera handling</h2>
+<p>The camera is animated to constantly rotate around the graph with two animations. The rotation around the graph is done with a simple <a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a> that just increments during 20 seconds from 0 degrees to 360 degrees and sets the <a href="q3dcamera.html#xRotation-prop">Q3DCamera::xRotation</a> property.</p>
+<pre class="cpp">
+
+  m_animationCameraX <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span>(m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">,</span> <span class="string">&quot;xRotation&quot;</span>);
+  m_animationCameraX<span class="operator">-</span><span class="operator">&gt;</span>setDuration(<span class="number">20000</span>);
+  m_animationCameraX<span class="operator">-</span><span class="operator">&gt;</span>setStartValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="number">0.0f</span>));
+  m_animationCameraX<span class="operator">-</span><span class="operator">&gt;</span>setEndValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="number">360.0f</span>));
+  m_animationCameraX<span class="operator">-</span><span class="operator">&gt;</span>setLoopCount(<span class="operator">-</span><span class="number">1</span>);
+
+</pre>
+<p>The camera movement up and down is implemented with a <a href="../qtcore/qsequentialanimationgroup.html">QSequentialAnimationGroup</a> that varies the <a href="q3dcamera.html#yRotation-prop">Q3DCamera::yRotation</a> property of the camera from 5 degrees to 45 degrees and back with in and out easing.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span> <span class="operator">*</span>upAnimation <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span>(m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">,</span> <span class="string">&quot;yRotation&quot;</span>);
+  upAnimation<span class="operator">-</span><span class="operator">&gt;</span>setDuration(<span class="number">9000</span>);
+  upAnimation<span class="operator">-</span><span class="operator">&gt;</span>setStartValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="number">5.0f</span>));
+  upAnimation<span class="operator">-</span><span class="operator">&gt;</span>setEndValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="number">45.0f</span>));
+
+  <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span> <span class="operator">*</span>downAnimation <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span>(m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">,</span> <span class="string">&quot;yRotation&quot;</span>);
+  downAnimation<span class="operator">-</span><span class="operator">&gt;</span>setDuration(<span class="number">9000</span>);
+  downAnimation<span class="operator">-</span><span class="operator">&gt;</span>setStartValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="number">45.0f</span>));
+  downAnimation<span class="operator">-</span><span class="operator">&gt;</span>setEndValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="number">5.0f</span>));
+
+  m_animationCameraY <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qsequentialanimationgroup.html">QSequentialAnimationGroup</a></span>();
+  m_animationCameraY<span class="operator">-</span><span class="operator">&gt;</span>setLoopCount(<span class="operator">-</span><span class="number">1</span>);
+  m_animationCameraY<span class="operator">-</span><span class="operator">&gt;</span>addAnimation(upAnimation);
+  m_animationCameraY<span class="operator">-</span><span class="operator">&gt;</span>addAnimation(downAnimation);
+
+</pre>
+<p>Files:</p>
+<ul>
+<li><a href="qtdatavisualization-custominput-custominputhandler-cpp.html">custominput/custominputhandler.cpp</a></li>
+<li><a href="qtdatavisualization-custominput-custominputhandler-h.html">custominput/custominputhandler.h</a></li>
+<li><a href="qtdatavisualization-custominput-scatterdatamodifier-cpp.html">custominput/scatterdatamodifier.cpp</a></li>
+<li><a href="qtdatavisualization-custominput-scatterdatamodifier-h.html">custominput/scatterdatamodifier.h</a></li>
+<li><a href="qtdatavisualization-custominput-main-cpp.html">custominput/main.cpp</a></li>
+<li><a href="qtdatavisualization-custominput-custominput-pro.html">custominput/custominput.pro</a></li>
+<li><a href="qtdatavisualization-custominput-custominput-qrc.html">custominput/custominput.qrc</a></li>
+</ul>
+</div>
+<!-- @@@custominput -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>audiodevices.cpp Example File | Qt Multimedia 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-multimedia-audiodevices-example.html">Audio Devices Example</a></td><td >audiodevices.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">audiodevices.cpp Example File</h1>
+<span class="subtitle">multimedia/audiodevices/audiodevices.cpp</span>
+<!-- $$$multimedia/audiodevices/audiodevices.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;audiodevices.h&quot;</span>
+
+  <span class="comment">// Utility functions for converting QAudioFormat fields into text</span>
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> toString(<span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>SampleType sampleType)
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> result(<span class="string">&quot;Unknown&quot;</span>);
+      <span class="keyword">switch</span> (sampleType) {
+      <span class="keyword">case</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>SignedInt:
+          result <span class="operator">=</span> <span class="string">&quot;SignedInt&quot;</span>;
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>UnSignedInt:
+          result <span class="operator">=</span> <span class="string">&quot;UnSignedInt&quot;</span>;
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>Float:
+          result <span class="operator">=</span> <span class="string">&quot;Float&quot;</span>;
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>Unknown:
+          result <span class="operator">=</span> <span class="string">&quot;Unknown&quot;</span>;
+      }
+      <span class="keyword">return</span> result;
+  }
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> toString(<span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>Endian endian)
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> result(<span class="string">&quot;Unknown&quot;</span>);
+      <span class="keyword">switch</span> (endian) {
+      <span class="keyword">case</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>LittleEndian:
+          result <span class="operator">=</span> <span class="string">&quot;LittleEndian&quot;</span>;
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>BigEndian:
+          result <span class="operator">=</span> <span class="string">&quot;BigEndian&quot;</span>;
+          <span class="keyword">break</span>;
+      }
+      <span class="keyword">return</span> result;
+  }
+
+  AudioDevicesBase<span class="operator">::</span>AudioDevicesBase(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtwidgets/qmainwindow.html">QMainWindow</a></span>(parent)
+  {
+      setupUi(<span class="keyword">this</span>);
+  }
+
+  AudioDevicesBase<span class="operator">::</span><span class="operator">~</span>AudioDevicesBase() {}
+
+  AudioTest<span class="operator">::</span>AudioTest(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : AudioDevicesBase(parent)
+  {
+      mode <span class="operator">=</span> <span class="type"><a href="qaudio.html">QAudio</a></span><span class="operator">::</span>AudioOutput;
+
+      connect(testButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> SLOT(test()));
+      connect(modeBox<span class="operator">,</span> SIGNAL(activated(<span class="type">int</span>))<span class="operator">,</span> SLOT(modeChanged(<span class="type">int</span>)));
+      connect(deviceBox<span class="operator">,</span> SIGNAL(activated(<span class="type">int</span>))<span class="operator">,</span> SLOT(deviceChanged(<span class="type">int</span>)));
+      connect(sampleRateBox<span class="operator">,</span> SIGNAL(activated(<span class="type">int</span>))<span class="operator">,</span> SLOT(sampleRateChanged(<span class="type">int</span>)));
+      connect(channelsBox<span class="operator">,</span> SIGNAL(activated(<span class="type">int</span>))<span class="operator">,</span> SLOT(channelChanged(<span class="type">int</span>)));
+      connect(codecsBox<span class="operator">,</span> SIGNAL(activated(<span class="type">int</span>))<span class="operator">,</span> SLOT(codecChanged(<span class="type">int</span>)));
+      connect(sampleSizesBox<span class="operator">,</span> SIGNAL(activated(<span class="type">int</span>))<span class="operator">,</span> SLOT(sampleSizeChanged(<span class="type">int</span>)));
+      connect(sampleTypesBox<span class="operator">,</span> SIGNAL(activated(<span class="type">int</span>))<span class="operator">,</span> SLOT(sampleTypeChanged(<span class="type">int</span>)));
+      connect(endianBox<span class="operator">,</span> SIGNAL(activated(<span class="type">int</span>))<span class="operator">,</span> SLOT(endianChanged(<span class="type">int</span>)));
+      connect(populateTableButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> SLOT(populateTable()));
+
+      modeBox<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(<span class="number">0</span>);
+      modeChanged(<span class="number">0</span>);
+      deviceBox<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(<span class="number">0</span>);
+      deviceChanged(<span class="number">0</span>);
+  }
+
+  AudioTest<span class="operator">::</span><span class="operator">~</span>AudioTest()
+  {
+  }
+
+  <span class="type">void</span> AudioTest<span class="operator">::</span>test()
+  {
+      <span class="comment">// tries to set all the settings picked.</span>
+      testResult<span class="operator">-</span><span class="operator">&gt;</span>clear();
+
+      <span class="keyword">if</span> (<span class="operator">!</span>deviceInfo<span class="operator">.</span>isNull()) {
+          <span class="keyword">if</span> (deviceInfo<span class="operator">.</span>isFormatSupported(settings)) {
+              testResult<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Success&quot;</span>));
+              nearestSampleRate<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="string">&quot;&quot;</span>);
+              nearestChannel<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="string">&quot;&quot;</span>);
+              nearestCodec<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="string">&quot;&quot;</span>);
+              nearestSampleSize<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="string">&quot;&quot;</span>);
+              nearestSampleType<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="string">&quot;&quot;</span>);
+              nearestEndian<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="string">&quot;&quot;</span>);
+          } <span class="keyword">else</span> {
+              <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span> nearest <span class="operator">=</span> deviceInfo<span class="operator">.</span>nearestFormat(settings);
+              testResult<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Failed&quot;</span>));
+              nearestSampleRate<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1&quot;</span>)<span class="operator">.</span>arg(nearest<span class="operator">.</span>sampleRate()));
+              nearestChannel<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1&quot;</span>)<span class="operator">.</span>arg(nearest<span class="operator">.</span>channelCount()));
+              nearestCodec<span class="operator">-</span><span class="operator">&gt;</span>setText(nearest<span class="operator">.</span>codec());
+              nearestSampleSize<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1&quot;</span>)<span class="operator">.</span>arg(nearest<span class="operator">.</span>sampleSize()));
+              nearestSampleType<span class="operator">-</span><span class="operator">&gt;</span>setText(toString(nearest<span class="operator">.</span>sampleType()));
+              nearestEndian<span class="operator">-</span><span class="operator">&gt;</span>setText(toString(nearest<span class="operator">.</span>byteOrder()));
+          }
+      }
+      <span class="keyword">else</span>
+          testResult<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;No Device&quot;</span>));
+  }
+
+  <span class="type">void</span> AudioTest<span class="operator">::</span>modeChanged(<span class="type">int</span> idx)
+  {
+      testResult<span class="operator">-</span><span class="operator">&gt;</span>clear();
+
+      <span class="comment">// mode has changed</span>
+      <span class="keyword">if</span> (idx <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+          mode <span class="operator">=</span> <span class="type"><a href="qaudio.html">QAudio</a></span><span class="operator">::</span>AudioInput;
+      <span class="keyword">else</span>
+          mode <span class="operator">=</span> <span class="type"><a href="qaudio.html">QAudio</a></span><span class="operator">::</span>AudioOutput;
+
+      deviceBox<span class="operator">-</span><span class="operator">&gt;</span>clear();
+      foreach (<span class="keyword">const</span> <span class="type"><a href="qaudiodeviceinfo.html">QAudioDeviceInfo</a></span> <span class="operator">&amp;</span>deviceInfo<span class="operator">,</span> <span class="type"><a href="qaudiodeviceinfo.html">QAudioDeviceInfo</a></span><span class="operator">::</span>availableDevices(mode))
+          deviceBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(deviceInfo<span class="operator">.</span>deviceName()<span class="operator">,</span> <a href="../qtcore/qvariant-obsolete.html#qVariantFromValue-1">qVariantFromValue</a>(deviceInfo));
+
+      deviceBox<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(<span class="number">0</span>);
+      deviceChanged(<span class="number">0</span>);
+  }
+
+  <span class="type">void</span> AudioTest<span class="operator">::</span>deviceChanged(<span class="type">int</span> idx)
+  {
+      testResult<span class="operator">-</span><span class="operator">&gt;</span>clear();
+
+      <span class="keyword">if</span> (deviceBox<span class="operator">-</span><span class="operator">&gt;</span>count() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="keyword">return</span>;
+
+      <span class="comment">// device has changed</span>
+      deviceInfo <span class="operator">=</span> deviceBox<span class="operator">-</span><span class="operator">&gt;</span>itemData(idx)<span class="operator">.</span>value<span class="operator">&lt;</span><span class="type"><a href="qaudiodeviceinfo.html">QAudioDeviceInfo</a></span><span class="operator">&gt;</span>();
+
+      sampleRateBox<span class="operator">-</span><span class="operator">&gt;</span>clear();
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span> sampleRatez <span class="operator">=</span> deviceInfo<span class="operator">.</span>supportedSampleRates();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> sampleRatez<span class="operator">.</span>size(); <span class="operator">+</span><span class="operator">+</span>i)
+          sampleRateBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1&quot;</span>)<span class="operator">.</span>arg(sampleRatez<span class="operator">.</span>at(i)));
+      <span class="keyword">if</span> (sampleRatez<span class="operator">.</span>size())
+          settings<span class="operator">.</span>setSampleRate(sampleRatez<span class="operator">.</span>at(<span class="number">0</span>));
+
+      channelsBox<span class="operator">-</span><span class="operator">&gt;</span>clear();
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span> chz <span class="operator">=</span> deviceInfo<span class="operator">.</span>supportedChannelCounts();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> chz<span class="operator">.</span>size(); <span class="operator">+</span><span class="operator">+</span>i)
+          channelsBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1&quot;</span>)<span class="operator">.</span>arg(chz<span class="operator">.</span>at(i)));
+      <span class="keyword">if</span> (chz<span class="operator">.</span>size())
+          settings<span class="operator">.</span>setChannelCount(chz<span class="operator">.</span>at(<span class="number">0</span>));
+
+      codecsBox<span class="operator">-</span><span class="operator">&gt;</span>clear();
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> codecs <span class="operator">=</span> deviceInfo<span class="operator">.</span>supportedCodecs();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> codecs<span class="operator">.</span>size(); <span class="operator">+</span><span class="operator">+</span>i)
+          codecsBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1&quot;</span>)<span class="operator">.</span>arg(codecs<span class="operator">.</span>at(i)));
+      <span class="keyword">if</span> (codecs<span class="operator">.</span>size())
+          settings<span class="operator">.</span>setCodec(codecs<span class="operator">.</span>at(<span class="number">0</span>));
+      <span class="comment">// Add false to create failed condition!</span>
+      codecsBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;audio/test&quot;</span>);
+
+      sampleSizesBox<span class="operator">-</span><span class="operator">&gt;</span>clear();
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span> sampleSizez <span class="operator">=</span> deviceInfo<span class="operator">.</span>supportedSampleSizes();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> sampleSizez<span class="operator">.</span>size(); <span class="operator">+</span><span class="operator">+</span>i)
+          sampleSizesBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1&quot;</span>)<span class="operator">.</span>arg(sampleSizez<span class="operator">.</span>at(i)));
+      <span class="keyword">if</span> (sampleSizez<span class="operator">.</span>size())
+          settings<span class="operator">.</span>setSampleSize(sampleSizez<span class="operator">.</span>at(<span class="number">0</span>));
+
+      sampleTypesBox<span class="operator">-</span><span class="operator">&gt;</span>clear();
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>SampleType<span class="operator">&gt;</span> sampleTypez <span class="operator">=</span> deviceInfo<span class="operator">.</span>supportedSampleTypes();
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> sampleTypez<span class="operator">.</span>size(); <span class="operator">+</span><span class="operator">+</span>i)
+          sampleTypesBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(toString(sampleTypez<span class="operator">.</span>at(i)));
+      <span class="keyword">if</span> (sampleTypez<span class="operator">.</span>size())
+          settings<span class="operator">.</span>setSampleType(sampleTypez<span class="operator">.</span>at(<span class="number">0</span>));
+
+      endianBox<span class="operator">-</span><span class="operator">&gt;</span>clear();
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>Endian<span class="operator">&gt;</span> endianz <span class="operator">=</span> deviceInfo<span class="operator">.</span>supportedByteOrders();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> endianz<span class="operator">.</span>size(); <span class="operator">+</span><span class="operator">+</span>i)
+          endianBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(toString(endianz<span class="operator">.</span>at(i)));
+      <span class="keyword">if</span> (endianz<span class="operator">.</span>size())
+          settings<span class="operator">.</span>setByteOrder(endianz<span class="operator">.</span>at(<span class="number">0</span>));
+
+      allFormatsTable<span class="operator">-</span><span class="operator">&gt;</span>clearContents();
+  }
+
+  <span class="type">void</span> AudioTest<span class="operator">::</span>populateTable()
+  {
+      <span class="type">int</span> row <span class="operator">=</span> <span class="number">0</span>;
+
+      <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span> format;
+      foreach (<span class="type"><a href="../qtcore/qstring.html">QString</a></span> codec<span class="operator">,</span> deviceInfo<span class="operator">.</span>supportedCodecs()) {
+          format<span class="operator">.</span>setCodec(codec);
+          foreach (<span class="type">int</span> sampleRate<span class="operator">,</span> deviceInfo<span class="operator">.</span>supportedSampleRates()) {
+              format<span class="operator">.</span>setSampleRate(sampleRate);
+              foreach (<span class="type">int</span> channels<span class="operator">,</span> deviceInfo<span class="operator">.</span>supportedChannelCounts()) {
+                  format<span class="operator">.</span>setChannelCount(channels);
+                  foreach (<span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>SampleType sampleType<span class="operator">,</span> deviceInfo<span class="operator">.</span>supportedSampleTypes()) {
+                      format<span class="operator">.</span>setSampleType(sampleType);
+                      foreach (<span class="type">int</span> sampleSize<span class="operator">,</span> deviceInfo<span class="operator">.</span>supportedSampleSizes()) {
+                          format<span class="operator">.</span>setSampleSize(sampleSize);
+                          foreach (<span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>Endian endian<span class="operator">,</span> deviceInfo<span class="operator">.</span>supportedByteOrders()) {
+                              format<span class="operator">.</span>setByteOrder(endian);
+                              <span class="keyword">if</span> (deviceInfo<span class="operator">.</span>isFormatSupported(format)) {
+                                  allFormatsTable<span class="operator">-</span><span class="operator">&gt;</span>setRowCount(row <span class="operator">+</span> <span class="number">1</span>);
+
+                                  <span class="type"><a href="../qtwidgets/qtablewidgetitem.html">QTableWidgetItem</a></span> <span class="operator">*</span>codecItem <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtablewidgetitem.html">QTableWidgetItem</a></span>(format<span class="operator">.</span>codec());
+                                  allFormatsTable<span class="operator">-</span><span class="operator">&gt;</span>setItem(row<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> codecItem);
+
+                                  <span class="type"><a href="../qtwidgets/qtablewidgetitem.html">QTableWidgetItem</a></span> <span class="operator">*</span>sampleRateItem <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtablewidgetitem.html">QTableWidgetItem</a></span>(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1&quot;</span>)<span class="operator">.</span>arg(format<span class="operator">.</span>sampleRate()));
+                                  allFormatsTable<span class="operator">-</span><span class="operator">&gt;</span>setItem(row<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> sampleRateItem);
+
+                                  <span class="type"><a href="../qtwidgets/qtablewidgetitem.html">QTableWidgetItem</a></span> <span class="operator">*</span>channelsItem <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtablewidgetitem.html">QTableWidgetItem</a></span>(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1&quot;</span>)<span class="operator">.</span>arg(format<span class="operator">.</span>channelCount()));
+                                  allFormatsTable<span class="operator">-</span><span class="operator">&gt;</span>setItem(row<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> channelsItem);
+
+                                  <span class="type"><a href="../qtwidgets/qtablewidgetitem.html">QTableWidgetItem</a></span> <span class="operator">*</span>sampleTypeItem <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtablewidgetitem.html">QTableWidgetItem</a></span>(toString(format<span class="operator">.</span>sampleType()));
+                                  allFormatsTable<span class="operator">-</span><span class="operator">&gt;</span>setItem(row<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> sampleTypeItem);
+
+                                  <span class="type"><a href="../qtwidgets/qtablewidgetitem.html">QTableWidgetItem</a></span> <span class="operator">*</span>sampleSizeItem <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtablewidgetitem.html">QTableWidgetItem</a></span>(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1&quot;</span>)<span class="operator">.</span>arg(format<span class="operator">.</span>sampleSize()));
+                                  allFormatsTable<span class="operator">-</span><span class="operator">&gt;</span>setItem(row<span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> sampleSizeItem);
+
+                                  <span class="type"><a href="../qtwidgets/qtablewidgetitem.html">QTableWidgetItem</a></span> <span class="operator">*</span>byteOrderItem <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtablewidgetitem.html">QTableWidgetItem</a></span>(toString(format<span class="operator">.</span>byteOrder()));
+                                  allFormatsTable<span class="operator">-</span><span class="operator">&gt;</span>setItem(row<span class="operator">,</span> <span class="number">5</span><span class="operator">,</span> byteOrderItem);
+
+                                  <span class="operator">+</span><span class="operator">+</span>row;
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+      }
+  }
+
+  <span class="type">void</span> AudioTest<span class="operator">::</span>sampleRateChanged(<span class="type">int</span> idx)
+  {
+      <span class="comment">// sample rate has changed</span>
+      settings<span class="operator">.</span>setSampleRate(sampleRateBox<span class="operator">-</span><span class="operator">&gt;</span>itemText(idx)<span class="operator">.</span>toInt());
+  }
+
+  <span class="type">void</span> AudioTest<span class="operator">::</span>channelChanged(<span class="type">int</span> idx)
+  {
+      settings<span class="operator">.</span>setChannelCount(channelsBox<span class="operator">-</span><span class="operator">&gt;</span>itemText(idx)<span class="operator">.</span>toInt());
+  }
+
+  <span class="type">void</span> AudioTest<span class="operator">::</span>codecChanged(<span class="type">int</span> idx)
+  {
+      settings<span class="operator">.</span>setCodec(codecsBox<span class="operator">-</span><span class="operator">&gt;</span>itemText(idx));
+  }
+
+  <span class="type">void</span> AudioTest<span class="operator">::</span>sampleSizeChanged(<span class="type">int</span> idx)
+  {
+      settings<span class="operator">.</span>setSampleSize(sampleSizesBox<span class="operator">-</span><span class="operator">&gt;</span>itemText(idx)<span class="operator">.</span>toInt());
+  }
+
+  <span class="type">void</span> AudioTest<span class="operator">::</span>sampleTypeChanged(<span class="type">int</span> idx)
+  {
+      <span class="keyword">switch</span> (sampleTypesBox<span class="operator">-</span><span class="operator">&gt;</span>itemText(idx)<span class="operator">.</span>toInt()) {
+          <span class="keyword">case</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>SignedInt:
+              settings<span class="operator">.</span>setSampleType(<span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>SignedInt);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>UnSignedInt:
+              settings<span class="operator">.</span>setSampleType(<span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>UnSignedInt);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>Float:
+              settings<span class="operator">.</span>setSampleType(<span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>Float);
+      }
+  }
+
+  <span class="type">void</span> AudioTest<span class="operator">::</span>endianChanged(<span class="type">int</span> idx)
+  {
+      <span class="keyword">switch</span> (endianBox<span class="operator">-</span><span class="operator">&gt;</span>itemText(idx)<span class="operator">.</span>toInt()) {
+          <span class="keyword">case</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>LittleEndian:
+              settings<span class="operator">.</span>setByteOrder(<span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>LittleEndian);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>BigEndian:
+              settings<span class="operator">.</span>setByteOrder(<span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>BigEndian);
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@multimedia/audiodevices/audiodevices.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

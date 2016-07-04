@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>player.cpp Example File | Qt Multimedia 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-multimediawidgets-player-example.html">Media Player Example</a></td><td >player.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">player.cpp Example File</h1>
+<span class="subtitle">multimediawidgets/player/player.cpp</span>
+<!-- $$$multimediawidgets/player/player.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;player.h&quot;</span>
+
+  <span class="preprocessor">#include &quot;playercontrols.h&quot;</span>
+  <span class="preprocessor">#include &quot;playlistmodel.h&quot;</span>
+  <span class="preprocessor">#include &quot;histogramwidget.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QMediaService&gt;</span>
+  <span class="preprocessor">#include &lt;QMediaPlaylist&gt;</span>
+  <span class="preprocessor">#include &lt;QVideoProbe&gt;</span>
+  <span class="preprocessor">#include &lt;QMediaMetaData&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+
+  Player<span class="operator">::</span>Player(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>(parent)
+      <span class="operator">,</span> videoWidget(<span class="number">0</span>)
+      <span class="operator">,</span> coverLabel(<span class="number">0</span>)
+      <span class="operator">,</span> slider(<span class="number">0</span>)
+  <span class="preprocessor">#ifndef PLAYER_NO_COLOROPTIONS</span>
+      <span class="operator">,</span> colorDialog(<span class="number">0</span>)
+  <span class="preprocessor">#endif</span>
+  {
+      player <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span>(<span class="keyword">this</span>);
+      <span class="comment">// owned by PlaylistModel</span>
+      playlist <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmediaplaylist.html">QMediaPlaylist</a></span>();
+      player<span class="operator">-</span><span class="operator">&gt;</span>setPlaylist(playlist);
+
+      connect(player<span class="operator">,</span> SIGNAL(durationChanged(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span>))<span class="operator">,</span> SLOT(durationChanged(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span>)));
+      connect(player<span class="operator">,</span> SIGNAL(positionChanged(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span>))<span class="operator">,</span> SLOT(positionChanged(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span>)));
+      connect(player<span class="operator">,</span> SIGNAL(metaDataChanged())<span class="operator">,</span> SLOT(metaDataChanged()));
+      connect(playlist<span class="operator">,</span> SIGNAL(currentIndexChanged(<span class="type">int</span>))<span class="operator">,</span> SLOT(playlistPositionChanged(<span class="type">int</span>)));
+      connect(player<span class="operator">,</span> SIGNAL(mediaStatusChanged(<span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>MediaStatus))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(statusChanged(<span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>MediaStatus)));
+      connect(player<span class="operator">,</span> SIGNAL(bufferStatusChanged(<span class="type">int</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(bufferingProgress(<span class="type">int</span>)));
+      connect(player<span class="operator">,</span> SIGNAL(videoAvailableChanged(bool))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(videoAvailableChanged(bool)));
+      connect(player<span class="operator">,</span> SIGNAL(error(<span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>Error))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(displayErrorMessage()));
+
+      videoWidget <span class="operator">=</span> <span class="keyword">new</span> VideoWidget(<span class="keyword">this</span>);
+      player<span class="operator">-</span><span class="operator">&gt;</span>setVideoOutput(videoWidget);
+
+      playlistModel <span class="operator">=</span> <span class="keyword">new</span> PlaylistModel(<span class="keyword">this</span>);
+      playlistModel<span class="operator">-</span><span class="operator">&gt;</span>setPlaylist(playlist);
+
+      playlistView <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlistview.html">QListView</a></span>(<span class="keyword">this</span>);
+      playlistView<span class="operator">-</span><span class="operator">&gt;</span>setModel(playlistModel);
+      playlistView<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(playlistModel<span class="operator">-</span><span class="operator">&gt;</span>index(playlist<span class="operator">-</span><span class="operator">&gt;</span>currentIndex()<span class="operator">,</span> <span class="number">0</span>));
+
+      connect(playlistView<span class="operator">,</span> SIGNAL(activated(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(jump(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>)));
+
+      slider <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qslider.html">QSlider</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal<span class="operator">,</span> <span class="keyword">this</span>);
+      slider<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="number">0</span><span class="operator">,</span> player<span class="operator">-</span><span class="operator">&gt;</span>duration() <span class="operator">/</span> <span class="number">1000</span>);
+
+      labelDuration <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlabel.html">QLabel</a></span>(<span class="keyword">this</span>);
+      connect(slider<span class="operator">,</span> SIGNAL(sliderMoved(<span class="type">int</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(seek(<span class="type">int</span>)));
+
+      labelHistogram <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlabel.html">QLabel</a></span>(<span class="keyword">this</span>);
+      labelHistogram<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="string">&quot;Histogram:&quot;</span>);
+      histogram <span class="operator">=</span> <span class="keyword">new</span> HistogramWidget(<span class="keyword">this</span>);
+      <span class="type"><a href="../qtwidgets/qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>histogramLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qhboxlayout.html">QHBoxLayout</a></span>;
+      histogramLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(labelHistogram);
+      histogramLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(histogram<span class="operator">,</span> <span class="number">1</span>);
+
+      probe <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvideoprobe.html">QVideoProbe</a></span>(<span class="keyword">this</span>);
+      connect(probe<span class="operator">,</span> SIGNAL(videoFrameProbed(<span class="type"><a href="qvideoframe.html">QVideoFrame</a></span>))<span class="operator">,</span> histogram<span class="operator">,</span> SLOT(processFrame(<span class="type"><a href="qvideoframe.html">QVideoFrame</a></span>)));
+      probe<span class="operator">-</span><span class="operator">&gt;</span>setSource(player);
+
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>openButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;Open&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+
+      connect(openButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(open()));
+
+      PlayerControls <span class="operator">*</span>controls <span class="operator">=</span> <span class="keyword">new</span> PlayerControls(<span class="keyword">this</span>);
+      controls<span class="operator">-</span><span class="operator">&gt;</span>setState(player<span class="operator">-</span><span class="operator">&gt;</span>state());
+      controls<span class="operator">-</span><span class="operator">&gt;</span>setVolume(player<span class="operator">-</span><span class="operator">&gt;</span>volume());
+      controls<span class="operator">-</span><span class="operator">&gt;</span>setMuted(controls<span class="operator">-</span><span class="operator">&gt;</span>isMuted());
+
+      connect(controls<span class="operator">,</span> SIGNAL(play())<span class="operator">,</span> player<span class="operator">,</span> SLOT(play()));
+      connect(controls<span class="operator">,</span> SIGNAL(pause())<span class="operator">,</span> player<span class="operator">,</span> SLOT(pause()));
+      connect(controls<span class="operator">,</span> SIGNAL(stop())<span class="operator">,</span> player<span class="operator">,</span> SLOT(stop()));
+      connect(controls<span class="operator">,</span> SIGNAL(next())<span class="operator">,</span> playlist<span class="operator">,</span> SLOT(next()));
+      connect(controls<span class="operator">,</span> SIGNAL(previous())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(previousClicked()));
+      connect(controls<span class="operator">,</span> SIGNAL(changeVolume(<span class="type">int</span>))<span class="operator">,</span> player<span class="operator">,</span> SLOT(setVolume(<span class="type">int</span>)));
+      connect(controls<span class="operator">,</span> SIGNAL(changeMuting(bool))<span class="operator">,</span> player<span class="operator">,</span> SLOT(setMuted(bool)));
+      connect(controls<span class="operator">,</span> SIGNAL(changeRate(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>))<span class="operator">,</span> player<span class="operator">,</span> SLOT(setPlaybackRate(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>)));
+
+      connect(controls<span class="operator">,</span> SIGNAL(stop())<span class="operator">,</span> videoWidget<span class="operator">,</span> SLOT(update()));
+
+      connect(player<span class="operator">,</span> SIGNAL(stateChanged(<span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>State))<span class="operator">,</span>
+              controls<span class="operator">,</span> SLOT(setState(<span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>State)));
+      connect(player<span class="operator">,</span> SIGNAL(volumeChanged(<span class="type">int</span>))<span class="operator">,</span> controls<span class="operator">,</span> SLOT(setVolume(<span class="type">int</span>)));
+      connect(player<span class="operator">,</span> SIGNAL(mutedChanged(bool))<span class="operator">,</span> controls<span class="operator">,</span> SLOT(setMuted(bool)));
+
+      fullScreenButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;FullScreen&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      fullScreenButton<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+
+  <span class="preprocessor">#ifndef PLAYER_NO_COLOROPTIONS</span>
+      colorButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;Color Options...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      colorButton<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      connect(colorButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(showColorDialog()));
+  <span class="preprocessor">#endif</span>
+
+      <span class="type"><a href="../qtwidgets/qboxlayout.html">QBoxLayout</a></span> <span class="operator">*</span>displayLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qhboxlayout.html">QHBoxLayout</a></span>;
+      displayLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(videoWidget<span class="operator">,</span> <span class="number">2</span>);
+      displayLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(playlistView);
+
+      <span class="type"><a href="../qtwidgets/qboxlayout.html">QBoxLayout</a></span> <span class="operator">*</span>controlLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qhboxlayout.html">QHBoxLayout</a></span>;
+      controlLayout<span class="operator">-</span><span class="operator">&gt;</span>setMargin(<span class="number">0</span>);
+      controlLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(openButton);
+      controlLayout<span class="operator">-</span><span class="operator">&gt;</span>addStretch(<span class="number">1</span>);
+      controlLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(controls);
+      controlLayout<span class="operator">-</span><span class="operator">&gt;</span>addStretch(<span class="number">1</span>);
+      controlLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(fullScreenButton);
+  <span class="preprocessor">#ifndef PLAYER_NO_COLOROPTIONS</span>
+      controlLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(colorButton);
+  <span class="preprocessor">#endif</span>
+
+      <span class="type"><a href="../qtwidgets/qboxlayout.html">QBoxLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qvboxlayout.html">QVBoxLayout</a></span>;
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(displayLayout);
+      <span class="type"><a href="../qtwidgets/qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>hLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qhboxlayout.html">QHBoxLayout</a></span>;
+      hLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(slider);
+      hLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(labelDuration);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(hLayout);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(controlLayout);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(histogramLayout);
+
+      setLayout(layout);
+
+      <span class="keyword">if</span> (<span class="operator">!</span>isPlayerAvailable()) {
+          <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Service not available&quot;</span>)<span class="operator">,</span>
+                               tr(<span class="string">&quot;The QMediaPlayer object does not have a valid service.\n&quot;</span>\
+                                  <span class="string">&quot;Please check the media service plugins are installed.&quot;</span>));
+
+          controls<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+          playlistView<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+          openButton<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+  <span class="preprocessor">#ifndef PLAYER_NO_COLOROPTIONS</span>
+          colorButton<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+  <span class="preprocessor">#endif</span>
+          fullScreenButton<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      }
+
+      metaDataChanged();
+  }
+
+  Player<span class="operator">::</span><span class="operator">~</span>Player()
+  {
+  }
+
+  bool Player<span class="operator">::</span>isPlayerAvailable() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> player<span class="operator">-</span><span class="operator">&gt;</span>isAvailable();
+  }
+
+  <span class="type">void</span> Player<span class="operator">::</span>open()
+  {
+      <span class="type"><a href="../qtwidgets/qfiledialog.html">QFileDialog</a></span> fileDialog(<span class="keyword">this</span>);
+      fileDialog<span class="operator">.</span>setAcceptMode(<span class="type"><a href="../qtwidgets/qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>AcceptOpen);
+      fileDialog<span class="operator">.</span>setWindowTitle(tr(<span class="string">&quot;Open Files&quot;</span>));
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> supportedMimeTypes <span class="operator">=</span> player<span class="operator">-</span><span class="operator">&gt;</span>supportedMimeTypes();
+      <span class="keyword">if</span> (<span class="operator">!</span>supportedMimeTypes<span class="operator">.</span>isEmpty()) {
+          supportedMimeTypes<span class="operator">.</span>append(<span class="string">&quot;audio/x-m3u&quot;</span>); <span class="comment">// MP3 playlists</span>
+          fileDialog<span class="operator">.</span>setMimeTypeFilters(supportedMimeTypes);
+      }
+      fileDialog<span class="operator">.</span>setDirectory(<span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>standardLocations(<span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>MoviesLocation)<span class="operator">.</span>value(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>homePath()));
+      <span class="keyword">if</span> (fileDialog<span class="operator">.</span>exec() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted)
+          addToPlaylist(fileDialog<span class="operator">.</span>selectedUrls());
+  }
+
+  <span class="keyword">static</span> bool isPlaylist(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>url) <span class="comment">// Check for &quot;.m3u&quot; playlists.</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>url<span class="operator">.</span>isLocalFile())
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span> fileInfo(url<span class="operator">.</span>toLocalFile());
+      <span class="keyword">return</span> fileInfo<span class="operator">.</span>exists() <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>fileInfo<span class="operator">.</span>suffix()<span class="operator">.</span>compare(QLatin1String(<span class="string">&quot;m3u&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CaseInsensitive);
+  }
+
+  <span class="type">void</span> Player<span class="operator">::</span>addToPlaylist(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">&gt;</span> urls)
+  {
+      foreach (<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>url<span class="operator">,</span> urls) {
+          <span class="keyword">if</span> (isPlaylist(url))
+              playlist<span class="operator">-</span><span class="operator">&gt;</span>load(url);
+          <span class="keyword">else</span>
+              playlist<span class="operator">-</span><span class="operator">&gt;</span>addMedia(url);
+      }
+  }
+
+  <span class="type">void</span> Player<span class="operator">::</span>durationChanged(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> duration)
+  {
+      <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>duration <span class="operator">=</span> duration<span class="operator">/</span><span class="number">1000</span>;
+      slider<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(duration <span class="operator">/</span> <span class="number">1000</span>);
+  }
+
+  <span class="type">void</span> Player<span class="operator">::</span>positionChanged(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> progress)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>slider<span class="operator">-</span><span class="operator">&gt;</span>isSliderDown()) {
+          slider<span class="operator">-</span><span class="operator">&gt;</span>setValue(progress <span class="operator">/</span> <span class="number">1000</span>);
+      }
+      updateDurationInfo(progress <span class="operator">/</span> <span class="number">1000</span>);
+  }
+
+  <span class="type">void</span> Player<span class="operator">::</span>metaDataChanged()
+  {
+      <span class="keyword">if</span> (player<span class="operator">-</span><span class="operator">&gt;</span>isMetaDataAvailable()) {
+          setTrackInfo(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1 - %2&quot;</span>)
+                  <span class="operator">.</span>arg(player<span class="operator">-</span><span class="operator">&gt;</span>metaData(<span class="type"><a href="qmediametadata.html">QMediaMetaData</a></span><span class="operator">::</span>AlbumArtist)<span class="operator">.</span>toString())
+                  <span class="operator">.</span>arg(player<span class="operator">-</span><span class="operator">&gt;</span>metaData(<span class="type"><a href="qmediametadata.html">QMediaMetaData</a></span><span class="operator">::</span>Title)<span class="operator">.</span>toString()));
+
+          <span class="keyword">if</span> (coverLabel) {
+              <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> url <span class="operator">=</span> player<span class="operator">-</span><span class="operator">&gt;</span>metaData(<span class="type"><a href="qmediametadata.html">QMediaMetaData</a></span><span class="operator">::</span>CoverArtUrlLarge)<span class="operator">.</span>value<span class="operator">&lt;</span><span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">&gt;</span>();
+
+              coverLabel<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(<span class="operator">!</span>url<span class="operator">.</span>isEmpty()
+                      <span class="operator">?</span> <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>(url<span class="operator">.</span>toString())
+                      : <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>());
+          }
+      }
+  }
+
+  <span class="type">void</span> Player<span class="operator">::</span>previousClicked()
+  {
+      <span class="comment">// Go to previous track if we are within the first 5 seconds of playback</span>
+      <span class="comment">// Otherwise, seek to the beginning.</span>
+      <span class="keyword">if</span>(player<span class="operator">-</span><span class="operator">&gt;</span>position() <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">5000</span>)
+          playlist<span class="operator">-</span><span class="operator">&gt;</span>previous();
+      <span class="keyword">else</span>
+          player<span class="operator">-</span><span class="operator">&gt;</span>setPosition(<span class="number">0</span>);
+  }
+
+  <span class="type">void</span> Player<span class="operator">::</span>jump(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index)
+  {
+      <span class="keyword">if</span> (index<span class="operator">.</span>isValid()) {
+          playlist<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(index<span class="operator">.</span>row());
+          player<span class="operator">-</span><span class="operator">&gt;</span>play();
+      }
+  }
+
+  <span class="type">void</span> Player<span class="operator">::</span>playlistPositionChanged(<span class="type">int</span> currentItem)
+  {
+      playlistView<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(playlistModel<span class="operator">-</span><span class="operator">&gt;</span>index(currentItem<span class="operator">,</span> <span class="number">0</span>));
+  }
+
+  <span class="type">void</span> Player<span class="operator">::</span>seek(<span class="type">int</span> seconds)
+  {
+      player<span class="operator">-</span><span class="operator">&gt;</span>setPosition(seconds <span class="operator">*</span> <span class="number">1000</span>);
+  }
+
+  <span class="type">void</span> Player<span class="operator">::</span>statusChanged(<span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>MediaStatus status)
+  {
+      handleCursor(status);
+
+      <span class="comment">// handle status message</span>
+      <span class="keyword">switch</span> (status) {
+      <span class="keyword">case</span> <span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>UnknownMediaStatus:
+      <span class="keyword">case</span> <span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>NoMedia:
+      <span class="keyword">case</span> <span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>LoadedMedia:
+      <span class="keyword">case</span> <span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>BufferingMedia:
+      <span class="keyword">case</span> <span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>BufferedMedia:
+          setStatusInfo(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>());
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> <span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>LoadingMedia:
+          setStatusInfo(tr(<span class="string">&quot;Loading...&quot;</span>));
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> <span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>StalledMedia:
+          setStatusInfo(tr(<span class="string">&quot;Media Stalled&quot;</span>));
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> <span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>EndOfMedia:
+          <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span><span class="operator">::</span>alert(<span class="keyword">this</span>);
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> <span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>InvalidMedia:
+          displayErrorMessage();
+          <span class="keyword">break</span>;
+      }
+  }
+
+  <span class="type">void</span> Player<span class="operator">::</span>handleCursor(<span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>MediaStatus status)
+  {
+  <span class="preprocessor">#ifndef QT_NO_CURSOR</span>
+      <span class="keyword">if</span> (status <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>LoadingMedia <span class="operator">|</span><span class="operator">|</span>
+          status <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>BufferingMedia <span class="operator">|</span><span class="operator">|</span>
+          status <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qmediaplayer.html">QMediaPlayer</a></span><span class="operator">::</span>StalledMedia)
+          setCursor(<span class="type"><a href="../qtgui/qcursor.html">QCursor</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BusyCursor));
+      <span class="keyword">else</span>
+          unsetCursor();
+  <span class="preprocessor">#endif</span>
+  }
+
+  <span class="type">void</span> Player<span class="operator">::</span>bufferingProgress(<span class="type">int</span> progress)
+  {
+      setStatusInfo(tr(<span class="string">&quot;Buffering %4%&quot;</span>)<span class="operator">.</span>arg(progress));
+  }
+
+  <span class="type">void</span> Player<span class="operator">::</span>videoAvailableChanged(bool available)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>available) {
+          disconnect(fullScreenButton<span class="operator">,</span> SIGNAL(clicked(bool))<span class="operator">,</span>
+                      videoWidget<span class="operator">,</span> SLOT(setFullScreen(bool)));
+          disconnect(videoWidget<span class="operator">,</span> SIGNAL(fullScreenChanged(bool))<span class="operator">,</span>
+                  fullScreenButton<span class="operator">,</span> SLOT(setChecked(bool)));
+          videoWidget<span class="operator">-</span><span class="operator">&gt;</span>setFullScreen(<span class="keyword">false</span>);
+      } <span class="keyword">else</span> {
+          connect(fullScreenButton<span class="operator">,</span> SIGNAL(clicked(bool))<span class="operator">,</span>
+                  videoWidget<span class="operator">,</span> SLOT(setFullScreen(bool)));
+          connect(videoWidget<span class="operator">,</span> SIGNAL(fullScreenChanged(bool))<span class="operator">,</span>
+                  fullScreenButton<span class="operator">,</span> SLOT(setChecked(bool)));
+
+          <span class="keyword">if</span> (fullScreenButton<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+              videoWidget<span class="operator">-</span><span class="operator">&gt;</span>setFullScreen(<span class="keyword">true</span>);
+      }
+  <span class="preprocessor">#ifndef PLAYER_NO_COLOROPTIONS</span>
+      colorButton<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(available);
+  <span class="preprocessor">#endif</span>
+  }
+
+  <span class="type">void</span> Player<span class="operator">::</span>setTrackInfo(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>info)
+  {
+      trackInfo <span class="operator">=</span> info;
+      <span class="keyword">if</span> (<span class="operator">!</span>statusInfo<span class="operator">.</span>isEmpty())
+          setWindowTitle(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1 | %2&quot;</span>)<span class="operator">.</span>arg(trackInfo)<span class="operator">.</span>arg(statusInfo));
+      <span class="keyword">else</span>
+          setWindowTitle(trackInfo);
+  }
+
+  <span class="type">void</span> Player<span class="operator">::</span>setStatusInfo(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>info)
+  {
+      statusInfo <span class="operator">=</span> info;
+      <span class="keyword">if</span> (<span class="operator">!</span>statusInfo<span class="operator">.</span>isEmpty())
+          setWindowTitle(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1 | %2&quot;</span>)<span class="operator">.</span>arg(trackInfo)<span class="operator">.</span>arg(statusInfo));
+      <span class="keyword">else</span>
+          setWindowTitle(trackInfo);
+  }
+
+  <span class="type">void</span> Player<span class="operator">::</span>displayErrorMessage()
+  {
+      setStatusInfo(player<span class="operator">-</span><span class="operator">&gt;</span>errorString());
+  }
+
+  <span class="type">void</span> Player<span class="operator">::</span>updateDurationInfo(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> currentInfo)
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> tStr;
+      <span class="keyword">if</span> (currentInfo <span class="operator">|</span><span class="operator">|</span> duration) {
+          <span class="type"><a href="../qtcore/qtime.html">QTime</a></span> currentTime((currentInfo<span class="operator">/</span><span class="number">3600</span>)<span class="operator">%</span><span class="number">60</span><span class="operator">,</span> (currentInfo<span class="operator">/</span><span class="number">60</span>)<span class="operator">%</span><span class="number">60</span><span class="operator">,</span> currentInfo<span class="operator">%</span><span class="number">60</span><span class="operator">,</span> (currentInfo<span class="operator">*</span><span class="number">1000</span>)<span class="operator">%</span><span class="number">1000</span>);
+          <span class="type"><a href="../qtcore/qtime.html">QTime</a></span> totalTime((duration<span class="operator">/</span><span class="number">3600</span>)<span class="operator">%</span><span class="number">60</span><span class="operator">,</span> (duration<span class="operator">/</span><span class="number">60</span>)<span class="operator">%</span><span class="number">60</span><span class="operator">,</span> duration<span class="operator">%</span><span class="number">60</span><span class="operator">,</span> (duration<span class="operator">*</span><span class="number">1000</span>)<span class="operator">%</span><span class="number">1000</span>);
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> format <span class="operator">=</span> <span class="string">&quot;mm:ss&quot;</span>;
+          <span class="keyword">if</span> (duration <span class="operator">&gt;</span> <span class="number">3600</span>)
+              format <span class="operator">=</span> <span class="string">&quot;hh:mm:ss&quot;</span>;
+          tStr <span class="operator">=</span> currentTime<span class="operator">.</span>toString(format) <span class="operator">+</span> <span class="string">&quot; / &quot;</span> <span class="operator">+</span> totalTime<span class="operator">.</span>toString(format);
+      }
+      labelDuration<span class="operator">-</span><span class="operator">&gt;</span>setText(tStr);
+  }
+
+  <span class="preprocessor">#ifndef PLAYER_NO_COLOROPTIONS</span>
+  <span class="type">void</span> Player<span class="operator">::</span>showColorDialog()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>colorDialog) {
+          <span class="type"><a href="../qtwidgets/qslider.html">QSlider</a></span> <span class="operator">*</span>brightnessSlider <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qslider.html">QSlider</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal);
+          brightnessSlider<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span><span class="number">100</span><span class="operator">,</span> <span class="number">100</span>);
+          brightnessSlider<span class="operator">-</span><span class="operator">&gt;</span>setValue(videoWidget<span class="operator">-</span><span class="operator">&gt;</span>brightness());
+          connect(brightnessSlider<span class="operator">,</span> SIGNAL(sliderMoved(<span class="type">int</span>))<span class="operator">,</span> videoWidget<span class="operator">,</span> SLOT(setBrightness(<span class="type">int</span>)));
+          connect(videoWidget<span class="operator">,</span> SIGNAL(brightnessChanged(<span class="type">int</span>))<span class="operator">,</span> brightnessSlider<span class="operator">,</span> SLOT(setValue(<span class="type">int</span>)));
+
+          <span class="type"><a href="../qtwidgets/qslider.html">QSlider</a></span> <span class="operator">*</span>contrastSlider <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qslider.html">QSlider</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal);
+          contrastSlider<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span><span class="number">100</span><span class="operator">,</span> <span class="number">100</span>);
+          contrastSlider<span class="operator">-</span><span class="operator">&gt;</span>setValue(videoWidget<span class="operator">-</span><span class="operator">&gt;</span>contrast());
+          connect(contrastSlider<span class="operator">,</span> SIGNAL(sliderMoved(<span class="type">int</span>))<span class="operator">,</span> videoWidget<span class="operator">,</span> SLOT(setContrast(<span class="type">int</span>)));
+          connect(videoWidget<span class="operator">,</span> SIGNAL(contrastChanged(<span class="type">int</span>))<span class="operator">,</span> contrastSlider<span class="operator">,</span> SLOT(setValue(<span class="type">int</span>)));
+
+          <span class="type"><a href="../qtwidgets/qslider.html">QSlider</a></span> <span class="operator">*</span>hueSlider <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qslider.html">QSlider</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal);
+          hueSlider<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span><span class="number">100</span><span class="operator">,</span> <span class="number">100</span>);
+          hueSlider<span class="operator">-</span><span class="operator">&gt;</span>setValue(videoWidget<span class="operator">-</span><span class="operator">&gt;</span>hue());
+          connect(hueSlider<span class="operator">,</span> SIGNAL(sliderMoved(<span class="type">int</span>))<span class="operator">,</span> videoWidget<span class="operator">,</span> SLOT(setHue(<span class="type">int</span>)));
+          connect(videoWidget<span class="operator">,</span> SIGNAL(hueChanged(<span class="type">int</span>))<span class="operator">,</span> hueSlider<span class="operator">,</span> SLOT(setValue(<span class="type">int</span>)));
+
+          <span class="type"><a href="../qtwidgets/qslider.html">QSlider</a></span> <span class="operator">*</span>saturationSlider <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qslider.html">QSlider</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal);
+          saturationSlider<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span><span class="number">100</span><span class="operator">,</span> <span class="number">100</span>);
+          saturationSlider<span class="operator">-</span><span class="operator">&gt;</span>setValue(videoWidget<span class="operator">-</span><span class="operator">&gt;</span>saturation());
+          connect(saturationSlider<span class="operator">,</span> SIGNAL(sliderMoved(<span class="type">int</span>))<span class="operator">,</span> videoWidget<span class="operator">,</span> SLOT(setSaturation(<span class="type">int</span>)));
+          connect(videoWidget<span class="operator">,</span> SIGNAL(saturationChanged(<span class="type">int</span>))<span class="operator">,</span> saturationSlider<span class="operator">,</span> SLOT(setValue(<span class="type">int</span>)));
+
+          <span class="type"><a href="../qtwidgets/qformlayout.html">QFormLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qformlayout.html">QFormLayout</a></span>;
+          layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;Brightness&quot;</span>)<span class="operator">,</span> brightnessSlider);
+          layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;Contrast&quot;</span>)<span class="operator">,</span> contrastSlider);
+          layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;Hue&quot;</span>)<span class="operator">,</span> hueSlider);
+          layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;Saturation&quot;</span>)<span class="operator">,</span> saturationSlider);
+
+          <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>button <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;Close&quot;</span>));
+          layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(button);
+
+          colorDialog <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span>(<span class="keyword">this</span>);
+          colorDialog<span class="operator">-</span><span class="operator">&gt;</span>setWindowTitle(tr(<span class="string">&quot;Color Options&quot;</span>));
+          colorDialog<span class="operator">-</span><span class="operator">&gt;</span>setLayout(layout);
+
+          connect(button<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> colorDialog<span class="operator">,</span> SLOT(close()));
+      }
+      colorDialog<span class="operator">-</span><span class="operator">&gt;</span>show();
+  }
+  <span class="preprocessor">#endif</span>
+
+</pre>
+</div>
+<!-- @@@multimediawidgets/player/player.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>heartrate.cpp Example File | Qt Bluetooth 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtbluetooth-index.html">Qt Bluetooth</a></td><td ><a href="qtbluetooth-heartlistener-example.html">Bluetooth Low Energy Heart Listener Example</a></td><td >heartrate.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">heartrate.cpp Example File</h1>
+<span class="subtitle">heartlistener/heartrate.cpp</span>
+<!-- $$$heartlistener/heartrate.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/***************************************************************************
+  **
+  ** Copyright (C) 2014 BlackBerry Limited. All rights reserved.
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the QtBluetooth module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;heartrate.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtEndian&gt;</span>
+
+  HeartRate<span class="operator">::</span>HeartRate():
+      m_currentDevice(<span class="type"><a href="qbluetoothdeviceinfo.html">QBluetoothDeviceInfo</a></span>())<span class="operator">,</span> foundHeartRateService(<span class="keyword">false</span>)<span class="operator">,</span>
+      m_max(<span class="number">0</span>)<span class="operator">,</span> m_min(<span class="number">0</span>)<span class="operator">,</span> calories(<span class="number">0</span>)<span class="operator">,</span> m_control(<span class="number">0</span>)<span class="operator">,</span> timer(<span class="number">0</span>)<span class="operator">,</span>
+      m_service(<span class="number">0</span>)
+  {
+      m_deviceDiscoveryAgent <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qbluetoothdevicediscoveryagent.html">QBluetoothDeviceDiscoveryAgent</a></span>(<span class="keyword">this</span>);
+
+      connect(m_deviceDiscoveryAgent<span class="operator">,</span> SIGNAL(deviceDiscovered(<span class="keyword">const</span> <span class="type"><a href="qbluetoothdeviceinfo.html">QBluetoothDeviceInfo</a></span><span class="operator">&amp;</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(addDevice(<span class="keyword">const</span> <span class="type"><a href="qbluetoothdeviceinfo.html">QBluetoothDeviceInfo</a></span><span class="operator">&amp;</span>)));
+      connect(m_deviceDiscoveryAgent<span class="operator">,</span> SIGNAL(error(<span class="type"><a href="qbluetoothdevicediscoveryagent.html">QBluetoothDeviceDiscoveryAgent</a></span><span class="operator">::</span>Error))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(deviceScanError(<span class="type"><a href="qbluetoothdevicediscoveryagent.html">QBluetoothDeviceDiscoveryAgent</a></span><span class="operator">::</span>Error)));
+      connect(m_deviceDiscoveryAgent<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(scanFinished()));
+
+      <span class="comment">// initialize random seed for demo mode</span>
+      qsrand(<span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime()<span class="operator">.</span>msec());
+  }
+
+  HeartRate<span class="operator">::</span><span class="operator">~</span>HeartRate()
+  {
+      <a href="../qtcore/qtalgorithms.html#qDeleteAll">qDeleteAll</a>(m_devices);
+      m_devices<span class="operator">.</span>clear();
+  }
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>deviceSearch()
+  {
+      <a href="../qtcore/qtalgorithms.html#qDeleteAll">qDeleteAll</a>(m_devices);
+      m_devices<span class="operator">.</span>clear();
+      m_deviceDiscoveryAgent<span class="operator">-</span><span class="operator">&gt;</span>start();
+      setMessage(<span class="string">&quot;Scanning for devices...&quot;</span>);
+  }
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>addDevice(<span class="keyword">const</span> <span class="type"><a href="qbluetoothdeviceinfo.html">QBluetoothDeviceInfo</a></span> <span class="operator">&amp;</span>device)
+  {
+      <span class="keyword">if</span> (device<span class="operator">.</span>coreConfigurations() <span class="operator">&amp;</span> <span class="type"><a href="qbluetoothdeviceinfo.html">QBluetoothDeviceInfo</a></span><span class="operator">::</span>LowEnergyCoreConfiguration) {
+          <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Discovered LE Device name: &quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> device<span class="operator">.</span>name() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot; Address: &quot;</span>
+                     <span class="operator">&lt;</span><span class="operator">&lt;</span> device<span class="operator">.</span>address()<span class="operator">.</span>toString();
+          DeviceInfo <span class="operator">*</span>dev <span class="operator">=</span> <span class="keyword">new</span> DeviceInfo(device);
+          m_devices<span class="operator">.</span>append(dev);
+          setMessage(<span class="string">&quot;Low Energy device found. Scanning for more...&quot;</span>);
+      }
+      <span class="comment">//...</span>
+  }
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>scanFinished()
+  {
+      <span class="keyword">if</span> (m_devices<span class="operator">.</span>size() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+          setMessage(<span class="string">&quot;No Low Energy devices found&quot;</span>);
+      Q_EMIT nameChanged();
+  }
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>deviceScanError(<span class="type"><a href="qbluetoothdevicediscoveryagent.html">QBluetoothDeviceDiscoveryAgent</a></span><span class="operator">::</span>Error error)
+  {
+      <span class="keyword">if</span> (error <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qbluetoothdevicediscoveryagent.html">QBluetoothDeviceDiscoveryAgent</a></span><span class="operator">::</span>PoweredOffError)
+          setMessage(<span class="string">&quot;The Bluetooth adaptor is powered off, power it on before doing discovery.&quot;</span>);
+      <span class="keyword">else</span> <span class="keyword">if</span> (error <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qbluetoothdevicediscoveryagent.html">QBluetoothDeviceDiscoveryAgent</a></span><span class="operator">::</span>InputOutputError)
+          setMessage(<span class="string">&quot;Writing or reading from the device resulted in an error.&quot;</span>);
+      <span class="keyword">else</span>
+          setMessage(<span class="string">&quot;An unknown error has occurred.&quot;</span>);
+  }
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>setMessage(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> message)
+  {
+      m_info <span class="operator">=</span> message;
+      Q_EMIT messageChanged();
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> HeartRate<span class="operator">::</span>message() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_info;
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> HeartRate<span class="operator">::</span>name()
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(m_devices);
+  }
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>connectToService(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>address)
+  {
+      m_measurements<span class="operator">.</span>clear();
+
+      bool deviceFound <span class="operator">=</span> <span class="keyword">false</span>;
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_devices<span class="operator">.</span>size(); i<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="keyword">if</span> (((DeviceInfo<span class="operator">*</span>)m_devices<span class="operator">.</span>at(i))<span class="operator">-</span><span class="operator">&gt;</span>getAddress() <span class="operator">=</span><span class="operator">=</span> address ) {
+              m_currentDevice<span class="operator">.</span>setDevice(((DeviceInfo<span class="operator">*</span>)m_devices<span class="operator">.</span>at(i))<span class="operator">-</span><span class="operator">&gt;</span>getDevice());
+              setMessage(<span class="string">&quot;Connecting to device...&quot;</span>);
+              deviceFound <span class="operator">=</span> <span class="keyword">true</span>;
+              <span class="keyword">break</span>;
+          }
+      }
+      <span class="comment">// we are running demo mode</span>
+      <span class="keyword">if</span> (<span class="operator">!</span>deviceFound) {
+          startDemo();
+          <span class="keyword">return</span>;
+      }
+
+      <span class="keyword">if</span> (m_control) {
+          m_control<span class="operator">-</span><span class="operator">&gt;</span>disconnectFromDevice();
+          <span class="keyword">delete</span> m_control;
+          m_control <span class="operator">=</span> <span class="number">0</span>;
+
+      }
+      m_control <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlowenergycontroller.html">QLowEnergyController</a></span>(m_currentDevice<span class="operator">.</span>getDevice()<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(m_control<span class="operator">,</span> SIGNAL(serviceDiscovered(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(serviceDiscovered(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>)));
+      connect(m_control<span class="operator">,</span> SIGNAL(discoveryFinished())<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(serviceScanDone()));
+      connect(m_control<span class="operator">,</span> SIGNAL(error(<span class="type"><a href="qlowenergycontroller.html">QLowEnergyController</a></span><span class="operator">::</span>Error))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(controllerError(<span class="type"><a href="qlowenergycontroller.html">QLowEnergyController</a></span><span class="operator">::</span>Error)));
+      connect(m_control<span class="operator">,</span> SIGNAL(connected())<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(deviceConnected()));
+      connect(m_control<span class="operator">,</span> SIGNAL(disconnected())<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(deviceDisconnected()));
+
+      m_control<span class="operator">-</span><span class="operator">&gt;</span>connectToDevice();
+  }
+
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>deviceConnected()
+  {
+      m_control<span class="operator">-</span><span class="operator">&gt;</span>discoverServices();
+  }
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>deviceDisconnected()
+  {
+      setMessage(<span class="string">&quot;Heart Rate service disconnected&quot;</span>);
+      <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Remote device disconnected&quot;</span>;
+  }
+
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>serviceDiscovered(<span class="keyword">const</span> <span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span> <span class="operator">&amp;</span>gatt)
+  {
+      <span class="keyword">if</span> (gatt <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>HeartRate)) {
+          setMessage(<span class="string">&quot;Heart Rate service discovered. Waiting for service scan to be done...&quot;</span>);
+          foundHeartRateService <span class="operator">=</span> <span class="keyword">true</span>;
+      }
+  }
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>serviceScanDone()
+  {
+      <span class="keyword">delete</span> m_service;
+      m_service <span class="operator">=</span> <span class="number">0</span>;
+
+      <span class="keyword">if</span> (foundHeartRateService) {
+          setMessage(<span class="string">&quot;Connecting to service...&quot;</span>);
+          m_service <span class="operator">=</span> m_control<span class="operator">-</span><span class="operator">&gt;</span>createServiceObject(
+                      <span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>HeartRate)<span class="operator">,</span> <span class="keyword">this</span>);
+      }
+
+      <span class="keyword">if</span> (<span class="operator">!</span>m_service) {
+          setMessage(<span class="string">&quot;Heart Rate Service not found.&quot;</span>);
+          <span class="keyword">return</span>;
+      }
+
+      connect(m_service<span class="operator">,</span> SIGNAL(stateChanged(<span class="type"><a href="qlowenergyservice.html">QLowEnergyService</a></span><span class="operator">::</span>ServiceState))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(serviceStateChanged(<span class="type"><a href="qlowenergyservice.html">QLowEnergyService</a></span><span class="operator">::</span>ServiceState)));
+      connect(m_service<span class="operator">,</span> SIGNAL(characteristicChanged(<span class="type"><a href="qlowenergycharacteristic.html">QLowEnergyCharacteristic</a></span><span class="operator">,</span><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(updateHeartRateValue(<span class="type"><a href="qlowenergycharacteristic.html">QLowEnergyCharacteristic</a></span><span class="operator">,</span><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span>)));
+      connect(m_service<span class="operator">,</span> SIGNAL(descriptorWritten(<span class="type"><a href="qlowenergydescriptor.html">QLowEnergyDescriptor</a></span><span class="operator">,</span><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(confirmedDescriptorWrite(<span class="type"><a href="qlowenergydescriptor.html">QLowEnergyDescriptor</a></span><span class="operator">,</span><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span>)));
+
+      m_service<span class="operator">-</span><span class="operator">&gt;</span>discoverDetails();
+  }
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>disconnectService()
+  {
+      foundHeartRateService <span class="operator">=</span> <span class="keyword">false</span>;
+      m_stop <span class="operator">=</span> <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span><span class="operator">::</span>currentDateTime();
+
+      <span class="keyword">if</span> (m_devices<span class="operator">.</span>isEmpty()) {
+          <span class="keyword">if</span> (timer)
+              timer<span class="operator">-</span><span class="operator">&gt;</span>stop();
+          <span class="keyword">return</span>;
+      }
+
+      <span class="comment">//disable notifications</span>
+      <span class="keyword">if</span> (m_notificationDesc<span class="operator">.</span>isValid() <span class="operator">&amp;</span><span class="operator">&amp;</span> m_service) {
+          m_service<span class="operator">-</span><span class="operator">&gt;</span>writeDescriptor(m_notificationDesc<span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">::</span>fromHex(<span class="string">&quot;0000&quot;</span>));
+      } <span class="keyword">else</span> {
+          m_control<span class="operator">-</span><span class="operator">&gt;</span>disconnectFromDevice();
+          <span class="keyword">delete</span> m_service;
+          m_service <span class="operator">=</span> <span class="number">0</span>;
+      }
+  }
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>controllerError(<span class="type"><a href="qlowenergycontroller.html">QLowEnergyController</a></span><span class="operator">::</span>Error error)
+  {
+      setMessage(<span class="string">&quot;Cannot connect to remote device.&quot;</span>);
+      <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Controller Error:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> error;
+  }
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>serviceStateChanged(<span class="type"><a href="qlowenergyservice.html">QLowEnergyService</a></span><span class="operator">::</span>ServiceState s)
+  {
+      <span class="keyword">switch</span> (s) {
+      <span class="keyword">case</span> <span class="type"><a href="qlowenergyservice.html">QLowEnergyService</a></span><span class="operator">::</span>ServiceDiscovered:
+      {
+          <span class="keyword">const</span> <span class="type"><a href="qlowenergycharacteristic.html">QLowEnergyCharacteristic</a></span> hrChar <span class="operator">=</span> m_service<span class="operator">-</span><span class="operator">&gt;</span>characteristic(
+                      <span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>HeartRateMeasurement));
+          <span class="keyword">if</span> (<span class="operator">!</span>hrChar<span class="operator">.</span>isValid()) {
+              setMessage(<span class="string">&quot;HR Data not found.&quot;</span>);
+              <span class="keyword">break</span>;
+          }
+
+          <span class="keyword">const</span> <span class="type"><a href="qlowenergydescriptor.html">QLowEnergyDescriptor</a></span> m_notificationDesc <span class="operator">=</span> hrChar<span class="operator">.</span>descriptor(
+                      <span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>ClientCharacteristicConfiguration);
+          <span class="keyword">if</span> (m_notificationDesc<span class="operator">.</span>isValid()) {
+              m_service<span class="operator">-</span><span class="operator">&gt;</span>writeDescriptor(m_notificationDesc<span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">::</span>fromHex(<span class="string">&quot;0100&quot;</span>));
+              setMessage(<span class="string">&quot;Measuring&quot;</span>);
+              m_start <span class="operator">=</span> <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span><span class="operator">::</span>currentDateTime();
+          }
+
+          <span class="keyword">break</span>;
+      }
+      <span class="keyword">default</span>:
+          <span class="comment">//nothing for now</span>
+          <span class="keyword">break</span>;
+      }
+  }
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>serviceError(<span class="type"><a href="qlowenergyservice.html">QLowEnergyService</a></span><span class="operator">::</span>ServiceError e)
+  {
+      <span class="keyword">switch</span> (e) {
+      <span class="keyword">case</span> <span class="type"><a href="qlowenergyservice.html">QLowEnergyService</a></span><span class="operator">::</span>DescriptorWriteError:
+          setMessage(<span class="string">&quot;Cannot obtain HR notifications&quot;</span>);
+          <span class="keyword">break</span>;
+      <span class="keyword">default</span>:
+          <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;HR service error:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> e;
+      }
+  }
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>updateHeartRateValue(<span class="keyword">const</span> <span class="type"><a href="qlowenergycharacteristic.html">QLowEnergyCharacteristic</a></span> <span class="operator">&amp;</span>c<span class="operator">,</span>
+                                       <span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>value)
+  {
+      <span class="comment">// ignore any other characteristic change -&gt; shouldn't really happen though</span>
+      <span class="keyword">if</span> (c<span class="operator">.</span>uuid() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>HeartRateMeasurement))
+          <span class="keyword">return</span>;
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span> <span class="operator">*</span>data <span class="operator">=</span> <span class="keyword">reinterpret_cast</span><span class="operator">&lt;</span><span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(value<span class="operator">.</span>constData());
+      <span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span> flags <span class="operator">=</span> data<span class="operator">[</span><span class="number">0</span><span class="operator">]</span>;
+
+      <span class="comment">//Heart Rate</span>
+      <span class="keyword">if</span> (flags <span class="operator">&amp;</span> <span class="number">0x1</span>) { <span class="comment">// HR 16 bit? otherwise 8 bit</span>
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> heartRate <span class="operator">=</span> <a href="../qtcore/qtendian.html#qFromLittleEndian">qFromLittleEndian</a><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span><span class="operator">&gt;</span>(data<span class="operator">[</span><span class="number">1</span><span class="operator">]</span>);
+          <span class="comment">//qDebug() &lt;&lt; &quot;16 bit HR value:&quot; &lt;&lt; heartRate;</span>
+          m_measurements<span class="operator">.</span>append(heartRate);
+      } <span class="keyword">else</span> {
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span> <span class="operator">*</span>heartRate <span class="operator">=</span> <span class="operator">&amp;</span>data<span class="operator">[</span><span class="number">1</span><span class="operator">]</span>;
+          m_measurements<span class="operator">.</span>append(<span class="operator">*</span>heartRate);
+          <span class="comment">//qDebug() &lt;&lt; &quot;8 bit HR value:&quot; &lt;&lt; *heartRate;</span>
+      }
+
+      <span class="comment">//Energy Expended</span>
+      <span class="keyword">if</span> (flags <span class="operator">&amp;</span> <span class="number">0x8</span>) {
+          <span class="type">int</span> index <span class="operator">=</span> (flags <span class="operator">&amp;</span> <span class="number">0x1</span>) <span class="operator">?</span> <span class="number">5</span> : <span class="number">3</span>;
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> energy <span class="operator">=</span> <a href="../qtcore/qtendian.html#qFromLittleEndian">qFromLittleEndian</a><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span><span class="operator">&gt;</span>(data<span class="operator">[</span>index<span class="operator">]</span>);
+          <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Used Energy:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> energy;
+      }
+
+      Q_EMIT hrChanged();
+  }
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>confirmedDescriptorWrite(<span class="keyword">const</span> <span class="type"><a href="qlowenergydescriptor.html">QLowEnergyDescriptor</a></span> <span class="operator">&amp;</span>d<span class="operator">,</span>
+                                           <span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>value)
+  {
+      <span class="keyword">if</span> (d<span class="operator">.</span>isValid() <span class="operator">&amp;</span><span class="operator">&amp;</span> d <span class="operator">=</span><span class="operator">=</span> m_notificationDesc <span class="operator">&amp;</span><span class="operator">&amp;</span> value <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span>(<span class="string">&quot;0000&quot;</span>)) {
+          <span class="comment">//disabled notifications -&gt; assume disconnect intent</span>
+          m_control<span class="operator">-</span><span class="operator">&gt;</span>disconnectFromDevice();
+          <span class="keyword">delete</span> m_service;
+          m_service <span class="operator">=</span> <span class="number">0</span>;
+      }
+  }
+
+  <span class="type">int</span> HeartRate<span class="operator">::</span>hR() <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (m_measurements<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span> <span class="number">0</span>;
+      <span class="keyword">return</span> m_measurements<span class="operator">.</span>last();
+  }
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>obtainResults()
+  {
+      Q_EMIT timeChanged();
+      Q_EMIT averageChanged();
+      Q_EMIT caloriesChanged();
+  }
+
+  <span class="type">int</span> HeartRate<span class="operator">::</span>time()
+  {
+      <span class="keyword">return</span> m_start<span class="operator">.</span>secsTo(m_stop);
+  }
+
+  <span class="type">int</span> HeartRate<span class="operator">::</span>maxHR() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_max;
+  }
+
+  <span class="type">int</span> HeartRate<span class="operator">::</span>minHR() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_min;
+  }
+
+  <span class="type">float</span> HeartRate<span class="operator">::</span>average()
+  {
+      <span class="keyword">if</span> (m_measurements<span class="operator">.</span>size() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>) {
+          <span class="keyword">return</span> <span class="number">0</span>;
+      } <span class="keyword">else</span> {
+          m_max <span class="operator">=</span> <span class="number">0</span>;
+          m_min <span class="operator">=</span> <span class="number">1000</span>;
+          <span class="type">int</span> sum <span class="operator">=</span> <span class="number">0</span>;
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_measurements<span class="operator">.</span>size(); i<span class="operator">+</span><span class="operator">+</span>) {
+              sum <span class="operator">+</span><span class="operator">=</span> (<span class="type">int</span>) m_measurements<span class="operator">.</span>value(i);
+              <span class="keyword">if</span> (((<span class="type">int</span>)m_measurements<span class="operator">.</span>value(i)) <span class="operator">&gt;</span> m_max)
+                  m_max <span class="operator">=</span> (<span class="type">int</span>)m_measurements<span class="operator">.</span>value(i);
+              <span class="keyword">if</span> (((<span class="type">int</span>)m_measurements<span class="operator">.</span>value(i)) <span class="operator">&lt;</span> m_min)
+                  m_min <span class="operator">=</span> (<span class="type">int</span>)m_measurements<span class="operator">.</span>value(i);
+          }
+          <span class="keyword">return</span> sum<span class="operator">/</span>m_measurements<span class="operator">.</span>size();
+      }
+  }
+
+  <span class="type">int</span> HeartRate<span class="operator">::</span>measurements(<span class="type">int</span> index) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (index <span class="operator">&gt;</span> m_measurements<span class="operator">.</span>size())
+          <span class="keyword">return</span> <span class="number">0</span>;
+      <span class="keyword">else</span>
+          <span class="keyword">return</span> (<span class="type">int</span>)m_measurements<span class="operator">.</span>value(index);
+  }
+
+  <span class="type">int</span> HeartRate<span class="operator">::</span>measurementsSize() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_measurements<span class="operator">.</span>size();
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> HeartRate<span class="operator">::</span>deviceAddress() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_currentDevice<span class="operator">.</span>getAddress();
+  }
+
+  <span class="type">float</span> HeartRate<span class="operator">::</span>caloriesCalculation()
+  {
+      calories <span class="operator">=</span> ((<span class="operator">-</span><span class="number">55.0969</span> <span class="operator">+</span> (<span class="number">0.6309</span> <span class="operator">*</span> average()) <span class="operator">+</span> (<span class="number">0.1988</span> <span class="operator">*</span> <span class="number">94</span>) <span class="operator">+</span> (<span class="number">0.2017</span> <span class="operator">*</span> <span class="number">24</span>)) <span class="operator">/</span> <span class="number">4.184</span>) <span class="operator">*</span> <span class="number">60</span> <span class="operator">*</span> time()<span class="operator">/</span><span class="number">3600</span> ;
+      <span class="keyword">return</span> calories;
+  }
+
+  <span class="type">int</span> HeartRate<span class="operator">::</span>numDevices() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_devices<span class="operator">.</span>size();
+  }
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>startDemo()
+  {
+      m_start <span class="operator">=</span> <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span><span class="operator">::</span>currentDateTime();
+      <span class="keyword">if</span> (<span class="operator">!</span>timer) {
+          timer <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span>(<span class="keyword">this</span>);
+          connect(timer<span class="operator">,</span> SIGNAL(timeout())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(receiveDemo()));
+      }
+      timer<span class="operator">-</span><span class="operator">&gt;</span>start(<span class="number">1000</span>);
+      setMessage(<span class="string">&quot;This is Demo mode&quot;</span>);
+  }
+
+  <span class="type">void</span> HeartRate<span class="operator">::</span>receiveDemo()
+  {
+      m_measurements<span class="operator">.</span>append(randomPulse());
+      Q_EMIT hrChanged();
+  }
+
+  <span class="type">int</span> HeartRate<span class="operator">::</span>randomPulse() <span class="keyword">const</span>
+  {
+      <span class="comment">// random number between 50 and 70</span>
+      <span class="keyword">return</span> qrand() <span class="operator">%</span> (<span class="number">70</span> <span class="operator">-</span> <span class="number">50</span>) <span class="operator">+</span> <span class="number">50</span>;
+  }
+
+</pre>
+</div>
+<!-- @@@heartlistener/heartrate.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

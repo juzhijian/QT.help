@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>customtablemodel.cpp Example File | Qt Charts 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcharts-index.html">Qt Charts</a></td><td ><a href="qtcharts-modeldata-example.html">Model Data Example</a></td><td >customtablemodel.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">customtablemodel.cpp Example File</h1>
+<span class="subtitle">modeldata/customtablemodel.cpp</span>
+<!-- $$$modeldata/customtablemodel.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Charts module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;customtablemodel.h&quot;</span>
+  <span class="preprocessor">#include &lt;QtCore/QVector&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QTime&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QRect&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QColor&gt;</span>
+
+  CustomTableModel<span class="operator">::</span>CustomTableModel(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent) :
+      <span class="type"><a href="../qtcore/qabstracttablemodel.html">QAbstractTableModel</a></span>(parent)
+  {
+      qsrand(<span class="type"><a href="../qtcore/qtime.html">QTime</a></span>(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>)<span class="operator">.</span>secsTo(<span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime()));
+
+      m_columnCount <span class="operator">=</span> <span class="number">4</span>;
+      m_rowCount <span class="operator">=</span> <span class="number">15</span>;
+
+      <span class="comment">// m_data</span>
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_rowCount; i<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span><span class="operator">&gt;</span><span class="operator">*</span> dataVec <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span><span class="operator">&gt;</span>(m_columnCount);
+          <span class="keyword">for</span> (<span class="type">int</span> k <span class="operator">=</span> <span class="number">0</span>; k <span class="operator">&lt;</span> dataVec<span class="operator">-</span><span class="operator">&gt;</span>size(); k<span class="operator">+</span><span class="operator">+</span>) {
+              <span class="keyword">if</span> (k <span class="operator">%</span> <span class="number">2</span> <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+                  dataVec<span class="operator">-</span><span class="operator">&gt;</span>replace(k<span class="operator">,</span> i <span class="operator">*</span> <span class="number">50</span> <span class="operator">+</span> qrand() <span class="operator">%</span> <span class="number">20</span>);
+              <span class="keyword">else</span>
+                  dataVec<span class="operator">-</span><span class="operator">&gt;</span>replace(k<span class="operator">,</span> qrand() <span class="operator">%</span> <span class="number">100</span>);
+          }
+          m_data<span class="operator">.</span>append(dataVec);
+      }
+  }
+
+  <span class="type">int</span> CustomTableModel<span class="operator">::</span>rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      Q_UNUSED(parent)
+      <span class="keyword">return</span> m_data<span class="operator">.</span>count();
+  }
+
+  <span class="type">int</span> CustomTableModel<span class="operator">::</span>columnCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      Q_UNUSED(parent)
+      <span class="keyword">return</span> m_columnCount;
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> CustomTableModel<span class="operator">::</span>headerData(<span class="type">int</span> section<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Orientation orientation<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (role <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+      <span class="keyword">if</span> (orientation <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal) {
+          <span class="keyword">if</span> (section <span class="operator">%</span> <span class="number">2</span> <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+              <span class="keyword">return</span> <span class="string">&quot;x&quot;</span>;
+          <span class="keyword">else</span>
+              <span class="keyword">return</span> <span class="string">&quot;y&quot;</span>;
+      } <span class="keyword">else</span> {
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1&quot;</span>)<span class="operator">.</span>arg(section <span class="operator">+</span> <span class="number">1</span>);
+      }
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> CustomTableModel<span class="operator">::</span>data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole) {
+          <span class="keyword">return</span> m_data<span class="operator">[</span>index<span class="operator">.</span>row()<span class="operator">]</span><span class="operator">-</span><span class="operator">&gt;</span>at(index<span class="operator">.</span>column());
+      } <span class="keyword">else</span> <span class="keyword">if</span> (role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole) {
+          <span class="keyword">return</span> m_data<span class="operator">[</span>index<span class="operator">.</span>row()<span class="operator">]</span><span class="operator">-</span><span class="operator">&gt;</span>at(index<span class="operator">.</span>column());
+      } <span class="keyword">else</span> <span class="keyword">if</span> (role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>BackgroundRole) {
+          foreach (<span class="type"><a href="../qtcore/qrect.html">QRect</a></span> rect<span class="operator">,</span> m_mapping) {
+              <span class="keyword">if</span> (rect<span class="operator">.</span>contains(index<span class="operator">.</span>column()<span class="operator">,</span> index<span class="operator">.</span>row()))
+                  <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(m_mapping<span class="operator">.</span>key(rect));
+          }
+          <span class="comment">// cell not mapped return white color</span>
+          <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white);
+      }
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+  }
+
+  bool CustomTableModel<span class="operator">::</span>setData(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> <span class="operator">&amp;</span>value<span class="operator">,</span> <span class="type">int</span> role)
+  {
+      <span class="keyword">if</span> (index<span class="operator">.</span>isValid() <span class="operator">&amp;</span><span class="operator">&amp;</span> role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole) {
+          m_data<span class="operator">[</span>index<span class="operator">.</span>row()<span class="operator">]</span><span class="operator">-</span><span class="operator">&gt;</span>replace(index<span class="operator">.</span>column()<span class="operator">,</span> value<span class="operator">.</span>toDouble());
+          <span class="keyword">emit</span> dataChanged(index<span class="operator">,</span> index);
+          <span class="keyword">return</span> <span class="keyword">true</span>;
+      }
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+  }
+
+  <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemFlags CustomTableModel<span class="operator">::</span>flags(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span><span class="operator">::</span>flags(index) <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsEditable;
+  }
+
+  <span class="type">void</span> CustomTableModel<span class="operator">::</span>addMapping(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> color<span class="operator">,</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> area)
+  {
+      m_mapping<span class="operator">.</span>insertMulti(color<span class="operator">,</span> area);
+  }
+
+</pre>
+</div>
+<!-- @@@modeldata/customtablemodel.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

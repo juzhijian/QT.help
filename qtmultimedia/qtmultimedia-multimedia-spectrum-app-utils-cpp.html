@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>utils.cpp Example File | Qt Multimedia 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-multimedia-spectrum-example.html">Spectrum Example</a></td><td >utils.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">utils.cpp Example File</h1>
+<span class="subtitle">multimedia/spectrum/app/utils.cpp</span>
+<!-- $$$multimedia/spectrum/app/utils.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QAudioFormat&gt;</span>
+  <span class="preprocessor">#include &quot;utils.h&quot;</span>
+
+  <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> audioDuration(<span class="keyword">const</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span> <span class="operator">&amp;</span>format<span class="operator">,</span> <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> bytes)
+  {
+      <span class="keyword">return</span> (bytes <span class="operator">*</span> <span class="number">1000000</span>) <span class="operator">/</span>
+          (format<span class="operator">.</span>sampleRate() <span class="operator">*</span> format<span class="operator">.</span>channelCount() <span class="operator">*</span> (format<span class="operator">.</span>sampleSize() <span class="operator">/</span> <span class="number">8</span>));
+  }
+
+  <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> audioLength(<span class="keyword">const</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span> <span class="operator">&amp;</span>format<span class="operator">,</span> <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> microSeconds)
+  {
+     <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> result <span class="operator">=</span> (format<span class="operator">.</span>sampleRate() <span class="operator">*</span> format<span class="operator">.</span>channelCount() <span class="operator">*</span> (format<span class="operator">.</span>sampleSize() <span class="operator">/</span> <span class="number">8</span>))
+         <span class="operator">*</span> microSeconds <span class="operator">/</span> <span class="number">1000000</span>;
+     result <span class="operator">-</span><span class="operator">=</span> result <span class="operator">%</span> (format<span class="operator">.</span>channelCount() <span class="operator">*</span> format<span class="operator">.</span>sampleSize());
+     <span class="keyword">return</span> result;
+  }
+
+  <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> nyquistFrequency(<span class="keyword">const</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span> <span class="operator">&amp;</span>format)
+  {
+      <span class="keyword">return</span> format<span class="operator">.</span>sampleRate() <span class="operator">/</span> <span class="number">2</span>;
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> formatToString(<span class="keyword">const</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span> <span class="operator">&amp;</span>format)
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> result;
+
+      <span class="keyword">if</span> (<span class="type"><a href="qaudioformat.html">QAudioFormat</a></span>() <span class="operator">!</span><span class="operator">=</span> format) {
+          <span class="keyword">if</span> (format<span class="operator">.</span>codec() <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;audio/pcm&quot;</span>) {
+              Q_ASSERT(format<span class="operator">.</span>sampleType() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>SignedInt);
+
+              <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> formatEndian <span class="operator">=</span> (format<span class="operator">.</span>byteOrder() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>LittleEndian)
+                  <span class="operator">?</span>   <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;LE&quot;</span>) : <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;BE&quot;</span>);
+
+              <span class="type"><a href="../qtcore/qstring.html">QString</a></span> formatType;
+              <span class="keyword">switch</span> (format<span class="operator">.</span>sampleType()) {
+              <span class="keyword">case</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>SignedInt:
+                  formatType <span class="operator">=</span> <span class="string">&quot;signed&quot;</span>;
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>UnSignedInt:
+                  formatType <span class="operator">=</span> <span class="string">&quot;unsigned&quot;</span>;
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>Float:
+                  formatType <span class="operator">=</span> <span class="string">&quot;float&quot;</span>;
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>Unknown:
+                  formatType <span class="operator">=</span> <span class="string">&quot;unknown&quot;</span>;
+                  <span class="keyword">break</span>;
+              }
+
+              <span class="type"><a href="../qtcore/qstring.html">QString</a></span> formatChannels <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1 channels&quot;</span>)<span class="operator">.</span>arg(format<span class="operator">.</span>channelCount());
+              <span class="keyword">switch</span> (format<span class="operator">.</span>channelCount()) {
+              <span class="keyword">case</span> <span class="number">1</span>:
+                  formatChannels <span class="operator">=</span> <span class="string">&quot;mono&quot;</span>;
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="number">2</span>:
+                  formatChannels <span class="operator">=</span> <span class="string">&quot;stereo&quot;</span>;
+                  <span class="keyword">break</span>;
+              }
+
+              result <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1 Hz %2 bit %3 %4 %5&quot;</span>)
+                  <span class="operator">.</span>arg(format<span class="operator">.</span>sampleRate())
+                  <span class="operator">.</span>arg(format<span class="operator">.</span>sampleSize())
+                  <span class="operator">.</span>arg(formatType)
+                  <span class="operator">.</span>arg(formatEndian)
+                  <span class="operator">.</span>arg(formatChannels);
+          } <span class="keyword">else</span> {
+              result <span class="operator">=</span> format<span class="operator">.</span>codec();
+          }
+      }
+
+      <span class="keyword">return</span> result;
+  }
+
+  bool isPCM(<span class="keyword">const</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span> <span class="operator">&amp;</span>format)
+  {
+      <span class="keyword">return</span> (format<span class="operator">.</span>codec() <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;audio/pcm&quot;</span>);
+  }
+
+  bool isPCMS16LE(<span class="keyword">const</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span> <span class="operator">&amp;</span>format)
+  {
+      <span class="keyword">return</span> isPCM(format) <span class="operator">&amp;</span><span class="operator">&amp;</span>
+             format<span class="operator">.</span>sampleType() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>SignedInt <span class="operator">&amp;</span><span class="operator">&amp;</span>
+             format<span class="operator">.</span>sampleSize() <span class="operator">=</span><span class="operator">=</span> <span class="number">16</span> <span class="operator">&amp;</span><span class="operator">&amp;</span>
+             format<span class="operator">.</span>byteOrder() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>LittleEndian;
+  }
+
+  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#qint16-typedef">qint16</a></span>  PCMS16MaxValue     <span class="operator">=</span>  <span class="number">32767</span>;
+  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> PCMS16MaxAmplitude <span class="operator">=</span>  <span class="number">32768</span>; <span class="comment">// because minimum is -32768</span>
+
+  <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> pcmToReal(<span class="type"><a href="../qtcore/qtglobal.html#qint16-typedef">qint16</a></span> pcm)
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>(pcm) <span class="operator">/</span> PCMS16MaxAmplitude;
+  }
+
+  <span class="type"><a href="../qtcore/qtglobal.html#qint16-typedef">qint16</a></span> realToPcm(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> real)
+  {
+      <span class="keyword">return</span> real <span class="operator">*</span> PCMS16MaxValue;
+  }
+
+</pre>
+</div>
+<!-- @@@multimedia/spectrum/app/utils.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

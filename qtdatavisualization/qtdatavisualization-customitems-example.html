@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- customitems.qdoc -->
+  <title>Custom Items Example | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td >Custom Items Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#adding-custom-meshes-to-the-application">Adding custom meshes to the application</a></li>
+<li class="level1"><a href="#adding-custom-item-to-a-graph">Adding custom item to a graph</a></li>
+<li class="level1"><a href="#removing-custom-item-from-a-graph">Removing custom item from a graph</a></li>
+<li class="level1"><a href="#example-contents">Example Contents</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Custom Items Example</h1>
+<span class="subtitle"></span>
+<!-- $$$customitems-description -->
+<div class="descr"> <a name="details"></a>
+<p>The custom items example shows how to add your own custom meshes as items to a graph, and how to remove them.</p>
+<p class="centerAlign"><img src="images/customitems-example.png" alt="" /></p><a name="adding-custom-meshes-to-the-application"></a>
+<h2 id="adding-custom-meshes-to-the-application">Adding custom meshes to the application</h2>
+<p>We'll add the meshes in a resource file:</p>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span>RCC<span class="operator">&gt;</span>
+  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+  <span class="operator">&lt;</span>qresource prefix<span class="operator">=</span><span class="string">&quot;/items&quot;</span><span class="operator">&gt;</span>
+      <span class="operator">&lt;</span>file<span class="operator">&gt;</span>refinery<span class="operator">.</span>obj<span class="operator">&lt;</span><span class="operator">/</span>file<span class="operator">&gt;</span>
+      <span class="operator">&lt;</span>file<span class="operator">&gt;</span>oilrig<span class="operator">.</span>obj<span class="operator">&lt;</span><span class="operator">/</span>file<span class="operator">&gt;</span>
+  <span class="operator">&lt;</span><span class="operator">/</span>qresource<span class="operator">&gt;</span>
+  <span class="operator">&lt;</span><span class="operator">/</span>RCC<span class="operator">&gt;</span>
+
+</pre>
+<a name="adding-custom-item-to-a-graph"></a>
+<h2 id="adding-custom-item-to-a-graph">Adding custom item to a graph</h2>
+<p>In this example we do not have specific textures for our meshes, so we'll just create a small <a href="../qtgui/qimage.html">QImage</a> and fill it with a single color:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> color <span class="operator">=</span> <span class="type"><a href="../qtgui/qimage.html">QImage</a></span>(<span class="number">2</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qimage.html">QImage</a></span><span class="operator">::</span>Format_RGB32);
+  color<span class="operator">.</span>fill(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>red);
+
+</pre>
+<p>Then we'll specify the position for the item in a variable. This way we'll be able to use it later for removing the correct item:</p>
+<pre class="cpp">
+
+  QVector3D positionOne <span class="operator">=</span> QVector3D(<span class="number">39.0f</span><span class="operator">,</span> <span class="number">77.0f</span><span class="operator">,</span> <span class="number">19.2f</span>);
+
+</pre>
+<p>Then we'll create a new <a href="qcustom3ditem.html">QCustom3DItem</a> with all the parameters:</p>
+<pre class="cpp">
+
+  QCustom3DItem <span class="operator">*</span>item <span class="operator">=</span> <span class="keyword">new</span> QCustom3DItem(<span class="string">&quot;:/items/oilrig.obj&quot;</span><span class="operator">,</span> positionOne<span class="operator">,</span>
+                                          QVector3D(<span class="number">0.025f</span><span class="operator">,</span> <span class="number">0.025f</span><span class="operator">,</span> <span class="number">0.025f</span>)<span class="operator">,</span>
+                                          <span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span><span class="operator">::</span>fromAxisAndAngle(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">45.0f</span>)<span class="operator">,</span>
+                                          color);
+
+</pre>
+<p>And finally we'll just add the item:</p>
+<pre class="cpp">
+
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>addCustomItem(item);
+
+</pre>
+<a name="removing-custom-item-from-a-graph"></a>
+<h2 id="removing-custom-item-from-a-graph">Removing custom item from a graph</h2>
+<p>We'll just call <code>removeCustomItemAt()</code> with the position of the item:</p>
+<pre class="cpp">
+
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>removeCustomItemAt(positionOne);
+
+</pre>
+<p><b>Note: </b>Removing a custom item from the graph also deletes it. If you want to preserve the item, you need to use <code>releaseCustomItem()</code> method instead.</p><a name="example-contents"></a>
+<h2 id="example-contents">Example Contents</h2>
+<p>Files:</p>
+<ul>
+<li><a href="qtdatavisualization-customitems-customitemgraph-cpp.html">customitems/customitemgraph.cpp</a></li>
+<li><a href="qtdatavisualization-customitems-customitemgraph-h.html">customitems/customitemgraph.h</a></li>
+<li><a href="qtdatavisualization-customitems-main-cpp.html">customitems/main.cpp</a></li>
+<li><a href="qtdatavisualization-customitems-customitems-pro.html">customitems/customitems.pro</a></li>
+<li><a href="qtdatavisualization-customitems-customitems-qrc.html">customitems/customitems.qrc</a></li>
+</ul>
+</div>
+<!-- @@@customitems -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

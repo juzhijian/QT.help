@@ -1,0 +1,652 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>MapComponent.qml Example File | Qt Location 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-mapviewer-example.html">Map Viewer (QML)</a></td><td >MapComponent.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">MapComponent.qml Example File</h1>
+<span class="subtitle">mapviewer/map/MapComponent.qml</span>
+<!-- $$$mapviewer/map/MapComponent.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+  import QtQuick 2.5
+  import QtQuick.Controls 1.4
+  import QtLocation 5.6
+  import QtPositioning 5.5
+  import &quot;../helper.js&quot; as Helper
+
+  <span class="type"><a href="qml-qtlocation-map.html">Map</a></span> {
+      <span class="name">id</span>: <span class="name">map</span>
+      property <span class="type">variant</span> <span class="name">markers</span>
+      property <span class="type">variant</span> <span class="name">mapItems</span>
+      property <span class="type">int</span> <span class="name">markerCounter</span>: <span class="number">0</span> <span class="comment">// counter for total amount of markers. Resets to 0 when number of markers = 0</span>
+      property <span class="type">int</span> <span class="name">currentMarker</span>
+      property <span class="type">int</span> <span class="name">lastX</span> : -<span class="number">1</span>
+      property <span class="type">int</span> <span class="name">lastY</span> : -<span class="number">1</span>
+      property <span class="type">int</span> <span class="name">pressX</span> : -<span class="number">1</span>
+      property <span class="type">int</span> <span class="name">pressY</span> : -<span class="number">1</span>
+      property <span class="type">int</span> <span class="name">jitterThreshold</span> : <span class="number">30</span>
+      property <span class="type">bool</span> <span class="name">followme</span>: <span class="number">false</span>
+      property <span class="type">variant</span> <span class="name">scaleLengths</span>: [<span class="number">5</span>, <span class="number">10</span>, <span class="number">20</span>, <span class="number">50</span>, <span class="number">100</span>, <span class="number">200</span>, <span class="number">500</span>, <span class="number">1000</span>, <span class="number">2000</span>, <span class="number">5000</span>, <span class="number">10000</span>, <span class="number">20000</span>, <span class="number">50000</span>, <span class="number">100000</span>, <span class="number">200000</span>, <span class="number">500000</span>, <span class="number">1000000</span>, <span class="number">2000000</span>]
+      property <span class="type">alias</span> <span class="name">routeQuery</span>: <span class="name">routeQuery</span>
+      property <span class="type">alias</span> <span class="name">routeModel</span>: <span class="name">routeModel</span>
+      property <span class="type">alias</span> <span class="name">geocodeModel</span>: <span class="name">geocodeModel</span>
+
+      signal <span class="type">showGeocodeInfo</span>()
+      signal <span class="type">geocodeFinished</span>()
+      signal <span class="type">routeError</span>()
+      signal <span class="type">coordinatesCaptured</span>(double latitude, double longitude)
+      signal <span class="type">showMainMenu</span>(variant coordinate)
+      signal <span class="type">showMarkerMenu</span>(variant coordinate)
+      signal <span class="type">showRouteMenu</span>(variant coordinate)
+      signal <span class="type">showPointMenu</span>(variant coordinate)
+      signal <span class="type">showRouteList</span>()
+
+      <span class="keyword">function</span> <span class="name">geocodeMessage</span>()
+      {
+          var <span class="name">street</span>, <span class="name">district</span>, <span class="name">city</span>, <span class="name">county</span>, <span class="name">state</span>, <span class="name">countryCode</span>, <span class="name">country</span>, <span class="name">postalCode</span>, <span class="name">latitude</span>, <span class="name">longitude</span>, <span class="name">text</span>
+          <span class="name">latitude</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">round</span>(<span class="name">geocodeModel</span>.<span class="name">get</span>(<span class="number">0</span>).<span class="name">coordinate</span>.<span class="name">latitude</span> <span class="operator">*</span> <span class="number">10000</span>) <span class="operator">/</span> <span class="number">10000</span>
+          <span class="name">longitude</span> <span class="operator">=</span><span class="name">Math</span>.<span class="name">round</span>(<span class="name">geocodeModel</span>.<span class="name">get</span>(<span class="number">0</span>).<span class="name">coordinate</span>.<span class="name">longitude</span> <span class="operator">*</span> <span class="number">10000</span>) <span class="operator">/</span> <span class="number">10000</span>
+          <span class="name">street</span> <span class="operator">=</span> <span class="name">geocodeModel</span>.<span class="name">get</span>(<span class="number">0</span>).<span class="name">address</span>.<span class="name">street</span>
+          <span class="name">district</span> <span class="operator">=</span> <span class="name">geocodeModel</span>.<span class="name">get</span>(<span class="number">0</span>).<span class="name">address</span>.<span class="name">district</span>
+          <span class="name">city</span> <span class="operator">=</span> <span class="name">geocodeModel</span>.<span class="name">get</span>(<span class="number">0</span>).<span class="name">address</span>.<span class="name">city</span>
+          <span class="name">county</span> <span class="operator">=</span> <span class="name">geocodeModel</span>.<span class="name">get</span>(<span class="number">0</span>).<span class="name">address</span>.<span class="name">county</span>
+          <span class="name">state</span> <span class="operator">=</span> <span class="name">geocodeModel</span>.<span class="name">get</span>(<span class="number">0</span>).<span class="name">address</span>.<span class="name">state</span>
+          <span class="name">countryCode</span> <span class="operator">=</span> <span class="name">geocodeModel</span>.<span class="name">get</span>(<span class="number">0</span>).<span class="name">address</span>.<span class="name">countryCode</span>
+          <span class="name">country</span> <span class="operator">=</span> <span class="name">geocodeModel</span>.<span class="name">get</span>(<span class="number">0</span>).<span class="name">address</span>.<span class="name">country</span>
+          <span class="name">postalCode</span> <span class="operator">=</span> <span class="name">geocodeModel</span>.<span class="name">get</span>(<span class="number">0</span>).<span class="name">address</span>.<span class="name">postalCode</span>
+
+          <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;&lt;b&gt;Latitude:&lt;/b&gt; &quot;</span> <span class="operator">+</span> <span class="name">latitude</span> <span class="operator">+</span> <span class="string">&quot;&lt;br/&gt;&quot;</span>
+          <span class="name">text</span> <span class="operator">+=</span><span class="string">&quot;&lt;b&gt;Longitude:&lt;/b&gt; &quot;</span> <span class="operator">+</span> <span class="name">longitude</span> <span class="operator">+</span> <span class="string">&quot;&lt;br/&gt;&quot;</span> <span class="operator">+</span> <span class="string">&quot;&lt;br/&gt;&quot;</span>
+          <span class="keyword">if</span> (<span class="name">street</span>) <span class="name">text</span> <span class="operator">+=</span><span class="string">&quot;&lt;b&gt;Street: &lt;/b&gt;&quot;</span><span class="operator">+</span> <span class="name">street</span> <span class="operator">+</span> <span class="string">&quot; &lt;br/&gt;&quot;</span>
+          <span class="keyword">if</span> (<span class="name">district</span>) <span class="name">text</span> <span class="operator">+=</span><span class="string">&quot;&lt;b&gt;District: &lt;/b&gt;&quot;</span><span class="operator">+</span> <span class="name">district</span> <span class="operator">+</span><span class="string">&quot; &lt;br/&gt;&quot;</span>
+          <span class="keyword">if</span> (<span class="name">city</span>) <span class="name">text</span> <span class="operator">+=</span><span class="string">&quot;&lt;b&gt;City: &lt;/b&gt;&quot;</span><span class="operator">+</span> <span class="name">city</span> <span class="operator">+</span> <span class="string">&quot; &lt;br/&gt;&quot;</span>
+          <span class="keyword">if</span> (<span class="name">county</span>) <span class="name">text</span> <span class="operator">+=</span><span class="string">&quot;&lt;b&gt;County: &lt;/b&gt;&quot;</span><span class="operator">+</span> <span class="name">county</span> <span class="operator">+</span> <span class="string">&quot; &lt;br/&gt;&quot;</span>
+          <span class="keyword">if</span> (<span class="name">state</span>) <span class="name">text</span> <span class="operator">+=</span><span class="string">&quot;&lt;b&gt;State: &lt;/b&gt;&quot;</span><span class="operator">+</span> <span class="name">state</span> <span class="operator">+</span> <span class="string">&quot; &lt;br/&gt;&quot;</span>
+          <span class="keyword">if</span> (<span class="name">countryCode</span>) <span class="name">text</span> <span class="operator">+=</span><span class="string">&quot;&lt;b&gt;Country code: &lt;/b&gt;&quot;</span><span class="operator">+</span> <span class="name">countryCode</span> <span class="operator">+</span> <span class="string">&quot; &lt;br/&gt;&quot;</span>
+          <span class="keyword">if</span> (<span class="name">country</span>) <span class="name">text</span> <span class="operator">+=</span><span class="string">&quot;&lt;b&gt;Country: &lt;/b&gt;&quot;</span><span class="operator">+</span> <span class="name">country</span> <span class="operator">+</span> <span class="string">&quot; &lt;br/&gt;&quot;</span>
+          <span class="keyword">if</span> (<span class="name">postalCode</span>) <span class="name">text</span> <span class="operator">+=</span><span class="string">&quot;&lt;b&gt;PostalCode: &lt;/b&gt;&quot;</span><span class="operator">+</span> <span class="name">postalCode</span> <span class="operator">+</span> <span class="string">&quot; &lt;br/&gt;&quot;</span>
+          <span class="keyword">return</span> <span class="name">text</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">calculateScale</span>()
+      {
+          var <span class="name">coord1</span>, <span class="name">coord2</span>, <span class="name">dist</span>, <span class="name">text</span>, <span class="name">f</span>
+          <span class="name">f</span> <span class="operator">=</span> <span class="number">0</span>
+          <span class="name">coord1</span> <span class="operator">=</span> <span class="name">map</span>.<span class="name">toCoordinate</span>(<span class="name">Qt</span>.<span class="name">point</span>(<span class="number">0</span>,<span class="name">scale</span>.<span class="name">y</span>))
+          <span class="name">coord2</span> <span class="operator">=</span> <span class="name">map</span>.<span class="name">toCoordinate</span>(<span class="name">Qt</span>.<span class="name">point</span>(<span class="number">0</span><span class="operator">+</span><span class="name">scaleImage</span>.<span class="name">sourceSize</span>.<span class="name">width</span>,<span class="name">scale</span>.<span class="name">y</span>))
+          <span class="name">dist</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">round</span>(<span class="name">coord1</span>.<span class="name">distanceTo</span>(<span class="name">coord2</span>))
+
+          <span class="keyword">if</span> (<span class="name">dist</span> <span class="operator">===</span> <span class="number">0</span>) {
+              <span class="comment">// not visible</span>
+          } <span class="keyword">else</span> {
+              <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">scaleLengths</span>.<span class="name">length</span><span class="operator">-</span><span class="number">1</span>; i++) {
+                  <span class="keyword">if</span> (<span class="name">dist</span> <span class="operator">&lt;</span> (<span class="name">scaleLengths</span>[<span class="name">i</span>] <span class="operator">+</span> <span class="name">scaleLengths</span>[<span class="name">i</span><span class="operator">+</span><span class="number">1</span>]) <span class="operator">/</span> <span class="number">2</span> ) {
+                      <span class="name">f</span> <span class="operator">=</span> <span class="name">scaleLengths</span>[<span class="name">i</span>] <span class="operator">/</span> <span class="name">dist</span>
+                      <span class="name">dist</span> <span class="operator">=</span> <span class="name">scaleLengths</span>[<span class="name">i</span>]
+                      <span class="keyword">break</span>;
+                  }
+              }
+              <span class="keyword">if</span> (<span class="name">f</span> <span class="operator">===</span> <span class="number">0</span>) {
+                  <span class="name">f</span> <span class="operator">=</span> <span class="name">dist</span> <span class="operator">/</span> <span class="name">scaleLengths</span>[<span class="name">i</span>]
+                  <span class="name">dist</span> <span class="operator">=</span> <span class="name">scaleLengths</span>[<span class="name">i</span>]
+              }
+          }
+
+          <span class="name">text</span> <span class="operator">=</span> <span class="name">Helper</span>.<span class="name">formatDistance</span>(<span class="name">dist</span>)
+          <span class="name">scaleImage</span>.<span class="name">width</span> <span class="operator">=</span> (<span class="name">scaleImage</span>.<span class="name">sourceSize</span>.<span class="name">width</span> <span class="operator">*</span> <span class="name">f</span>) <span class="operator">-</span> <span class="number">2</span> <span class="operator">*</span> <span class="name">scaleImageLeft</span>.<span class="name">sourceSize</span>.<span class="name">width</span>
+          <span class="name">scaleText</span>.<span class="name">text</span> <span class="operator">=</span> <span class="name">text</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">deleteMarkers</span>()
+      {
+          var <span class="name">count</span> = <span class="name">map</span>.<span class="name">markers</span>.<span class="name">length</span>
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span><span class="operator">&lt;</span><span class="name">count</span>; i++){
+              <span class="name">map</span>.<span class="name">removeMapItem</span>(<span class="name">map</span>.<span class="name">markers</span>[<span class="name">i</span>])
+              <span class="name">map</span>.<span class="name">markers</span>[<span class="name">i</span>].<span class="name">destroy</span>()
+          }
+          <span class="name">map</span>.<span class="name">markers</span> <span class="operator">=</span> []
+          <span class="name">markerCounter</span> <span class="operator">=</span> <span class="number">0</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">deleteMapItems</span>()
+      {
+          var <span class="name">count</span> = <span class="name">map</span>.<span class="name">mapItems</span>.<span class="name">length</span>
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span><span class="operator">&lt;</span><span class="name">count</span>; i++){
+              <span class="name">map</span>.<span class="name">removeMapItem</span>(<span class="name">map</span>.<span class="name">mapItems</span>[<span class="name">i</span>])
+              <span class="name">map</span>.<span class="name">mapItems</span>[<span class="name">i</span>].<span class="name">destroy</span>()
+          }
+          <span class="name">map</span>.<span class="name">mapItems</span> <span class="operator">=</span> []
+      }
+
+      <span class="keyword">function</span> <span class="name">addMarker</span>()
+      {
+          var <span class="name">count</span> = <span class="name">map</span>.<span class="name">markers</span>.<span class="name">length</span>
+          markerCounter++
+          var <span class="name">marker</span> = <span class="name">Qt</span>.<span class="name">createQmlObject</span> (<span class="string">'Marker {}'</span>, <span class="name">map</span>)
+          <span class="name">map</span>.<span class="name">addMapItem</span>(<span class="name">marker</span>)
+          <span class="name">marker</span>.<span class="name">z</span> <span class="operator">=</span> <span class="name">map</span>.<span class="name">z</span><span class="operator">+</span><span class="number">1</span>
+          <span class="name">marker</span>.<span class="name">coordinate</span> <span class="operator">=</span> <span class="name">mouseArea</span>.<span class="name">lastCoordinate</span>
+
+          <span class="comment">//update list of markers</span>
+          var <span class="name">myArray</span> = new <span class="name">Array</span>()
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span><span class="operator">&lt;</span><span class="name">count</span>; i++){
+              <span class="name">myArray</span>.<span class="name">push</span>(<span class="name">markers</span>[<span class="name">i</span>])
+          }
+          <span class="name">myArray</span>.<span class="name">push</span>(<span class="name">marker</span>)
+          <span class="name">markers</span> <span class="operator">=</span> <span class="name">myArray</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">addGeoItem</span>(<span class="name">item</span>)
+      {
+          var <span class="name">count</span> = <span class="name">map</span>.<span class="name">mapItems</span>.<span class="name">length</span>
+          var <span class="name">co</span> = <span class="name">Qt</span>.<span class="name">createComponent</span>(<span class="name">item</span><span class="operator">+</span><span class="string">'.qml'</span>)
+          <span class="keyword">if</span> (<span class="name">co</span>.<span class="name">status</span> <span class="operator">==</span> <span class="name">Component</span>.<span class="name">Ready</span>) {
+              var <span class="name">o</span> = <span class="name">co</span>.<span class="name">createObject</span>(<span class="name">map</span>)
+              <span class="name">o</span>.<span class="name">setGeometry</span>(<span class="name">map</span>.<span class="name">markers</span>, <span class="name">currentMarker</span>)
+              <span class="name">map</span>.<span class="name">addMapItem</span>(<span class="name">o</span>)
+              <span class="comment">//update list of items</span>
+              var <span class="name">myArray</span> = new <span class="name">Array</span>()
+              <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span><span class="operator">&lt;</span><span class="name">count</span>; i++){
+                  <span class="name">myArray</span>.<span class="name">push</span>(<span class="name">mapItems</span>[<span class="name">i</span>])
+              }
+              <span class="name">myArray</span>.<span class="name">push</span>(<span class="name">o</span>)
+              <span class="name">mapItems</span> <span class="operator">=</span> <span class="name">myArray</span>
+
+          } <span class="keyword">else</span> {
+              <span class="name">console</span>.<span class="name">log</span>(<span class="name">item</span> <span class="operator">+</span> <span class="string">&quot; is not supported right now, please call us later.&quot;</span>)
+          }
+      }
+
+      <span class="keyword">function</span> <span class="name">deleteMarker</span>(<span class="name">index</span>)
+      {
+          <span class="comment">//update list of markers</span>
+          var <span class="name">myArray</span> = new <span class="name">Array</span>()
+          var <span class="name">count</span> = <span class="name">map</span>.<span class="name">markers</span>.<span class="name">length</span>
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span><span class="operator">&lt;</span><span class="name">count</span>; i++){
+              <span class="keyword">if</span> (<span class="name">index</span> <span class="operator">!=</span> <span class="name">i</span>) <span class="name">myArray</span>.<span class="name">push</span>(<span class="name">map</span>.<span class="name">markers</span>[<span class="name">i</span>])
+          }
+
+          <span class="name">map</span>.<span class="name">removeMapItem</span>(<span class="name">map</span>.<span class="name">markers</span>[<span class="name">index</span>])
+          <span class="name">map</span>.<span class="name">markers</span>[<span class="name">index</span>].<span class="name">destroy</span>()
+          <span class="name">map</span>.<span class="name">markers</span> <span class="operator">=</span> <span class="name">myArray</span>
+          <span class="keyword">if</span> (<span class="name">markers</span>.<span class="name">length</span> <span class="operator">==</span> <span class="number">0</span>) <span class="name">markerCounter</span> <span class="operator">=</span> <span class="number">0</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">calculateMarkerRoute</span>()
+      {
+          <span class="name">routeQuery</span>.<span class="name">clearWaypoints</span>();
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="name">currentMarker</span>; <span class="name">i</span><span class="operator">&lt;</span> <span class="name">map</span>.<span class="name">markers</span>.<span class="name">length</span>; i++){
+              <span class="name">routeQuery</span>.<span class="name">addWaypoint</span>(<span class="name">markers</span>[<span class="name">i</span>].<span class="name">coordinate</span>)
+          }
+          <span class="name">routeQuery</span>.<span class="name">travelModes</span> <span class="operator">=</span> <span class="name">RouteQuery</span>.<span class="name">CarTravel</span>
+          <span class="name">routeQuery</span>.<span class="name">routeOptimizations</span> <span class="operator">=</span> <span class="name">RouteQuery</span>.<span class="name">ShortestRoute</span>
+          <span class="name">routeQuery</span>.<span class="name">setFeatureWeight</span>(<span class="number">0</span>, <span class="number">0</span>)
+          <span class="name">routeModel</span>.<span class="name">update</span>();
+      }
+
+      <span class="keyword">function</span> <span class="name">calculateCoordinateRoute</span>(<span class="name">startCoordinate</span>, endCoordinate)
+      {
+          <span class="comment">// clear away any old data in the query</span>
+          <span class="name">routeQuery</span>.<span class="name">clearWaypoints</span>();
+
+          <span class="comment">// add the start and end coords as waypoints on the route</span>
+          <span class="name">routeQuery</span>.<span class="name">addWaypoint</span>(<span class="name">startCoordinate</span>)
+          <span class="name">routeQuery</span>.<span class="name">addWaypoint</span>(<span class="name">endCoordinate</span>)
+          <span class="name">routeQuery</span>.<span class="name">travelModes</span> <span class="operator">=</span> <span class="name">RouteQuery</span>.<span class="name">CarTravel</span>
+          <span class="name">routeQuery</span>.<span class="name">routeOptimizations</span> <span class="operator">=</span> <span class="name">RouteQuery</span>.<span class="name">FastestRoute</span>
+
+
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span>=<span class="number">0</span>; <span class="name">i</span><span class="operator">&lt;</span><span class="number">9</span>; i++) {
+              <span class="name">routeQuery</span>.<span class="name">setFeatureWeight</span>(<span class="name">i</span>, <span class="number">0</span>)
+          }
+          <span class="comment">//for (var i=0; i&lt;routeDialog.features.length; i++) {</span>
+          <span class="comment">//    map.routeQuery.setFeatureWeight(routeDialog.features[i], RouteQuery.AvoidFeatureWeight)</span>
+          <span class="comment">//}</span>
+
+          <span class="name">routeModel</span>.<span class="name">update</span>();
+
+          <span class="comment">// center the map on the start coord</span>
+          <span class="name">map</span>.<span class="name">center</span> <span class="operator">=</span> <span class="name">startCoordinate</span>;
+      }
+
+      <span class="keyword">function</span> <span class="name">geocode</span>(<span class="name">fromAddress</span>)
+      {
+          <span class="comment">// send the geocode request</span>
+          <span class="name">geocodeModel</span>.<span class="name">query</span> <span class="operator">=</span> <span class="name">fromAddress</span>
+          <span class="name">geocodeModel</span>.<span class="name">update</span>()
+      }
+
+      <span class="name">zoomLevel</span>: (<span class="name">maximumZoomLevel</span> <span class="operator">-</span> <span class="name">minimumZoomLevel</span>)<span class="operator">/</span><span class="number">2</span>
+      <span class="type"><a href="../qtcore/qtextstream.html#center">center</a></span> {
+          <span class="comment">// The Qt Company in Oslo</span>
+          <span class="name">latitude</span>: <span class="number">59.9485</span>
+          <span class="name">longitude</span>: <span class="number">10.7686</span>
+      }
+
+      <span class="comment">// Enable pan, flick, and pinch gestures to zoom in and out</span>
+      <span class="name">gesture</span>.acceptedGestures: <span class="name">MapGestureArea</span>.<span class="name">PanGesture</span> <span class="operator">|</span> <span class="name">MapGestureArea</span>.<span class="name">FlickGesture</span> <span class="operator">|</span> <span class="name">MapGestureArea</span>.<span class="name">PinchGesture</span>
+      <span class="name">gesture</span>.flickDeceleration: <span class="number">3000</span>
+      <span class="name">gesture</span>.enabled: <span class="number">true</span>
+      <span class="name">focus</span>: <span class="number">true</span>
+      <span class="name">onCopyrightLinkActivated</span>: <span class="name">Qt</span>.<span class="name">openUrlExternally</span>(<span class="name">link</span>)
+
+      <span class="name">onCenterChanged</span>:{
+          <span class="name">scaleTimer</span>.<span class="name">restart</span>()
+          <span class="keyword">if</span> (<span class="name">map</span>.<span class="name">followme</span>)
+              <span class="keyword">if</span> (<span class="name">map</span>.<span class="name">center</span> <span class="operator">!=</span> <span class="name">positionSource</span>.<span class="name">position</span>.<span class="name">coordinate</span>) <span class="name">map</span>.<span class="name">followme</span> <span class="operator">=</span> <span class="number">false</span>
+      }
+
+      <span class="name">onZoomLevelChanged</span>:{
+          <span class="name">scaleTimer</span>.<span class="name">restart</span>()
+          <span class="keyword">if</span> (<span class="name">map</span>.<span class="name">followme</span>) <span class="name">map</span>.<span class="name">center</span> <span class="operator">=</span> <span class="name">positionSource</span>.<span class="name">position</span>.<span class="name">coordinate</span>
+      }
+
+      <span class="name">onWidthChanged</span>:{
+          <span class="name">scaleTimer</span>.<span class="name">restart</span>()
+      }
+
+      <span class="name">onHeightChanged</span>:{
+          <span class="name">scaleTimer</span>.<span class="name">restart</span>()
+      }
+
+      <span class="name">Component</span>.onCompleted: {
+          <span class="name">markers</span> <span class="operator">=</span> new <span class="name">Array</span>();
+          <span class="name">mapItems</span> <span class="operator">=</span> new <span class="name">Array</span>();
+      }
+
+      <span class="name">Keys</span>.onPressed: {
+          <span class="keyword">if</span> (<span class="name">event</span>.<span class="name">key</span> <span class="operator">===</span> <span class="name">Qt</span>.<span class="name">Key_Plus</span>) {
+              map.zoomLevel++;
+          } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">event</span>.<span class="name">key</span> <span class="operator">===</span> <span class="name">Qt</span>.<span class="name">Key_Minus</span>) {
+              map.zoomLevel--;
+          } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">event</span>.<span class="name">key</span> <span class="operator">===</span> <span class="name">Qt</span>.<span class="name">Key_Left</span> <span class="operator">||</span> <span class="name">event</span>.<span class="name">key</span> <span class="operator">===</span> <span class="name">Qt</span>.<span class="name">Key_Right</span> <span class="operator">||</span>
+                     <span class="name">event</span>.<span class="name">key</span> <span class="operator">===</span> <span class="name">Qt</span>.<span class="name">Key_Up</span>   <span class="operator">||</span> <span class="name">event</span>.<span class="name">key</span> <span class="operator">===</span> <span class="name">Qt</span>.<span class="name">Key_Down</span>) {
+              var <span class="name">dx</span> = <span class="number">0</span>;
+              var <span class="name">dy</span> = <span class="number">0</span>;
+
+              <span class="keyword">switch</span> (<span class="name">event</span>.<span class="name">key</span>) {
+
+              <span class="keyword">case</span> <span class="name">Qt</span>.<span class="name">Key_Left</span>: <span class="name">dx</span> <span class="operator">=</span> <span class="name">map</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">4</span>; <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="name">Qt</span>.<span class="name">Key_Right</span>: <span class="name">dx</span> <span class="operator">=</span> -<span class="name">map</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">4</span>; <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="name">Qt</span>.<span class="name">Key_Up</span>: <span class="name">dy</span> <span class="operator">=</span> <span class="name">map</span>.<span class="name">height</span> <span class="operator">/</span> <span class="number">4</span>; <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="name">Qt</span>.<span class="name">Key_Down</span>: <span class="name">dy</span> <span class="operator">=</span> -<span class="name">map</span>.<span class="name">height</span> <span class="operator">/</span> <span class="number">4</span>; <span class="keyword">break</span>;
+
+              }
+
+              var <span class="name">mapCenterPoint</span> = <span class="name">Qt</span>.<span class="name">point</span>(<span class="name">map</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">2.0</span> <span class="operator">-</span> <span class="name">dx</span>, <span class="name">map</span>.<span class="name">height</span> <span class="operator">/</span> <span class="number">2.0</span> <span class="operator">-</span> <span class="name">dy</span>);
+              <span class="name">map</span>.<span class="name">center</span> <span class="operator">=</span> <span class="name">map</span>.<span class="name">toCoordinate</span>(<span class="name">mapCenterPoint</span>);
+          }
+      }
+
+      <span class="comment">/* @todo
+      Binding {
+          target: map
+          property: 'center'
+          value: positionSource.position.coordinate
+          when: followme
+      }*/</span>
+
+      <span class="type"><a href="../qtpositioning/qml-qtpositioning-positionsource.html">PositionSource</a></span>{
+          <span class="name">id</span>: <span class="name">positionSource</span>
+          <span class="name">active</span>: <span class="name">followme</span>
+
+          <span class="name">onPositionChanged</span>: {
+              <span class="name">map</span>.<span class="name">center</span> <span class="operator">=</span> <span class="name">positionSource</span>.<span class="name">position</span>.<span class="name">coordinate</span>
+          }
+      }
+
+      <span class="type"><a href="qml-qtlocation-mapquickitem.html">MapQuickItem</a></span> {
+          <span class="name">id</span>: <span class="name">poiTheQtComapny</span>
+          <span class="name">sourceItem</span>: <span class="name">Rectangle</span> { <span class="name">width</span>: <span class="number">14</span>; <span class="name">height</span>: <span class="number">14</span>; <span class="name">color</span>: <span class="string">&quot;#e41e25&quot;</span>; <span class="name">border</span>.width: <span class="number">2</span>; <span class="name">border</span>.color: <span class="string">&quot;white&quot;</span>; <span class="name">smooth</span>: <span class="number">true</span>; <span class="name">radius</span>: <span class="number">7</span> }
+          <span class="type">coordinate</span> {
+              <span class="name">latitude</span>: <span class="number">59.9485</span>
+              <span class="name">longitude</span>: <span class="number">10.7686</span>
+          }
+          <span class="name">opacity</span>: <span class="number">1.0</span>
+          <span class="name">anchorPoint</span>: <span class="name">Qt</span>.<span class="name">point</span>(<span class="name">sourceItem</span>.<span class="name">width</span><span class="operator">/</span><span class="number">2</span>, <span class="name">sourceItem</span>.<span class="name">height</span><span class="operator">/</span><span class="number">2</span>)
+      }
+
+      <span class="type"><a href="qml-qtlocation-mapquickitem.html">MapQuickItem</a></span> {
+          <span class="name">sourceItem</span>: <span class="name">Text</span>{
+              <span class="name">text</span>: <span class="string">&quot;The Qt Company&quot;</span>
+              <span class="name">color</span>:<span class="string">&quot;#242424&quot;</span>
+              <span class="name">font</span>.bold: <span class="number">true</span>
+              <span class="name">styleColor</span>: <span class="string">&quot;#ECECEC&quot;</span>
+              <span class="name">style</span>: <span class="name">Text</span>.<span class="name">Outline</span>
+          }
+          <span class="name">coordinate</span>: <span class="name">poiTheQtComapny</span>.<span class="name">coordinate</span>
+          <span class="name">anchorPoint</span>: <span class="name">Qt</span>.<span class="name">point</span>(-<span class="name">poiTheQtComapny</span>.<span class="name">sourceItem</span>.<span class="name">width</span> <span class="operator">*</span> <span class="number">0.5</span>,<span class="name">poiTheQtComapny</span>.<span class="name">sourceItem</span>.<span class="name">height</span> <span class="operator">*</span> <span class="number">1.5</span>)
+      }
+
+      <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls-slider.html">Slider</a></span> {
+          <span class="name">id</span>: <span class="name">zoomSlider</span>;
+          <span class="name">z</span>: <span class="name">map</span>.<span class="name">z</span> <span class="operator">+</span> <span class="number">3</span>
+          <span class="name">minimumValue</span>: <span class="name">map</span>.<span class="name">minimumZoomLevel</span>;
+          <span class="name">maximumValue</span>: <span class="name">map</span>.<span class="name">maximumZoomLevel</span>;
+          <span class="name">anchors</span>.margins: <span class="number">10</span>
+          <span class="name">anchors</span>.bottom: <span class="name">scale</span>.<span class="name">top</span>
+          <span class="name">anchors</span>.top: <span class="name">parent</span>.<span class="name">top</span>
+          <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+          <span class="name">orientation</span> : <span class="name">Qt</span>.<span class="name">Vertical</span>
+          <span class="name">value</span>: <span class="name">map</span>.<span class="name">zoomLevel</span>
+          <span class="name">onValueChanged</span>: {
+              <span class="name">map</span>.<span class="name">zoomLevel</span> <span class="operator">=</span> <span class="name">value</span>
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+          <span class="name">id</span>: <span class="name">scale</span>
+          <span class="name">z</span>: <span class="name">map</span>.<span class="name">z</span> <span class="operator">+</span> <span class="number">3</span>
+          <span class="name">visible</span>: <span class="name">scaleText</span>.<span class="name">text</span> <span class="operator">!=</span> <span class="string">&quot;0 m&quot;</span>
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>;
+          <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+          <span class="name">anchors</span>.margins: <span class="number">20</span>
+          <span class="name">height</span>: <span class="name">scaleText</span>.<span class="name">height</span> <span class="operator">*</span> <span class="number">2</span>
+          <span class="name">width</span>: <span class="name">scaleImage</span>.<span class="name">width</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+              <span class="name">id</span>: <span class="name">scaleImageLeft</span>
+              <span class="name">source</span>: <span class="string">&quot;../resources/scale_end.png&quot;</span>
+              <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+              <span class="name">anchors</span>.right: <span class="name">scaleImage</span>.<span class="name">left</span>
+          }
+          <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+              <span class="name">id</span>: <span class="name">scaleImage</span>
+              <span class="name">source</span>: <span class="string">&quot;../resources/scale.png&quot;</span>
+              <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+              <span class="name">anchors</span>.right: <span class="name">scaleImageRight</span>.<span class="name">left</span>
+          }
+          <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+              <span class="name">id</span>: <span class="name">scaleImageRight</span>
+              <span class="name">source</span>: <span class="string">&quot;../resources/scale_end.png&quot;</span>
+              <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+              <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+          }
+          <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls-label.html">Label</a></span> {
+              <span class="name">id</span>: <span class="name">scaleText</span>
+              <span class="name">color</span>: <span class="string">&quot;#004EAE&quot;</span>
+              <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+              <span class="name">text</span>: <span class="string">&quot;0 m&quot;</span>
+          }
+          <span class="name">Component</span>.onCompleted: {
+              <span class="name">map</span>.<span class="name">calculateScale</span>();
+          }
+      }
+
+      <span class="type"><a href="qml-qtlocation-routemodel.html">RouteModel</a></span> {
+          <span class="name">id</span>: <span class="name">routeModel</span>
+          <span class="name">plugin</span> : <span class="name">map</span>.<span class="name">plugin</span>
+          <span class="name">query</span>:  <span class="name">RouteQuery</span> {
+              <span class="name">id</span>: <span class="name">routeQuery</span>
+          }
+          <span class="name">onStatusChanged</span>: {
+              <span class="keyword">if</span> (<span class="name">status</span> <span class="operator">==</span> <span class="name">RouteModel</span>.<span class="name">Ready</span>) {
+                  <span class="keyword">switch</span> (<span class="name">count</span>) {
+                  <span class="keyword">case</span> <span class="number">0</span>:
+                      <span class="comment">// technically not an error</span>
+                      <span class="name">map</span>.<span class="name">routeError</span>()
+                      <span class="keyword">break</span>
+                  <span class="keyword">case</span> <span class="number">1</span>:
+                      <span class="name">map</span>.<span class="name">showRouteList</span>()
+                      <span class="keyword">break</span>
+                  }
+              } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">status</span> <span class="operator">==</span> <span class="name">RouteModel</span>.<span class="name">Error</span>) {
+                  <span class="name">map</span>.<span class="name">routeError</span>()
+              }
+          }
+      }
+
+      <span class="type"><a href="../qtqml/qml-qtqml-component.html">Component</a></span> {
+          <span class="name">id</span>: <span class="name">routeDelegate</span>
+
+          <span class="type"><a href="qml-qtlocation-maproute.html">MapRoute</a></span> {
+              <span class="name">id</span>: <span class="name">route</span>
+              <span class="name">route</span>: <span class="name">routeData</span>
+              <span class="name">line</span>.color: <span class="string">&quot;#46a2da&quot;</span>
+              <span class="name">line</span>.width: <span class="number">5</span>
+              <span class="name">smooth</span>: <span class="number">true</span>
+              <span class="name">opacity</span>: <span class="number">0.8</span>
+              <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+                  <span class="name">id</span>: <span class="name">routeMouseArea</span>
+                  <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                  <span class="name">hoverEnabled</span>: <span class="number">false</span>
+                  property <span class="type">variant</span> <span class="name">lastCoordinate</span>
+
+                  <span class="name">onPressed</span> : {
+                      <span class="name">map</span>.<span class="name">lastX</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">x</span> <span class="operator">+</span> <span class="name">parent</span>.<span class="name">x</span>
+                      <span class="name">map</span>.<span class="name">lastY</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">y</span> <span class="operator">+</span> <span class="name">parent</span>.<span class="name">y</span>
+                      <span class="name">map</span>.<span class="name">pressX</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">x</span> <span class="operator">+</span> <span class="name">parent</span>.<span class="name">x</span>
+                      <span class="name">map</span>.<span class="name">pressY</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">y</span> <span class="operator">+</span> <span class="name">parent</span>.<span class="name">y</span>
+                      <span class="name">lastCoordinate</span> <span class="operator">=</span> <span class="name">map</span>.<span class="name">toCoordinate</span>(<span class="name">Qt</span>.<span class="name">point</span>(<span class="name">mouse</span>.<span class="name">x</span>, <span class="name">mouse</span>.<span class="name">y</span>))
+                  }
+
+                  <span class="name">onPositionChanged</span>: {
+                      <span class="keyword">if</span> (<span class="name">mouse</span>.<span class="name">button</span> <span class="operator">==</span> <span class="name">Qt</span>.<span class="name">LeftButton</span>) {
+                          <span class="name">map</span>.<span class="name">lastX</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">x</span> <span class="operator">+</span> <span class="name">parent</span>.<span class="name">x</span>
+                          <span class="name">map</span>.<span class="name">lastY</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">y</span> <span class="operator">+</span> <span class="name">parent</span>.<span class="name">y</span>
+                      }
+                  }
+
+                  <span class="name">onPressAndHold</span>:{
+                      <span class="keyword">if</span> (<span class="name">Math</span>.<span class="name">abs</span>(<span class="name">map</span>.<span class="name">pressX</span> <span class="operator">-</span> <span class="name">parent</span>.<span class="name">x</span><span class="operator">-</span> <span class="name">mouse</span>.<span class="name">x</span> ) <span class="operator">&lt;</span> <span class="name">map</span>.<span class="name">jitterThreshold</span>
+                              <span class="operator">&amp;&amp;</span> <span class="name">Math</span>.<span class="name">abs</span>(<span class="name">map</span>.<span class="name">pressY</span> <span class="operator">-</span> <span class="name">parent</span>.<span class="name">y</span> <span class="operator">-</span> <span class="name">mouse</span>.<span class="name">y</span> ) <span class="operator">&lt;</span> <span class="name">map</span>.<span class="name">jitterThreshold</span>) {
+                          <span class="name">showRouteMenu</span>(<span class="name">lastCoordinate</span>);
+                      }
+                  }
+
+              }
+          }
+      }
+
+      <span class="type"><a href="qml-qtlocation-geocodemodel.html">GeocodeModel</a></span> {
+          <span class="name">id</span>: <span class="name">geocodeModel</span>
+          <span class="name">plugin</span>: <span class="name">map</span>.<span class="name">plugin</span>
+          <span class="name">onStatusChanged</span>: {
+              <span class="keyword">if</span> ((<span class="name">status</span> <span class="operator">==</span> <span class="name">GeocodeModel</span>.<span class="name">Ready</span>) <span class="operator">||</span> (<span class="name">status</span> <span class="operator">==</span> <span class="name">GeocodeModel</span>.<span class="name">Error</span>))
+                  <span class="name">map</span>.<span class="name">geocodeFinished</span>()
+          }
+          <span class="name">onLocationsChanged</span>:
+          {
+              <span class="keyword">if</span> (<span class="name">count</span> <span class="operator">==</span> <span class="number">1</span>) {
+                  <span class="name">map</span>.<span class="name">center</span>.<span class="name">latitude</span> <span class="operator">=</span> <span class="name">get</span>(<span class="number">0</span>).<span class="name">coordinate</span>.<span class="name">latitude</span>
+                  <span class="name">map</span>.<span class="name">center</span>.<span class="name">longitude</span> <span class="operator">=</span> <span class="name">get</span>(<span class="number">0</span>).<span class="name">coordinate</span>.<span class="name">longitude</span>
+              }
+          }
+      }
+
+      <span class="type"><a href="../qtqml/qml-qtqml-component.html">Component</a></span> {
+          <span class="name">id</span>: <span class="name">pointDelegate</span>
+
+          <span class="type"><a href="qml-qtlocation-mapcircle.html">MapCircle</a></span> {
+              <span class="name">id</span>: <span class="name">point</span>
+              <span class="name">radius</span>: <span class="number">1000</span>
+              <span class="name">color</span>: <span class="string">&quot;#46a2da&quot;</span>
+              <span class="name">border</span>.color: <span class="string">&quot;#190a33&quot;</span>
+              <span class="name">border</span>.width: <span class="number">2</span>
+              <span class="name">smooth</span>: <span class="number">true</span>
+              <span class="name">opacity</span>: <span class="number">0.25</span>
+              <span class="name">center</span>: <span class="name">locationData</span>.<span class="name">coordinate</span>
+              <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+                  <span class="name">anchors</span>.fill:<span class="name">parent</span>
+                  <span class="name">id</span>: <span class="name">circleMouseArea</span>
+                  <span class="name">hoverEnabled</span>: <span class="number">false</span>
+                  property <span class="type">variant</span> <span class="name">lastCoordinate</span>
+
+                  <span class="name">onPressed</span> : {
+                      <span class="name">map</span>.<span class="name">lastX</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">x</span> <span class="operator">+</span> <span class="name">parent</span>.<span class="name">x</span>
+                      <span class="name">map</span>.<span class="name">lastY</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">y</span> <span class="operator">+</span> <span class="name">parent</span>.<span class="name">y</span>
+                      <span class="name">map</span>.<span class="name">pressX</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">x</span> <span class="operator">+</span> <span class="name">parent</span>.<span class="name">x</span>
+                      <span class="name">map</span>.<span class="name">pressY</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">y</span> <span class="operator">+</span> <span class="name">parent</span>.<span class="name">y</span>
+                      <span class="name">lastCoordinate</span> <span class="operator">=</span> <span class="name">map</span>.<span class="name">toCoordinate</span>(<span class="name">Qt</span>.<span class="name">point</span>(<span class="name">mouse</span>.<span class="name">x</span>, <span class="name">mouse</span>.<span class="name">y</span>))
+                  }
+
+                  <span class="name">onPositionChanged</span>: {
+                      <span class="keyword">if</span> (<span class="name">Math</span>.<span class="name">abs</span>(<span class="name">map</span>.<span class="name">pressX</span> <span class="operator">-</span> <span class="name">parent</span>.<span class="name">x</span><span class="operator">-</span> <span class="name">mouse</span>.<span class="name">x</span> ) <span class="operator">&gt;</span> <span class="name">map</span>.<span class="name">jitterThreshold</span> <span class="operator">||</span>
+                              <span class="name">Math</span>.<span class="name">abs</span>(<span class="name">map</span>.<span class="name">pressY</span> <span class="operator">-</span> <span class="name">parent</span>.<span class="name">y</span> <span class="operator">-</span><span class="name">mouse</span>.<span class="name">y</span> ) <span class="operator">&gt;</span> <span class="name">map</span>.<span class="name">jitterThreshold</span>) {
+                          <span class="keyword">if</span> (<span class="name">pressed</span>) <span class="name">parent</span>.<span class="name">radius</span> <span class="operator">=</span> <span class="name">parent</span>.<span class="name">center</span>.<span class="name">distanceTo</span>(
+                                           <span class="name">map</span>.<span class="name">toCoordinate</span>(<span class="name">Qt</span>.<span class="name">point</span>(<span class="name">mouse</span>.<span class="name">x</span>, <span class="name">mouse</span>.<span class="name">y</span>)))
+                      }
+                      <span class="keyword">if</span> (<span class="name">mouse</span>.<span class="name">button</span> <span class="operator">==</span> <span class="name">Qt</span>.<span class="name">LeftButton</span>) {
+                          <span class="name">map</span>.<span class="name">lastX</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">x</span> <span class="operator">+</span> <span class="name">parent</span>.<span class="name">x</span>
+                          <span class="name">map</span>.<span class="name">lastY</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">y</span> <span class="operator">+</span> <span class="name">parent</span>.<span class="name">y</span>
+                      }
+                  }
+
+                  <span class="name">onPressAndHold</span>:{
+                      <span class="keyword">if</span> (<span class="name">Math</span>.<span class="name">abs</span>(<span class="name">map</span>.<span class="name">pressX</span> <span class="operator">-</span> <span class="name">parent</span>.<span class="name">x</span><span class="operator">-</span> <span class="name">mouse</span>.<span class="name">x</span> ) <span class="operator">&lt;</span> <span class="name">map</span>.<span class="name">jitterThreshold</span>
+                              <span class="operator">&amp;&amp;</span> <span class="name">Math</span>.<span class="name">abs</span>(<span class="name">map</span>.<span class="name">pressY</span> <span class="operator">-</span> <span class="name">parent</span>.<span class="name">y</span> <span class="operator">-</span> <span class="name">mouse</span>.<span class="name">y</span> ) <span class="operator">&lt;</span> <span class="name">map</span>.<span class="name">jitterThreshold</span>) {
+                          <span class="name">showPointMenu</span>(<span class="name">lastCoordinate</span>);
+                      }
+                  }
+              }
+          }
+      }
+
+      <span class="type"><a href="qml-qtlocation-mapitemview.html">MapItemView</a></span> {
+          <span class="name">model</span>: <span class="name">routeModel</span>
+          <span class="name">delegate</span>: <span class="name">routeDelegate</span>
+          <span class="name">autoFitViewport</span>: <span class="number">true</span>
+      }
+
+      <span class="type"><a href="qml-qtlocation-mapitemview.html">MapItemView</a></span> {
+          <span class="name">model</span>: <span class="name">geocodeModel</span>
+          <span class="name">delegate</span>: <span class="name">pointDelegate</span>
+      }
+
+      <span class="type"><a href="../qtqml/qml-qtqml-timer.html">Timer</a></span> {
+          <span class="name">id</span>: <span class="name">scaleTimer</span>
+          <span class="name">interval</span>: <span class="number">100</span>
+          <span class="name">running</span>: <span class="number">false</span>
+          <span class="name">repeat</span>: <span class="number">false</span>
+          <span class="name">onTriggered</span>: {
+              <span class="name">map</span>.<span class="name">calculateScale</span>()
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+          <span class="name">id</span>: <span class="name">mouseArea</span>
+          property <span class="type">variant</span> <span class="name">lastCoordinate</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">acceptedButtons</span>: <span class="name">Qt</span>.<span class="name">LeftButton</span> <span class="operator">|</span> <span class="name">Qt</span>.<span class="name">RightButton</span>
+
+          <span class="name">onPressed</span> : {
+              <span class="name">map</span>.<span class="name">lastX</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">x</span>
+              <span class="name">map</span>.<span class="name">lastY</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">y</span>
+              <span class="name">map</span>.<span class="name">pressX</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">x</span>
+              <span class="name">map</span>.<span class="name">pressY</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">y</span>
+              <span class="name">lastCoordinate</span> <span class="operator">=</span> <span class="name">map</span>.<span class="name">toCoordinate</span>(<span class="name">Qt</span>.<span class="name">point</span>(<span class="name">mouse</span>.<span class="name">x</span>, <span class="name">mouse</span>.<span class="name">y</span>))
+          }
+
+          <span class="name">onPositionChanged</span>: {
+              <span class="keyword">if</span> (<span class="name">mouse</span>.<span class="name">button</span> <span class="operator">==</span> <span class="name">Qt</span>.<span class="name">LeftButton</span>) {
+                  <span class="name">map</span>.<span class="name">lastX</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">x</span>
+                  <span class="name">map</span>.<span class="name">lastY</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">y</span>
+              }
+          }
+
+          <span class="name">onDoubleClicked</span>: {
+              var <span class="name">mouseGeoPos</span> = <span class="name">map</span>.<span class="name">toCoordinate</span>(<span class="name">Qt</span>.<span class="name">point</span>(<span class="name">mouse</span>.<span class="name">x</span>, <span class="name">mouse</span>.<span class="name">y</span>));
+              var <span class="name">preZoomPoint</span> = <span class="name">map</span>.<span class="name">fromCoordinate</span>(<span class="name">mouseGeoPos</span>, <span class="number">false</span>);
+              <span class="keyword">if</span> (<span class="name">mouse</span>.<span class="name">button</span> <span class="operator">===</span> <span class="name">Qt</span>.<span class="name">LeftButton</span>) {
+                  map.zoomLevel++;
+              } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">mouse</span>.<span class="name">button</span> <span class="operator">===</span> <span class="name">Qt</span>.<span class="name">RightButton</span>) {
+                  map.zoomLevel--;
+              }
+              var <span class="name">postZoomPoint</span> = <span class="name">map</span>.<span class="name">fromCoordinate</span>(<span class="name">mouseGeoPos</span>, <span class="number">false</span>);
+              var <span class="name">dx</span> = <span class="name">postZoomPoint</span>.<span class="name">x</span> <span class="operator">-</span> <span class="name">preZoomPoint</span>.<span class="name">x</span>;
+              var <span class="name">dy</span> = <span class="name">postZoomPoint</span>.<span class="name">y</span> <span class="operator">-</span> <span class="name">preZoomPoint</span>.<span class="name">y</span>;
+
+              var <span class="name">mapCenterPoint</span> = <span class="name">Qt</span>.<span class="name">point</span>(<span class="name">map</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">2.0</span> <span class="operator">+</span> <span class="name">dx</span>, <span class="name">map</span>.<span class="name">height</span> <span class="operator">/</span> <span class="number">2.0</span> <span class="operator">+</span> <span class="name">dy</span>);
+              <span class="name">map</span>.<span class="name">center</span> <span class="operator">=</span> <span class="name">map</span>.<span class="name">toCoordinate</span>(<span class="name">mapCenterPoint</span>);
+
+              <span class="name">lastX</span> <span class="operator">=</span> -<span class="number">1</span>;
+              <span class="name">lastY</span> <span class="operator">=</span> -<span class="number">1</span>;
+          }
+
+          <span class="name">onPressAndHold</span>:{
+              <span class="keyword">if</span> (<span class="name">Math</span>.<span class="name">abs</span>(<span class="name">map</span>.<span class="name">pressX</span> <span class="operator">-</span> <span class="name">mouse</span>.<span class="name">x</span> ) <span class="operator">&lt;</span> <span class="name">map</span>.<span class="name">jitterThreshold</span>
+                      <span class="operator">&amp;&amp;</span> <span class="name">Math</span>.<span class="name">abs</span>(<span class="name">map</span>.<span class="name">pressY</span> <span class="operator">-</span> <span class="name">mouse</span>.<span class="name">y</span> ) <span class="operator">&lt;</span> <span class="name">map</span>.<span class="name">jitterThreshold</span>) {
+                  <span class="name">showMainMenu</span>(<span class="name">lastCoordinate</span>);
+              }
+          }
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@mapviewer/map/MapComponent.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

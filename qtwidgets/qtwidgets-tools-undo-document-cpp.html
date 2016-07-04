@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>document.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-tools-undo-example.html">Undo Framework</a></td><td >document.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">document.cpp Example File</h1>
+<span class="subtitle">tools/undo/document.cpp</span>
+<!-- $$$tools/undo/document.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;qevent.h&gt;</span>
+  <span class="preprocessor">#include &lt;QPainter&gt;</span>
+  <span class="preprocessor">#include &lt;QTextStream&gt;</span>
+  <span class="preprocessor">#include &lt;QUndoStack&gt;</span>
+  <span class="preprocessor">#include &quot;document.h&quot;</span>
+  <span class="preprocessor">#include &quot;commands.h&quot;</span>
+
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">int</span> resizeHandleWidth <span class="operator">=</span> <span class="number">6</span>;
+
+  <span class="comment">/******************************************************************************
+  ** Shape
+  */</span>
+
+  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> Shape<span class="operator">::</span>minSize(<span class="number">80</span><span class="operator">,</span> <span class="number">50</span>);
+
+  Shape<span class="operator">::</span>Shape(Type type<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>color<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> <span class="operator">&amp;</span>rect)
+      : m_type(type)<span class="operator">,</span> m_rect(rect)<span class="operator">,</span> m_color(color)
+  {
+  }
+
+  Shape<span class="operator">::</span>Type Shape<span class="operator">::</span>type() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_type;
+  }
+
+  <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> Shape<span class="operator">::</span>rect() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_rect;
+  }
+
+  <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> Shape<span class="operator">::</span>color() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_color;
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> Shape<span class="operator">::</span>name() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_name;
+  }
+
+  <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> Shape<span class="operator">::</span>resizeHandle() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> br <span class="operator">=</span> m_rect<span class="operator">.</span>bottomRight();
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(br <span class="operator">-</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(resizeHandleWidth<span class="operator">,</span> resizeHandleWidth)<span class="operator">,</span> br);
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> Shape<span class="operator">::</span>typeToString(Type type)
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> result;
+
+      <span class="keyword">switch</span> (type) {
+          <span class="keyword">case</span> Rectangle:
+              result <span class="operator">=</span> QLatin1String(<span class="string">&quot;Rectangle&quot;</span>);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> Circle:
+              result <span class="operator">=</span> QLatin1String(<span class="string">&quot;Circle&quot;</span>);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> Triangle:
+              result <span class="operator">=</span> QLatin1String(<span class="string">&quot;Triangle&quot;</span>);
+              <span class="keyword">break</span>;
+      }
+
+      <span class="keyword">return</span> result;
+  }
+
+  Shape<span class="operator">::</span>Type Shape<span class="operator">::</span>stringToType(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>s<span class="operator">,</span> bool <span class="operator">*</span>ok)
+  {
+      <span class="keyword">if</span> (ok <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="operator">*</span>ok <span class="operator">=</span> <span class="keyword">true</span>;
+
+      <span class="keyword">if</span> (s <span class="operator">=</span><span class="operator">=</span> QLatin1String(<span class="string">&quot;Rectangle&quot;</span>))
+          <span class="keyword">return</span> Rectangle;
+      <span class="keyword">if</span> (s <span class="operator">=</span><span class="operator">=</span> QLatin1String(<span class="string">&quot;Circle&quot;</span>))
+          <span class="keyword">return</span> Circle;
+      <span class="keyword">if</span> (s <span class="operator">=</span><span class="operator">=</span> QLatin1String(<span class="string">&quot;Triangle&quot;</span>))
+          <span class="keyword">return</span> Triangle;
+
+      <span class="keyword">if</span> (ok <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="operator">*</span>ok <span class="operator">=</span> <span class="keyword">false</span>;
+      <span class="keyword">return</span> Rectangle;
+  }
+
+  <span class="comment">/******************************************************************************
+  ** Document
+  */</span>
+
+  Document<span class="operator">::</span>Document(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qwidget.html">QWidget</a></span>(parent)<span class="operator">,</span> m_currentIndex(<span class="operator">-</span><span class="number">1</span>)<span class="operator">,</span> m_mousePressIndex(<span class="operator">-</span><span class="number">1</span>)<span class="operator">,</span> m_resizeHandlePressed(<span class="keyword">false</span>)
+  {
+      m_undoStack <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qundostack.html">QUndoStack</a></span>(<span class="keyword">this</span>);
+
+      setAutoFillBackground(<span class="keyword">true</span>);
+      setBackgroundRole(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Base);
+
+      <span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span> pal <span class="operator">=</span> palette();
+      pal<span class="operator">.</span>setBrush(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Base<span class="operator">,</span> <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span>(<span class="string">&quot;:/icons/background.png&quot;</span>));
+      pal<span class="operator">.</span>setColor(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>HighlightedText<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>red);
+      setPalette(pal);
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> Document<span class="operator">::</span>addShape(<span class="keyword">const</span> Shape <span class="operator">&amp;</span>shape)
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> name <span class="operator">=</span> Shape<span class="operator">::</span>typeToString(shape<span class="operator">.</span>type());
+      name <span class="operator">=</span> uniqueName(name);
+
+      m_shapeList<span class="operator">.</span>append(shape);
+      m_shapeList<span class="operator">[</span>m_shapeList<span class="operator">.</span>count() <span class="operator">-</span> <span class="number">1</span><span class="operator">]</span><span class="operator">.</span>m_name <span class="operator">=</span> name;
+      setCurrentShape(m_shapeList<span class="operator">.</span>count() <span class="operator">-</span> <span class="number">1</span>);
+
+      <span class="keyword">return</span> name;
+  }
+
+  <span class="type">void</span> Document<span class="operator">::</span>deleteShape(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>shapeName)
+  {
+      <span class="type">int</span> index <span class="operator">=</span> indexOf(shapeName);
+      <span class="keyword">if</span> (index <span class="operator">=</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+          <span class="keyword">return</span>;
+
+      update(m_shapeList<span class="operator">.</span>at(index)<span class="operator">.</span>rect());
+
+      m_shapeList<span class="operator">.</span>removeAt(index);
+
+      <span class="keyword">if</span> (index <span class="operator">&lt;</span><span class="operator">=</span> m_currentIndex) {
+          m_currentIndex <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>;
+          <span class="keyword">if</span> (index <span class="operator">=</span><span class="operator">=</span> m_shapeList<span class="operator">.</span>count())
+              <span class="operator">-</span><span class="operator">-</span>index;
+          setCurrentShape(index);
+      }
+  }
+
+  Shape Document<span class="operator">::</span>shape(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>shapeName) <span class="keyword">const</span>
+  {
+      <span class="type">int</span> index <span class="operator">=</span> indexOf(shapeName);
+      <span class="keyword">if</span> (index <span class="operator">=</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+          <span class="keyword">return</span> Shape();
+      <span class="keyword">return</span> m_shapeList<span class="operator">.</span>at(index);
+  }
+
+  <span class="type">void</span> Document<span class="operator">::</span>setShapeRect(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>shapeName<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> <span class="operator">&amp;</span>rect)
+  {
+      <span class="type">int</span> index <span class="operator">=</span> indexOf(shapeName);
+      <span class="keyword">if</span> (index <span class="operator">=</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+          <span class="keyword">return</span>;
+
+      Shape <span class="operator">&amp;</span>shape <span class="operator">=</span> m_shapeList<span class="operator">[</span>index<span class="operator">]</span>;
+
+      update(shape<span class="operator">.</span>rect());
+      update(rect);
+
+      shape<span class="operator">.</span>m_rect <span class="operator">=</span> rect;
+  }
+
+  <span class="type">void</span> Document<span class="operator">::</span>setShapeColor(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>shapeName<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>color)
+  {
+
+      <span class="type">int</span> index <span class="operator">=</span> indexOf(shapeName);
+      <span class="keyword">if</span> (index <span class="operator">=</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+          <span class="keyword">return</span>;
+
+      Shape <span class="operator">&amp;</span>shape <span class="operator">=</span> m_shapeList<span class="operator">[</span>index<span class="operator">]</span>;
+      shape<span class="operator">.</span>m_color <span class="operator">=</span> color;
+
+      update(shape<span class="operator">.</span>rect());
+  }
+
+  <span class="type"><a href="qundostack.html">QUndoStack</a></span> <span class="operator">*</span>Document<span class="operator">::</span>undoStack() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_undoStack;
+  }
+
+  bool Document<span class="operator">::</span>load(<span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span> <span class="operator">&amp;</span>stream)
+  {
+      m_shapeList<span class="operator">.</span>clear();
+
+      <span class="keyword">while</span> (<span class="operator">!</span>stream<span class="operator">.</span>atEnd()) {
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> shapeType<span class="operator">,</span> shapeName<span class="operator">,</span> colorName;
+          <span class="type">int</span> left<span class="operator">,</span> top<span class="operator">,</span> width<span class="operator">,</span> height;
+          stream <span class="operator">&gt;</span><span class="operator">&gt;</span> shapeType <span class="operator">&gt;</span><span class="operator">&gt;</span> shapeName <span class="operator">&gt;</span><span class="operator">&gt;</span> colorName <span class="operator">&gt;</span><span class="operator">&gt;</span> left <span class="operator">&gt;</span><span class="operator">&gt;</span> top <span class="operator">&gt;</span><span class="operator">&gt;</span> width <span class="operator">&gt;</span><span class="operator">&gt;</span> height;
+          <span class="keyword">if</span> (stream<span class="operator">.</span>status() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span><span class="operator">::</span>Ok)
+              <span class="keyword">return</span> <span class="keyword">false</span>;
+          bool ok;
+          Shape<span class="operator">::</span>Type type <span class="operator">=</span> Shape<span class="operator">::</span>stringToType(shapeType<span class="operator">,</span> <span class="operator">&amp;</span>ok);
+          <span class="keyword">if</span> (<span class="operator">!</span>ok)
+              <span class="keyword">return</span> <span class="keyword">false</span>;
+          <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> color(colorName);
+          <span class="keyword">if</span> (<span class="operator">!</span>color<span class="operator">.</span>isValid())
+              <span class="keyword">return</span> <span class="keyword">false</span>;
+
+          Shape shape(type);
+          shape<span class="operator">.</span>m_name <span class="operator">=</span> shapeName;
+          shape<span class="operator">.</span>m_color <span class="operator">=</span> color;
+          shape<span class="operator">.</span>m_rect <span class="operator">=</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(left<span class="operator">,</span> top<span class="operator">,</span> width<span class="operator">,</span> height);
+
+          m_shapeList<span class="operator">.</span>append(shape);
+      }
+
+      m_currentIndex <span class="operator">=</span> m_shapeList<span class="operator">.</span>isEmpty() <span class="operator">?</span> <span class="operator">-</span><span class="number">1</span> : <span class="number">0</span>;
+
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  <span class="type">void</span> Document<span class="operator">::</span>save(<span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span> <span class="operator">&amp;</span>stream)
+  {
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_shapeList<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="keyword">const</span> Shape <span class="operator">&amp;</span>shape <span class="operator">=</span> m_shapeList<span class="operator">.</span>at(i);
+          <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> r <span class="operator">=</span> shape<span class="operator">.</span>rect();
+          stream <span class="operator">&lt;</span><span class="operator">&lt;</span> Shape<span class="operator">::</span>typeToString(shape<span class="operator">.</span>type()) <span class="operator">&lt;</span><span class="operator">&lt;</span> QLatin1Char(<span class="char">' '</span>)
+                  <span class="operator">&lt;</span><span class="operator">&lt;</span> shape<span class="operator">.</span>name() <span class="operator">&lt;</span><span class="operator">&lt;</span> QLatin1Char(<span class="char">' '</span>)
+                  <span class="operator">&lt;</span><span class="operator">&lt;</span> shape<span class="operator">.</span>color()<span class="operator">.</span>name() <span class="operator">&lt;</span><span class="operator">&lt;</span> QLatin1Char(<span class="char">' '</span>)
+                  <span class="operator">&lt;</span><span class="operator">&lt;</span> r<span class="operator">.</span>left() <span class="operator">&lt;</span><span class="operator">&lt;</span> QLatin1Char(<span class="char">' '</span>)
+                  <span class="operator">&lt;</span><span class="operator">&lt;</span> r<span class="operator">.</span>top() <span class="operator">&lt;</span><span class="operator">&lt;</span> QLatin1Char(<span class="char">' '</span>)
+                  <span class="operator">&lt;</span><span class="operator">&lt;</span> r<span class="operator">.</span>width() <span class="operator">&lt;</span><span class="operator">&lt;</span> QLatin1Char(<span class="char">' '</span>)
+                  <span class="operator">&lt;</span><span class="operator">&lt;</span> r<span class="operator">.</span>height();
+          <span class="keyword">if</span> (i <span class="operator">!</span><span class="operator">=</span> m_shapeList<span class="operator">.</span>count() <span class="operator">-</span> <span class="number">1</span>)
+              stream <span class="operator">&lt;</span><span class="operator">&lt;</span> QLatin1Char(<span class="char">'\n'</span>);
+      }
+      m_undoStack<span class="operator">-</span><span class="operator">&gt;</span>setClean();
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> Document<span class="operator">::</span>fileName() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_fileName;
+  }
+
+  <span class="type">void</span> Document<span class="operator">::</span>setFileName(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      m_fileName <span class="operator">=</span> fileName;
+  }
+
+  <span class="type">int</span> Document<span class="operator">::</span>indexAt(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <span class="operator">&amp;</span>pos) <span class="keyword">const</span>
+  {
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> m_shapeList<span class="operator">.</span>count() <span class="operator">-</span> <span class="number">1</span>; i <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span>; <span class="operator">-</span><span class="operator">-</span>i) {
+          <span class="keyword">if</span> (m_shapeList<span class="operator">.</span>at(i)<span class="operator">.</span>rect()<span class="operator">.</span>contains(pos))
+              <span class="keyword">return</span> i;
+      }
+      <span class="keyword">return</span> <span class="operator">-</span><span class="number">1</span>;
+  }
+
+  <span class="type">void</span> Document<span class="operator">::</span>mousePressEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      event<span class="operator">-</span><span class="operator">&gt;</span>accept();
+      <span class="type">int</span> index <span class="operator">=</span> indexAt(event<span class="operator">-</span><span class="operator">&gt;</span>pos());;
+      <span class="keyword">if</span> (index <span class="operator">!</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>) {
+          setCurrentShape(index);
+
+          <span class="keyword">const</span> Shape <span class="operator">&amp;</span>shape <span class="operator">=</span> m_shapeList<span class="operator">.</span>at(index);
+          m_resizeHandlePressed <span class="operator">=</span> shape<span class="operator">.</span>resizeHandle()<span class="operator">.</span>contains(event<span class="operator">-</span><span class="operator">&gt;</span>pos());
+
+          <span class="keyword">if</span> (m_resizeHandlePressed)
+              m_mousePressOffset <span class="operator">=</span> shape<span class="operator">.</span>rect()<span class="operator">.</span>bottomRight() <span class="operator">-</span> event<span class="operator">-</span><span class="operator">&gt;</span>pos();
+          <span class="keyword">else</span>
+              m_mousePressOffset <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>pos() <span class="operator">-</span> shape<span class="operator">.</span>rect()<span class="operator">.</span>topLeft();
+      }
+      m_mousePressIndex <span class="operator">=</span> index;
+  }
+
+  <span class="type">void</span> Document<span class="operator">::</span>mouseReleaseEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      event<span class="operator">-</span><span class="operator">&gt;</span>accept();
+      m_mousePressIndex <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>;
+  }
+
+  <span class="type">void</span> Document<span class="operator">::</span>mouseMoveEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      event<span class="operator">-</span><span class="operator">&gt;</span>accept();
+
+      <span class="keyword">if</span> (m_mousePressIndex <span class="operator">=</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+          <span class="keyword">return</span>;
+
+      <span class="keyword">const</span> Shape <span class="operator">&amp;</span>shape <span class="operator">=</span> m_shapeList<span class="operator">.</span>at(m_mousePressIndex);
+
+      <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> rect;
+      <span class="keyword">if</span> (m_resizeHandlePressed) {
+          rect <span class="operator">=</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(shape<span class="operator">.</span>rect()<span class="operator">.</span>topLeft()<span class="operator">,</span> event<span class="operator">-</span><span class="operator">&gt;</span>pos() <span class="operator">+</span> m_mousePressOffset);
+      } <span class="keyword">else</span> {
+          rect <span class="operator">=</span> shape<span class="operator">.</span>rect();
+          rect<span class="operator">.</span>moveTopLeft(event<span class="operator">-</span><span class="operator">&gt;</span>pos() <span class="operator">-</span> m_mousePressOffset);
+      }
+
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> size <span class="operator">=</span> rect<span class="operator">.</span>size()<span class="operator">.</span>expandedTo(Shape<span class="operator">::</span>minSize);
+      rect<span class="operator">.</span>setSize(size);
+
+      m_undoStack<span class="operator">-</span><span class="operator">&gt;</span>push(<span class="keyword">new</span> SetShapeRectCommand(<span class="keyword">this</span><span class="operator">,</span> shape<span class="operator">.</span>name()<span class="operator">,</span> rect));
+  }
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtgui/qgradient.html">QGradient</a></span> gradient(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>color<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> <span class="operator">&amp;</span>rect)
+  {
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> c <span class="operator">=</span> color;
+      c<span class="operator">.</span>setAlpha(<span class="number">160</span>);
+      <span class="type"><a href="../qtgui/qlineargradient.html">QLinearGradient</a></span> result(rect<span class="operator">.</span>topLeft()<span class="operator">,</span> rect<span class="operator">.</span>bottomRight());
+      result<span class="operator">.</span>setColorAt(<span class="number">0</span><span class="operator">,</span> c<span class="operator">.</span>dark(<span class="number">150</span>));
+      result<span class="operator">.</span>setColorAt(<span class="number">0.5</span><span class="operator">,</span> c<span class="operator">.</span>light(<span class="number">200</span>));
+      result<span class="operator">.</span>setColorAt(<span class="number">1</span><span class="operator">,</span> c<span class="operator">.</span>dark(<span class="number">150</span>));
+      <span class="keyword">return</span> result;
+  }
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtgui/qpolygon.html">QPolygon</a></span> triangle(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> <span class="operator">&amp;</span>rect)
+  {
+      <span class="type"><a href="../qtgui/qpolygon.html">QPolygon</a></span> result(<span class="number">3</span>);
+      result<span class="operator">.</span>setPoint(<span class="number">0</span><span class="operator">,</span> rect<span class="operator">.</span>center()<span class="operator">.</span>x()<span class="operator">,</span> rect<span class="operator">.</span>top());
+      result<span class="operator">.</span>setPoint(<span class="number">1</span><span class="operator">,</span> rect<span class="operator">.</span>right()<span class="operator">,</span> rect<span class="operator">.</span>bottom());
+      result<span class="operator">.</span>setPoint(<span class="number">2</span><span class="operator">,</span> rect<span class="operator">.</span>left()<span class="operator">,</span> rect<span class="operator">.</span>bottom());
+      <span class="keyword">return</span> result;
+  }
+
+  <span class="type">void</span> Document<span class="operator">::</span>paintEvent(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="type"><a href="../qtgui/qregion.html">QRegion</a></span> paintRegion <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>region();
+      <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter(<span class="keyword">this</span>);
+      <span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span> pal <span class="operator">=</span> palette();
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_shapeList<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="keyword">const</span> Shape <span class="operator">&amp;</span>shape <span class="operator">=</span> m_shapeList<span class="operator">.</span>at(i);
+
+          <span class="keyword">if</span> (<span class="operator">!</span>paintRegion<span class="operator">.</span>contains(shape<span class="operator">.</span>rect()))
+              <span class="keyword">continue</span>;
+
+          <span class="type"><a href="../qtgui/qpen.html">QPen</a></span> pen <span class="operator">=</span> pal<span class="operator">.</span>text()<span class="operator">.</span>color();
+          pen<span class="operator">.</span>setWidth(i <span class="operator">=</span><span class="operator">=</span> m_currentIndex <span class="operator">?</span> <span class="number">2</span> : <span class="number">1</span>);
+          painter<span class="operator">.</span>setPen(pen);
+          painter<span class="operator">.</span>setBrush(gradient(shape<span class="operator">.</span>color()<span class="operator">,</span> shape<span class="operator">.</span>rect()));
+
+          <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> rect <span class="operator">=</span> shape<span class="operator">.</span>rect();
+          rect<span class="operator">.</span>adjust(<span class="number">1</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="operator">-</span>resizeHandleWidth<span class="operator">/</span><span class="number">2</span><span class="operator">,</span> <span class="operator">-</span>resizeHandleWidth<span class="operator">/</span><span class="number">2</span>);
+
+          <span class="comment">// paint the shape</span>
+          <span class="keyword">switch</span> (shape<span class="operator">.</span>type()) {
+              <span class="keyword">case</span> Shape<span class="operator">::</span>Rectangle:
+                  painter<span class="operator">.</span>drawRect(rect);
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> Shape<span class="operator">::</span>Circle:
+                  painter<span class="operator">.</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing);
+                  painter<span class="operator">.</span>drawEllipse(rect);
+                  painter<span class="operator">.</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing<span class="operator">,</span> <span class="keyword">false</span>);
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> Shape<span class="operator">::</span>Triangle:
+                  painter<span class="operator">.</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing);
+                  painter<span class="operator">.</span>drawPolygon(triangle(rect));
+                  painter<span class="operator">.</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing<span class="operator">,</span> <span class="keyword">false</span>);
+                  <span class="keyword">break</span>;
+          }
+
+          <span class="comment">// paint the resize handle</span>
+          painter<span class="operator">.</span>setPen(pal<span class="operator">.</span>text()<span class="operator">.</span>color());
+          painter<span class="operator">.</span>setBrush(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white);
+          painter<span class="operator">.</span>drawRect(shape<span class="operator">.</span>resizeHandle()<span class="operator">.</span>adjusted(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span>));
+
+          <span class="comment">// paint the shape name</span>
+          painter<span class="operator">.</span>setBrush(pal<span class="operator">.</span>text());
+          <span class="keyword">if</span> (shape<span class="operator">.</span>type() <span class="operator">=</span><span class="operator">=</span> Shape<span class="operator">::</span>Triangle)
+              rect<span class="operator">.</span>adjust(<span class="number">0</span><span class="operator">,</span> rect<span class="operator">.</span>height()<span class="operator">/</span><span class="number">2</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+          painter<span class="operator">.</span>drawText(rect<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignCenter<span class="operator">,</span> shape<span class="operator">.</span>name());
+      }
+  }
+
+  <span class="type">void</span> Document<span class="operator">::</span>setCurrentShape(<span class="type">int</span> index)
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> currentName;
+
+      <span class="keyword">if</span> (m_currentIndex <span class="operator">!</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+          update(m_shapeList<span class="operator">.</span>at(m_currentIndex)<span class="operator">.</span>rect());
+
+      m_currentIndex <span class="operator">=</span> index;
+
+      <span class="keyword">if</span> (m_currentIndex <span class="operator">!</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>) {
+          <span class="keyword">const</span> Shape <span class="operator">&amp;</span>current <span class="operator">=</span> m_shapeList<span class="operator">.</span>at(m_currentIndex);
+          update(current<span class="operator">.</span>rect());
+          currentName <span class="operator">=</span> current<span class="operator">.</span>name();
+      }
+
+      <span class="keyword">emit</span> currentShapeChanged(currentName);
+  }
+
+  <span class="type">int</span> Document<span class="operator">::</span>indexOf(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>shapeName) <span class="keyword">const</span>
+  {
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_shapeList<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="keyword">if</span> (m_shapeList<span class="operator">.</span>at(i)<span class="operator">.</span>name() <span class="operator">=</span><span class="operator">=</span> shapeName)
+              <span class="keyword">return</span> i;
+      }
+      <span class="keyword">return</span> <span class="operator">-</span><span class="number">1</span>;
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> Document<span class="operator">::</span>uniqueName(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>name) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> unique;
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; ; <span class="operator">+</span><span class="operator">+</span>i) {
+          unique <span class="operator">=</span> name;
+          <span class="keyword">if</span> (i <span class="operator">&gt;</span> <span class="number">0</span>)
+              unique <span class="operator">+</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(i);
+          <span class="keyword">if</span> (indexOf(unique) <span class="operator">=</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+              <span class="keyword">break</span>;
+      }
+
+      <span class="keyword">return</span> unique;
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> Document<span class="operator">::</span>currentShapeName() <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (m_currentIndex <span class="operator">=</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+      <span class="keyword">return</span> m_shapeList<span class="operator">.</span>at(m_currentIndex)<span class="operator">.</span>name();
+  }
+
+</pre>
+</div>
+<!-- @@@tools/undo/document.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

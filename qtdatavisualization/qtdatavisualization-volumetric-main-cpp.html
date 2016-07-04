@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>main.cpp Example File | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td ><a href="qtdatavisualization-volumetric-example.html">Volumetric rendering Example</a></td><td >main.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">main.cpp Example File</h1>
+<span class="subtitle">volumetric/main.cpp</span>
+<!-- $$$volumetric/main.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Data Visualization module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;volumetric.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets/QApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QWidget&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QHBoxLayout&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QVBoxLayout&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QRadioButton&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QSlider&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QCheckBox&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QLabel&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QGroupBox&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QMessageBox&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QScreen&gt;</span>
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span>argv)
+  {
+      <span class="type">QApplication</span> app(argc<span class="operator">,</span> argv);
+      <span class="type"><a href="q3dscatter.html">Q3DScatter</a></span> <span class="operator">*</span>graph <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="q3dscatter.html">Q3DScatter</a></span>();
+      <span class="type">QWidget</span> <span class="operator">*</span>container <span class="operator">=</span> <span class="type">QWidget</span><span class="operator">::</span>createWindowContainer(graph);
+
+      <span class="keyword">if</span> (<span class="operator">!</span>graph<span class="operator">-</span><span class="operator">&gt;</span>hasContext()) {
+          <span class="type">QMessageBox</span> msgBox;
+          msgBox<span class="operator">.</span>setText(<span class="string">&quot;Couldn't initialize the OpenGL context.&quot;</span>);
+          msgBox<span class="operator">.</span>exec();
+          <span class="keyword">return</span> <span class="operator">-</span><span class="number">1</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> screenSize <span class="operator">=</span> graph<span class="operator">-</span><span class="operator">&gt;</span>screen()<span class="operator">-</span><span class="operator">&gt;</span>size();
+      container<span class="operator">-</span><span class="operator">&gt;</span>setMinimumSize(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(screenSize<span class="operator">.</span>width() <span class="operator">/</span> <span class="number">3</span><span class="operator">,</span> screenSize<span class="operator">.</span>height() <span class="operator">/</span> <span class="number">3</span>));
+      container<span class="operator">-</span><span class="operator">&gt;</span>setMaximumSize(screenSize);
+      container<span class="operator">-</span><span class="operator">&gt;</span>setSizePolicy(<span class="type">QSizePolicy</span><span class="operator">::</span>Expanding<span class="operator">,</span> <span class="type">QSizePolicy</span><span class="operator">::</span>Expanding);
+      container<span class="operator">-</span><span class="operator">&gt;</span>setFocusPolicy(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>StrongFocus);
+
+      <span class="type">QWidget</span> <span class="operator">*</span>widget <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QWidget</span>();
+      <span class="type">QHBoxLayout</span> <span class="operator">*</span>hLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QHBoxLayout</span>(widget);
+      <span class="type">QVBoxLayout</span> <span class="operator">*</span>vLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QVBoxLayout</span>();
+      <span class="type">QVBoxLayout</span> <span class="operator">*</span>vLayout2 <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QVBoxLayout</span>();
+      hLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(container<span class="operator">,</span> <span class="number">1</span>);
+      hLayout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(vLayout);
+      hLayout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(vLayout2);
+
+      widget<span class="operator">-</span><span class="operator">&gt;</span>setWindowTitle(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Volumetric object example - 3D terrain&quot;</span>));
+
+      <span class="type">QCheckBox</span> <span class="operator">*</span>sliceXCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCheckBox</span>(widget);
+      sliceXCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Slice volume on X axis&quot;</span>));
+      sliceXCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+      <span class="type">QCheckBox</span> <span class="operator">*</span>sliceYCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCheckBox</span>(widget);
+      sliceYCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Slice volume on Y axis&quot;</span>));
+      sliceYCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+      <span class="type">QCheckBox</span> <span class="operator">*</span>sliceZCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCheckBox</span>(widget);
+      sliceZCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Slice volume on Z axis&quot;</span>));
+      sliceZCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+
+      <span class="type">QSlider</span> <span class="operator">*</span>sliceXSlider <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QSlider</span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal<span class="operator">,</span> widget);
+      sliceXSlider<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(<span class="number">0</span>);
+      sliceXSlider<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(<span class="number">1024</span>);
+      sliceXSlider<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="number">512</span>);
+      sliceXSlider<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+      <span class="type">QSlider</span> <span class="operator">*</span>sliceYSlider <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QSlider</span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal<span class="operator">,</span> widget);
+      sliceYSlider<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(<span class="number">0</span>);
+      sliceYSlider<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(<span class="number">1024</span>);
+      sliceYSlider<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="number">512</span>);
+      sliceYSlider<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+      <span class="type">QSlider</span> <span class="operator">*</span>sliceZSlider <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QSlider</span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal<span class="operator">,</span> widget);
+      sliceZSlider<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(<span class="number">0</span>);
+      sliceZSlider<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(<span class="number">1024</span>);
+      sliceZSlider<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="number">512</span>);
+      sliceZSlider<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+
+      <span class="type">QCheckBox</span> <span class="operator">*</span>fpsCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCheckBox</span>(widget);
+      fpsCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Show FPS&quot;</span>));
+      fpsCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+      <span class="type">QLabel</span> <span class="operator">*</span>fpsLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QLabel</span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;&quot;</span>)<span class="operator">,</span> widget);
+
+      <span class="type">QGroupBox</span> <span class="operator">*</span>textureDetailGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QGroupBox</span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Texture detail&quot;</span>));
+
+      <span class="type">QRadioButton</span> <span class="operator">*</span>lowDetailRB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QRadioButton</span>(widget);
+      lowDetailRB<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Low (128x64x128)&quot;</span>));
+      lowDetailRB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+      <span class="type">QRadioButton</span> <span class="operator">*</span>mediumDetailRB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QRadioButton</span>(widget);
+      mediumDetailRB<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Generating...&quot;</span>));
+      mediumDetailRB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+      mediumDetailRB<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+
+      <span class="type">QRadioButton</span> <span class="operator">*</span>highDetailRB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QRadioButton</span>(widget);
+      highDetailRB<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Generating...&quot;</span>));
+      highDetailRB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+      highDetailRB<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+
+      <span class="type">QVBoxLayout</span> <span class="operator">*</span>textureDetailVBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QVBoxLayout</span>;
+      textureDetailVBox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(lowDetailRB);
+      textureDetailVBox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(mediumDetailRB);
+      textureDetailVBox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(highDetailRB);
+      textureDetailGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(textureDetailVBox);
+
+      <span class="type">QGroupBox</span> <span class="operator">*</span>areaGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QGroupBox</span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Show area&quot;</span>));
+
+      <span class="type">QRadioButton</span> <span class="operator">*</span>areaAllRB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QRadioButton</span>(widget);
+      areaAllRB<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Whole region&quot;</span>));
+      areaAllRB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+      <span class="type">QRadioButton</span> <span class="operator">*</span>areaMineRB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QRadioButton</span>(widget);
+      areaMineRB<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;The mine&quot;</span>));
+      areaMineRB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+
+      <span class="type">QRadioButton</span> <span class="operator">*</span>areaMountainRB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QRadioButton</span>(widget);
+      areaMountainRB<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;The mountain&quot;</span>));
+      areaMountainRB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+
+      <span class="type">QVBoxLayout</span> <span class="operator">*</span>areaVBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QVBoxLayout</span>;
+      areaVBox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(areaAllRB);
+      areaVBox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(areaMineRB);
+      areaVBox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(areaMountainRB);
+      areaGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(areaVBox);
+
+      <span class="type">QCheckBox</span> <span class="operator">*</span>colorTableCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCheckBox</span>(widget);
+      colorTableCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Alternate color table&quot;</span>));
+      colorTableCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+
+      <span class="type">QLabel</span> <span class="operator">*</span>sliceImageXLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QLabel</span>(widget);
+      <span class="type">QLabel</span> <span class="operator">*</span>sliceImageYLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QLabel</span>(widget);
+      <span class="type">QLabel</span> <span class="operator">*</span>sliceImageZLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QLabel</span>(widget);
+      sliceImageXLabel<span class="operator">-</span><span class="operator">&gt;</span>setMinimumSize(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">200</span><span class="operator">,</span> <span class="number">100</span>));
+      sliceImageYLabel<span class="operator">-</span><span class="operator">&gt;</span>setMinimumSize(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">200</span><span class="operator">,</span> <span class="number">200</span>));
+      sliceImageZLabel<span class="operator">-</span><span class="operator">&gt;</span>setMinimumSize(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">200</span><span class="operator">,</span> <span class="number">100</span>));
+      sliceImageXLabel<span class="operator">-</span><span class="operator">&gt;</span>setMaximumSize(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">200</span><span class="operator">,</span> <span class="number">100</span>));
+      sliceImageYLabel<span class="operator">-</span><span class="operator">&gt;</span>setMaximumSize(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">200</span><span class="operator">,</span> <span class="number">200</span>));
+      sliceImageZLabel<span class="operator">-</span><span class="operator">&gt;</span>setMaximumSize(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">200</span><span class="operator">,</span> <span class="number">100</span>));
+      sliceImageXLabel<span class="operator">-</span><span class="operator">&gt;</span>setFrameShape(<span class="type">QFrame</span><span class="operator">::</span>Box);
+      sliceImageYLabel<span class="operator">-</span><span class="operator">&gt;</span>setFrameShape(<span class="type">QFrame</span><span class="operator">::</span>Box);
+      sliceImageZLabel<span class="operator">-</span><span class="operator">&gt;</span>setFrameShape(<span class="type">QFrame</span><span class="operator">::</span>Box);
+      sliceImageXLabel<span class="operator">-</span><span class="operator">&gt;</span>setScaledContents(<span class="keyword">true</span>);
+      sliceImageYLabel<span class="operator">-</span><span class="operator">&gt;</span>setScaledContents(<span class="keyword">true</span>);
+      sliceImageZLabel<span class="operator">-</span><span class="operator">&gt;</span>setScaledContents(<span class="keyword">true</span>);
+
+      <span class="type">QSlider</span> <span class="operator">*</span>alphaMultiplierSlider <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QSlider</span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal<span class="operator">,</span> widget);
+      alphaMultiplierSlider<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(<span class="number">0</span>);
+      alphaMultiplierSlider<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(<span class="number">139</span>);
+      alphaMultiplierSlider<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="number">100</span>);
+      alphaMultiplierSlider<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+      <span class="type">QLabel</span> <span class="operator">*</span>alphaMultiplierLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QLabel</span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Alpha multiplier: 1.0&quot;</span>));
+
+      <span class="type">QCheckBox</span> <span class="operator">*</span>preserveOpacityCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCheckBox</span>(widget);
+      preserveOpacityCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Preserve opacity&quot;</span>));
+      preserveOpacityCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+      <span class="type">QCheckBox</span> <span class="operator">*</span>transparentGroundCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCheckBox</span>(widget);
+      transparentGroundCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Transparent ground&quot;</span>));
+      transparentGroundCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+
+      <span class="type">QCheckBox</span> <span class="operator">*</span>useHighDefShaderCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCheckBox</span>(widget);
+      useHighDefShaderCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Use HD shader&quot;</span>));
+      useHighDefShaderCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+      <span class="type">QLabel</span> <span class="operator">*</span>performanceNoteLabel <span class="operator">=</span>
+              <span class="keyword">new</span> <span class="type">QLabel</span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(
+                             <span class="string">&quot;Note: A high end graphics card is\nrecommended with the HD shader\nwhen the volume contains a lot of\ntransparent areas.&quot;</span>));
+      performanceNoteLabel<span class="operator">-</span><span class="operator">&gt;</span>setFrameShape(<span class="type">QFrame</span><span class="operator">::</span>Box);
+
+      <span class="type">QCheckBox</span> <span class="operator">*</span>drawSliceFramesCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCheckBox</span>(widget);
+      drawSliceFramesCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Draw slice frames&quot;</span>));
+      drawSliceFramesCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(sliceXCheckBox);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(sliceXSlider);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(sliceImageXLabel);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(sliceYCheckBox);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(sliceYSlider);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(sliceImageYLabel);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(sliceZCheckBox);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(sliceZSlider);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(sliceImageZLabel);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(drawSliceFramesCheckBox<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignTop);
+      vLayout2<span class="operator">-</span><span class="operator">&gt;</span>addWidget(fpsCheckBox);
+      vLayout2<span class="operator">-</span><span class="operator">&gt;</span>addWidget(fpsLabel);
+      vLayout2<span class="operator">-</span><span class="operator">&gt;</span>addWidget(textureDetailGroupBox);
+      vLayout2<span class="operator">-</span><span class="operator">&gt;</span>addWidget(areaGroupBox);
+      vLayout2<span class="operator">-</span><span class="operator">&gt;</span>addWidget(colorTableCheckBox);
+      vLayout2<span class="operator">-</span><span class="operator">&gt;</span>addWidget(alphaMultiplierLabel);
+      vLayout2<span class="operator">-</span><span class="operator">&gt;</span>addWidget(alphaMultiplierSlider);
+      vLayout2<span class="operator">-</span><span class="operator">&gt;</span>addWidget(preserveOpacityCheckBox);
+      vLayout2<span class="operator">-</span><span class="operator">&gt;</span>addWidget(transparentGroundCheckBox);
+      vLayout2<span class="operator">-</span><span class="operator">&gt;</span>addWidget(useHighDefShaderCheckBox);
+      vLayout2<span class="operator">-</span><span class="operator">&gt;</span>addWidget(performanceNoteLabel<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignTop);
+
+      VolumetricModifier <span class="operator">*</span>modifier <span class="operator">=</span> <span class="keyword">new</span> VolumetricModifier(graph);
+      modifier<span class="operator">-</span><span class="operator">&gt;</span>setFpsLabel(fpsLabel);
+      modifier<span class="operator">-</span><span class="operator">&gt;</span>setMediumDetailRB(mediumDetailRB);
+      modifier<span class="operator">-</span><span class="operator">&gt;</span>setHighDetailRB(highDetailRB);
+      modifier<span class="operator">-</span><span class="operator">&gt;</span>setSliceSliders(sliceXSlider<span class="operator">,</span> sliceYSlider<span class="operator">,</span> sliceZSlider);
+      modifier<span class="operator">-</span><span class="operator">&gt;</span>setSliceLabels(sliceImageXLabel<span class="operator">,</span> sliceImageYLabel<span class="operator">,</span> sliceImageZLabel);
+      modifier<span class="operator">-</span><span class="operator">&gt;</span>setAlphaMultiplierLabel(alphaMultiplierLabel);
+      modifier<span class="operator">-</span><span class="operator">&gt;</span>setTransparentGround(transparentGroundCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked());
+
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(fpsCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>stateChanged<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>setFpsMeasurement);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(sliceXCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>stateChanged<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>sliceX);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(sliceYCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>stateChanged<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>sliceY);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(sliceZCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>stateChanged<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>sliceZ);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(sliceXSlider<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QSlider</span><span class="operator">::</span>valueChanged<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>adjustSliceX);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(sliceYSlider<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QSlider</span><span class="operator">::</span>valueChanged<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>adjustSliceY);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(sliceZSlider<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QSlider</span><span class="operator">::</span>valueChanged<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>adjustSliceZ);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(lowDetailRB<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QRadioButton</span><span class="operator">::</span>toggled<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>toggleLowDetail);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(mediumDetailRB<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QRadioButton</span><span class="operator">::</span>toggled<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>toggleMediumDetail);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(highDetailRB<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QRadioButton</span><span class="operator">::</span>toggled<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>toggleHighDetail);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(colorTableCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>stateChanged<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>changeColorTable);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(preserveOpacityCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>stateChanged<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>setPreserveOpacity);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(transparentGroundCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>stateChanged<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>setTransparentGround);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(useHighDefShaderCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>stateChanged<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>setUseHighDefShader);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(alphaMultiplierSlider<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QSlider</span><span class="operator">::</span>valueChanged<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>adjustAlphaMultiplier);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(areaAllRB<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QRadioButton</span><span class="operator">::</span>toggled<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>toggleAreaAll);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(areaMineRB<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QRadioButton</span><span class="operator">::</span>toggled<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>toggleAreaMine);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(areaMountainRB<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QRadioButton</span><span class="operator">::</span>toggled<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>toggleAreaMountain);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(drawSliceFramesCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>stateChanged<span class="operator">,</span> modifier<span class="operator">,</span>
+                       <span class="operator">&amp;</span>VolumetricModifier<span class="operator">::</span>setDrawSliceFrames);
+
+      widget<span class="operator">-</span><span class="operator">&gt;</span>show();
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+</div>
+<!-- @@@volumetric/main.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

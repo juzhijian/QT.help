@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>states.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-animation-sub-attaq-example.html">Sub-Attaq</a></td><td >states.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">states.cpp Example File</h1>
+<span class="subtitle">animation/sub-attaq/states.cpp</span>
+<!-- $$$animation/sub-attaq/states.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the QtCore module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="comment">//Own</span>
+  <span class="preprocessor">#include &quot;states.h&quot;</span>
+  <span class="preprocessor">#include &quot;graphicsscene.h&quot;</span>
+  <span class="preprocessor">#include &quot;boat.h&quot;</span>
+  <span class="preprocessor">#include &quot;submarine.h&quot;</span>
+  <span class="preprocessor">#include &quot;torpedo.h&quot;</span>
+  <span class="preprocessor">#include &quot;animationmanager.h&quot;</span>
+  <span class="preprocessor">#include &quot;progressitem.h&quot;</span>
+  <span class="preprocessor">#include &quot;textinformationitem.h&quot;</span>
+
+  <span class="comment">//Qt</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QMessageBox&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QGraphicsView&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QStateMachine&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QKeyEventTransition&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QFinalState&gt;</span>
+
+  PlayState<span class="operator">::</span>PlayState(GraphicsScene <span class="operator">*</span>scene<span class="operator">,</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qstate.html">QState</a></span>(parent)<span class="operator">,</span>
+      scene(scene)<span class="operator">,</span>
+      machine(<span class="number">0</span>)<span class="operator">,</span>
+      currentLevel(<span class="number">0</span>)<span class="operator">,</span>
+      score(<span class="number">0</span>)
+  {
+  }
+
+  PlayState<span class="operator">::</span><span class="operator">~</span>PlayState()
+  {
+      <span class="keyword">delete</span> machine;
+  }
+
+  <span class="type">void</span> PlayState<span class="operator">::</span>onEntry(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> <span class="operator">*</span>)
+  {
+      <span class="comment">//We are now playing?</span>
+      <span class="keyword">if</span> (machine) {
+          machine<span class="operator">-</span><span class="operator">&gt;</span>stop();
+          <span class="comment">//we hide the information</span>
+          scene<span class="operator">-</span><span class="operator">&gt;</span>textInformationItem<span class="operator">-</span><span class="operator">&gt;</span>hide();
+          scene<span class="operator">-</span><span class="operator">&gt;</span>clearScene();
+          currentLevel <span class="operator">=</span> <span class="number">0</span>;
+          score <span class="operator">=</span> <span class="number">0</span>;
+          <span class="keyword">delete</span> machine;
+      }
+
+      machine <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstatemachine.html">QStateMachine</a></span>;
+
+      <span class="comment">//This state is when player is playing</span>
+      LevelState <span class="operator">*</span>levelState <span class="operator">=</span> <span class="keyword">new</span> LevelState(scene<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> machine);
+
+      <span class="comment">//This state is when the player is actually playing but the game is not paused</span>
+      <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>playingState <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span>(levelState);
+      levelState<span class="operator">-</span><span class="operator">&gt;</span>setInitialState(playingState);
+
+      <span class="comment">//This state is when the game is paused</span>
+      PauseState <span class="operator">*</span>pauseState <span class="operator">=</span> <span class="keyword">new</span> PauseState(scene<span class="operator">,</span> levelState);
+
+      <span class="comment">//We have one view, it receive the key press event</span>
+      <span class="type"><a href="qkeyeventtransition.html">QKeyEventTransition</a></span> <span class="operator">*</span>pressPplay <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qkeyeventtransition.html">QKeyEventTransition</a></span>(scene<span class="operator">-</span><span class="operator">&gt;</span>views()<span class="operator">.</span>at(<span class="number">0</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_P);
+      pressPplay<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(pauseState);
+      <span class="type"><a href="qkeyeventtransition.html">QKeyEventTransition</a></span> <span class="operator">*</span>pressPpause <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qkeyeventtransition.html">QKeyEventTransition</a></span>(scene<span class="operator">-</span><span class="operator">&gt;</span>views()<span class="operator">.</span>at(<span class="number">0</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_P);
+      pressPpause<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(playingState);
+
+      <span class="comment">//Pause &quot;P&quot; is triggered, the player pause the game</span>
+      playingState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(pressPplay);
+
+      <span class="comment">//To get back playing when the game has been paused</span>
+      pauseState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(pressPpause);
+
+      <span class="comment">//This state is when player have lost</span>
+      LostState <span class="operator">*</span>lostState <span class="operator">=</span> <span class="keyword">new</span> LostState(scene<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> machine);
+
+      <span class="comment">//This state is when player have won</span>
+      WinState <span class="operator">*</span>winState <span class="operator">=</span> <span class="keyword">new</span> WinState(scene<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> machine);
+
+      <span class="comment">//The boat has been destroyed then the game is finished</span>
+      levelState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(scene<span class="operator">-</span><span class="operator">&gt;</span>boat<span class="operator">,</span> SIGNAL(boatExecutionFinished())<span class="operator">,</span>lostState);
+
+      <span class="comment">//This transition check if we won or not</span>
+      WinTransition <span class="operator">*</span>winTransition <span class="operator">=</span> <span class="keyword">new</span> WinTransition(scene<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> winState);
+
+      <span class="comment">//The boat has been destroyed then the game is finished</span>
+      levelState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(winTransition);
+
+      <span class="comment">//This state is an animation when the score changed</span>
+      UpdateScoreState <span class="operator">*</span>scoreState <span class="operator">=</span> <span class="keyword">new</span> UpdateScoreState(levelState);
+
+      <span class="comment">//This transition update the score when a submarine die</span>
+      UpdateScoreTransition <span class="operator">*</span>scoreTransition <span class="operator">=</span> <span class="keyword">new</span> UpdateScoreTransition(scene<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> levelState);
+      scoreTransition<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(scoreState);
+
+      <span class="comment">//The boat has been destroyed then the game is finished</span>
+      playingState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(scoreTransition);
+
+      <span class="comment">//We go back to play state</span>
+      scoreState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(playingState);
+
+      <span class="comment">//We start playing!!!</span>
+      machine<span class="operator">-</span><span class="operator">&gt;</span>setInitialState(levelState);
+
+      <span class="comment">//Final state</span>
+      <span class="type"><a href="../qtcore/qfinalstate.html">QFinalState</a></span> <span class="operator">*</span>final <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qfinalstate.html">QFinalState</a></span>(machine);
+
+      <span class="comment">//This transition is triggered when the player press space after completing a level</span>
+      CustomSpaceTransition <span class="operator">*</span>spaceTransition <span class="operator">=</span> <span class="keyword">new</span> CustomSpaceTransition(scene<span class="operator">-</span><span class="operator">&gt;</span>views()<span class="operator">.</span>at(<span class="number">0</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Space);
+      spaceTransition<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(levelState);
+      winState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(spaceTransition);
+
+      <span class="comment">//We lost we should reach the final state</span>
+      lostState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(lostState<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> final);
+
+      machine<span class="operator">-</span><span class="operator">&gt;</span>start();
+  }
+
+  LevelState<span class="operator">::</span>LevelState(GraphicsScene <span class="operator">*</span>scene<span class="operator">,</span> PlayState <span class="operator">*</span>game<span class="operator">,</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>parent) : <span class="type"><a href="../qtcore/qstate.html">QState</a></span>(parent)<span class="operator">,</span> scene(scene)<span class="operator">,</span> game(game)
+  {
+  }
+  <span class="type">void</span> LevelState<span class="operator">::</span>onEntry(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> <span class="operator">*</span>)
+  {
+      initializeLevel();
+  }
+
+  <span class="type">void</span> LevelState<span class="operator">::</span>initializeLevel()
+  {
+      <span class="comment">//we re-init the boat</span>
+      scene<span class="operator">-</span><span class="operator">&gt;</span>boat<span class="operator">-</span><span class="operator">&gt;</span>setPos(scene<span class="operator">-</span><span class="operator">&gt;</span>width()<span class="operator">/</span><span class="number">2</span><span class="operator">,</span> scene<span class="operator">-</span><span class="operator">&gt;</span>sealLevel() <span class="operator">-</span> scene<span class="operator">-</span><span class="operator">&gt;</span>boat<span class="operator">-</span><span class="operator">&gt;</span>size()<span class="operator">.</span>height());
+      scene<span class="operator">-</span><span class="operator">&gt;</span>boat<span class="operator">-</span><span class="operator">&gt;</span>setCurrentSpeed(<span class="number">0</span>);
+      scene<span class="operator">-</span><span class="operator">&gt;</span>boat<span class="operator">-</span><span class="operator">&gt;</span>setCurrentDirection(Boat<span class="operator">::</span>None);
+      scene<span class="operator">-</span><span class="operator">&gt;</span>boat<span class="operator">-</span><span class="operator">&gt;</span>setBombsLaunched(<span class="number">0</span>);
+      scene<span class="operator">-</span><span class="operator">&gt;</span>boat<span class="operator">-</span><span class="operator">&gt;</span>show();
+      scene<span class="operator">-</span><span class="operator">&gt;</span>setFocusItem(scene<span class="operator">-</span><span class="operator">&gt;</span>boat<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>OtherFocusReason);
+      scene<span class="operator">-</span><span class="operator">&gt;</span>boat<span class="operator">-</span><span class="operator">&gt;</span>run();
+
+      scene<span class="operator">-</span><span class="operator">&gt;</span>progressItem<span class="operator">-</span><span class="operator">&gt;</span>setScore(game<span class="operator">-</span><span class="operator">&gt;</span>score);
+      scene<span class="operator">-</span><span class="operator">&gt;</span>progressItem<span class="operator">-</span><span class="operator">&gt;</span>setLevel(game<span class="operator">-</span><span class="operator">&gt;</span>currentLevel <span class="operator">+</span> <span class="number">1</span>);
+
+      GraphicsScene<span class="operator">::</span>LevelDescription currentLevelDescription <span class="operator">=</span> scene<span class="operator">-</span><span class="operator">&gt;</span>levelsData<span class="operator">.</span>value(game<span class="operator">-</span><span class="operator">&gt;</span>currentLevel);
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> currentLevelDescription<span class="operator">.</span>submarines<span class="operator">.</span>size(); <span class="operator">+</span><span class="operator">+</span>i ) {
+
+          <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span><span class="operator">&gt;</span> subContent <span class="operator">=</span> currentLevelDescription<span class="operator">.</span>submarines<span class="operator">.</span>at(i);
+          GraphicsScene<span class="operator">::</span>SubmarineDescription submarineDesc <span class="operator">=</span> scene<span class="operator">-</span><span class="operator">&gt;</span>submarinesData<span class="operator">.</span>at(subContent<span class="operator">.</span>first);
+
+          <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> subContent<span class="operator">.</span>second; <span class="operator">+</span><span class="operator">+</span>j ) {
+              SubMarine <span class="operator">*</span>sub <span class="operator">=</span> <span class="keyword">new</span> SubMarine(submarineDesc<span class="operator">.</span>type<span class="operator">,</span> submarineDesc<span class="operator">.</span>name<span class="operator">,</span> submarineDesc<span class="operator">.</span>points);
+              scene<span class="operator">-</span><span class="operator">&gt;</span>addItem(sub);
+              <span class="type">int</span> random <span class="operator">=</span> (qrand() <span class="operator">%</span> <span class="number">15</span> <span class="operator">+</span> <span class="number">1</span>);
+              <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> x <span class="operator">=</span> random <span class="operator">=</span><span class="operator">=</span> <span class="number">13</span> <span class="operator">|</span><span class="operator">|</span> random <span class="operator">=</span><span class="operator">=</span> <span class="number">5</span> <span class="operator">?</span> <span class="number">0</span> : scene<span class="operator">-</span><span class="operator">&gt;</span>width() <span class="operator">-</span> sub<span class="operator">-</span><span class="operator">&gt;</span>size()<span class="operator">.</span>width();
+              <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> y <span class="operator">=</span> scene<span class="operator">-</span><span class="operator">&gt;</span>height() <span class="operator">-</span>(qrand() <span class="operator">%</span> <span class="number">150</span> <span class="operator">+</span> <span class="number">1</span>) <span class="operator">-</span> sub<span class="operator">-</span><span class="operator">&gt;</span>size()<span class="operator">.</span>height();
+              sub<span class="operator">-</span><span class="operator">&gt;</span>setPos(x<span class="operator">,</span>y);
+              sub<span class="operator">-</span><span class="operator">&gt;</span>setCurrentDirection(x <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">?</span> SubMarine<span class="operator">::</span>Right : SubMarine<span class="operator">::</span>Left);
+              sub<span class="operator">-</span><span class="operator">&gt;</span>setCurrentSpeed(qrand() <span class="operator">%</span> <span class="number">3</span> <span class="operator">+</span> <span class="number">1</span>);
+          }
+      }
+  }
+
+  <span class="comment">/** Pause State */</span>
+  PauseState<span class="operator">::</span>PauseState(GraphicsScene <span class="operator">*</span>scene<span class="operator">,</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>parent) : <span class="type"><a href="../qtcore/qstate.html">QState</a></span>(parent)<span class="operator">,</span>scene(scene)
+  {
+  }
+  <span class="type">void</span> PauseState<span class="operator">::</span>onEntry(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> <span class="operator">*</span>)
+  {
+      AnimationManager<span class="operator">::</span>self()<span class="operator">-</span><span class="operator">&gt;</span>pauseAll();
+      scene<span class="operator">-</span><span class="operator">&gt;</span>boat<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+  }
+  <span class="type">void</span> PauseState<span class="operator">::</span>onExit(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> <span class="operator">*</span>)
+  {
+      AnimationManager<span class="operator">::</span>self()<span class="operator">-</span><span class="operator">&gt;</span>resumeAll();
+      scene<span class="operator">-</span><span class="operator">&gt;</span>boat<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+      scene<span class="operator">-</span><span class="operator">&gt;</span>boat<span class="operator">-</span><span class="operator">&gt;</span>setFocus();
+  }
+
+  <span class="comment">/** Lost State */</span>
+  LostState<span class="operator">::</span>LostState(GraphicsScene <span class="operator">*</span>scene<span class="operator">,</span> PlayState <span class="operator">*</span>game<span class="operator">,</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>parent) : <span class="type"><a href="../qtcore/qstate.html">QState</a></span>(parent)<span class="operator">,</span> scene(scene)<span class="operator">,</span> game(game)
+  {
+  }
+
+  <span class="type">void</span> LostState<span class="operator">::</span>onEntry(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> <span class="operator">*</span>)
+  {
+      <span class="comment">//The message to display</span>
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> message <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;You lose on level %1. Your score is %2.&quot;</span>)<span class="operator">.</span>arg(game<span class="operator">-</span><span class="operator">&gt;</span>currentLevel<span class="operator">+</span><span class="number">1</span>)<span class="operator">.</span>arg(game<span class="operator">-</span><span class="operator">&gt;</span>score);
+
+      <span class="comment">//We set the level back to 0</span>
+      game<span class="operator">-</span><span class="operator">&gt;</span>currentLevel <span class="operator">=</span> <span class="number">0</span>;
+
+      <span class="comment">//We set the score back to 0</span>
+      game<span class="operator">-</span><span class="operator">&gt;</span>score <span class="operator">=</span> <span class="number">0</span>;
+
+      <span class="comment">//We clear the scene</span>
+      scene<span class="operator">-</span><span class="operator">&gt;</span>clearScene();
+
+      <span class="comment">//We inform the player</span>
+      scene<span class="operator">-</span><span class="operator">&gt;</span>textInformationItem<span class="operator">-</span><span class="operator">&gt;</span>setMessage(message);
+      scene<span class="operator">-</span><span class="operator">&gt;</span>textInformationItem<span class="operator">-</span><span class="operator">&gt;</span>show();
+  }
+
+  <span class="type">void</span> LostState<span class="operator">::</span>onExit(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> <span class="operator">*</span>)
+  {
+      <span class="comment">//we hide the information</span>
+      scene<span class="operator">-</span><span class="operator">&gt;</span>textInformationItem<span class="operator">-</span><span class="operator">&gt;</span>hide();
+  }
+
+  <span class="comment">/** Win State */</span>
+  WinState<span class="operator">::</span>WinState(GraphicsScene <span class="operator">*</span>scene<span class="operator">,</span> PlayState <span class="operator">*</span>game<span class="operator">,</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>parent) : <span class="type"><a href="../qtcore/qstate.html">QState</a></span>(parent)<span class="operator">,</span> scene(scene)<span class="operator">,</span> game(game)
+  {
+  }
+
+  <span class="type">void</span> WinState<span class="operator">::</span>onEntry(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> <span class="operator">*</span>)
+  {
+      <span class="comment">//We clear the scene</span>
+      scene<span class="operator">-</span><span class="operator">&gt;</span>clearScene();
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> message;
+      <span class="keyword">if</span> (scene<span class="operator">-</span><span class="operator">&gt;</span>levelsData<span class="operator">.</span>size() <span class="operator">-</span> <span class="number">1</span> <span class="operator">!</span><span class="operator">=</span> game<span class="operator">-</span><span class="operator">&gt;</span>currentLevel) {
+          message <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;You win the level %1. Your score is %2.\nPress Space to continue.&quot;</span>)<span class="operator">.</span>arg(game<span class="operator">-</span><span class="operator">&gt;</span>currentLevel<span class="operator">+</span><span class="number">1</span>)<span class="operator">.</span>arg(game<span class="operator">-</span><span class="operator">&gt;</span>score);
+          <span class="comment">//We increment the level number</span>
+          game<span class="operator">-</span><span class="operator">&gt;</span>currentLevel<span class="operator">+</span><span class="operator">+</span>;
+      } <span class="keyword">else</span> {
+          message <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;You finish the game on level %1. Your score is %2.&quot;</span>)<span class="operator">.</span>arg(game<span class="operator">-</span><span class="operator">&gt;</span>currentLevel<span class="operator">+</span><span class="number">1</span>)<span class="operator">.</span>arg(game<span class="operator">-</span><span class="operator">&gt;</span>score);
+          <span class="comment">//We set the level back to 0</span>
+          game<span class="operator">-</span><span class="operator">&gt;</span>currentLevel <span class="operator">=</span> <span class="number">0</span>;
+          <span class="comment">//We set the score back to 0</span>
+          game<span class="operator">-</span><span class="operator">&gt;</span>score <span class="operator">=</span> <span class="number">0</span>;
+      }
+
+      <span class="comment">//We inform the player</span>
+      scene<span class="operator">-</span><span class="operator">&gt;</span>textInformationItem<span class="operator">-</span><span class="operator">&gt;</span>setMessage(message);
+      scene<span class="operator">-</span><span class="operator">&gt;</span>textInformationItem<span class="operator">-</span><span class="operator">&gt;</span>show();
+  }
+
+  <span class="type">void</span> WinState<span class="operator">::</span>onExit(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> <span class="operator">*</span>)
+  {
+      <span class="comment">//we hide the information</span>
+      scene<span class="operator">-</span><span class="operator">&gt;</span>textInformationItem<span class="operator">-</span><span class="operator">&gt;</span>hide();
+  }
+
+  <span class="comment">/** UpdateScore State */</span>
+  UpdateScoreState<span class="operator">::</span>UpdateScoreState(<span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>parent) : <span class="type"><a href="../qtcore/qstate.html">QState</a></span>(parent)
+  {
+  }
+
+  <span class="comment">/** Win transition */</span>
+  UpdateScoreTransition<span class="operator">::</span>UpdateScoreTransition(GraphicsScene <span class="operator">*</span>scene<span class="operator">,</span> PlayState <span class="operator">*</span>game<span class="operator">,</span> <span class="type"><a href="../qtcore/qabstractstate.html">QAbstractState</a></span> <span class="operator">*</span>target)
+      : <span class="type"><a href="../qtcore/qsignaltransition.html">QSignalTransition</a></span>(scene<span class="operator">,</span>SIGNAL(subMarineDestroyed(<span class="type">int</span>)))<span class="operator">,</span>
+      game(game)<span class="operator">,</span> scene(scene)
+  {
+      setTargetState(target);
+  }
+
+  bool UpdateScoreTransition<span class="operator">::</span>eventTest(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span><span class="type"><a href="../qtcore/qsignaltransition.html">QSignalTransition</a></span><span class="operator">::</span>eventTest(event))
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      <span class="type"><a href="../qtcore/qstatemachine.html">QStateMachine</a></span><span class="operator">::</span>SignalEvent <span class="operator">*</span>se <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstatemachine.html">QStateMachine</a></span><span class="operator">::</span>SignalEvent<span class="operator">*</span><span class="operator">&gt;</span>(event);
+      game<span class="operator">-</span><span class="operator">&gt;</span>score <span class="operator">+</span><span class="operator">=</span> se<span class="operator">-</span><span class="operator">&gt;</span>arguments()<span class="operator">.</span>at(<span class="number">0</span>)<span class="operator">.</span>toInt();
+      scene<span class="operator">-</span><span class="operator">&gt;</span>progressItem<span class="operator">-</span><span class="operator">&gt;</span>setScore(game<span class="operator">-</span><span class="operator">&gt;</span>score);
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  <span class="comment">/** Win transition */</span>
+  WinTransition<span class="operator">::</span>WinTransition(GraphicsScene <span class="operator">*</span>scene<span class="operator">,</span> PlayState <span class="operator">*</span>game<span class="operator">,</span> <span class="type"><a href="../qtcore/qabstractstate.html">QAbstractState</a></span> <span class="operator">*</span>target)
+      : <span class="type"><a href="../qtcore/qsignaltransition.html">QSignalTransition</a></span>(scene<span class="operator">,</span>SIGNAL(allSubMarineDestroyed(<span class="type">int</span>)))<span class="operator">,</span>
+      game(game)<span class="operator">,</span> scene(scene)
+  {
+      setTargetState(target);
+  }
+
+  bool WinTransition<span class="operator">::</span>eventTest(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span><span class="type"><a href="../qtcore/qsignaltransition.html">QSignalTransition</a></span><span class="operator">::</span>eventTest(event))
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      <span class="type"><a href="../qtcore/qstatemachine.html">QStateMachine</a></span><span class="operator">::</span>SignalEvent <span class="operator">*</span>se <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstatemachine.html">QStateMachine</a></span><span class="operator">::</span>SignalEvent<span class="operator">*</span><span class="operator">&gt;</span>(event);
+      game<span class="operator">-</span><span class="operator">&gt;</span>score <span class="operator">+</span><span class="operator">=</span> se<span class="operator">-</span><span class="operator">&gt;</span>arguments()<span class="operator">.</span>at(<span class="number">0</span>)<span class="operator">.</span>toInt();
+      scene<span class="operator">-</span><span class="operator">&gt;</span>progressItem<span class="operator">-</span><span class="operator">&gt;</span>setScore(game<span class="operator">-</span><span class="operator">&gt;</span>score);
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  <span class="comment">/** Space transition */</span>
+  CustomSpaceTransition<span class="operator">::</span>CustomSpaceTransition(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>widget<span class="operator">,</span> PlayState <span class="operator">*</span>game<span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>Type type<span class="operator">,</span> <span class="type">int</span> key)
+      :   <span class="type"><a href="qkeyeventtransition.html">QKeyEventTransition</a></span>(widget<span class="operator">,</span> type<span class="operator">,</span> key)<span class="operator">,</span>
+          game(game)
+  {
+  }
+
+  bool CustomSpaceTransition<span class="operator">::</span>eventTest(<span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span><span class="type"><a href="qkeyeventtransition.html">QKeyEventTransition</a></span><span class="operator">::</span>eventTest(event))
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      <span class="keyword">return</span> (game<span class="operator">-</span><span class="operator">&gt;</span>currentLevel <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>);
+  }
+
+</pre>
+</div>
+<!-- @@@animation/sub-attaq/states.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

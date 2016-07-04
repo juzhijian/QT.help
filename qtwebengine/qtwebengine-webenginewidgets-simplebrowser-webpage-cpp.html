@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>webpage.cpp Example File | Qt WebEngine 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwebengine-index.html">Qt WebEngine</a></td><td ><a href="qtwebengine-webenginewidgets-simplebrowser-example.html">WebEngine Widgets Simple Browser Example</a></td><td >webpage.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">webpage.cpp Example File</h1>
+<span class="subtitle">webenginewidgets/simplebrowser/webpage.cpp</span>
+<!-- $$$webenginewidgets/simplebrowser/webpage.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;browserwindow.h&quot;</span>
+  <span class="preprocessor">#include &quot;tabwidget.h&quot;</span>
+  <span class="preprocessor">#include &quot;ui_certificateerrordialog.h&quot;</span>
+  <span class="preprocessor">#include &quot;ui_passworddialog.h&quot;</span>
+  <span class="preprocessor">#include &quot;webpage.h&quot;</span>
+  <span class="preprocessor">#include &quot;webview.h&quot;</span>
+  <span class="preprocessor">#include &lt;QAuthenticator&gt;</span>
+  <span class="preprocessor">#include &lt;QMessageBox&gt;</span>
+
+  WebPage<span class="operator">::</span>WebPage(<span class="type"><a href="qwebengineprofile.html">QWebEngineProfile</a></span> <span class="operator">*</span>profile<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span>(profile<span class="operator">,</span> parent)
+  {
+      connect(<span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>authenticationRequired<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>WebPage<span class="operator">::</span>handleAuthenticationRequired);
+      connect(<span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>proxyAuthenticationRequired<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>WebPage<span class="operator">::</span>handleProxyAuthenticationRequired);
+  }
+
+  bool WebPage<span class="operator">::</span>certificateError(<span class="keyword">const</span> <span class="type"><a href="qwebenginecertificateerror.html">QWebEngineCertificateError</a></span> <span class="operator">&amp;</span>error)
+  {
+      <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>mainWindow <span class="operator">=</span> view()<span class="operator">-</span><span class="operator">&gt;</span>window();
+      <span class="keyword">if</span> (error<span class="operator">.</span>isOverridable()) {
+          <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span> dialog(mainWindow);
+          dialog<span class="operator">.</span>setModal(<span class="keyword">true</span>);
+          dialog<span class="operator">.</span>setWindowFlags(dialog<span class="operator">.</span>windowFlags() <span class="operator">&amp;</span> <span class="operator">~</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowContextHelpButtonHint);
+          Ui<span class="operator">::</span>CertificateErrorDialog certificateDialog;
+          certificateDialog<span class="operator">.</span>setupUi(<span class="operator">&amp;</span>dialog);
+          certificateDialog<span class="operator">.</span>m_iconLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>());
+          <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> icon(mainWindow<span class="operator">-</span><span class="operator">&gt;</span>style()<span class="operator">-</span><span class="operator">&gt;</span>standardIcon(<span class="type"><a href="../qtwidgets/qstyle.html">QStyle</a></span><span class="operator">::</span>SP_MessageBoxWarning<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> mainWindow));
+          certificateDialog<span class="operator">.</span>m_iconLabel<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(icon<span class="operator">.</span>pixmap(<span class="number">32</span><span class="operator">,</span> <span class="number">32</span>));
+          certificateDialog<span class="operator">.</span>m_errorLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(error<span class="operator">.</span>errorDescription());
+          dialog<span class="operator">.</span>setWindowTitle(tr(<span class="string">&quot;Certificate Error&quot;</span>));
+          <span class="keyword">return</span> dialog<span class="operator">.</span>exec() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted;
+      }
+
+      <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>critical(mainWindow<span class="operator">,</span> tr(<span class="string">&quot;Certificate Error&quot;</span>)<span class="operator">,</span> error<span class="operator">.</span>errorDescription());
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+  }
+
+  <span class="type">void</span> WebPage<span class="operator">::</span>handleAuthenticationRequired(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>requestUrl<span class="operator">,</span> <span class="type"><a href="../qtnetwork/qauthenticator.html">QAuthenticator</a></span> <span class="operator">*</span>auth)
+  {
+      <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>mainWindow <span class="operator">=</span> view()<span class="operator">-</span><span class="operator">&gt;</span>window();
+      <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span> dialog(mainWindow);
+      dialog<span class="operator">.</span>setModal(<span class="keyword">true</span>);
+      dialog<span class="operator">.</span>setWindowFlags(dialog<span class="operator">.</span>windowFlags() <span class="operator">&amp;</span> <span class="operator">~</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowContextHelpButtonHint);
+
+      Ui<span class="operator">::</span>PasswordDialog passwordDialog;
+      passwordDialog<span class="operator">.</span>setupUi(<span class="operator">&amp;</span>dialog);
+
+      passwordDialog<span class="operator">.</span>m_iconLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>());
+      <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> icon(mainWindow<span class="operator">-</span><span class="operator">&gt;</span>style()<span class="operator">-</span><span class="operator">&gt;</span>standardIcon(<span class="type"><a href="../qtwidgets/qstyle.html">QStyle</a></span><span class="operator">::</span>SP_MessageBoxQuestion<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> mainWindow));
+      passwordDialog<span class="operator">.</span>m_iconLabel<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(icon<span class="operator">.</span>pixmap(<span class="number">32</span><span class="operator">,</span> <span class="number">32</span>));
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> introMessage(tr(<span class="string">&quot;Enter username and password for \&quot;%1\&quot; at %2&quot;</span>)
+                           <span class="operator">.</span>arg(auth<span class="operator">-</span><span class="operator">&gt;</span>realm())<span class="operator">.</span>arg(requestUrl<span class="operator">.</span>toString()<span class="operator">.</span>toHtmlEscaped()));
+      passwordDialog<span class="operator">.</span>m_infoLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(introMessage);
+      passwordDialog<span class="operator">.</span>m_infoLabel<span class="operator">-</span><span class="operator">&gt;</span>setWordWrap(<span class="keyword">true</span>);
+
+      <span class="keyword">if</span> (dialog<span class="operator">.</span>exec() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted) {
+          auth<span class="operator">-</span><span class="operator">&gt;</span>setUser(passwordDialog<span class="operator">.</span>m_userNameLineEdit<span class="operator">-</span><span class="operator">&gt;</span>text());
+          auth<span class="operator">-</span><span class="operator">&gt;</span>setPassword(passwordDialog<span class="operator">.</span>m_passwordLineEdit<span class="operator">-</span><span class="operator">&gt;</span>text());
+      } <span class="keyword">else</span> {
+          <span class="comment">// Set authenticator null if dialog is cancelled</span>
+          <span class="operator">*</span>auth <span class="operator">=</span> <span class="type"><a href="../qtnetwork/qauthenticator.html">QAuthenticator</a></span>();
+      }
+  }
+
+  <span class="type">void</span> WebPage<span class="operator">::</span>handleProxyAuthenticationRequired(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span><span class="operator">,</span> <span class="type"><a href="../qtnetwork/qauthenticator.html">QAuthenticator</a></span> <span class="operator">*</span>auth<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>proxyHost)
+  {
+      <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>mainWindow <span class="operator">=</span> view()<span class="operator">-</span><span class="operator">&gt;</span>window();
+      <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span> dialog(mainWindow);
+      dialog<span class="operator">.</span>setModal(<span class="keyword">true</span>);
+      dialog<span class="operator">.</span>setWindowFlags(dialog<span class="operator">.</span>windowFlags() <span class="operator">&amp;</span> <span class="operator">~</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowContextHelpButtonHint);
+
+      Ui<span class="operator">::</span>PasswordDialog passwordDialog;
+      passwordDialog<span class="operator">.</span>setupUi(<span class="operator">&amp;</span>dialog);
+
+      passwordDialog<span class="operator">.</span>m_iconLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>());
+      <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> icon(mainWindow<span class="operator">-</span><span class="operator">&gt;</span>style()<span class="operator">-</span><span class="operator">&gt;</span>standardIcon(<span class="type"><a href="../qtwidgets/qstyle.html">QStyle</a></span><span class="operator">::</span>SP_MessageBoxQuestion<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> mainWindow));
+      passwordDialog<span class="operator">.</span>m_iconLabel<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(icon<span class="operator">.</span>pixmap(<span class="number">32</span><span class="operator">,</span> <span class="number">32</span>));
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> introMessage <span class="operator">=</span> tr(<span class="string">&quot;Connect to proxy \&quot;%1\&quot; using:&quot;</span>);
+      introMessage <span class="operator">=</span> introMessage<span class="operator">.</span>arg(proxyHost<span class="operator">.</span>toHtmlEscaped());
+      passwordDialog<span class="operator">.</span>m_infoLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(introMessage);
+      passwordDialog<span class="operator">.</span>m_infoLabel<span class="operator">-</span><span class="operator">&gt;</span>setWordWrap(<span class="keyword">true</span>);
+
+      <span class="keyword">if</span> (dialog<span class="operator">.</span>exec() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted) {
+          auth<span class="operator">-</span><span class="operator">&gt;</span>setUser(passwordDialog<span class="operator">.</span>m_userNameLineEdit<span class="operator">-</span><span class="operator">&gt;</span>text());
+          auth<span class="operator">-</span><span class="operator">&gt;</span>setPassword(passwordDialog<span class="operator">.</span>m_passwordLineEdit<span class="operator">-</span><span class="operator">&gt;</span>text());
+      } <span class="keyword">else</span> {
+          <span class="comment">// Set authenticator null if dialog is cancelled</span>
+          <span class="operator">*</span>auth <span class="operator">=</span> <span class="type"><a href="../qtnetwork/qauthenticator.html">QAuthenticator</a></span>();
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@webenginewidgets/simplebrowser/webpage.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

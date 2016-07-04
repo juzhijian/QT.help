@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>spectrumanalyser.h Example File | Qt Multimedia 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-multimedia-spectrum-example.html">Spectrum Example</a></td><td >spectrumanalyser.h Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">spectrumanalyser.h Example File</h1>
+<span class="subtitle">multimedia/spectrum/app/spectrumanalyser.h</span>
+<!-- $$$multimedia/spectrum/app/spectrumanalyser.h-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#ifndef SPECTRUMANALYSER_H</span>
+  <span class="preprocessor">#define SPECTRUMANALYSER_H</span>
+
+  <span class="preprocessor">#include &lt;QByteArray&gt;</span>
+  <span class="preprocessor">#include &lt;QObject&gt;</span>
+  <span class="preprocessor">#include &lt;QVector&gt;</span>
+
+  <span class="preprocessor">#ifdef DUMP_SPECTRUMANALYSER</span>
+  <span class="preprocessor">#include &lt;QDir&gt;</span>
+  <span class="preprocessor">#include &lt;QFile&gt;</span>
+  <span class="preprocessor">#include &lt;QTextStream&gt;</span>
+  <span class="preprocessor">#endif</span>
+
+  <span class="preprocessor">#include &quot;frequencyspectrum.h&quot;</span>
+  <span class="preprocessor">#include &quot;spectrum.h&quot;</span>
+
+  <span class="preprocessor">#ifndef DISABLE_FFT</span>
+  <span class="preprocessor">#include &quot;FFTRealFixLenParam.h&quot;</span>
+  <span class="preprocessor">#endif</span>
+
+  QT_FORWARD_DECLARE_CLASS(<span class="type"><a href="qaudioformat.html">QAudioFormat</a></span>)
+  QT_FORWARD_DECLARE_CLASS(<span class="type"><a href="../qtcore/qthread.html">QThread</a></span>)
+
+  <span class="keyword">class</span> FFTRealWrapper;
+
+  <span class="keyword">class</span> SpectrumAnalyserThreadPrivate;
+
+  <span class="comment">/**
+   * Implementation of the spectrum analysis which can be run in a
+   * separate thread.
+   */</span>
+  <span class="keyword">class</span> SpectrumAnalyserThread : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      SpectrumAnalyserThread(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent);
+      <span class="operator">~</span>SpectrumAnalyserThread();
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> setWindowFunction(WindowFunction type);
+      <span class="type">void</span> calculateSpectrum(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>buffer<span class="operator">,</span>
+                             <span class="type">int</span> inputFrequency<span class="operator">,</span>
+                             <span class="type">int</span> bytesPerSample);
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> calculationComplete(<span class="keyword">const</span> FrequencySpectrum <span class="operator">&amp;</span>spectrum);
+
+  <span class="keyword">private</span>:
+      <span class="type">void</span> calculateWindow();
+
+  <span class="keyword">private</span>:
+  <span class="preprocessor">#ifndef DISABLE_FFT</span>
+      FFTRealWrapper<span class="operator">*</span>                             m_fft;
+  <span class="preprocessor">#endif</span>
+
+      <span class="keyword">const</span> <span class="type">int</span>                                   m_numSamples;
+
+      WindowFunction                              m_windowFunction;
+
+  <span class="preprocessor">#ifdef DISABLE_FFT</span>
+      <span class="keyword">typedef</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>                               DataType;
+  <span class="preprocessor">#else</span>
+      <span class="keyword">typedef</span> FFTRealFixLenParam<span class="operator">::</span>DataType        DataType;
+  <span class="preprocessor">#endif</span>
+      <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span>DataType<span class="operator">&gt;</span>                           m_window;
+
+      <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span>DataType<span class="operator">&gt;</span>                           m_input;
+      <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span>DataType<span class="operator">&gt;</span>                           m_output;
+
+      FrequencySpectrum                           m_spectrum;
+
+  <span class="preprocessor">#ifdef SPECTRUM_ANALYSER_SEPARATE_THREAD</span>
+      <span class="type"><a href="../qtcore/qthread.html">QThread</a></span><span class="operator">*</span>                                    m_thread;
+  <span class="preprocessor">#endif</span>
+  };
+
+  <span class="comment">/**
+   * Class which performs frequency spectrum analysis on a window of
+   * audio samples, provided to it by the Engine.
+   */</span>
+  <span class="keyword">class</span> SpectrumAnalyser : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      SpectrumAnalyser(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+      <span class="operator">~</span>SpectrumAnalyser();
+
+  <span class="preprocessor">#ifdef DUMP_SPECTRUMANALYSER</span>
+      <span class="type">void</span> setOutputPath(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>outputPath);
+  <span class="preprocessor">#endif</span>
+
+  <span class="keyword">public</span>:
+      <span class="comment">/*
+       * Set the windowing function which is applied before calculating the FFT
+       */</span>
+      <span class="type">void</span> setWindowFunction(WindowFunction type);
+
+      <span class="comment">/*
+       * Calculate a frequency spectrum
+       *
+       * \param buffer       Audio data
+       * \param format       Format of audio data
+       *
+       * Frequency spectrum is calculated asynchronously.  The result is returned
+       * via the spectrumChanged signal.
+       *
+       * An ongoing calculation can be cancelled by calling cancelCalculation().
+       *
+       */</span>
+      <span class="type">void</span> calculate(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>buffer<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span> <span class="operator">&amp;</span>format);
+
+      <span class="comment">/*
+       * Check whether the object is ready to perform another calculation
+       */</span>
+      bool isReady() <span class="keyword">const</span>;
+
+      <span class="comment">/*
+       * Cancel an ongoing calculation
+       *
+       * Note that cancelling is asynchronous.
+       */</span>
+      <span class="type">void</span> cancelCalculation();
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> spectrumChanged(<span class="keyword">const</span> FrequencySpectrum <span class="operator">&amp;</span>spectrum);
+
+  <span class="keyword">private</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> calculationComplete(<span class="keyword">const</span> FrequencySpectrum <span class="operator">&amp;</span>spectrum);
+
+  <span class="keyword">private</span>:
+      <span class="type">void</span> calculateWindow();
+
+  <span class="keyword">private</span>:
+
+      SpectrumAnalyserThread<span class="operator">*</span>    m_thread;
+
+      <span class="keyword">enum</span> State {
+          Idle<span class="operator">,</span>
+          Busy<span class="operator">,</span>
+          Cancelled
+      };
+
+      State              m_state;
+
+  <span class="preprocessor">#ifdef DUMP_SPECTRUMANALYSER</span>
+      <span class="type"><a href="../qtcore/qdir.html">QDir</a></span>                m_outputDir;
+      <span class="type">int</span>                 m_count;
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span>               m_textFile;
+      <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span>         m_textStream;
+  <span class="preprocessor">#endif</span>
+  };
+
+  <span class="preprocessor">#endif // SPECTRUMANALYSER_H</span>
+
+</pre>
+</div>
+<!-- @@@multimedia/spectrum/app/spectrumanalyser.h -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

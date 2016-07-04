@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>regularexpressiondialog.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-tools-regularexpression-example.html">QRegularExpression Example</a></td><td >regularexpressiondialog.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">regularexpressiondialog.cpp Example File</h1>
+<span class="subtitle">tools/regularexpression/regularexpressiondialog.cpp</span>
+<!-- $$$tools/regularexpression/regularexpressiondialog.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com, author Giuseppe D'Angelo &lt;giuseppe.dangelo@kdab.com&gt;
+  ** Copyright (C) 2016 Samuel Gaist &lt;samuel.gaist@edeltech.ch&gt;
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;regularexpressiondialog.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QApplication&gt;</span>
+
+  <span class="preprocessor">#include &lt;QCheckBox&gt;</span>
+  <span class="preprocessor">#include &lt;QComboBox&gt;</span>
+  <span class="preprocessor">#include &lt;QLabel&gt;</span>
+  <span class="preprocessor">#include &lt;QLineEdit&gt;</span>
+  <span class="preprocessor">#include &lt;QSpinBox&gt;</span>
+  <span class="preprocessor">#include &lt;QPlainTextEdit&gt;</span>
+  <span class="preprocessor">#include &lt;QTreeWidget&gt;</span>
+
+  <span class="preprocessor">#include &lt;QAction&gt;</span>
+  <span class="preprocessor">#include &lt;QClipboard&gt;</span>
+
+  <span class="preprocessor">#include &lt;QHBoxLayout&gt;</span>
+  <span class="preprocessor">#include &lt;QGridLayout&gt;</span>
+  <span class="preprocessor">#include &lt;QFormLayout&gt;</span>
+
+  <span class="preprocessor">#include &lt;QRegularExpression&gt;</span>
+  <span class="preprocessor">#include &lt;QRegularExpressionMatch&gt;</span>
+  <span class="preprocessor">#include &lt;QRegularExpressionMatchIterator&gt;</span>
+
+  Q_DECLARE_METATYPE(<span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>MatchType)
+
+  RegularExpressionDialog<span class="operator">::</span>RegularExpressionDialog(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qdialog.html">QDialog</a></span>(parent)
+  {
+      setupUi();
+      setWindowTitle(tr(<span class="string">&quot;QRegularExpression Example&quot;</span>));
+
+      connect(patternLineEdit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qlineedit.html">QLineEdit</a></span><span class="operator">::</span>textChanged<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>RegularExpressionDialog<span class="operator">::</span>refresh);
+      connect(subjectTextEdit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qplaintextedit.html">QPlainTextEdit</a></span><span class="operator">::</span>textChanged<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>RegularExpressionDialog<span class="operator">::</span>refresh);
+
+      connect(caseInsensitiveOptionCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qcheckbox.html">QCheckBox</a></span><span class="operator">::</span>toggled<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>RegularExpressionDialog<span class="operator">::</span>refresh);
+      connect(dotMatchesEverythingOptionCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qcheckbox.html">QCheckBox</a></span><span class="operator">::</span>toggled<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>RegularExpressionDialog<span class="operator">::</span>refresh);
+      connect(multilineOptionCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qcheckbox.html">QCheckBox</a></span><span class="operator">::</span>toggled<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>RegularExpressionDialog<span class="operator">::</span>refresh);
+      connect(extendedPatternSyntaxOptionCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qcheckbox.html">QCheckBox</a></span><span class="operator">::</span>toggled<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>RegularExpressionDialog<span class="operator">::</span>refresh);
+      connect(invertedGreedinessOptionCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qcheckbox.html">QCheckBox</a></span><span class="operator">::</span>toggled<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>RegularExpressionDialog<span class="operator">::</span>refresh);
+      connect(dontCaptureOptionCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qcheckbox.html">QCheckBox</a></span><span class="operator">::</span>toggled<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>RegularExpressionDialog<span class="operator">::</span>refresh);
+      connect(useUnicodePropertiesOptionCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qcheckbox.html">QCheckBox</a></span><span class="operator">::</span>toggled<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>RegularExpressionDialog<span class="operator">::</span>refresh);
+      connect(optimizeOnFirstUsageOptionCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qcheckbox.html">QCheckBox</a></span><span class="operator">::</span>toggled<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>RegularExpressionDialog<span class="operator">::</span>refresh);
+      connect(dontAutomaticallyOptimizeOptionCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qcheckbox.html">QCheckBox</a></span><span class="operator">::</span>toggled<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>RegularExpressionDialog<span class="operator">::</span>refresh);
+
+      connect(offsetSpinBox<span class="operator">,</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type">void</span> (<span class="type"><a href="qspinbox.html">QSpinBox</a></span><span class="operator">::</span><span class="operator">*</span>)(<span class="type">int</span>)<span class="operator">&gt;</span>(<span class="operator">&amp;</span><span class="type"><a href="qspinbox.html">QSpinBox</a></span><span class="operator">::</span>valueChanged)<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>RegularExpressionDialog<span class="operator">::</span>refresh);
+
+      connect(matchTypeComboBox<span class="operator">,</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type">void</span> (<span class="type"><a href="qcombobox.html">QComboBox</a></span><span class="operator">::</span><span class="operator">*</span>)(<span class="type">int</span>)<span class="operator">&gt;</span>(<span class="operator">&amp;</span><span class="type"><a href="qcombobox.html">QComboBox</a></span><span class="operator">::</span>currentIndexChanged)<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>RegularExpressionDialog<span class="operator">::</span>refresh);
+
+      connect(anchoredMatchOptionCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qcheckbox.html">QCheckBox</a></span><span class="operator">::</span>toggled<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>RegularExpressionDialog<span class="operator">::</span>refresh);
+      connect(dontCheckSubjectStringMatchOptionCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qcheckbox.html">QCheckBox</a></span><span class="operator">::</span>toggled<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>RegularExpressionDialog<span class="operator">::</span>refresh);
+
+      patternLineEdit<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;(\\+?\\d+)-(?&lt;prefix&gt;\\d+)-(?&lt;number&gt;\\w+)&quot;</span>));
+      subjectTextEdit<span class="operator">-</span><span class="operator">&gt;</span>setPlainText(tr(<span class="string">&quot;My office number is +43-152-0123456, my mobile is 001-41-255512 instead.&quot;</span>));
+
+      refresh();
+  }
+
+  <span class="type">void</span> RegularExpressionDialog<span class="operator">::</span>refresh()
+  {
+      setUpdatesEnabled(<span class="keyword">false</span>);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> pattern <span class="operator">=</span> patternLineEdit<span class="operator">-</span><span class="operator">&gt;</span>text();
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> text <span class="operator">=</span> subjectTextEdit<span class="operator">-</span><span class="operator">&gt;</span>toPlainText();
+
+      offsetSpinBox<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(<a href="../qtcore/qtglobal.html#qMax">qMax</a>(<span class="number">0</span><span class="operator">,</span> text<span class="operator">.</span>length() <span class="operator">-</span> <span class="number">1</span>));
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> escaped <span class="operator">=</span> pattern;
+      escaped<span class="operator">.</span>replace(QLatin1String(<span class="string">&quot;\\&quot;</span>)<span class="operator">,</span> QLatin1String(<span class="string">&quot;\\\\&quot;</span>));
+      escaped<span class="operator">.</span>replace(QLatin1String(<span class="string">&quot;\&quot;&quot;</span>)<span class="operator">,</span> QLatin1String(<span class="string">&quot;\\\&quot;&quot;</span>));
+      escaped<span class="operator">.</span>prepend(QLatin1Char(<span class="char">'&quot;'</span>));
+      escaped<span class="operator">.</span>append(QLatin1Char(<span class="char">'&quot;'</span>));
+      escapedPatternLineEdit<span class="operator">-</span><span class="operator">&gt;</span>setText(escaped);
+
+      <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span> rx(pattern);
+      <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>MatchType matchType <span class="operator">=</span> matchTypeComboBox<span class="operator">-</span><span class="operator">&gt;</span>currentData()<span class="operator">.</span>value<span class="operator">&lt;</span><span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>MatchType<span class="operator">&gt;</span>();
+      <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>PatternOptions patternOptions <span class="operator">=</span> <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>NoPatternOption;
+      <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>MatchOptions matchOptions <span class="operator">=</span> <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>NoMatchOption;
+
+      <span class="keyword">if</span> (anchoredMatchOptionCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          matchOptions <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>AnchoredMatchOption;
+      <span class="keyword">if</span> (dontCheckSubjectStringMatchOptionCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          matchOptions <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>DontCheckSubjectStringMatchOption;
+
+      <span class="keyword">if</span> (caseInsensitiveOptionCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          patternOptions <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>CaseInsensitiveOption;
+      <span class="keyword">if</span> (dotMatchesEverythingOptionCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          patternOptions <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>DotMatchesEverythingOption;
+      <span class="keyword">if</span> (multilineOptionCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          patternOptions <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>MultilineOption;
+      <span class="keyword">if</span> (extendedPatternSyntaxOptionCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          patternOptions <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>ExtendedPatternSyntaxOption;
+      <span class="keyword">if</span> (invertedGreedinessOptionCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          patternOptions <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>InvertedGreedinessOption;
+      <span class="keyword">if</span> (dontCaptureOptionCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          patternOptions <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>DontCaptureOption;
+      <span class="keyword">if</span> (useUnicodePropertiesOptionCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          patternOptions <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>UseUnicodePropertiesOption;
+      <span class="keyword">if</span> (optimizeOnFirstUsageOptionCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          patternOptions <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>OptimizeOnFirstUsageOption;
+      <span class="keyword">if</span> (dontAutomaticallyOptimizeOptionCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          patternOptions <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>DontAutomaticallyOptimizeOption;
+
+      rx<span class="operator">.</span>setPatternOptions(patternOptions);
+
+      <span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span> palette <span class="operator">=</span> patternLineEdit<span class="operator">-</span><span class="operator">&gt;</span>palette();
+      <span class="keyword">if</span> (rx<span class="operator">.</span>isValid())
+          palette<span class="operator">.</span>setColor(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Text<span class="operator">,</span> subjectTextEdit<span class="operator">-</span><span class="operator">&gt;</span>palette()<span class="operator">.</span>color(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Text));
+      <span class="keyword">else</span>
+          palette<span class="operator">.</span>setColor(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Text<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>red);
+      patternLineEdit<span class="operator">-</span><span class="operator">&gt;</span>setPalette(palette);
+
+      matchDetailsTreeWidget<span class="operator">-</span><span class="operator">&gt;</span>clear();
+      matchDetailsTreeWidget<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(rx<span class="operator">.</span>isValid());
+
+      <span class="keyword">if</span> (rx<span class="operator">.</span>isValid()) {
+          <span class="keyword">const</span> <span class="type">int</span> capturingGroupsCount <span class="operator">=</span> rx<span class="operator">.</span>captureCount() <span class="operator">+</span> <span class="number">1</span>;
+
+          <span class="type"><a href="../qtcore/qregularexpressionmatchiterator.html">QRegularExpressionMatchIterator</a></span> iterator <span class="operator">=</span> rx<span class="operator">.</span>globalMatch(text<span class="operator">,</span> offsetSpinBox<span class="operator">-</span><span class="operator">&gt;</span>value()<span class="operator">,</span> matchType<span class="operator">,</span> matchOptions);
+          <span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>;
+
+          <span class="keyword">while</span> (iterator<span class="operator">.</span>hasNext()) {
+              <span class="type"><a href="../qtcore/qregularexpressionmatch.html">QRegularExpressionMatch</a></span> match <span class="operator">=</span> iterator<span class="operator">.</span>next();
+
+              <span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span> <span class="operator">*</span>matchDetailTopItem <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span>(matchDetailsTreeWidget);
+              matchDetailTopItem<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(i));
+
+              <span class="keyword">for</span> (<span class="type">int</span> captureGroupIndex <span class="operator">=</span> <span class="number">0</span>; captureGroupIndex <span class="operator">&lt;</span> capturingGroupsCount; <span class="operator">+</span><span class="operator">+</span>captureGroupIndex) {
+                  <span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span> <span class="operator">*</span>matchDetailItem <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span>(matchDetailTopItem);
+                  matchDetailItem<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(captureGroupIndex));
+                  matchDetailItem<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="number">2</span><span class="operator">,</span> match<span class="operator">.</span>captured(captureGroupIndex));
+              }
+
+              <span class="operator">+</span><span class="operator">+</span>i;
+          }
+      }
+
+      matchDetailsTreeWidget<span class="operator">-</span><span class="operator">&gt;</span>expandAll();
+
+      namedGroupsTreeWidget<span class="operator">-</span><span class="operator">&gt;</span>clear();
+      namedGroupsTreeWidget<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(rx<span class="operator">.</span>isValid());
+
+      <span class="keyword">if</span> (rx<span class="operator">.</span>isValid()) {
+          regexpStatusLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Valid&quot;</span>));
+
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> namedCaptureGroups <span class="operator">=</span> rx<span class="operator">.</span>namedCaptureGroups();
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> namedCaptureGroups<span class="operator">.</span>size(); <span class="operator">+</span><span class="operator">+</span>i) {
+              <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> currentNamedCaptureGroup <span class="operator">=</span> namedCaptureGroups<span class="operator">.</span>at(i);
+
+              <span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span> <span class="operator">*</span>namedGroupItem <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtreewidgetitem.html">QTreeWidgetItem</a></span>(namedGroupsTreeWidget);
+              namedGroupItem<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(i));
+              namedGroupItem<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="number">1</span><span class="operator">,</span> currentNamedCaptureGroup<span class="operator">.</span>isNull() <span class="operator">?</span> tr(<span class="string">&quot;&lt;no name&gt;&quot;</span>) : currentNamedCaptureGroup);
+          }
+      } <span class="keyword">else</span> {
+          regexpStatusLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Invalid: syntax error at position %1 (%2)&quot;</span>)
+                                     <span class="operator">.</span>arg(rx<span class="operator">.</span>patternErrorOffset())
+                                     <span class="operator">.</span>arg(rx<span class="operator">.</span>errorString()));
+      }
+
+      setUpdatesEnabled(<span class="keyword">true</span>);
+  }
+
+  <span class="type">void</span> RegularExpressionDialog<span class="operator">::</span>copyEscapedPatternToClipboard()
+  {
+  <span class="preprocessor">#ifndef QT_NO_CLIPBOARD</span>
+      <span class="type"><a href="../qtgui/qclipboard.html">QClipboard</a></span> <span class="operator">*</span>clipboard <span class="operator">=</span> <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span><span class="operator">::</span>clipboard();
+      <span class="keyword">if</span> (clipboard)
+          clipboard<span class="operator">-</span><span class="operator">&gt;</span>setText(escapedPatternLineEdit<span class="operator">-</span><span class="operator">&gt;</span>text());
+  <span class="preprocessor">#endif</span>
+  }
+
+  <span class="type">void</span> RegularExpressionDialog<span class="operator">::</span>setupUi()
+  {
+      <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>leftHalfContainer <span class="operator">=</span> setupLeftUi();
+
+      <span class="type"><a href="qframe.html">QFrame</a></span> <span class="operator">*</span>verticalSeparator <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qframe.html">QFrame</a></span>;
+      verticalSeparator<span class="operator">-</span><span class="operator">&gt;</span>setFrameStyle(<span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>VLine <span class="operator">|</span> <span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Sunken);
+
+      <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>rightHalfContainer <span class="operator">=</span> setupRightUi();
+
+      <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>mainLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span>;
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(leftHalfContainer);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(verticalSeparator);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(rightHalfContainer);
+
+      setLayout(mainLayout);
+  }
+
+  <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>RegularExpressionDialog<span class="operator">::</span>setupLeftUi()
+  {
+      <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>container <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qwidget.html">QWidget</a></span>;
+
+      <span class="type"><a href="qformlayout.html">QFormLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qformlayout.html">QFormLayout</a></span>(container);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>setFieldGrowthPolicy(<span class="type"><a href="qformlayout.html">QFormLayout</a></span><span class="operator">::</span>AllNonFixedFieldsGrow);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>setMargin(<span class="number">0</span>);
+
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>regexpAndSubjectLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;&lt;h3&gt;Regular expression and text input&lt;/h3&gt;&quot;</span>));
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(regexpAndSubjectLabel);
+
+      patternLineEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlineedit.html">QLineEdit</a></span>;
+      patternLineEdit<span class="operator">-</span><span class="operator">&gt;</span>setClearButtonEnabled(<span class="keyword">true</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;&amp;Pattern:&quot;</span>)<span class="operator">,</span> patternLineEdit);
+
+      escapedPatternLineEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlineedit.html">QLineEdit</a></span>;
+      escapedPatternLineEdit<span class="operator">-</span><span class="operator">&gt;</span>setReadOnly(<span class="keyword">true</span>);
+      <span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span> palette <span class="operator">=</span> escapedPatternLineEdit<span class="operator">-</span><span class="operator">&gt;</span>palette();
+      palette<span class="operator">.</span>setBrush(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Base<span class="operator">,</span> palette<span class="operator">.</span>brush(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Disabled<span class="operator">,</span> <span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Base));
+      escapedPatternLineEdit<span class="operator">-</span><span class="operator">&gt;</span>setPalette(palette);
+
+  <span class="preprocessor">#ifndef QT_NO_CLIPBOARD</span>
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>copyEscapedPatternAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(<span class="keyword">this</span>);
+      copyEscapedPatternAction<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Copy to clipboard&quot;</span>));
+      copyEscapedPatternAction<span class="operator">-</span><span class="operator">&gt;</span>setIcon(<span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;:/images/copy.png&quot;</span>)));
+      connect(copyEscapedPatternAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>RegularExpressionDialog<span class="operator">::</span>copyEscapedPatternToClipboard);
+      escapedPatternLineEdit<span class="operator">-</span><span class="operator">&gt;</span>addAction(copyEscapedPatternAction<span class="operator">,</span> <span class="type"><a href="qlineedit.html">QLineEdit</a></span><span class="operator">::</span>TrailingPosition);
+  <span class="preprocessor">#endif</span>
+
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;&amp;Escaped pattern:&quot;</span>)<span class="operator">,</span> escapedPatternLineEdit);
+
+      subjectTextEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qplaintextedit.html">QPlainTextEdit</a></span>;
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;&amp;Subject text:&quot;</span>)<span class="operator">,</span> subjectTextEdit);
+
+      caseInsensitiveOptionCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Case insensitive (/i)&quot;</span>));
+      dotMatchesEverythingOptionCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Dot matches everything (/s)&quot;</span>));
+      multilineOptionCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Multiline (/m)&quot;</span>));
+      extendedPatternSyntaxOptionCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Extended pattern (/x)&quot;</span>));
+      invertedGreedinessOptionCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Inverted greediness&quot;</span>));
+      dontCaptureOptionCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Don't capture&quot;</span>));
+      useUnicodePropertiesOptionCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Use unicode properties (/u)&quot;</span>));
+      optimizeOnFirstUsageOptionCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Optimize on first usage&quot;</span>));
+      dontAutomaticallyOptimizeOptionCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Don't automatically optimize&quot;</span>));
+
+      <span class="type"><a href="qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>patternOptionsCheckBoxLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+      <span class="type">int</span> gridRow <span class="operator">=</span> <span class="number">0</span>;
+      patternOptionsCheckBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(caseInsensitiveOptionCheckBox<span class="operator">,</span> gridRow<span class="operator">,</span> <span class="number">1</span>);
+      patternOptionsCheckBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(dotMatchesEverythingOptionCheckBox<span class="operator">,</span> gridRow<span class="operator">,</span> <span class="number">2</span>);
+      <span class="operator">+</span><span class="operator">+</span>gridRow;
+      patternOptionsCheckBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(multilineOptionCheckBox<span class="operator">,</span> gridRow<span class="operator">,</span> <span class="number">1</span>);
+      patternOptionsCheckBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(extendedPatternSyntaxOptionCheckBox<span class="operator">,</span> gridRow<span class="operator">,</span> <span class="number">2</span>);
+      <span class="operator">+</span><span class="operator">+</span>gridRow;
+      patternOptionsCheckBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(invertedGreedinessOptionCheckBox<span class="operator">,</span> gridRow<span class="operator">,</span> <span class="number">1</span>);
+      patternOptionsCheckBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(dontCaptureOptionCheckBox<span class="operator">,</span> gridRow<span class="operator">,</span> <span class="number">2</span>);
+      <span class="operator">+</span><span class="operator">+</span>gridRow;
+      patternOptionsCheckBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(useUnicodePropertiesOptionCheckBox<span class="operator">,</span> gridRow<span class="operator">,</span> <span class="number">1</span>);
+      patternOptionsCheckBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(optimizeOnFirstUsageOptionCheckBox<span class="operator">,</span> gridRow<span class="operator">,</span> <span class="number">2</span>);
+      <span class="operator">+</span><span class="operator">+</span>gridRow;
+      patternOptionsCheckBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(dontAutomaticallyOptimizeOptionCheckBox<span class="operator">,</span> gridRow<span class="operator">,</span> <span class="number">1</span>);
+
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;Pattern options:&quot;</span>)<span class="operator">,</span> patternOptionsCheckBoxLayout);
+
+      offsetSpinBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qspinbox.html">QSpinBox</a></span>;
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;Match &amp;offset:&quot;</span>)<span class="operator">,</span> offsetSpinBox);
+
+      matchTypeComboBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcombobox.html">QComboBox</a></span>;
+      matchTypeComboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Normal&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>NormalMatch));
+      matchTypeComboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Partial prefer complete&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>PartialPreferCompleteMatch));
+      matchTypeComboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Partial prefer first&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>PartialPreferFirstMatch));
+      matchTypeComboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;No match&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="../qtcore/qregularexpression.html">QRegularExpression</a></span><span class="operator">::</span>NoMatch));
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;Match &amp;type:&quot;</span>)<span class="operator">,</span> matchTypeComboBox);
+
+      dontCheckSubjectStringMatchOptionCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Don't check subject string&quot;</span>));
+      anchoredMatchOptionCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Anchored match&quot;</span>));
+
+      <span class="type"><a href="qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>matchOptionsCheckBoxLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+      matchOptionsCheckBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(dontCheckSubjectStringMatchOptionCheckBox<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      matchOptionsCheckBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(anchoredMatchOptionCheckBox<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;Match options:&quot;</span>)<span class="operator">,</span> matchOptionsCheckBoxLayout);
+
+      <span class="keyword">return</span> container;
+  }
+
+  <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>RegularExpressionDialog<span class="operator">::</span>setupRightUi()
+  {
+      <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>container <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qwidget.html">QWidget</a></span>;
+
+      <span class="type"><a href="qformlayout.html">QFormLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qformlayout.html">QFormLayout</a></span>(container);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>setFieldGrowthPolicy(<span class="type"><a href="qformlayout.html">QFormLayout</a></span><span class="operator">::</span>AllNonFixedFieldsGrow);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>setMargin(<span class="number">0</span>);
+
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>matchInfoLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;&lt;h3&gt;Match information&lt;/h3&gt;&quot;</span>));
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(matchInfoLabel);
+
+      matchDetailsTreeWidget <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtreewidget.html">QTreeWidget</a></span>;
+      matchDetailsTreeWidget<span class="operator">-</span><span class="operator">&gt;</span>setHeaderLabels(<span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Match index&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Group index&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Captured string&quot;</span>));
+      matchDetailsTreeWidget<span class="operator">-</span><span class="operator">&gt;</span>setSizeAdjustPolicy(<span class="type"><a href="qtreewidget.html">QTreeWidget</a></span><span class="operator">::</span>AdjustToContents);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;Match details:&quot;</span>)<span class="operator">,</span> matchDetailsTreeWidget);
+
+      <span class="type"><a href="qframe.html">QFrame</a></span> <span class="operator">*</span>horizontalSeparator <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qframe.html">QFrame</a></span>;
+      horizontalSeparator<span class="operator">-</span><span class="operator">&gt;</span>setFrameStyle(<span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>HLine <span class="operator">|</span> <span class="type"><a href="qframe.html">QFrame</a></span><span class="operator">::</span>Sunken);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(horizontalSeparator);
+
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>regexpInfoLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;&lt;h3&gt;Regular expression information&lt;/h3&gt;&quot;</span>));
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(regexpInfoLabel);
+
+      regexpStatusLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Valid&quot;</span>));
+      regexpStatusLabel<span class="operator">-</span><span class="operator">&gt;</span>setWordWrap(<span class="keyword">true</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;Pattern status:&quot;</span>)<span class="operator">,</span> regexpStatusLabel);
+
+      namedGroupsTreeWidget <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtreewidget.html">QTreeWidget</a></span>;
+      namedGroupsTreeWidget<span class="operator">-</span><span class="operator">&gt;</span>setHeaderLabels(<span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Index&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Named group&quot;</span>));
+      namedGroupsTreeWidget<span class="operator">-</span><span class="operator">&gt;</span>setSizeAdjustPolicy(<span class="type"><a href="qtreewidget.html">QTreeWidget</a></span><span class="operator">::</span>AdjustToContents);
+      namedGroupsTreeWidget<span class="operator">-</span><span class="operator">&gt;</span>setRootIsDecorated(<span class="keyword">false</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addRow(tr(<span class="string">&quot;Named groups:&quot;</span>)<span class="operator">,</span> namedGroupsTreeWidget);
+
+      <span class="keyword">return</span> container;
+  }
+
+</pre>
+</div>
+<!-- @@@tools/regularexpression/regularexpressiondialog.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

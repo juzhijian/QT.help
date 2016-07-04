@@ -1,0 +1,1004 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>SolarSystem.qml Example File | Qt 3D 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-planets-qml-example.html">Qt 3D: Planets QML Example</a></td><td >SolarSystem.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">SolarSystem.qml Example File</h1>
+<span class="subtitle">planets-qml/SolarSystem.qml</span>
+<!-- $$$planets-qml/SolarSystem.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt3D module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.0 as QQ2
+  import Qt3D.Core 2.0
+  import Qt3D.Render 2.0
+  import Qt3D.Input 2.0
+  import Qt3D.Logic 2.0
+  import Qt3D.Extras 2.0
+
+  import &quot;planets.js&quot; as Planets
+
+  <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+      <span class="name">id</span>: <span class="name">sceneRoot</span>
+
+      property <span class="type">bool</span> <span class="name">ready</span>: <span class="number">false</span>
+
+      property <span class="type">real</span> <span class="name">cameraNear</span>: <span class="number">0</span>
+      property <span class="type">real</span> <span class="name">xLookAtOffset</span>: <span class="number">0</span>
+      property <span class="type">real</span> <span class="name">yLookAtOffset</span>: <span class="number">0</span>
+      property <span class="type">real</span> <span class="name">zLookAtOffset</span>: <span class="number">0</span>
+      property <span class="type">real</span> <span class="name">xCameraOffset</span>: <span class="number">0</span>
+      property <span class="type">real</span> <span class="name">yCameraOffset</span>: <span class="number">0</span>
+      property <span class="type">real</span> <span class="name">zCameraOffset</span>: <span class="number">0</span>
+
+      property <span class="type">var</span> <span class="name">planetData</span>
+      property <span class="type">var</span> <span class="name">planets</span>: []
+
+      property <span class="type">vector3d</span> <span class="name">defaultUp</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>)
+      property <span class="type">vector3d</span> <span class="name">defaultCameraPosition</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">Planets</span>.<span class="name">solarDistance</span>,
+                                                           <span class="name">Planets</span>.<span class="name">solarDistance</span>,
+                                                           <span class="name">Planets</span>.<span class="name">solarDistance</span>)
+      property <span class="type">vector3d</span> <span class="name">tiltAxis</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>)
+      property <span class="type">vector3d</span> <span class="name">rollAxis</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>)
+      property <span class="type">real</span> <span class="name">cameraDistance</span>: <span class="number">1</span>
+      property <span class="type">vector3d</span> <span class="name">oldCameraPosition</span>
+      property <span class="type">vector3d</span> <span class="name">oldFocusedPlanetPosition</span>
+
+      property <span class="type">color</span> <span class="name">ambientStrengthStarfield</span>: <span class="string">&quot;#000000&quot;</span>
+      property <span class="type">color</span> <span class="name">ambientStrengthSun</span>: <span class="string">&quot;#ffffff&quot;</span>
+      property <span class="type">color</span> <span class="name">ambientStrengthClouds</span>: <span class="string">&quot;#000000&quot;</span>
+      property <span class="type">color</span> <span class="name">ambientStrengthRing</span>: <span class="string">&quot;#111111&quot;</span>
+      property <span class="type">color</span> <span class="name">ambientStrengthPlanet</span>: <span class="string">&quot;#222222&quot;</span>
+      property <span class="type">real</span> <span class="name">shininessSpecularMap</span>: <span class="number">50.0</span>
+      property <span class="type">real</span> <span class="name">shininessClouds</span>: <span class="number">10.0</span>
+      property <span class="type">real</span> <span class="name">shininessBasic</span>: <span class="number">1.0</span>
+
+      property <span class="type">real</span> <span class="name">saturnRingInnerRadius</span>
+      property <span class="type">real</span> <span class="name">saturnRingOuterRadius</span>
+      property <span class="type">real</span> <span class="name">uranusRingInnerRadius</span>
+      property <span class="type">real</span> <span class="name">uranusRingOuterRadius</span>
+
+      <span class="comment">// Time variables</span>
+      property <span class="type">int</span> <span class="name">year</span>: <span class="number">2000</span>
+      property <span class="type">int</span> <span class="name">month</span>: <span class="number">1</span>
+      property <span class="type">int</span> <span class="name">day</span>: <span class="number">1</span>
+      <span class="comment">// Time scale formula based on http://www.stjarnhimlen.se/comp/ppcomp.html</span>
+      property <span class="type">real</span> <span class="name">startD</span>: <span class="number">367</span> <span class="operator">*</span> <span class="name">year</span> <span class="operator">-</span> <span class="number">7</span> <span class="operator">*</span> (<span class="name">year</span> <span class="operator">+</span> (<span class="name">month</span> <span class="operator">+</span> <span class="number">9</span>) <span class="operator">/</span> <span class="number">12</span>) <span class="operator">/</span> <span class="number">4</span> <span class="operator">+</span> <span class="number">275</span> <span class="operator">*</span> <span class="name">month</span> <span class="operator">/</span> <span class="number">9</span> <span class="operator">+</span> <span class="name">day</span> <span class="operator">-</span> <span class="number">730530</span>
+      property <span class="type">real</span> <span class="name">oldTimeD</span>: <span class="name">startD</span>
+      property <span class="type">real</span> <span class="name">currTimeD</span>: <span class="name">startD</span>
+      property <span class="type">real</span> <span class="name">deltaTimeD</span>: <span class="number">0</span>
+      property <span class="type">real</span> <span class="name">daysPerFrame</span>
+      property <span class="type">real</span> <span class="name">daysPerFrameScale</span>
+
+      property <span class="type">real</span> <span class="name">planetScale</span>
+
+      property <span class="type">bool</span> <span class="name">focusedScaling</span>: <span class="number">false</span>
+      property <span class="type">int</span> <span class="name">focusedMinimumScale</span>: <span class="number">20</span>
+      property <span class="type">real</span> <span class="name">actualScale</span>
+
+      <span class="comment">// Animate solar system with LogicComponent</span>
+      <span class="type"><a href="qml-qt3d-logic-frameaction.html">FrameAction</a></span> {
+          <span class="name">onTriggered</span>: {
+              frames++
+              <span class="name">animate</span>(<span class="name">focusedPlanet</span>)
+          }
+      }
+
+      <span class="type">PlanetsLight</span> {
+          <span class="name">id</span>: <span class="name">light</span>
+          <span class="name">ratio</span>: <span class="name">width</span> <span class="operator">/</span> <span class="name">height</span>
+      }
+
+      <span class="type"><a href="qml-qt3d-render-camera.html">Camera</a></span> {
+          <span class="name">id</span>: <span class="name">camera</span>
+          <span class="name">projectionType</span>: <span class="name">CameraLens</span>.<span class="name">PerspectiveProjection</span>
+          <span class="name">fieldOfView</span>: <span class="number">45</span>
+          <span class="name">aspectRatio</span>: <span class="name">width</span> <span class="operator">/</span> <span class="name">height</span>
+          <span class="name">nearPlane</span>: <span class="number">2500000.0</span>
+          <span class="name">farPlane</span>: <span class="number">20000000.0</span>
+          <span class="name">position</span>: <span class="name">defaultCameraPosition</span>
+          <span class="name">upVector</span>: <span class="name">defaultUp</span>
+          <span class="name">viewCenter</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>( <span class="name">xLookAtOffset</span>, <span class="name">yLookAtOffset</span>, <span class="name">zLookAtOffset</span> )
+      }
+
+      <span class="type">FirstPersonCameraController</span> { <span class="name">camera</span>: <span class="name">camera</span> }
+
+      <span class="name">components</span>: [
+          <span class="type">PlanetFrameGraph</span> {
+              <span class="name">id</span>: <span class="name">framegraph</span>
+              <span class="name">viewCamera</span>: <span class="name">camera</span>
+              <span class="name">lightCamera</span>: <span class="name">light</span>.<span class="name">lightCamera</span>
+          },
+          <span class="type"><a href="qml-qt3d-input-inputsettings.html">InputSettings</a></span> {}
+      ]
+
+      <span class="type">PlanetEffect</span> {
+          <span class="name">id</span>: <span class="name">effectD</span>
+          <span class="name">light</span>: <span class="name">light</span>
+      }
+
+      <span class="type">PlanetEffect</span> {
+          <span class="name">id</span>: <span class="name">effectDB</span>
+          <span class="name">light</span>: <span class="name">light</span>
+          <span class="name">vertexES</span>: <span class="string">&quot;qrc:/shaders/es2/planetDB.vert&quot;</span>
+          <span class="name">fragmentES</span>: <span class="string">&quot;qrc:/shaders/es2/planetDB.frag&quot;</span>
+          <span class="name">vertexGL</span>: <span class="string">&quot;qrc:/shaders/gl3/planetDB.vert&quot;</span>
+          <span class="name">fragmentGL</span>: <span class="string">&quot;qrc:/shaders/gl3/planetDB.frag&quot;</span>
+      }
+
+      <span class="type">PlanetEffect</span> {
+          <span class="name">id</span>: <span class="name">effectDSB</span>
+          <span class="name">light</span>: <span class="name">light</span>
+          <span class="name">vertexES</span>: <span class="string">&quot;qrc:/shaders/es2/planetDB.vert&quot;</span>
+          <span class="name">fragmentES</span>: <span class="string">&quot;qrc:/shaders/es2/planetDSB.frag&quot;</span>
+          <span class="name">vertexGL</span>: <span class="string">&quot;qrc:/shaders/gl3/planetDB.vert&quot;</span>
+          <span class="name">fragmentGL</span>: <span class="string">&quot;qrc:/shaders/gl3/planetDSB.frag&quot;</span>
+      }
+
+      <span class="type">PlanetEffect</span> {
+          <span class="name">id</span>: <span class="name">cloudEffect</span>
+          <span class="name">light</span>: <span class="name">light</span>
+          <span class="name">vertexES</span>: <span class="string">&quot;qrc:/shaders/es2/planetD.vert&quot;</span>
+          <span class="name">fragmentES</span>: <span class="string">&quot;qrc:/shaders/es2/planetDS.frag&quot;</span>
+          <span class="name">vertexGL</span>: <span class="string">&quot;qrc:/shaders/gl3/planetD.vert&quot;</span>
+          <span class="name">fragmentGL</span>: <span class="string">&quot;qrc:/shaders/gl3/planetDS.frag&quot;</span>
+      }
+
+      <span class="type">SunEffect</span> {
+          <span class="name">id</span>: <span class="name">sunEffect</span>
+      }
+
+      <span class="type">ShadowEffect</span> {
+          <span class="name">id</span>: <span class="name">shadowMapEffect</span>
+          <span class="name">shadowTexture</span>: <span class="name">framegraph</span>.<span class="name">shadowTexture</span>
+          <span class="name">light</span>: <span class="name">light</span>
+      }
+
+      <span class="name">QQ2</span>.Component.onCompleted: {
+          <span class="name">planetData</span> <span class="operator">=</span> <span class="name">Planets</span>.<span class="name">loadPlanetData</span>()
+          <span class="comment">// Push in the correct order</span>
+          <span class="name">planets</span>.<span class="name">push</span>(<span class="name">sun</span>)
+          <span class="name">planets</span>.<span class="name">push</span>(<span class="name">mercury</span>)
+          <span class="name">planets</span>.<span class="name">push</span>(<span class="name">venus</span>)
+          <span class="name">planets</span>.<span class="name">push</span>(<span class="name">earth</span>)
+          <span class="name">planets</span>.<span class="name">push</span>(<span class="name">mars</span>)
+          <span class="name">planets</span>.<span class="name">push</span>(<span class="name">jupiter</span>)
+          <span class="name">planets</span>.<span class="name">push</span>(<span class="name">saturn</span>)
+          <span class="name">planets</span>.<span class="name">push</span>(<span class="name">uranus</span>)
+          <span class="name">planets</span>.<span class="name">push</span>(<span class="name">neptune</span>)
+          <span class="name">planets</span>.<span class="name">push</span>(<span class="name">moon</span>)
+          <span class="comment">// TODO: Once support for creating meshes from arrays is implemented take these into use</span>
+          <span class="comment">//saturnRing.makeRing()</span>
+          <span class="comment">//uranusRing.makeRing()</span>
+          <span class="name">saturnRingOuterRadius</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">SATURN</span>].<span class="name">radius</span> <span class="operator">+</span> <span class="name">Planets</span>.<span class="name">saturnOuterRadius</span>
+          <span class="name">saturnRingInnerRadius</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">SATURN</span>].<span class="name">radius</span> <span class="operator">+</span> <span class="number">6.630</span>
+          <span class="name">uranusRingOuterRadius</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">URANUS</span>].<span class="name">radius</span> <span class="operator">+</span> <span class="name">Planets</span>.<span class="name">uranusOuterRadius</span>
+          <span class="name">uranusRingInnerRadius</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">URANUS</span>].<span class="name">radius</span> <span class="operator">+</span> <span class="number">2</span>
+          <span class="name">ready</span> <span class="operator">=</span> <span class="number">true</span>
+          <span class="name">changeScale</span>(<span class="number">1200</span>)
+          <span class="name">changeSpeed</span>(<span class="number">0.2</span>)
+          <span class="name">setLookAtOffset</span>(<span class="name">Planets</span>.<span class="name">SUN</span>)
+      }
+
+      <span class="type">QQ2</span>.NumberAnimation {
+          <span class="name">id</span>: <span class="name">lookAtOffsetAnimation</span>
+          <span class="name">target</span>: <span class="name">sceneRoot</span>
+          <span class="name">properties</span>: <span class="string">&quot;xLookAtOffset, yLookAtOffset, zLookAtOffset&quot;</span>
+          <span class="name">to</span>: <span class="number">0</span>
+          <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuint</span>
+          <span class="name">duration</span>: <span class="number">1250</span>
+      }
+
+      <span class="type">QQ2</span>.NumberAnimation {
+          <span class="name">id</span>: <span class="name">cameraOffsetAnimation</span>
+          <span class="name">target</span>: <span class="name">sceneRoot</span>
+          <span class="name">properties</span>: <span class="string">&quot;xCameraOffset, yCameraOffset, zCameraOffset&quot;</span>
+          <span class="name">to</span>: <span class="number">0</span>
+          <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuint</span>
+          <span class="name">duration</span>: <span class="number">2500</span>
+      }
+
+      QQ2.Behavior on <span class="name">cameraNear</span> {
+          <span class="type">QQ2</span>.PropertyAnimation {
+              <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutQuint</span>
+              <span class="name">duration</span>: <span class="number">2500</span>
+          }
+      }
+
+      <span class="keyword">function</span> <span class="name">changePlanetFocus</span>(<span class="name">oldPlanet</span>, focusedPlanet) {
+          <span class="name">setOldPlanet</span>(<span class="name">oldPlanet</span>, <span class="name">focusedPlanet</span>)
+          <span class="name">setLookAtOffset</span>(<span class="name">focusedPlanet</span>)
+          <span class="name">setCameraOffset</span>(<span class="name">oldPlanet</span>, <span class="name">focusedPlanet</span>)
+          <span class="name">lookAtOffsetAnimation</span>.<span class="name">restart</span>()
+          <span class="name">cameraOffsetAnimation</span>.<span class="name">restart</span>()
+      }
+
+      <span class="keyword">function</span> <span class="name">setOldPlanet</span>(<span class="name">oldPlanet</span>, focusedPlanet) {
+          <span class="name">oldCameraPosition</span> <span class="operator">=</span> <span class="name">camera</span>.<span class="name">position</span>
+
+          var <span class="name">planet</span> = <span class="number">0</span>
+          <span class="keyword">if</span> (<span class="name">oldPlanet</span> <span class="operator">!==</span> <span class="name">Planets</span>.<span class="name">SOLAR_SYSTEM</span>)
+              <span class="name">planet</span> <span class="operator">=</span> <span class="name">oldPlanet</span>
+          <span class="name">oldFocusedPlanetPosition</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">planets</span>[<span class="name">planet</span>].<span class="name">x</span>,
+                                                 <span class="name">planets</span>[<span class="name">planet</span>].<span class="name">y</span>,
+                                                 <span class="name">planets</span>[<span class="name">planet</span>].<span class="name">z</span>)
+          <span class="name">checkScaling</span>(<span class="name">focusedPlanet</span>)
+      }
+
+      <span class="keyword">function</span> <span class="name">setScale</span>(<span class="name">value</span>, focused) {
+          <span class="comment">// Save actual scale</span>
+          <span class="keyword">if</span> (!<span class="name">focused</span>)
+              <span class="name">actualScale</span> <span class="operator">=</span> <span class="name">value</span>
+
+          <span class="comment">// Limit minimum scaling in focus mode to avoid jitter caused by rounding errors</span>
+          <span class="keyword">if</span> (<span class="name">value</span> <span class="operator">&lt;=</span> <span class="name">focusedMinimumScale</span> <span class="operator">&amp;&amp;</span> (<span class="name">focusedScaling</span> <span class="operator">||</span> <span class="name">focused</span>))
+              <span class="name">planetScale</span> <span class="operator">=</span> <span class="name">focusedMinimumScale</span>
+          <span class="keyword">else</span>
+              <span class="name">planetScale</span> <span class="operator">=</span> <span class="name">actualScale</span>
+          <span class="keyword">return</span> <span class="name">planetScale</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">checkScaling</span>(<span class="name">focusedPlanet</span>) {
+          <span class="keyword">if</span> (<span class="name">focusedPlanet</span> <span class="operator">!==</span> <span class="name">Planets</span>.<span class="name">SOLAR_SYSTEM</span>) {
+              <span class="comment">// Limit minimum scaling in focus mode to avoid jitter caused by rounding errors</span>
+              <span class="keyword">if</span> (<span class="name">actualScale</span> <span class="operator">&lt;=</span> <span class="name">focusedMinimumScale</span>) {
+                  <span class="name">planetScale</span> <span class="operator">=</span> <span class="name">focusedMinimumScale</span>
+                  <span class="name">changeScale</span>(<span class="name">focusedMinimumScale</span>, <span class="number">true</span>)
+              }
+              <span class="name">focusedScaling</span> <span class="operator">=</span> <span class="number">true</span>
+          } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">focusedScaling</span> <span class="operator">===</span> <span class="number">true</span>) {
+              <span class="comment">// Restore normal scaling</span>
+              <span class="name">focusedScaling</span> <span class="operator">=</span> <span class="number">false</span>
+              <span class="name">changeScale</span>(<span class="name">actualScale</span>, <span class="number">false</span>)
+          }
+      }
+
+      <span class="keyword">function</span> <span class="name">setLookAtOffset</span>(<span class="name">focusedPlanet</span>) {
+          var <span class="name">offset</span> = <span class="name">oldFocusedPlanetPosition</span>
+
+          var <span class="name">planet</span> = <span class="number">0</span>
+          <span class="keyword">if</span> (<span class="name">focusedPlanet</span> <span class="operator">!==</span> <span class="name">Planets</span>.<span class="name">SOLAR_SYSTEM</span>)
+              <span class="name">planet</span> <span class="operator">=</span> <span class="name">focusedPlanet</span>
+
+          var <span class="name">focusedPlanetPosition</span> = <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">planets</span>[<span class="name">planet</span>].<span class="name">x</span>,
+                                                  <span class="name">planets</span>[<span class="name">planet</span>].<span class="name">y</span>,
+                                                  <span class="name">planets</span>[<span class="name">planet</span>].<span class="name">z</span>)
+          <span class="name">offset</span> <span class="operator">=</span> <span class="name">offset</span>.<span class="name">minus</span>(<span class="name">focusedPlanetPosition</span>)
+
+          <span class="name">xLookAtOffset</span> <span class="operator">=</span> <span class="name">offset</span>.<span class="name">x</span>
+          <span class="name">yLookAtOffset</span> <span class="operator">=</span> <span class="name">offset</span>.<span class="name">y</span>
+          <span class="name">zLookAtOffset</span> <span class="operator">=</span> <span class="name">offset</span>.<span class="name">z</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">setCameraOffset</span>(<span class="name">oldPlanet</span>, focusedPlanet) {
+          var <span class="name">offset</span> = <span class="name">oldCameraPosition</span>
+
+          var <span class="name">planet</span> = <span class="number">0</span>
+          <span class="keyword">if</span> (<span class="name">focusedPlanet</span> <span class="operator">!==</span> <span class="name">Planets</span>.<span class="name">SOLAR_SYSTEM</span>)
+              <span class="name">planet</span> <span class="operator">=</span> <span class="name">focusedPlanet</span>
+
+          var <span class="name">newCameraPosition</span> = <span class="name">getNewCameraPosition</span>(<span class="name">focusedPlanet</span>, <span class="name">Planets</span>.<span class="name">getOuterRadius</span>(<span class="name">planet</span>))
+
+          <span class="keyword">if</span> (<span class="name">focusedPlanet</span> <span class="operator">!==</span> <span class="name">Planets</span>.<span class="name">SUN</span>)
+              <span class="name">offset</span> <span class="operator">=</span> <span class="name">offset</span>.<span class="name">minus</span>(<span class="name">newCameraPosition</span>)
+
+          <span class="keyword">if</span> (<span class="name">oldPlanet</span> <span class="operator">===</span> <span class="name">Planets</span>.<span class="name">SOLAR_SYSTEM</span> <span class="operator">&amp;&amp;</span> <span class="name">focusedPlanet</span> <span class="operator">===</span> <span class="name">Planets</span>.<span class="name">SUN</span>) {
+              <span class="name">xCameraOffset</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">abs</span>(<span class="name">offset</span>.<span class="name">x</span>)
+              <span class="name">yCameraOffset</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">abs</span>(<span class="name">offset</span>.<span class="name">y</span>)
+              <span class="name">zCameraOffset</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">abs</span>(<span class="name">offset</span>.<span class="name">z</span>)
+          } <span class="keyword">else</span> { <span class="comment">// from a planet to another</span>
+              <span class="name">xCameraOffset</span> <span class="operator">=</span> <span class="name">offset</span>.<span class="name">x</span>
+              <span class="name">yCameraOffset</span> <span class="operator">=</span> <span class="name">offset</span>.<span class="name">y</span>
+              <span class="name">zCameraOffset</span> <span class="operator">=</span> <span class="name">offset</span>.<span class="name">z</span>
+          }
+      }
+
+      <span class="keyword">function</span> <span class="name">getNewCameraPosition</span>(<span class="name">focusedPlanet</span>, radius) {
+          var <span class="name">position</span>
+          <span class="keyword">if</span> (<span class="name">focusedPlanet</span> <span class="operator">===</span> <span class="name">Planets</span>.<span class="name">SOLAR_SYSTEM</span>) {
+              <span class="name">position</span> <span class="operator">=</span> <span class="name">defaultCameraPosition</span>
+              <span class="name">position</span> <span class="operator">=</span> <span class="name">position</span>.<span class="name">times</span>(<span class="name">cameraDistance</span>)
+          } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">focusedPlanet</span> <span class="operator">===</span> <span class="name">Planets</span>.<span class="name">SUN</span>) {
+              <span class="name">position</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">radius</span> <span class="operator">*</span> <span class="name">planetScale</span> <span class="operator">*</span> <span class="number">2</span>,
+                                     <span class="name">radius</span> <span class="operator">*</span> <span class="name">planetScale</span> <span class="operator">*</span> <span class="number">2</span>,
+                                     <span class="name">radius</span> <span class="operator">*</span> <span class="name">planetScale</span> <span class="operator">*</span> <span class="number">2</span>)
+              <span class="name">position</span> <span class="operator">=</span> <span class="name">position</span>.<span class="name">times</span>(<span class="name">cameraDistance</span>)
+          } <span class="keyword">else</span> {
+              var <span class="name">vec1</span> = <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">planets</span>[<span class="name">focusedPlanet</span>].<span class="name">x</span>,
+                                     <span class="name">planets</span>[<span class="name">focusedPlanet</span>].<span class="name">y</span>,
+                                     <span class="name">planets</span>[<span class="name">focusedPlanet</span>].<span class="name">z</span>)
+              var <span class="name">vec2</span> = <span class="name">defaultUp</span>
+              <span class="name">vec1</span> <span class="operator">=</span> <span class="name">vec1</span>.<span class="name">normalized</span>()
+              <span class="name">vec2</span> <span class="operator">=</span> <span class="name">vec2</span>.<span class="name">crossProduct</span>(<span class="name">vec1</span>)
+              <span class="name">vec2</span> <span class="operator">=</span> <span class="name">vec2</span>.<span class="name">times</span>(<span class="name">radius</span> <span class="operator">*</span> <span class="name">planetScale</span> <span class="operator">*</span> <span class="name">cameraDistance</span> <span class="operator">*</span> <span class="number">4</span>)
+              <span class="name">vec2</span> <span class="operator">=</span> <span class="name">vec2</span>.<span class="name">plus</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">planets</span>[<span class="name">focusedPlanet</span>].<span class="name">x</span>,
+                                           <span class="name">planets</span>[<span class="name">focusedPlanet</span>].<span class="name">y</span>,
+                                           <span class="name">planets</span>[<span class="name">focusedPlanet</span>].<span class="name">z</span>))
+              <span class="name">vec1</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">0</span>, <span class="name">radius</span> <span class="operator">*</span> <span class="name">planetScale</span>, <span class="number">0</span>)
+              <span class="name">vec2</span> <span class="operator">=</span> <span class="name">vec2</span>.<span class="name">plus</span>(<span class="name">vec1</span>)
+              <span class="name">position</span> <span class="operator">=</span> <span class="name">vec2</span>
+          }
+          <span class="keyword">return</span> <span class="name">position</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">advanceTime</span>(<span class="name">focusedPlanet</span>) {
+          <span class="keyword">if</span> (<span class="name">focusedPlanet</span> <span class="operator">===</span> <span class="name">Planets</span>.<span class="name">SOLAR_SYSTEM</span>)
+              <span class="name">daysPerFrame</span> <span class="operator">=</span> <span class="name">daysPerFrameScale</span> <span class="operator">*</span> <span class="number">10</span>
+          <span class="keyword">else</span>
+              <span class="name">daysPerFrame</span> <span class="operator">=</span> <span class="name">daysPerFrameScale</span> <span class="operator">*</span> <span class="name">planetData</span>[<span class="name">focusedPlanet</span>].<span class="name">period</span> <span class="operator">/</span> <span class="number">100.0</span>
+
+          <span class="comment">// Advance the time in days</span>
+          <span class="name">oldTimeD</span> <span class="operator">=</span> <span class="name">currTimeD</span>
+          <span class="name">currTimeD</span> <span class="operator">=</span> <span class="name">currTimeD</span> <span class="operator">+</span> <span class="name">daysPerFrame</span>
+          <span class="name">deltaTimeD</span> <span class="operator">=</span> <span class="name">currTimeD</span> <span class="operator">-</span> <span class="name">oldTimeD</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">positionPlanet</span>(<span class="name">i</span>) {
+          var <span class="name">planet</span> = <span class="name">planetData</span>[<span class="name">i</span>]
+          var <span class="name">target</span> = <span class="name">planets</span>[<span class="name">i</span>]
+
+          <span class="keyword">if</span> (<span class="name">i</span> <span class="operator">!==</span> <span class="name">Planets</span>.<span class="name">SUN</span>) {
+              <span class="comment">// Calculate the planet orbital elements from the current time in days</span>
+              var <span class="name">N</span> = (<span class="name">planet</span>.<span class="name">N1</span> <span class="operator">+</span> <span class="name">planet</span>.<span class="name">N2</span> <span class="operator">*</span> <span class="name">currTimeD</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">PI</span> <span class="operator">/</span> <span class="number">180</span>
+              var <span class="name">iPlanet</span> = (<span class="name">planet</span>.<span class="name">i1</span> <span class="operator">+</span> <span class="name">planet</span>.<span class="name">i2</span> <span class="operator">*</span> <span class="name">currTimeD</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">PI</span> <span class="operator">/</span> <span class="number">180</span>
+              var <span class="name">w</span> = (<span class="name">planet</span>.<span class="name">w1</span> <span class="operator">+</span> <span class="name">planet</span>.<span class="name">w2</span> <span class="operator">*</span> <span class="name">currTimeD</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">PI</span> <span class="operator">/</span> <span class="number">180</span>
+              var <span class="name">a</span> = <span class="name">planet</span>.<span class="name">a1</span> <span class="operator">+</span> <span class="name">planet</span>.<span class="name">a2</span> <span class="operator">*</span> <span class="name">currTimeD</span>
+              var <span class="name">e</span> = <span class="name">planet</span>.<span class="name">e1</span> <span class="operator">+</span> <span class="name">planet</span>.<span class="name">e2</span> <span class="operator">*</span> <span class="name">currTimeD</span>
+              var <span class="name">M</span> = (<span class="name">planet</span>.<span class="name">M1</span> <span class="operator">+</span> <span class="name">planet</span>.<span class="name">M2</span> <span class="operator">*</span> <span class="name">currTimeD</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">PI</span> <span class="operator">/</span> <span class="number">180</span>
+              var <span class="name">E</span> = <span class="name">M</span> <span class="operator">+</span> <span class="name">e</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">sin</span>(<span class="name">M</span>) <span class="operator">*</span> (<span class="number">1.0</span> <span class="operator">+</span> <span class="name">e</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">cos</span>(<span class="name">M</span>))
+
+              var <span class="name">xv</span> = <span class="name">a</span> <span class="operator">*</span> (<span class="name">Math</span>.<span class="name">cos</span>(<span class="name">E</span>) <span class="operator">-</span> <span class="name">e</span>)
+              var <span class="name">yv</span> = <span class="name">a</span> <span class="operator">*</span> (<span class="name">Math</span>.<span class="name">sqrt</span>(<span class="number">1.0</span> <span class="operator">-</span> <span class="name">e</span> <span class="operator">*</span> <span class="name">e</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">sin</span>(<span class="name">E</span>))
+              var <span class="name">v</span> = <span class="name">Math</span>.<span class="name">atan2</span>(<span class="name">yv</span>, <span class="name">xv</span>)
+
+              <span class="comment">// Calculate the distance (radius)</span>
+              var <span class="name">r</span> = <span class="name">Math</span>.<span class="name">sqrt</span>(<span class="name">xv</span> <span class="operator">*</span> <span class="name">xv</span> <span class="operator">+</span> <span class="name">yv</span> <span class="operator">*</span> <span class="name">yv</span>)
+
+              <span class="comment">// From http://www.davidcolarusso.com/astro/</span>
+              <span class="comment">// Modified to compensate for the right handed coordinate system of OpenGL</span>
+              var <span class="name">xh</span> = <span class="name">r</span> <span class="operator">*</span> (<span class="name">Math</span>.<span class="name">cos</span>(<span class="name">N</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">cos</span>(<span class="name">v</span> <span class="operator">+</span> <span class="name">w</span>)
+                            <span class="operator">-</span> <span class="name">Math</span>.<span class="name">sin</span>(<span class="name">N</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">sin</span>(<span class="name">v</span> <span class="operator">+</span> <span class="name">w</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">cos</span>(<span class="name">iPlanet</span>))
+              var <span class="name">zh</span> = -<span class="name">r</span> <span class="operator">*</span> (<span class="name">Math</span>.<span class="name">sin</span>(<span class="name">N</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">cos</span>(<span class="name">v</span> <span class="operator">+</span> <span class="name">w</span>)
+                             <span class="operator">+</span> <span class="name">Math</span>.<span class="name">cos</span>(<span class="name">N</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">sin</span>(<span class="name">v</span> <span class="operator">+</span> <span class="name">w</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">cos</span>(<span class="name">iPlanet</span>))
+              var <span class="name">yh</span> = <span class="name">r</span> <span class="operator">*</span> (<span class="name">Math</span>.<span class="name">sin</span>(<span class="name">w</span> <span class="operator">+</span> <span class="name">v</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">sin</span>(<span class="name">iPlanet</span>))
+
+              <span class="comment">// Apply the position offset from the center of orbit to the bodies</span>
+              var <span class="name">centerOfOrbit</span> = <span class="name">planet</span>.<span class="name">centerOfOrbit</span>
+              <span class="name">target</span>.<span class="name">x</span> <span class="operator">=</span> <span class="name">planets</span>[<span class="name">centerOfOrbit</span>].<span class="name">x</span> <span class="operator">+</span> <span class="name">xh</span> <span class="operator">*</span> <span class="name">Planets</span>.<span class="name">auScale</span>
+              <span class="name">target</span>.<span class="name">y</span> <span class="operator">=</span> <span class="name">planets</span>[<span class="name">centerOfOrbit</span>].<span class="name">y</span> <span class="operator">+</span> <span class="name">yh</span> <span class="operator">*</span> <span class="name">Planets</span>.<span class="name">auScale</span>
+              <span class="name">target</span>.<span class="name">z</span> <span class="operator">=</span> <span class="name">planets</span>[<span class="name">centerOfOrbit</span>].<span class="name">z</span> <span class="operator">+</span> <span class="name">zh</span> <span class="operator">*</span> <span class="name">Planets</span>.<span class="name">auScale</span>
+          }
+          <span class="comment">// Calculate the rotation (roll) of the bodies. Tilt does not change.</span>
+          <span class="name">target</span>.<span class="name">roll</span> <span class="operator">+=</span> (<span class="name">deltaTimeD</span> <span class="operator">/</span> <span class="name">planet</span>.<span class="name">period</span>) <span class="operator">*</span> <span class="number">360</span> <span class="comment">// In degrees</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">changeScale</span>(<span class="name">scale</span>, focused) {
+          <span class="keyword">if</span> (!<span class="name">ready</span>)
+              <span class="keyword">return</span>
+
+          var <span class="name">scaling</span> = <span class="name">setScale</span>(<span class="name">scale</span>, <span class="name">focused</span>)
+          <span class="name">sun</span>.<span class="name">r</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">SUN</span>].<span class="name">radius</span> <span class="operator">*</span> <span class="name">scaling</span> <span class="operator">/</span> <span class="number">100</span>
+          <span class="name">mercury</span>.<span class="name">r</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">MERCURY</span>].<span class="name">radius</span> <span class="operator">*</span> <span class="name">scaling</span>
+          <span class="name">venus</span>.<span class="name">r</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">VENUS</span>].<span class="name">radius</span> <span class="operator">*</span> <span class="name">scaling</span>
+          <span class="name">earth</span>.<span class="name">r</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">EARTH</span>].<span class="name">radius</span> <span class="operator">*</span> <span class="name">scaling</span>
+          <span class="name">earthClouds</span>.<span class="name">r</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">EARTH</span>].<span class="name">radius</span> <span class="operator">*</span> <span class="name">scaling</span> <span class="operator">*</span> <span class="number">1.02</span>
+          <span class="name">moon</span>.<span class="name">r</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">MOON</span>].<span class="name">radius</span> <span class="operator">*</span> <span class="name">scaling</span>
+          <span class="name">mars</span>.<span class="name">r</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">MARS</span>].<span class="name">radius</span> <span class="operator">*</span> <span class="name">scaling</span>
+          <span class="name">jupiter</span>.<span class="name">r</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">JUPITER</span>].<span class="name">radius</span> <span class="operator">*</span> <span class="name">scaling</span>
+          <span class="name">saturn</span>.<span class="name">r</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">SATURN</span>].<span class="name">radius</span> <span class="operator">*</span> <span class="name">scaling</span>
+          <span class="name">saturnRing</span>.<span class="name">outerRadius</span> <span class="operator">=</span> <span class="name">saturnRingOuterRadius</span> <span class="operator">*</span> <span class="name">scaling</span>
+          <span class="name">saturnRing</span>.<span class="name">innerRadius</span> <span class="operator">=</span> <span class="name">saturnRingInnerRadius</span> <span class="operator">*</span> <span class="name">scaling</span>
+          <span class="name">uranus</span>.<span class="name">r</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">URANUS</span>].<span class="name">radius</span> <span class="operator">*</span> <span class="name">scaling</span>
+          <span class="name">uranusRing</span>.<span class="name">outerRadius</span> <span class="operator">=</span> <span class="name">uranusRingOuterRadius</span> <span class="operator">*</span> <span class="name">scaling</span>
+          <span class="name">uranusRing</span>.<span class="name">innerRadius</span> <span class="operator">=</span> <span class="name">uranusRingInnerRadius</span> <span class="operator">*</span> <span class="name">scaling</span>
+          <span class="name">neptune</span>.<span class="name">r</span> <span class="operator">=</span> <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">NEPTUNE</span>].<span class="name">radius</span> <span class="operator">*</span> <span class="name">scaling</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">changeSpeed</span>(<span class="name">speed</span>) {
+          <span class="name">daysPerFrameScale</span> <span class="operator">=</span> <span class="name">speed</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">changeCameraDistance</span>(<span class="name">distance</span>) {
+          <span class="name">cameraDistance</span> <span class="operator">=</span> <span class="name">distance</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">animate</span>(<span class="name">focusedPlanet</span>) {
+          <span class="keyword">if</span> (!<span class="name">ready</span>)
+              <span class="keyword">return</span>
+
+          <span class="name">advanceTime</span>(<span class="name">focusedPlanet</span>)
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;=</span> <span class="name">Planets</span>.<span class="name">NUM_SELECTABLE_PLANETS</span>; i++)
+              <span class="name">positionPlanet</span>(<span class="name">i</span>)
+
+          <span class="name">updateCamera</span>(<span class="name">focusedPlanet</span>)
+      }
+
+      <span class="keyword">function</span> <span class="name">updateCamera</span>(<span class="name">focusedPlanet</span>) {
+          <span class="comment">// Get the appropriate near plane position for the camera and animate it with QML animations</span>
+          var <span class="name">outerRadius</span> = <span class="name">Planets</span>.<span class="name">getOuterRadius</span>(<span class="name">focusedPlanet</span>)
+          <span class="name">cameraNear</span> <span class="operator">=</span> <span class="name">outerRadius</span>
+          <span class="name">camera</span>.<span class="name">nearPlane</span> <span class="operator">=</span> <span class="name">cameraNear</span>
+          <span class="name">light</span>.<span class="name">near</span> <span class="operator">=</span> <span class="name">cameraNear</span>
+
+          <span class="comment">// Calculate position</span>
+          var <span class="name">cameraPosition</span> = <span class="name">getNewCameraPosition</span>(<span class="name">focusedPlanet</span>, <span class="name">outerRadius</span>)
+          var <span class="name">cameraOffset</span> = <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">xCameraOffset</span>, <span class="name">yCameraOffset</span>, <span class="name">zCameraOffset</span>)
+          <span class="name">cameraPosition</span> <span class="operator">=</span> <span class="name">cameraPosition</span>.<span class="name">plus</span>(<span class="name">cameraOffset</span>)
+
+          <span class="comment">// Calculate look-at point</span>
+          var <span class="name">lookAtPlanet</span> = <span class="name">Planets</span>.<span class="name">SUN</span>
+          <span class="keyword">if</span> (<span class="name">focusedPlanet</span> <span class="operator">!==</span> <span class="name">Planets</span>.<span class="name">SOLAR_SYSTEM</span>)
+              <span class="name">lookAtPlanet</span> <span class="operator">=</span> <span class="name">focusedPlanet</span>
+          var <span class="name">cameraLookAt</span> = <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">planets</span>[<span class="name">lookAtPlanet</span>].<span class="name">x</span>,
+                                         <span class="name">planets</span>[<span class="name">lookAtPlanet</span>].<span class="name">y</span>,
+                                         <span class="name">planets</span>[<span class="name">lookAtPlanet</span>].<span class="name">z</span>)
+          var <span class="name">lookAtOffset</span> = <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">xLookAtOffset</span>, <span class="name">yLookAtOffset</span>, <span class="name">zLookAtOffset</span>)
+          <span class="name">cameraLookAt</span> <span class="operator">=</span> <span class="name">cameraLookAt</span>.<span class="name">plus</span>(<span class="name">lookAtOffset</span>)
+
+          <span class="comment">// Set position and look-at</span>
+          <span class="name">camera</span>.<span class="name">viewCenter</span> <span class="operator">=</span> <span class="name">cameraLookAt</span>
+          <span class="name">camera</span>.<span class="name">position</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">cameraPosition</span>.<span class="name">x</span>, <span class="name">cameraPosition</span>.<span class="name">y</span>, <span class="name">cameraPosition</span>.<span class="name">z</span>)
+          <span class="name">camera</span>.<span class="name">upVector</span> <span class="operator">=</span> <span class="name">defaultUp</span>
+      }
+
+      //
+      <span class="comment">// STARFIELD</span>
+      //
+
+      <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+          <span class="name">id</span>: <span class="name">starfieldEntity</span>
+
+          <span class="type"><a href="qml-qt3d-render-mesh.html">Mesh</a></span> {
+              <span class="name">id</span>: <span class="name">starfield</span>
+              <span class="name">source</span>: <span class="string">&quot;qrc:/meshes/starfield.obj&quot;</span>
+          }
+
+          <span class="type">PlanetMaterial</span> {
+              <span class="name">id</span>: <span class="name">materialStarfield</span>
+              <span class="name">effect</span>: <span class="name">effectD</span>
+              <span class="name">ambientLight</span>: <span class="name">ambientStrengthStarfield</span>
+              <span class="name">specularColor</span>: <span class="name">Qt</span>.<span class="name">rgba</span>(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">1.0</span>)
+              <span class="name">diffuseMap</span>: <span class="string">&quot;qrc:/images/galaxy_starfield.png&quot;</span>
+              <span class="name">shininess</span>: <span class="number">1000000.0</span>
+          }
+
+          property <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> <span class="name">transformStarfield</span>: <span class="name">Transform</span> {
+              <span class="name">scale</span>: <span class="number">8500000</span>
+              <span class="name">translation</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)
+          }
+
+          <span class="name">components</span>: [ <span class="name">starfield</span>, <span class="name">materialStarfield</span>, <span class="name">transformStarfield</span> ]
+      }
+
+      //
+      <span class="comment">// SUN</span>
+      //
+
+      <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+          <span class="name">id</span>: <span class="name">sunEntity</span>
+
+          <span class="type">Planet</span> {
+              <span class="name">id</span>: <span class="name">sun</span>
+              <span class="name">tilt</span>: <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">SUN</span>].<span class="name">tilt</span>
+          }
+
+          <span class="type">PlanetMaterial</span> {
+              <span class="name">id</span>: <span class="name">materialSun</span>
+              <span class="name">effect</span>: <span class="name">sunEffect</span>
+              <span class="name">ambientLight</span>: <span class="name">ambientStrengthSun</span>
+              <span class="name">diffuseMap</span>: <span class="string">&quot;qrc:/images/sunmap.jpg&quot;</span>
+          }
+
+          property <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> <span class="name">transformSun</span>: <span class="name">Transform</span> {
+              <span class="name">matrix</span>: {
+                  var <span class="name">m</span> = <span class="name">Qt</span>.<span class="name">matrix4x4</span>()
+                  <span class="name">m</span>.<span class="name">translate</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">sun</span>.<span class="name">x</span>, <span class="name">sun</span>.<span class="name">y</span>, <span class="name">sun</span>.<span class="name">z</span>))
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">sun</span>.<span class="name">tilt</span>, <span class="name">tiltAxis</span>)
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">sun</span>.<span class="name">roll</span>, <span class="name">rollAxis</span>)
+                  <span class="name">m</span>.<span class="name">scale</span>(<span class="name">sun</span>.<span class="name">r</span>)
+                  <span class="keyword">return</span> <span class="name">m</span>
+              }
+          }
+
+          <span class="name">components</span>: [ <span class="name">sun</span>, <span class="name">materialSun</span>, <span class="name">transformSun</span> ]
+      }
+
+      //
+      <span class="comment">// PLANETS</span>
+      //
+
+      <span class="comment">// MERCURY</span>
+
+      <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+          <span class="name">id</span>: <span class="name">mercuryEntity</span>
+
+          <span class="type">Planet</span> {
+              <span class="name">id</span>: <span class="name">mercury</span>
+              <span class="name">tilt</span>: <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">MERCURY</span>].<span class="name">tilt</span>
+          }
+
+          <span class="type">PlanetMaterial</span> {
+              <span class="name">id</span>: <span class="name">materialMercury</span>
+              <span class="name">effect</span>: <span class="name">effectDB</span>
+              <span class="name">ambientLight</span>: <span class="name">ambientStrengthPlanet</span>
+              <span class="name">specularColor</span>: <span class="name">Qt</span>.<span class="name">rgba</span>(<span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">1.0</span>)
+              <span class="name">diffuseMap</span>: <span class="string">&quot;qrc:/images/mercurymap.jpg&quot;</span>
+              <span class="name">normalMap</span>: <span class="string">&quot;qrc:/images/mercurynormal.jpg&quot;</span>
+              <span class="name">shininess</span>: <span class="name">shininessSpecularMap</span>
+          }
+
+          property <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> <span class="name">transformMercury</span>: <span class="name">Transform</span> {
+              <span class="name">matrix</span>: {
+                  var <span class="name">m</span> = <span class="name">Qt</span>.<span class="name">matrix4x4</span>()
+                  <span class="name">m</span>.<span class="name">translate</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">mercury</span>.<span class="name">x</span>, <span class="name">mercury</span>.<span class="name">y</span>, <span class="name">mercury</span>.<span class="name">z</span>))
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">mercury</span>.<span class="name">tilt</span>, <span class="name">tiltAxis</span>)
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">mercury</span>.<span class="name">roll</span>, <span class="name">rollAxis</span>)
+                  <span class="name">m</span>.<span class="name">scale</span>(<span class="name">mercury</span>.<span class="name">r</span>)
+                  <span class="keyword">return</span> <span class="name">m</span>
+              }
+          }
+
+          <span class="name">components</span>: [ <span class="name">mercury</span>, <span class="name">materialMercury</span>, <span class="name">transformMercury</span> ]
+      }
+
+      <span class="comment">// VENUS</span>
+
+      <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+          <span class="name">id</span>: <span class="name">venusEntity</span>
+
+          <span class="type">Planet</span> {
+              <span class="name">id</span>: <span class="name">venus</span>
+              <span class="name">tilt</span>: <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">VENUS</span>].<span class="name">tilt</span>
+          }
+
+          <span class="type">PlanetMaterial</span> {
+              <span class="name">id</span>: <span class="name">materialVenus</span>
+              <span class="name">effect</span>: <span class="name">effectDB</span>
+              <span class="name">ambientLight</span>: <span class="name">ambientStrengthPlanet</span>
+              <span class="name">specularColor</span>: <span class="name">Qt</span>.<span class="name">rgba</span>(<span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">1.0</span>)
+              <span class="name">diffuseMap</span>: <span class="string">&quot;qrc:/images/venusmap.jpg&quot;</span>
+              <span class="name">normalMap</span>: <span class="string">&quot;qrc:/images/venusnormal.jpg&quot;</span>
+              <span class="name">shininess</span>: <span class="name">shininessSpecularMap</span>
+          }
+
+          property <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> <span class="name">transformVenus</span>: <span class="name">Transform</span> {
+              <span class="name">matrix</span>: {
+                  var <span class="name">m</span> = <span class="name">Qt</span>.<span class="name">matrix4x4</span>()
+                  <span class="name">m</span>.<span class="name">translate</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">venus</span>.<span class="name">x</span>, <span class="name">venus</span>.<span class="name">y</span>, <span class="name">venus</span>.<span class="name">z</span>))
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">venus</span>.<span class="name">tilt</span>, <span class="name">tiltAxis</span>)
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">venus</span>.<span class="name">roll</span>, <span class="name">rollAxis</span>)
+                  <span class="name">m</span>.<span class="name">scale</span>(<span class="name">venus</span>.<span class="name">r</span>)
+                  <span class="keyword">return</span> <span class="name">m</span>
+              }
+          }
+
+          <span class="name">components</span>: [ <span class="name">venus</span>, <span class="name">materialVenus</span>, <span class="name">transformVenus</span> ]
+      }
+
+      <span class="comment">// EARTH</span>
+
+      <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+          <span class="name">id</span>: <span class="name">earthEntity</span>
+
+          <span class="type">Planet</span> {
+              <span class="name">id</span>: <span class="name">earth</span>
+              <span class="name">tilt</span>: <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">EARTH</span>].<span class="name">tilt</span>
+          }
+
+          <span class="type">PlanetMaterial</span> {
+              <span class="name">id</span>: <span class="name">materialEarth</span>
+              <span class="name">effect</span>: <span class="name">effectDSB</span>
+              <span class="name">ambientLight</span>: <span class="name">ambientStrengthPlanet</span>
+              <span class="name">diffuseMap</span>: <span class="string">&quot;qrc:/images/earthmap1k.jpg&quot;</span>
+              <span class="name">specularMap</span>: <span class="string">&quot;qrc:/images/earthspec1k.jpg&quot;</span>
+              <span class="name">normalMap</span>: <span class="string">&quot;qrc:/images/earthnormal1k.jpg&quot;</span>
+              <span class="name">shininess</span>: <span class="name">shininessSpecularMap</span>
+          }
+
+          property <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> <span class="name">transformEarth</span>: <span class="name">Transform</span> {
+              <span class="name">matrix</span>: {
+                  var <span class="name">m</span> = <span class="name">Qt</span>.<span class="name">matrix4x4</span>()
+                  <span class="name">m</span>.<span class="name">translate</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">earth</span>.<span class="name">x</span>, <span class="name">earth</span>.<span class="name">y</span>, <span class="name">earth</span>.<span class="name">z</span>))
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">earth</span>.<span class="name">tilt</span>, <span class="name">tiltAxis</span>)
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">earth</span>.<span class="name">roll</span>, <span class="name">rollAxis</span>)
+                  <span class="name">m</span>.<span class="name">scale</span>(<span class="name">earth</span>.<span class="name">r</span>)
+                  <span class="keyword">return</span> <span class="name">m</span>
+              }
+          }
+
+          <span class="name">components</span>: [ <span class="name">earth</span>, <span class="name">materialEarth</span>, <span class="name">transformEarth</span> ]
+      }
+
+      <span class="comment">// EARTH CLOUDS</span>
+
+      <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+          <span class="name">id</span>: <span class="name">earthCloudsEntity</span>
+
+          <span class="type">Planet</span> {
+              <span class="name">id</span>: <span class="name">earthClouds</span>
+              <span class="name">tilt</span>: <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">EARTH</span>].<span class="name">tilt</span>
+          }
+
+          <span class="type">PlanetMaterial</span> {
+              <span class="name">id</span>: <span class="name">materialEarthClouds</span>
+              <span class="name">effect</span>: <span class="name">cloudEffect</span>
+              <span class="name">ambientLight</span>: <span class="name">ambientStrengthClouds</span>
+              <span class="name">diffuseMap</span>: <span class="string">&quot;qrc:/images/earthcloudmapcolortrans.png&quot;</span>
+              <span class="name">specularMap</span>: <span class="string">&quot;qrc:/images/earthcloudmapspec.jpg&quot;</span>
+              <span class="name">shininess</span>: <span class="name">shininessClouds</span>
+              <span class="name">opacity</span>: <span class="number">0.2</span>
+          }
+
+          property <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> <span class="name">transformEarthClouds</span>: <span class="name">Transform</span> {
+              <span class="name">matrix</span>: {
+                  var <span class="name">m</span> = <span class="name">Qt</span>.<span class="name">matrix4x4</span>()
+                  <span class="name">m</span>.<span class="name">translate</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">earth</span>.<span class="name">x</span>, <span class="name">earth</span>.<span class="name">y</span>, <span class="name">earth</span>.<span class="name">z</span>))
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">earth</span>.<span class="name">tilt</span>, <span class="name">tiltAxis</span>)
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">earth</span>.<span class="name">roll</span> <span class="operator">/</span> <span class="number">1.2</span>, <span class="name">rollAxis</span>)
+                  <span class="name">m</span>.<span class="name">scale</span>(<span class="name">earthClouds</span>.<span class="name">r</span>)
+                  <span class="keyword">return</span> <span class="name">m</span>
+              }
+          }
+
+          <span class="name">components</span>: [ <span class="name">earthClouds</span>, <span class="name">materialEarthClouds</span>, <span class="name">transformEarthClouds</span> ]
+      }
+
+      <span class="comment">// MOON</span>
+
+      <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+          <span class="name">id</span>: <span class="name">moonEntity</span>
+
+          <span class="type">Planet</span> {
+              <span class="name">id</span>: <span class="name">moon</span>
+              <span class="name">tilt</span>: <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">MOON</span>].<span class="name">tilt</span>
+          }
+
+          <span class="type">PlanetMaterial</span> {
+              <span class="name">id</span>: <span class="name">materialMoon</span>
+              <span class="name">effect</span>: <span class="name">effectDB</span>
+              <span class="name">ambientLight</span>: <span class="name">ambientStrengthPlanet</span>
+              <span class="name">specularColor</span>: <span class="name">Qt</span>.<span class="name">rgba</span>(<span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">1.0</span>)
+              <span class="name">diffuseMap</span>: <span class="string">&quot;qrc:/images/moonmap1k.jpg&quot;</span>
+              <span class="name">normalMap</span>: <span class="string">&quot;qrc:/images/moonnormal1k.jpg&quot;</span>
+              <span class="name">shininess</span>: <span class="name">shininessSpecularMap</span>
+          }
+
+          property <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> <span class="name">transformMoon</span>: <span class="name">Transform</span> {
+              <span class="name">matrix</span>: {
+                  var <span class="name">m</span> = <span class="name">Qt</span>.<span class="name">matrix4x4</span>()
+                  <span class="name">m</span>.<span class="name">translate</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">moon</span>.<span class="name">x</span>, <span class="name">moon</span>.<span class="name">y</span>, <span class="name">moon</span>.<span class="name">z</span>))
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">moon</span>.<span class="name">tilt</span>, <span class="name">tiltAxis</span>)
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">moon</span>.<span class="name">roll</span>, <span class="name">rollAxis</span>)
+                  <span class="name">m</span>.<span class="name">scale</span>(<span class="name">moon</span>.<span class="name">r</span>)
+                  <span class="keyword">return</span> <span class="name">m</span>
+              }
+          }
+
+          <span class="name">components</span>: [ <span class="name">moon</span>, <span class="name">materialMoon</span>, <span class="name">transformMoon</span> ]
+      }
+
+      <span class="comment">// MARS</span>
+
+      <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+          <span class="name">id</span>: <span class="name">marsEntity</span>
+
+          <span class="type">Planet</span> {
+              <span class="name">id</span>: <span class="name">mars</span>
+              <span class="name">tilt</span>: <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">MARS</span>].<span class="name">tilt</span>
+          }
+
+          <span class="type">PlanetMaterial</span> {
+              <span class="name">id</span>: <span class="name">materialMars</span>
+              <span class="name">effect</span>: <span class="name">effectDB</span>
+              <span class="name">ambientLight</span>: <span class="name">ambientStrengthPlanet</span>
+              <span class="name">specularColor</span>: <span class="name">Qt</span>.<span class="name">rgba</span>(<span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">1.0</span>)
+              <span class="name">diffuseMap</span>: <span class="string">&quot;qrc:/images/marsmap1k.jpg&quot;</span>
+              <span class="name">normalMap</span>: <span class="string">&quot;qrc:/images/marsnormal1k.jpg&quot;</span>
+              <span class="name">shininess</span>: <span class="name">shininessSpecularMap</span>
+          }
+
+          property <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> <span class="name">transformMars</span>: <span class="name">Transform</span> {
+              <span class="name">matrix</span>: {
+                  var <span class="name">m</span> = <span class="name">Qt</span>.<span class="name">matrix4x4</span>()
+                  <span class="name">m</span>.<span class="name">translate</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">mars</span>.<span class="name">x</span>, <span class="name">mars</span>.<span class="name">y</span>, <span class="name">mars</span>.<span class="name">z</span>))
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">mars</span>.<span class="name">tilt</span>, <span class="name">tiltAxis</span>)
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">mars</span>.<span class="name">roll</span>, <span class="name">rollAxis</span>)
+                  <span class="name">m</span>.<span class="name">scale</span>(<span class="name">mars</span>.<span class="name">r</span>)
+                  <span class="keyword">return</span> <span class="name">m</span>
+              }
+          }
+
+          <span class="name">components</span>: [ <span class="name">mars</span>, <span class="name">materialMars</span>, <span class="name">transformMars</span> ]
+      }
+
+      <span class="comment">// JUPITER</span>
+
+      <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+          <span class="name">id</span>: <span class="name">jupiterEntity</span>
+
+          <span class="type">Planet</span> {
+              <span class="name">id</span>: <span class="name">jupiter</span>
+              <span class="name">tilt</span>: <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">JUPITER</span>].<span class="name">tilt</span>
+          }
+
+          <span class="type">PlanetMaterial</span> {
+              <span class="name">id</span>: <span class="name">materialJupiter</span>
+              <span class="name">effect</span>: <span class="name">effectD</span>
+              <span class="name">ambientLight</span>: <span class="name">ambientStrengthPlanet</span>
+              <span class="name">specularColor</span>: <span class="name">Qt</span>.<span class="name">rgba</span>(<span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">1.0</span>)
+              <span class="name">diffuseMap</span>: <span class="string">&quot;qrc:/images/jupitermap.jpg&quot;</span>
+              <span class="name">shininess</span>: <span class="name">shininessBasic</span>
+          }
+
+          property <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> <span class="name">transformJupiter</span>: <span class="name">Transform</span> {
+              <span class="name">matrix</span>: {
+                  var <span class="name">m</span> = <span class="name">Qt</span>.<span class="name">matrix4x4</span>()
+                  <span class="name">m</span>.<span class="name">translate</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">jupiter</span>.<span class="name">x</span>, <span class="name">jupiter</span>.<span class="name">y</span>, <span class="name">jupiter</span>.<span class="name">z</span>))
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">jupiter</span>.<span class="name">tilt</span>, <span class="name">tiltAxis</span>)
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">jupiter</span>.<span class="name">roll</span>, <span class="name">rollAxis</span>)
+                  <span class="name">m</span>.<span class="name">scale</span>(<span class="name">jupiter</span>.<span class="name">r</span>)
+                  <span class="keyword">return</span> <span class="name">m</span>
+              }
+          }
+
+          <span class="name">components</span>: [ <span class="name">jupiter</span>, <span class="name">materialJupiter</span>, <span class="name">transformJupiter</span> ]
+      }
+
+      <span class="comment">// SATURN</span>
+
+      <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+          <span class="name">id</span>: <span class="name">saturnEntity</span>
+
+          <span class="type">Planet</span> {
+              <span class="name">id</span>: <span class="name">saturn</span>
+              <span class="name">tilt</span>: <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">SATURN</span>].<span class="name">tilt</span>
+          }
+
+          <span class="type">PlanetMaterial</span> {
+              <span class="name">id</span>: <span class="name">materialSaturn</span>
+              <span class="name">effect</span>: <span class="name">shadowMapEffect</span>
+              <span class="name">ambientLight</span>: <span class="name">ambientStrengthPlanet</span>
+              <span class="name">specularColor</span>: <span class="name">Qt</span>.<span class="name">rgba</span>(<span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">1.0</span>)
+              <span class="name">diffuseMap</span>: <span class="string">&quot;qrc:/images/saturnmap.jpg&quot;</span>
+              <span class="name">shininess</span>: <span class="name">shininessBasic</span>
+          }
+
+          property <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> <span class="name">transformSaturn</span>: <span class="name">Transform</span> {
+              <span class="name">matrix</span>: {
+                  var <span class="name">m</span> = <span class="name">Qt</span>.<span class="name">matrix4x4</span>()
+                  <span class="name">m</span>.<span class="name">translate</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">saturn</span>.<span class="name">x</span>, <span class="name">saturn</span>.<span class="name">y</span>, <span class="name">saturn</span>.<span class="name">z</span>))
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">saturn</span>.<span class="name">tilt</span>, <span class="name">tiltAxis</span>)
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">saturn</span>.<span class="name">roll</span>, <span class="name">rollAxis</span>)
+                  <span class="name">m</span>.<span class="name">scale</span>(<span class="name">saturn</span>.<span class="name">r</span>)
+                  <span class="keyword">return</span> <span class="name">m</span>
+              }
+          }
+
+          <span class="name">components</span>: [ <span class="name">saturn</span>, <span class="name">materialSaturn</span>, <span class="name">transformSaturn</span> ]
+      }
+
+      <span class="comment">// SATURN RING</span>
+
+      <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+          <span class="name">id</span>: <span class="name">saturnRingEntity</span>
+
+          <span class="type">Ring</span> {
+              <span class="name">id</span>: <span class="name">saturnRing</span>
+              <span class="name">innerRadius</span>: <span class="name">saturnRingInnerRadius</span>
+              <span class="name">outerRadius</span>: <span class="name">saturnRingOuterRadius</span>
+          }
+
+          <span class="type">PlanetMaterial</span> {
+              <span class="name">id</span>: <span class="name">materialSaturnRing</span>
+              <span class="name">effect</span>: <span class="name">shadowMapEffect</span>
+              <span class="name">ambientLight</span>: <span class="name">ambientStrengthRing</span>
+              <span class="name">specularColor</span>: <span class="name">Qt</span>.<span class="name">rgba</span>(<span class="number">0.01</span>, <span class="number">0.01</span>, <span class="number">0.01</span>, <span class="number">1.0</span>)
+              <span class="name">diffuseMap</span>: <span class="string">&quot;qrc:/images/saturnringcolortrans.png&quot;</span>
+              <span class="name">shininess</span>: <span class="name">shininessBasic</span>
+              <span class="name">opacity</span>: <span class="number">0.4</span>
+          }
+
+          property <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> <span class="name">transformSaturnRing</span>: <span class="name">Transform</span> {
+              <span class="name">matrix</span>: {
+                  var <span class="name">m</span> = <span class="name">Qt</span>.<span class="name">matrix4x4</span>()
+                  <span class="name">m</span>.<span class="name">translate</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">saturn</span>.<span class="name">x</span>, <span class="name">saturn</span>.<span class="name">y</span>, <span class="name">saturn</span>.<span class="name">z</span>))
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">saturn</span>.<span class="name">tilt</span>, <span class="name">tiltAxis</span>)
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">saturn</span>.<span class="name">roll</span> <span class="operator">/</span> <span class="number">10</span>, <span class="name">rollAxis</span>)
+                  <span class="name">m</span>.<span class="name">scale</span>((<span class="name">saturnRing</span>.<span class="name">innerRadius</span> <span class="operator">+</span> <span class="name">saturnRing</span>.<span class="name">outerRadius</span>) <span class="operator">/</span> <span class="number">1.75</span>)
+                  <span class="keyword">return</span> <span class="name">m</span>
+              }
+          }
+
+          <span class="name">components</span>: [ <span class="name">saturnRing</span>, <span class="name">materialSaturnRing</span>, <span class="name">transformSaturnRing</span> ]
+      }
+
+      <span class="comment">// URANUS</span>
+
+      <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+          <span class="name">id</span>: <span class="name">uranusEntity</span>
+
+          <span class="type">Planet</span> {
+              <span class="name">id</span>: <span class="name">uranus</span>
+              <span class="name">tilt</span>: <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">URANUS</span>].<span class="name">tilt</span>
+          }
+
+          <span class="type">PlanetMaterial</span> {
+              <span class="name">id</span>: <span class="name">materialUranus</span>
+              <span class="name">effect</span>: <span class="name">shadowMapEffect</span>
+              <span class="name">ambientLight</span>: <span class="name">ambientStrengthPlanet</span>
+              <span class="name">specularColor</span>: <span class="name">Qt</span>.<span class="name">rgba</span>(<span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">1.0</span>)
+              <span class="name">diffuseMap</span>: <span class="string">&quot;qrc:/images/uranusmap.jpg&quot;</span>
+              <span class="name">shininess</span>: <span class="name">shininessBasic</span>
+          }
+
+          property <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> <span class="name">transformUranus</span>: <span class="name">Transform</span> {
+              <span class="name">matrix</span>: {
+                  var <span class="name">m</span> = <span class="name">Qt</span>.<span class="name">matrix4x4</span>()
+                  <span class="name">m</span>.<span class="name">translate</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">uranus</span>.<span class="name">x</span>, <span class="name">uranus</span>.<span class="name">y</span>, <span class="name">uranus</span>.<span class="name">z</span>))
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">uranus</span>.<span class="name">tilt</span>, <span class="name">tiltAxis</span>)
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">uranus</span>.<span class="name">roll</span>, <span class="name">rollAxis</span>)
+                  <span class="name">m</span>.<span class="name">scale</span>(<span class="name">uranus</span>.<span class="name">r</span>)
+                  <span class="keyword">return</span> <span class="name">m</span>
+              }
+          }
+
+          <span class="name">components</span>: [ <span class="name">uranus</span>, <span class="name">materialUranus</span>, <span class="name">transformUranus</span> ]
+      }
+
+      <span class="comment">// URANUS RING</span>
+
+      <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+          <span class="name">id</span>: <span class="name">uranusRingEntity</span>
+
+          <span class="type">Ring</span> {
+              <span class="name">id</span>: <span class="name">uranusRing</span>
+              <span class="name">innerRadius</span>: <span class="name">uranusRingInnerRadius</span>
+              <span class="name">outerRadius</span>: <span class="name">uranusRingOuterRadius</span>
+          }
+
+          <span class="type">PlanetMaterial</span> {
+              <span class="name">id</span>: <span class="name">materialUranusRing</span>
+              <span class="name">effect</span>: <span class="name">shadowMapEffect</span>
+              <span class="name">ambientLight</span>: <span class="name">ambientStrengthRing</span>
+              <span class="name">specularColor</span>: <span class="name">Qt</span>.<span class="name">rgba</span>(<span class="number">0.01</span>, <span class="number">0.01</span>, <span class="number">0.01</span>, <span class="number">1.0</span>)
+              <span class="name">diffuseMap</span>: <span class="string">&quot;qrc:/images/uranusringcolortrans.png&quot;</span>
+              <span class="name">shininess</span>: <span class="name">shininessBasic</span>
+              <span class="name">opacity</span>: <span class="number">0.4</span>
+          }
+
+          property <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> <span class="name">transformUranusRing</span>: <span class="name">Transform</span> {
+              <span class="name">matrix</span>: {
+                  var <span class="name">m</span> = <span class="name">Qt</span>.<span class="name">matrix4x4</span>()
+                  <span class="name">m</span>.<span class="name">translate</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">uranus</span>.<span class="name">x</span>, <span class="name">uranus</span>.<span class="name">y</span>, <span class="name">uranus</span>.<span class="name">z</span>))
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">uranus</span>.<span class="name">tilt</span>, <span class="name">tiltAxis</span>)
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">uranus</span>.<span class="name">roll</span> <span class="operator">/</span> <span class="number">10</span>, <span class="name">rollAxis</span>)
+                  <span class="name">m</span>.<span class="name">scale</span>((<span class="name">uranusRing</span>.<span class="name">innerRadius</span> <span class="operator">+</span> <span class="name">uranusRing</span>.<span class="name">outerRadius</span>) <span class="operator">/</span> <span class="number">1.75</span>)
+                  <span class="keyword">return</span> <span class="name">m</span>
+              }
+          }
+
+          <span class="name">components</span>: [ <span class="name">uranusRing</span>, <span class="name">materialUranusRing</span>, <span class="name">transformUranusRing</span> ]
+      }
+
+      <span class="comment">// NEPTUNE</span>
+
+      <span class="type"><a href="qml-qt3d-core-entity.html">Entity</a></span> {
+          <span class="name">id</span>: <span class="name">neptuneEntity</span>
+
+          <span class="type">Planet</span> {
+              <span class="name">id</span>: <span class="name">neptune</span>
+              <span class="name">tilt</span>: <span class="name">planetData</span>[<span class="name">Planets</span>.<span class="name">NEPTUNE</span>].<span class="name">tilt</span>
+          }
+
+          <span class="type">PlanetMaterial</span> {
+              <span class="name">id</span>: <span class="name">materialNeptune</span>
+              <span class="name">effect</span>: <span class="name">effectD</span>
+              <span class="name">ambientLight</span>: <span class="name">ambientStrengthPlanet</span>
+              <span class="name">specularColor</span>: <span class="name">Qt</span>.<span class="name">rgba</span>(<span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">1.0</span>)
+              <span class="name">diffuseMap</span>: <span class="string">&quot;qrc:/images/neptunemap.jpg&quot;</span>
+              <span class="name">shininess</span>: <span class="name">shininessBasic</span>
+          }
+
+          property <span class="type"><a href="qml-qt3d-core-transform.html">Transform</a></span> <span class="name">transformNeptune</span>: <span class="name">Transform</span> {
+              <span class="name">matrix</span>: {
+                  var <span class="name">m</span> = <span class="name">Qt</span>.<span class="name">matrix4x4</span>()
+                  <span class="name">m</span>.<span class="name">translate</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="name">neptune</span>.<span class="name">x</span>, <span class="name">neptune</span>.<span class="name">y</span>, <span class="name">neptune</span>.<span class="name">z</span>))
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">neptune</span>.<span class="name">tilt</span>, <span class="name">tiltAxis</span>)
+                  <span class="name">m</span>.<span class="name">rotate</span>(<span class="name">neptune</span>.<span class="name">roll</span>, <span class="name">rollAxis</span>)
+                  <span class="name">m</span>.<span class="name">scale</span>(<span class="name">neptune</span>.<span class="name">r</span>)
+                  <span class="keyword">return</span> <span class="name">m</span>
+              }
+          }
+
+          <span class="name">components</span>: [ <span class="name">neptune</span>, <span class="name">materialNeptune</span>, <span class="name">transformNeptune</span> ]
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@planets-qml/SolarSystem.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

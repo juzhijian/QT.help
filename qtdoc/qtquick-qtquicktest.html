@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtquicktest.qdoc -->
+  <title>Qt Quick Test Reference Documentation | Qt 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.7</a></td><td >Qt Quick Test Reference Documentation</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#introduction">Introduction</a></li>
+<li class="level1"><a href="#running-tests">Running Tests</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Quick Test Reference Documentation</h1>
+<span class="subtitle"></span>
+<!-- $$$qtquick-qtquicktest.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="introduction"></a>
+<h2 id="introduction">Introduction</h2>
+<p><a href="../qtquick/qttest-qmlmodule.html">Qt Quick Test</a> is a unit test framework for QML applications. Test cases are written as JavaScript functions within a <a href="../qtquick/qml-qttest-testcase.html">TestCase</a> type:</p>
+<pre class="cpp">
+
+  import <span class="type"><a href="../qtqml/qtquick-qmlmodule.html">QtQuick</a></span> <span class="number">2.3</span>
+  import <span class="type"><a href="../qtquick/qttest-qmlmodule.html">QtTest</a></span> <span class="number">1.0</span>
+
+  TestCase {
+      name: <span class="string">&quot;MathTests&quot;</span>
+
+      function test_math() {
+          compare(<span class="number">2</span> <span class="operator">+</span> <span class="number">2</span><span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> <span class="string">&quot;2 + 2 = 4&quot;</span>)
+      }
+
+      function test_fail() {
+          compare(<span class="number">2</span> <span class="operator">+</span> <span class="number">2</span><span class="operator">,</span> <span class="number">5</span><span class="operator">,</span> <span class="string">&quot;2 + 2 = 5&quot;</span>)
+      }
+  }
+
+</pre>
+<p>Functions whose names start with <code>test_</code> are treated as test cases to be executed. See the documentation for the <a href="../qtquick/qml-qttest-testcase.html">TestCase</a> and <a href="../qtquick/qml-qttest-signalspy.html">SignalSpy</a> types for more information on writing test cases.</p>
+<a name="running-tests"></a>
+<h2 id="running-tests">Running Tests</h2>
+<p>Test cases are launched by a C++ harness that consists of the following code:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QtQuickTest/quicktest.h&gt;</span>
+  QUICK_TEST_MAIN(example)
+
+</pre>
+<p>Where &quot;example&quot; is the identifier to use to uniquely identify this set of tests. You should add <code>CONFIG += qmltestcase</code>. for example:</p>
+<pre class="cpp">
+
+  TEMPLATE <span class="operator">=</span> app
+  TARGET <span class="operator">=</span> tst_example
+  CONFIG <span class="operator">+</span><span class="operator">=</span> warn_on qmltestcase
+  SOURCES <span class="operator">+</span><span class="operator">=</span> tst_example<span class="operator">.</span>cpp
+
+</pre>
+<p>The test harness scans the specified source directory recursively for &quot;tst_*.qml&quot; files. If <code>QUICK_TEST_SOURCE_DIR</code> is not defined, then the current directory will be scanned when the harness is run. Other *.qml files may appear for auxillary QML components that are used by the test.</p>
+<p>The <code>-input</code> command-line option can be set at runtime to run test cases from a different directory. This may be needed to run tests on a target device where the compiled-in directory name refers to a host. For example:</p>
+<pre class="cpp">
+
+  tst_example <span class="operator">-</span>input <span class="operator">/</span>mnt<span class="operator">/</span>SDCard<span class="operator">/</span>qmltests
+
+</pre>
+<p>It is also possible to run a single file using the <code>-input</code> option. For example:</p>
+<pre class="cpp">
+
+  tst_example <span class="operator">-</span>input data<span class="operator">/</span>test<span class="operator">.</span>qml
+
+</pre>
+<pre class="cpp">
+
+  tst_example <span class="operator">-</span>input <span class="operator">&lt;</span>full_path<span class="operator">&gt;</span><span class="operator">/</span>test<span class="operator">.</span>qml
+
+</pre>
+<p><b>Note: </b>Specifying the full path to the qml test file is for example needed for shadow builds.</p><p>If your test case needs QML imports, then you can add them as <code>-import</code> options to the test program command-line.</p>
+<p>If IMPORTPATH is specified in your .pro file, each import path added to IMPORTPATH will be passed as a command-line argument when the test is run using &quot;make check&quot;:</p>
+<pre class="cpp">
+
+  IMPORTPATH <span class="operator">+</span><span class="operator">=</span> $$PWD<span class="operator">/</span><span class="operator">.</span><span class="operator">.</span><span class="operator">/</span>imports<span class="operator">/</span>my_module1 $$PWD<span class="operator">/</span><span class="operator">.</span><span class="operator">.</span><span class="operator">/</span>imports<span class="operator">/</span>my_module2
+
+</pre>
+<p>The <code>-functions</code> command-line option will return a list of the current tests functions. It is possible to run a single test function using the name of the test function as an argument. For example:</p>
+<pre class="cpp">
+
+  tst_example Test_Name<span class="operator">::</span>function1
+
+</pre>
+<p>The <code>-help</code> command-line option will return all the options available.</p>
+<pre class="cpp">
+
+  tst_example <span class="operator">-</span>help
+
+</pre>
+</div>
+<!-- @@@qtquick-qtquicktest.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

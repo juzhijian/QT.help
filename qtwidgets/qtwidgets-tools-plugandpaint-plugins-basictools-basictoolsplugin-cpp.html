@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>basictoolsplugin.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-tools-plugandpaint-plugins-basictools-example.html">Plug &amp; Paint Basic Tools Example</a></td><td >basictoolsplugin.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">basictoolsplugin.cpp Example File</h1>
+<span class="subtitle">tools/plugandpaint/plugins/basictools/basictoolsplugin.cpp</span>
+<!-- $$$tools/plugandpaint/plugins/basictools/basictoolsplugin.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+
+  <span class="preprocessor">#include &lt;cmath&gt;</span>
+  <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+
+  <span class="preprocessor">#include &quot;basictoolsplugin.h&quot;</span>
+
+  <span class="keyword">const</span> <span class="type">float</span> Pi <span class="operator">=</span> <span class="number">3.14159f</span>;
+
+  <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> BasicToolsPlugin<span class="operator">::</span>brushes() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Pencil&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Air Brush&quot;</span>)
+                           <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Random Letters&quot;</span>);
+  }
+
+  <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> BasicToolsPlugin<span class="operator">::</span>mousePress(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>brush<span class="operator">,</span> <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">&amp;</span>painter<span class="operator">,</span>
+                                     <span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <span class="operator">&amp;</span>pos)
+  {
+      <span class="keyword">return</span> mouseMove(brush<span class="operator">,</span> painter<span class="operator">,</span> pos<span class="operator">,</span> pos);
+  }
+
+  <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> BasicToolsPlugin<span class="operator">::</span>mouseMove(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>brush<span class="operator">,</span> <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">&amp;</span>painter<span class="operator">,</span>
+                                    <span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <span class="operator">&amp;</span>oldPos<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <span class="operator">&amp;</span>newPos)
+  {
+      painter<span class="operator">.</span>save();
+
+      <span class="type">int</span> rad <span class="operator">=</span> painter<span class="operator">.</span>pen()<span class="operator">.</span>width() <span class="operator">/</span> <span class="number">2</span>;
+      <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> boundingRect <span class="operator">=</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(oldPos<span class="operator">,</span> newPos)<span class="operator">.</span>normalized()
+                                                <span class="operator">.</span>adjusted(<span class="operator">-</span>rad<span class="operator">,</span> <span class="operator">-</span>rad<span class="operator">,</span> <span class="operator">+</span>rad<span class="operator">,</span> <span class="operator">+</span>rad);
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> color <span class="operator">=</span> painter<span class="operator">.</span>pen()<span class="operator">.</span>color();
+      <span class="type">int</span> thickness <span class="operator">=</span> painter<span class="operator">.</span>pen()<span class="operator">.</span>width();
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> transparentColor(color<span class="operator">.</span>red()<span class="operator">,</span> color<span class="operator">.</span>green()<span class="operator">,</span> color<span class="operator">.</span>blue()<span class="operator">,</span> <span class="number">0</span>);
+
+      <span class="keyword">if</span> (brush <span class="operator">=</span><span class="operator">=</span> tr(<span class="string">&quot;Pencil&quot;</span>)) {
+          painter<span class="operator">.</span>drawLine(oldPos<span class="operator">,</span> newPos);
+      } <span class="keyword">else</span> <span class="keyword">if</span> (brush <span class="operator">=</span><span class="operator">=</span> tr(<span class="string">&quot;Air Brush&quot;</span>)) {
+          <span class="type">int</span> numSteps <span class="operator">=</span> <span class="number">2</span> <span class="operator">+</span> (newPos <span class="operator">-</span> oldPos)<span class="operator">.</span>manhattanLength() <span class="operator">/</span> <span class="number">2</span>;
+
+          painter<span class="operator">.</span>setBrush(<span class="type"><a href="../qtgui/qbrush.html">QBrush</a></span>(color<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Dense6Pattern));
+          painter<span class="operator">.</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoPen);
+
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> numSteps; <span class="operator">+</span><span class="operator">+</span>i) {
+              <span class="type">int</span> x <span class="operator">=</span> oldPos<span class="operator">.</span>x() <span class="operator">+</span> i <span class="operator">*</span> (newPos<span class="operator">.</span>x() <span class="operator">-</span> oldPos<span class="operator">.</span>x()) <span class="operator">/</span> (numSteps <span class="operator">-</span> <span class="number">1</span>);
+              <span class="type">int</span> y <span class="operator">=</span> oldPos<span class="operator">.</span>y() <span class="operator">+</span> i <span class="operator">*</span> (newPos<span class="operator">.</span>y() <span class="operator">-</span> oldPos<span class="operator">.</span>y()) <span class="operator">/</span> (numSteps <span class="operator">-</span> <span class="number">1</span>);
+
+              painter<span class="operator">.</span>drawEllipse(x <span class="operator">-</span> (thickness <span class="operator">/</span> <span class="number">2</span>)<span class="operator">,</span> y <span class="operator">-</span> (thickness <span class="operator">/</span> <span class="number">2</span>)<span class="operator">,</span>
+                                  thickness<span class="operator">,</span> thickness);
+          }
+      } <span class="keyword">else</span> <span class="keyword">if</span> (brush <span class="operator">=</span><span class="operator">=</span> tr(<span class="string">&quot;Random Letters&quot;</span>)) {
+          <span class="type"><a href="../qtcore/qchar.html">QChar</a></span> ch(<span class="char">'A'</span> <span class="operator">+</span> (qrand() <span class="operator">%</span> <span class="number">26</span>));
+
+          <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> biggerFont <span class="operator">=</span> painter<span class="operator">.</span>font();
+          biggerFont<span class="operator">.</span>setBold(<span class="keyword">true</span>);
+          biggerFont<span class="operator">.</span>setPointSize(biggerFont<span class="operator">.</span>pointSize() <span class="operator">+</span> thickness);
+          painter<span class="operator">.</span>setFont(biggerFont);
+
+          painter<span class="operator">.</span>drawText(newPos<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(ch));
+
+          <span class="type"><a href="../qtgui/qfontmetrics.html">QFontMetrics</a></span> metrics(painter<span class="operator">.</span>font());
+          boundingRect <span class="operator">=</span> metrics<span class="operator">.</span>boundingRect(ch);
+          boundingRect<span class="operator">.</span>translate(newPos);
+          boundingRect<span class="operator">.</span>adjust(<span class="operator">-</span><span class="number">10</span><span class="operator">,</span> <span class="operator">-</span><span class="number">10</span><span class="operator">,</span> <span class="operator">+</span><span class="number">10</span><span class="operator">,</span> <span class="operator">+</span><span class="number">10</span>);
+      }
+      painter<span class="operator">.</span>restore();
+      <span class="keyword">return</span> boundingRect;
+  }
+
+  <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> BasicToolsPlugin<span class="operator">::</span>mouseRelease(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span> <span class="comment">/* brush */</span><span class="operator">,</span>
+                                       <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">&amp;</span> <span class="comment">/* painter */</span><span class="operator">,</span>
+                                       <span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <span class="operator">&amp;</span> <span class="comment">/* pos */</span>)
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+  }
+
+  <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> BasicToolsPlugin<span class="operator">::</span>shapes() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Circle&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Star&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Text...&quot;</span>);
+  }
+
+  <span class="type"><a href="../qtgui/qpainterpath.html">QPainterPath</a></span> BasicToolsPlugin<span class="operator">::</span>generateShape(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>shape<span class="operator">,</span>
+                                               <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+  {
+      <span class="type"><a href="../qtgui/qpainterpath.html">QPainterPath</a></span> path;
+
+      <span class="keyword">if</span> (shape <span class="operator">=</span><span class="operator">=</span> tr(<span class="string">&quot;Circle&quot;</span>)) {
+          path<span class="operator">.</span>addEllipse(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">50</span><span class="operator">,</span> <span class="number">50</span>);
+      } <span class="keyword">else</span> <span class="keyword">if</span> (shape <span class="operator">=</span><span class="operator">=</span> tr(<span class="string">&quot;Star&quot;</span>)) {
+          path<span class="operator">.</span>moveTo(<span class="number">90</span><span class="operator">,</span> <span class="number">50</span>);
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">1</span>; i <span class="operator">&lt;</span> <span class="number">5</span>; <span class="operator">+</span><span class="operator">+</span>i) {
+              path<span class="operator">.</span>lineTo(<span class="number">50</span> <span class="operator">+</span> <span class="number">40</span> <span class="operator">*</span> std<span class="operator">::</span>cos(<span class="number">0.8</span> <span class="operator">*</span> i <span class="operator">*</span> Pi)<span class="operator">,</span>
+                          <span class="number">50</span> <span class="operator">+</span> <span class="number">40</span> <span class="operator">*</span> std<span class="operator">::</span>sin(<span class="number">0.8</span> <span class="operator">*</span> i <span class="operator">*</span> Pi));
+          }
+          path<span class="operator">.</span>closeSubpath();
+      } <span class="keyword">else</span> <span class="keyword">if</span> (shape <span class="operator">=</span><span class="operator">=</span> tr(<span class="string">&quot;Text...&quot;</span>)) {
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> text <span class="operator">=</span> <span class="type"><a href="qinputdialog.html">QInputDialog</a></span><span class="operator">::</span>getText(parent<span class="operator">,</span> tr(<span class="string">&quot;Text Shape&quot;</span>)<span class="operator">,</span>
+                                               tr(<span class="string">&quot;Enter text:&quot;</span>)<span class="operator">,</span>
+                                               <span class="type"><a href="qlineedit.html">QLineEdit</a></span><span class="operator">::</span>Normal<span class="operator">,</span> tr(<span class="string">&quot;Qt&quot;</span>));
+          <span class="keyword">if</span> (<span class="operator">!</span>text<span class="operator">.</span>isEmpty()) {
+              <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> timesFont(<span class="string">&quot;Times&quot;</span><span class="operator">,</span> <span class="number">50</span>);
+              timesFont<span class="operator">.</span>setStyleStrategy(<span class="type"><a href="../qtgui/qfont.html">QFont</a></span><span class="operator">::</span>ForceOutline);
+              path<span class="operator">.</span>addText(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> timesFont<span class="operator">,</span> text);
+          }
+      }
+
+      <span class="keyword">return</span> path;
+  }
+
+  <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> BasicToolsPlugin<span class="operator">::</span>filters() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Invert Pixels&quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Swap RGB&quot;</span>)
+                           <span class="operator">&lt;</span><span class="operator">&lt;</span> tr(<span class="string">&quot;Grayscale&quot;</span>);
+  }
+
+  <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> BasicToolsPlugin<span class="operator">::</span>filterImage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>filter<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> <span class="operator">&amp;</span>image<span class="operator">,</span>
+                                       <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span> <span class="comment">/* parent */</span>)
+  {
+      <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> result <span class="operator">=</span> image<span class="operator">.</span>convertToFormat(<span class="type"><a href="../qtgui/qimage.html">QImage</a></span><span class="operator">::</span>Format_RGB32);
+
+      <span class="keyword">if</span> (filter <span class="operator">=</span><span class="operator">=</span> tr(<span class="string">&quot;Invert Pixels&quot;</span>)) {
+          result<span class="operator">.</span>invertPixels();
+      } <span class="keyword">else</span> <span class="keyword">if</span> (filter <span class="operator">=</span><span class="operator">=</span> tr(<span class="string">&quot;Swap RGB&quot;</span>)) {
+          result <span class="operator">=</span> result<span class="operator">.</span>rgbSwapped();
+      } <span class="keyword">else</span> <span class="keyword">if</span> (filter <span class="operator">=</span><span class="operator">=</span> tr(<span class="string">&quot;Grayscale&quot;</span>)) {
+          <span class="keyword">for</span> (<span class="type">int</span> y <span class="operator">=</span> <span class="number">0</span>; y <span class="operator">&lt;</span> result<span class="operator">.</span>height(); <span class="operator">+</span><span class="operator">+</span>y) {
+              <span class="keyword">for</span> (<span class="type">int</span> x <span class="operator">=</span> <span class="number">0</span>; x <span class="operator">&lt;</span> result<span class="operator">.</span>width(); <span class="operator">+</span><span class="operator">+</span>x) {
+                  <span class="type">int</span> pixel <span class="operator">=</span> result<span class="operator">.</span>pixel(x<span class="operator">,</span> y);
+                  <span class="type">int</span> gray <span class="operator">=</span> <a href="../qtgui/qcolor.html#qGray-1">qGray</a>(pixel);
+                  <span class="type">int</span> alpha <span class="operator">=</span> <a href="../qtgui/qcolor.html#qAlpha">qAlpha</a>(pixel);
+                  result<span class="operator">.</span>setPixel(x<span class="operator">,</span> y<span class="operator">,</span> <a href="../qtgui/qcolor.html#qRgba">qRgba</a>(gray<span class="operator">,</span> gray<span class="operator">,</span> gray<span class="operator">,</span> alpha));
+              }
+          }
+      }
+      <span class="keyword">return</span> result;
+  }
+
+</pre>
+</div>
+<!-- @@@tools/plugandpaint/plugins/basictools/basictoolsplugin.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

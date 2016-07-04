@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>xorblender.cpp Example File | Qt Quick 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-scenegraph-twotextureproviders-example.html">Scene Graph - Two Texture Providers</a></td><td >xorblender.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">xorblender.cpp Example File</h1>
+<span class="subtitle">scenegraph/twotextureproviders/xorblender.cpp</span>
+<!-- $$$scenegraph/twotextureproviders/xorblender.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2014 Gunnar Sletta &lt;gunnar@sletta.org&gt;
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;xorblender.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtCore/QPointer&gt;</span>
+
+  <span class="preprocessor">#include &lt;QtGui/QOpenGLContext&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QOpenGLFunctions&gt;</span>
+
+  <span class="preprocessor">#include &lt;QtQuick/QSGSimpleMaterial&gt;</span>
+  <span class="preprocessor">#include &lt;QtQuick/QSGTexture&gt;</span>
+  <span class="preprocessor">#include &lt;QtQuick/QSGGeometryNode&gt;</span>
+  <span class="preprocessor">#include &lt;QtQuick/QSGTextureProvider&gt;</span>
+
+  <span class="comment">/* This example could just as well have been implemented all in QML using
+   * a ShaderEffect, and for 90% of all usecases, using a ShaderEffect will
+   * be sufficient. This example exists to illustrate how to consume
+   * texture providers from C++ and how to use multiple texture sources in
+   * a custom material.
+   */</span>
+
+  <span class="keyword">struct</span> XorBlendState {
+      <span class="type"><a href="qsgtexture.html">QSGTexture</a></span> <span class="operator">*</span>texture1;
+      <span class="type"><a href="qsgtexture.html">QSGTexture</a></span> <span class="operator">*</span>texture2;
+  };
+
+  <span class="keyword">class</span> XorBlendShader : <span class="keyword">public</span> <span class="type"><a href="qsgsimplematerialshader.html">QSGSimpleMaterialShader</a></span><span class="operator">&lt;</span>XorBlendState<span class="operator">&gt;</span>
+  {
+      QSG_DECLARE_SIMPLE_SHADER(XorBlendShader<span class="operator">,</span> XorBlendState)
+  <span class="keyword">public</span>:
+
+      <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>vertexShader() <span class="keyword">const</span> {
+          <span class="keyword">return</span>
+          <span class="string">&quot;attribute highp vec4 aVertex;              \n&quot;</span>
+          <span class="string">&quot;attribute highp vec2 aTexCoord;            \n&quot;</span>
+          <span class="string">&quot;uniform highp mat4 qt_Matrix;              \n&quot;</span>
+          <span class="string">&quot;varying highp vec2 vTexCoord;              \n&quot;</span>
+          <span class="string">&quot;void main() {                              \n&quot;</span>
+          <span class="string">&quot;    gl_Position = qt_Matrix * aVertex;     \n&quot;</span>
+          <span class="string">&quot;    vTexCoord = aTexCoord;                 \n&quot;</span>
+          <span class="string">&quot;}&quot;</span>;
+      }
+
+      <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>fragmentShader() <span class="keyword">const</span> {
+          <span class="keyword">return</span>
+          <span class="string">&quot;uniform lowp float qt_Opacity;                                             \n&quot;</span>
+          <span class="string">&quot;uniform lowp sampler2D uSource1;                                           \n&quot;</span>
+          <span class="string">&quot;uniform lowp sampler2D uSource2;                                           \n&quot;</span>
+          <span class="string">&quot;varying highp vec2 vTexCoord;                                              \n&quot;</span>
+          <span class="string">&quot;void main() {                                                              \n&quot;</span>
+          <span class="string">&quot;    lowp vec4 p1 = texture2D(uSource1, vTexCoord);                         \n&quot;</span>
+          <span class="string">&quot;    lowp vec4 p2 = texture2D(uSource2, vTexCoord);                         \n&quot;</span>
+          <span class="string">&quot;    gl_FragColor = (p1 * (1.0 - p2.a) + p2 * (1.0 - p1.a)) * qt_Opacity;   \n&quot;</span>
+          <span class="string">&quot;}&quot;</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> attributes() <span class="keyword">const</span> {
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;aVertex&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;aTexCoord&quot;</span>;
+      }
+
+      <span class="type">void</span> updateState(<span class="keyword">const</span> XorBlendState <span class="operator">*</span>state<span class="operator">,</span> <span class="keyword">const</span> XorBlendState <span class="operator">*</span>) {
+          <span class="type"><a href="../qtgui/qopenglfunctions.html">QOpenGLFunctions</a></span> <span class="operator">*</span>f <span class="operator">=</span> <span class="type"><a href="../qtgui/qopenglcontext.html">QOpenGLContext</a></span><span class="operator">::</span>currentContext()<span class="operator">-</span><span class="operator">&gt;</span>functions();
+          <span class="comment">// We bind the textures in inverse order so that we leave the updateState</span>
+          <span class="comment">// function with GL_TEXTURE0 as the active texture unit. This is maintain</span>
+          <span class="comment">// the &quot;contract&quot; that updateState should not mess up the GL state beyond</span>
+          <span class="comment">// what is needed for this material.</span>
+          f<span class="operator">-</span><span class="operator">&gt;</span>glActiveTexture(GL_TEXTURE1);
+          state<span class="operator">-</span><span class="operator">&gt;</span>texture2<span class="operator">-</span><span class="operator">&gt;</span>bind();
+          f<span class="operator">-</span><span class="operator">&gt;</span>glActiveTexture(GL_TEXTURE0);
+          state<span class="operator">-</span><span class="operator">&gt;</span>texture1<span class="operator">-</span><span class="operator">&gt;</span>bind();
+      }
+
+      <span class="type">void</span> resolveUniforms() {
+          <span class="comment">// The texture units never change, only the texturess we bind to them so</span>
+          <span class="comment">// we set these once and for all here.</span>
+          program()<span class="operator">-</span><span class="operator">&gt;</span>setUniformValue(<span class="string">&quot;uSource1&quot;</span><span class="operator">,</span> <span class="number">0</span>); <span class="comment">// GL_TEXTURE0</span>
+          program()<span class="operator">-</span><span class="operator">&gt;</span>setUniformValue(<span class="string">&quot;uSource2&quot;</span><span class="operator">,</span> <span class="number">1</span>); <span class="comment">// GL_TEXTURE1</span>
+      }
+  };
+
+  <span class="comment">/* The rendering is split into two nodes. The top-most node is not actually
+   * rendering anything, but is responsible for managing the texture providers.
+   * The XorNode also has a geometry node internally which it uses to render
+   * the texture providers using the XorBlendShader when all providers and
+   * textures are all present.
+   *
+   * The texture providers are updated solely on the render thread (when rendering
+   * is happening on a separate thread). This is why we are using preprocess
+   * and direct signals between the the texture providers and the node rather
+   * than updating state in updatePaintNode.
+   */</span>
+  <span class="keyword">class</span> XorNode : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">,</span> <span class="keyword">public</span> <span class="type"><a href="qsgnode.html">QSGNode</a></span>
+  {
+      Q_OBJECT
+  <span class="keyword">public</span>:
+      XorNode(<span class="type"><a href="qsgtextureprovider.html">QSGTextureProvider</a></span> <span class="operator">*</span>p1<span class="operator">,</span> <span class="type"><a href="qsgtextureprovider.html">QSGTextureProvider</a></span> <span class="operator">*</span>p2)
+          : m_provider1(p1)
+          <span class="operator">,</span> m_provider2(p2)
+      {
+          setFlag(<span class="type"><a href="qsgnode.html">QSGNode</a></span><span class="operator">::</span>UsePreprocess<span class="operator">,</span> <span class="keyword">true</span>);
+
+          <span class="comment">// Set up material so it is all set for later..</span>
+          m_material <span class="operator">=</span> XorBlendShader<span class="operator">::</span>createMaterial();
+          m_material<span class="operator">-</span><span class="operator">&gt;</span>state()<span class="operator">-</span><span class="operator">&gt;</span>texture1 <span class="operator">=</span> <span class="number">0</span>;
+          m_material<span class="operator">-</span><span class="operator">&gt;</span>state()<span class="operator">-</span><span class="operator">&gt;</span>texture2 <span class="operator">=</span> <span class="number">0</span>;
+          m_material<span class="operator">-</span><span class="operator">&gt;</span>setFlag(<span class="type"><a href="qsgmaterial.html">QSGMaterial</a></span><span class="operator">::</span>Blending);
+          m_node<span class="operator">.</span>setMaterial(m_material);
+          m_node<span class="operator">.</span>setFlag(<span class="type"><a href="qsgnode.html">QSGNode</a></span><span class="operator">::</span>OwnsMaterial);
+
+          <span class="comment">// Set up geometry, actual vertices will be initialized in updatePaintNode</span>
+          m_node<span class="operator">.</span>setGeometry(<span class="keyword">new</span> <span class="type"><a href="qsggeometry.html">QSGGeometry</a></span>(<span class="type"><a href="qsggeometry.html">QSGGeometry</a></span><span class="operator">::</span>defaultAttributes_TexturedPoint2D()<span class="operator">,</span> <span class="number">4</span>));
+          m_node<span class="operator">.</span>setFlag(<span class="type"><a href="qsgnode.html">QSGNode</a></span><span class="operator">::</span>OwnsGeometry);
+
+          <span class="comment">// If this node is used as in a shader effect source, we need to propegate</span>
+          <span class="comment">// changes that will occur in this node outwards.</span>
+          connect(m_provider1<span class="operator">.</span>data()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qsgtextureprovider.html">QSGTextureProvider</a></span><span class="operator">::</span>textureChanged<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>XorNode<span class="operator">::</span>textureChange<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DirectConnection);
+          connect(m_provider2<span class="operator">.</span>data()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qsgtextureprovider.html">QSGTextureProvider</a></span><span class="operator">::</span>textureChanged<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>XorNode<span class="operator">::</span>textureChange<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DirectConnection);
+      }
+
+      <span class="type">void</span> preprocess() {
+          XorBlendState <span class="operator">*</span>state <span class="operator">=</span> m_material<span class="operator">-</span><span class="operator">&gt;</span>state();
+          <span class="comment">// Update the textures from the providers, calling into QSGDynamicTexture if required</span>
+          <span class="keyword">if</span> (m_provider1) {
+              state<span class="operator">-</span><span class="operator">&gt;</span>texture1 <span class="operator">=</span> m_provider1<span class="operator">-</span><span class="operator">&gt;</span>texture();
+              <span class="keyword">if</span> (<span class="type"><a href="qsgdynamictexture.html">QSGDynamicTexture</a></span> <span class="operator">*</span>dt1 <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qsgdynamictexture.html">QSGDynamicTexture</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(state<span class="operator">-</span><span class="operator">&gt;</span>texture1))
+                  dt1<span class="operator">-</span><span class="operator">&gt;</span>updateTexture();
+          }
+          <span class="keyword">if</span> (m_provider2) {
+              state<span class="operator">-</span><span class="operator">&gt;</span>texture2 <span class="operator">=</span> m_provider2<span class="operator">-</span><span class="operator">&gt;</span>texture();
+              <span class="keyword">if</span> (<span class="type"><a href="qsgdynamictexture.html">QSGDynamicTexture</a></span> <span class="operator">*</span>dt2 <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qsgdynamictexture.html">QSGDynamicTexture</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(state<span class="operator">-</span><span class="operator">&gt;</span>texture2))
+                  dt2<span class="operator">-</span><span class="operator">&gt;</span>updateTexture();
+          }
+
+          <span class="comment">// Remove node from the scene graph if it is there and either texture is missing...</span>
+          <span class="keyword">if</span> (m_node<span class="operator">.</span>parent() <span class="operator">&amp;</span><span class="operator">&amp;</span> (<span class="operator">!</span>state<span class="operator">-</span><span class="operator">&gt;</span>texture1 <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>state<span class="operator">-</span><span class="operator">&gt;</span>texture2))
+              removeChildNode(<span class="operator">&amp;</span>m_node);
+
+          <span class="comment">// Add it if it is not already there and both textures are present..</span>
+          <span class="keyword">else</span> <span class="keyword">if</span> (<span class="operator">!</span>m_node<span class="operator">.</span>parent() <span class="operator">&amp;</span><span class="operator">&amp;</span> state<span class="operator">-</span><span class="operator">&gt;</span>texture1 <span class="operator">&amp;</span><span class="operator">&amp;</span> state<span class="operator">-</span><span class="operator">&gt;</span>texture2)
+              appendChildNode(<span class="operator">&amp;</span>m_node);
+      }
+
+      <span class="type">void</span> setRect(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> <span class="operator">&amp;</span>rect) {
+          <span class="comment">// Update geometry if it has changed and mark the change in the scene graph.</span>
+          <span class="keyword">if</span> (m_rect <span class="operator">!</span><span class="operator">=</span> rect) {
+              m_rect <span class="operator">=</span> rect;
+              <span class="type"><a href="qsggeometry.html">QSGGeometry</a></span><span class="operator">::</span>updateTexturedRectGeometry(m_node<span class="operator">.</span>geometry()<span class="operator">,</span> m_rect<span class="operator">,</span> <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span>(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>));
+              m_node<span class="operator">.</span>markDirty(<span class="type"><a href="qsgnode.html">QSGNode</a></span><span class="operator">::</span>DirtyGeometry);
+          }
+      }
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> textureChange() {
+          <span class="comment">// When our sources change, we will look different, so signal the change to the</span>
+          <span class="comment">// scene graph.</span>
+          markDirty(<span class="type"><a href="qsgnode.html">QSGNode</a></span><span class="operator">::</span>DirtyMaterial);
+      }
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> m_rect;
+      <span class="type"><a href="qsgsimplematerial.html">QSGSimpleMaterial</a></span><span class="operator">&lt;</span>XorBlendState<span class="operator">&gt;</span> <span class="operator">*</span>m_material;
+      <span class="type"><a href="qsggeometrynode.html">QSGGeometryNode</a></span> m_node;
+      <span class="type"><a href="../qtcore/qpointer.html">QPointer</a></span><span class="operator">&lt;</span><span class="type"><a href="qsgtextureprovider.html">QSGTextureProvider</a></span><span class="operator">&gt;</span> m_provider1;
+      <span class="type"><a href="../qtcore/qpointer.html">QPointer</a></span><span class="operator">&lt;</span><span class="type"><a href="qsgtextureprovider.html">QSGTextureProvider</a></span><span class="operator">&gt;</span> m_provider2;
+  };
+
+  XorBlender<span class="operator">::</span>XorBlender(<span class="type"><a href="qquickitem.html">QQuickItem</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qquickitem.html">QQuickItem</a></span>(parent)
+      <span class="operator">,</span> m_source1(<span class="number">0</span>)
+      <span class="operator">,</span> m_source2(<span class="number">0</span>)
+      <span class="operator">,</span> m_source1Changed(<span class="keyword">false</span>)
+      <span class="operator">,</span> m_source2Changed(<span class="keyword">false</span>)
+  {
+      setFlag(ItemHasContents<span class="operator">,</span> <span class="keyword">true</span>);
+  }
+
+  <span class="type">void</span> XorBlender<span class="operator">::</span>setSource1(<span class="type"><a href="qquickitem.html">QQuickItem</a></span> <span class="operator">*</span>i)
+  {
+      <span class="keyword">if</span> (i <span class="operator">=</span><span class="operator">=</span> m_source1)
+          <span class="keyword">return</span>;
+      m_source1 <span class="operator">=</span> i;
+      <span class="keyword">emit</span> source1Changed(m_source1);
+      m_source1Changed <span class="operator">=</span> <span class="keyword">true</span>;
+      update();
+  }
+
+  <span class="type">void</span> XorBlender<span class="operator">::</span>setSource2(<span class="type"><a href="qquickitem.html">QQuickItem</a></span> <span class="operator">*</span>i)
+  {
+      <span class="keyword">if</span> (i <span class="operator">=</span><span class="operator">=</span> m_source2)
+          <span class="keyword">return</span>;
+      m_source2 <span class="operator">=</span> i;
+      <span class="keyword">emit</span> source2Changed(m_source2);
+      m_source2Changed <span class="operator">=</span> <span class="keyword">true</span>;
+      update();
+  }
+
+  <span class="type"><a href="qsgnode.html">QSGNode</a></span> <span class="operator">*</span>XorBlender<span class="operator">::</span>updatePaintNode(<span class="type"><a href="qsgnode.html">QSGNode</a></span> <span class="operator">*</span>old<span class="operator">,</span> UpdatePaintNodeData <span class="operator">*</span>)
+  {
+      <span class="comment">// Check if our input is valid and abort if not, deleting the old node.</span>
+      bool abort <span class="operator">=</span> <span class="keyword">false</span>;
+      <span class="keyword">if</span> (<span class="operator">!</span>m_source1 <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>m_source1<span class="operator">-</span><span class="operator">&gt;</span>isTextureProvider()) {
+          <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;source1 is missing or not a texture provider&quot;</span>;
+          abort <span class="operator">=</span> <span class="keyword">true</span>;
+      }
+      <span class="keyword">if</span> (<span class="operator">!</span>m_source2 <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>m_source2<span class="operator">-</span><span class="operator">&gt;</span>isTextureProvider()) {
+          <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;source2 is missing or not a texture provider&quot;</span>;
+          abort <span class="operator">=</span> <span class="keyword">true</span>;
+      }
+      <span class="keyword">if</span> (abort) {
+          <span class="keyword">delete</span> old;
+          <span class="keyword">return</span> <span class="number">0</span>;
+      }
+
+      XorNode <span class="operator">*</span>node <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>XorNode <span class="operator">*</span><span class="operator">&gt;</span>(old);
+
+      <span class="comment">// If the sources have changed, recreate the nodes</span>
+      <span class="keyword">if</span> (m_source1Changed <span class="operator">|</span><span class="operator">|</span> m_source2Changed) {
+          <span class="keyword">delete</span> node;
+          node <span class="operator">=</span> <span class="number">0</span>;
+          m_source1Changed <span class="operator">=</span> <span class="keyword">false</span>;
+          m_source2Changed <span class="operator">=</span> <span class="keyword">false</span>;
+      }
+
+      <span class="comment">// Create a new XorNode for us to render with.</span>
+      <span class="keyword">if</span> (<span class="operator">!</span>node)
+          node <span class="operator">=</span> <span class="keyword">new</span> XorNode(m_source1<span class="operator">-</span><span class="operator">&gt;</span>textureProvider()<span class="operator">,</span> m_source2<span class="operator">-</span><span class="operator">&gt;</span>textureProvider());
+
+      <span class="comment">// Update the geometry of the node to match the new bounding rect</span>
+      node<span class="operator">-</span><span class="operator">&gt;</span>setRect(boundingRect());
+
+      <span class="keyword">return</span> node;
+  }
+
+  <span class="preprocessor">#include &quot;xorblender.moc&quot;</span>
+
+</pre>
+</div>
+<!-- @@@scenegraph/twotextureproviders/xorblender.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

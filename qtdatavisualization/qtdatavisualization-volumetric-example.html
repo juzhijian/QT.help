@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- volumetric.qdoc -->
+  <title>Volumetric rendering Example | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td >Volumetric rendering Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#initializing-volume-item">Initializing volume item</a></li>
+<li class="level1"><a href="#slicing-into-the-volume">Slicing into the volume</a></li>
+<li class="level1"><a href="#adjusting-volume-transparency">Adjusting volume transparency</a></li>
+<li class="level1"><a href="#high-definition-vs-low-definition-shader">High definition vs. low definition shader</a></li>
+<li class="level1"><a href="#example-contents">Example contents</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Volumetric rendering Example</h1>
+<span class="subtitle"></span>
+<!-- $$$volumetric-description -->
+<div class="descr"> <a name="details"></a>
+<p>This example shows how to use <a href="qcustom3dvolume.html">QCustom3DVolume</a> items to display volumetric data.</p>
+<p class="centerAlign"><img src="images/volumetric-example.png" alt="" /></p><a name="initializing-volume-item"></a>
+<h2 id="initializing-volume-item">Initializing volume item</h2>
+<p>The <a href="qcustom3dvolume.html">QCustom3DVolume</a> items are special custom items (see <a href="qcustom3ditem.html">QCustom3DItem</a>), which can be used to display volumetric data. The volume items are only supported with orthographic projection, so first we make sure the graph is using it:</p>
+<pre class="cpp">
+
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>setOrthoProjection(<span class="keyword">true</span>);
+
+</pre>
+<p>The following code shows how to create a volumetric item tied to the data ranges of the axes:</p>
+<pre class="cpp">
+
+  m_volumeItem <span class="operator">=</span> <span class="keyword">new</span> QCustom3DVolume;
+  <span class="comment">// Adjust water level to zero with a minor tweak to y-coordinate position and scaling</span>
+  m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setScaling(
+              QVector3D(m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">-</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>min()<span class="operator">,</span>
+                        (m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">-</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>min()) <span class="operator">*</span> <span class="number">0.91f</span><span class="operator">,</span>
+                        m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">-</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>min()));
+  m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setPosition(
+              QVector3D((m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">+</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>min()) <span class="operator">/</span> <span class="number">2.0f</span><span class="operator">,</span>
+                        <span class="operator">-</span><span class="number">0.045f</span> <span class="operator">*</span> (m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">-</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>min()) <span class="operator">+</span>
+                        (m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">+</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>min()) <span class="operator">/</span> <span class="number">2.0f</span><span class="operator">,</span>
+                        (m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">+</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>min()) <span class="operator">/</span> <span class="number">2.0f</span>));
+  m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setScalingAbsolute(<span class="keyword">false</span>);
+
+</pre>
+<p>By setting the <a href="qcustom3ditem.html#scalingAbsolute-prop">QCustom3DItem::scalingAbsolute</a> property to <code>false</code>, we indicate that the scaling of the volume should follow the changes in the data ranges. Next we define the internal contents of the volume:</p>
+<pre class="cpp">
+
+  m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setTextureWidth(lowDetailSize);
+  m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setTextureHeight(lowDetailSize <span class="operator">/</span> <span class="number">2</span>);
+  m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setTextureDepth(lowDetailSize);
+  m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setTextureFormat(<span class="type"><a href="../qtgui/qimage.html">QImage</a></span><span class="operator">::</span>Format_Indexed8);
+  m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setTextureData(<span class="keyword">new</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span><span class="operator">&gt;</span>(<span class="operator">*</span>m_lowDetailData));
+
+</pre>
+<p>We use eight bit indexed color for our texture, as it is compact and makes it easy to adjust the colors without needing to reset the whole texture. For the texture data we use the data we created earlier based on some height maps. Typically the data for volume items comes pregenerated in a form of a stack of images, so we are not going to explain the data generation in detail. Please refer to the example code if you are interested in the actual data generation process.</p>
+<p>Since we are using eight bit indexed colors, we need a color table to map the eight bit color indexes to actual colors. We use one we populated on our own, but in a typical use case you would get the color table from the source images:</p>
+<pre class="cpp">
+
+  m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setColorTable(m_colorTable1);
+
+</pre>
+<p>We want to optionally show slice frames around the volume, so we initialize their properties. Initially, the frames will be hidden:</p>
+<pre class="cpp">
+
+  m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setSliceFrameGaps(QVector3D(<span class="number">0.01f</span><span class="operator">,</span> <span class="number">0.02f</span><span class="operator">,</span> <span class="number">0.01f</span>));
+  m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setSliceFrameThicknesses(QVector3D(<span class="number">0.0025f</span><span class="operator">,</span> <span class="number">0.005f</span><span class="operator">,</span> <span class="number">0.0025f</span>));
+  m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setSliceFrameWidths(QVector3D(<span class="number">0.0025f</span><span class="operator">,</span> <span class="number">0.005f</span><span class="operator">,</span> <span class="number">0.0025f</span>));
+  m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setDrawSliceFrames(<span class="keyword">false</span>);
+
+</pre>
+<p>Finally we add the volume as a custom item to the graph to display it:</p>
+<pre class="cpp">
+
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>addCustomItem(m_volumeItem);
+
+</pre>
+<a name="slicing-into-the-volume"></a>
+<h2 id="slicing-into-the-volume">Slicing into the volume</h2>
+<p>Unless the volume is largely transparent, you can only see the surface of it, which is often not very helpful. One way to inspect the internal structure of the volume is to view the slices of the volume. <a href="qcustom3dvolume.html">QCustom3DVolume</a> provides two ways to display the slices. The first is to show the selected slices in place of the volume. For example, to specify a slice perpendicular to the X-axis, you can use the following method:</p>
+<pre class="cpp">
+
+  m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setSliceIndexX(m_sliceIndexX);
+
+</pre>
+<p>To actually draw the slice specified above, the <a href="qcustom3dvolume.html#drawSlices-prop">QCustom3DVolume::drawSlices</a> property must be also set:</p>
+<pre class="cpp">
+
+  m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setDrawSlices(<span class="keyword">true</span>);
+
+</pre>
+<p>The second way to view slices is to use <a href="qcustom3dvolume.html#renderSlice">QCustom3DVolume::renderSlice</a>() method, which produces a <a href="../qtgui/qimage.html">QImage</a> from the specified slice. This image can then be displayed on another widget, such as a QLabel here:</p>
+<pre class="cpp">
+
+  m_sliceLabelX<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(
+              <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span><span class="operator">::</span>fromImage(m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>renderSlice(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>XAxis<span class="operator">,</span> m_sliceIndexX)));
+
+</pre>
+<a name="adjusting-volume-transparency"></a>
+<h2 id="adjusting-volume-transparency">Adjusting volume transparency</h2>
+<p>Sometimes viewing just the slices doesn't give you a good understanding of the volume's internal structure. <a href="qcustom3dvolume.html">QCustom3DVolume</a> provides two properties that can be used to adjust the volume transparency:</p>
+<pre class="cpp">
+
+  m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setAlphaMultiplier(mult);
+      ...
+  m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setPreserveOpacity(enabled);
+
+</pre>
+<p>The <a href="qcustom3dvolume.html#alphaMultiplier-prop">QCustom3DVolume::alphaMultiplier</a> is a general multiplier that is applied to the alpha value of each voxel of the volume. It makes it possible to add uniform transparency to the already somewhat transparent portions of the volume to reveal internal opaque details. This multiplier doesn't affect colors that are fully opaque, unless the <a href="qcustom3dvolume.html#preserveOpacity-prop">QCustom3DVolume::preserveOpacity</a> property is set to <code>false</code>.</p>
+<p>An alternative way to adjust the transparency of the volume is adjust the alpha values of the voxels directly. For eight bit indexed textures, this is done simply by modifying and resetting the color table:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> newAlpha <span class="operator">=</span> enabled <span class="operator">?</span> terrainTransparency : <span class="number">255</span>;
+  <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> aboveWaterGroundColorsMin; i <span class="operator">&lt;</span> underWaterGroundColorsMax; i<span class="operator">+</span><span class="operator">+</span>) {
+      <span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span> oldColor1 <span class="operator">=</span> m_colorTable1<span class="operator">.</span>at(i);
+      <span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span> oldColor2 <span class="operator">=</span> m_colorTable2<span class="operator">.</span>at(i);
+      m_colorTable1<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRgba">qRgba</a>(<a href="../qtgui/qcolor.html#qRed">qRed</a>(oldColor1)<span class="operator">,</span> <a href="../qtgui/qcolor.html#qGreen">qGreen</a>(oldColor1)<span class="operator">,</span> <a href="../qtgui/qcolor.html#qBlue">qBlue</a>(oldColor1)<span class="operator">,</span> newAlpha);
+      m_colorTable2<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <a href="../qtgui/qcolor.html#qRgba">qRgba</a>(<a href="../qtgui/qcolor.html#qRed">qRed</a>(oldColor2)<span class="operator">,</span> <a href="../qtgui/qcolor.html#qGreen">qGreen</a>(oldColor2)<span class="operator">,</span> <a href="../qtgui/qcolor.html#qBlue">qBlue</a>(oldColor2)<span class="operator">,</span> newAlpha);
+  }
+  <span class="keyword">if</span> (m_usingPrimaryTable)
+      m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setColorTable(m_colorTable1);
+  <span class="keyword">else</span>
+      m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setColorTable(m_colorTable2);
+
+</pre>
+<a name="high-definition-vs-low-definition-shader"></a>
+<h2 id="high-definition-vs-low-definition-shader">High definition vs. low definition shader</h2>
+<p>By default the volume rendering uses the high definition shader. It accounts for each voxel of the volume with correct weight when ray-tracing the volume contents, providing an accurate representation of even the finer details of the volume. However, this is computationally very expensive, so the frame rate suffers. If rendering speed is more important than pixel-perfect accuracy of the volume contents, you can take the much faster low definition shader into use by setting <code>false</code> for <a href="qcustom3dvolume.html#useHighDefShader-prop">QCustom3DVolume::useHighDefShader</a> property. The low definition shader achieves the speed by making compromises on the accuracy, so it doesn't guarantee each voxel of the volume will be sampled. This can lead to flickering and/or other rendering artifacts on the finer details of the volume.</p>
+<pre class="cpp">
+
+  m_volumeItem<span class="operator">-</span><span class="operator">&gt;</span>setUseHighDefShader(enabled);
+
+</pre>
+<a name="example-contents"></a>
+<h2 id="example-contents">Example contents</h2>
+<p>Files:</p>
+<ul>
+<li><a href="qtdatavisualization-volumetric-volumetric-cpp.html">volumetric/volumetric.cpp</a></li>
+<li><a href="qtdatavisualization-volumetric-volumetric-h.html">volumetric/volumetric.h</a></li>
+<li><a href="qtdatavisualization-volumetric-main-cpp.html">volumetric/main.cpp</a></li>
+<li><a href="qtdatavisualization-volumetric-volumetric-pro.html">volumetric/volumetric.pro</a></li>
+<li><a href="qtdatavisualization-volumetric-volumetric-qrc.html">volumetric/volumetric.qrc</a></li>
+</ul>
+</div>
+<!-- @@@volumetric -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

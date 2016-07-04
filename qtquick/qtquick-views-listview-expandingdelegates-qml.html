@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>expandingdelegates.qml Example File | Qt Quick 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-views-example.html">Qt Quick Examples - Views</a></td><td >expandingdelegates.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">expandingdelegates.qml Example File</h1>
+<span class="subtitle">views/listview/expandingdelegates.qml</span>
+<!-- $$$views/listview/expandingdelegates.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.0
+  import &quot;content&quot;
+
+  <span class="comment">// This example illustrates expanding a list item to show a more detailed view.</span>
+
+  <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">page</span>
+      <span class="name">width</span>: <span class="number">400</span>; <span class="name">height</span>: <span class="number">240</span>
+      <span class="name">color</span>: <span class="string">&quot;black&quot;</span>
+
+      <span class="comment">// Delegate for the recipes.  This delegate has two modes:</span>
+      <span class="comment">// 1. List mode (default), which just shows the picture and title of the recipe.</span>
+      <span class="comment">// 2. Details mode, which also shows the ingredients and method.</span>
+      <span class="type"><a href="../qtqml/qml-qtqml-component.html">Component</a></span> {
+          <span class="name">id</span>: <span class="name">recipeDelegate</span>
+          <span class="type"><a href="qml-qtquick-item.html">Item</a></span> {
+              <span class="name">id</span>: <span class="name">recipe</span>
+
+              <span class="comment">// Create a property to contain the visibility of the details.</span>
+              <span class="comment">// We can bind multiple element's opacity to this one property,</span>
+              <span class="comment">// rather than having a &quot;PropertyChanges&quot; line for each element we</span>
+              <span class="comment">// want to fade.</span>
+              property <span class="type">real</span> <span class="name">detailsOpacity</span> : <span class="number">0</span>
+              <span class="name">width</span>: <span class="name">listView</span>.<span class="name">width</span>
+              <span class="name">height</span>: <span class="number">70</span>
+
+              <span class="comment">// A simple rounded rectangle for the background</span>
+              <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+                  <span class="name">id</span>: <span class="name">background</span>
+                  <span class="name">x</span>: <span class="number">2</span>; <span class="name">y</span>: <span class="number">2</span>; <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">-</span> <span class="name">x</span><span class="operator">*</span><span class="number">2</span>; <span class="name">height</span>: <span class="name">parent</span>.<span class="name">height</span> <span class="operator">-</span> <span class="name">y</span><span class="operator">*</span><span class="number">2</span>
+                  <span class="name">color</span>: <span class="string">&quot;ivory&quot;</span>
+                  <span class="name">border</span>.color: <span class="string">&quot;orange&quot;</span>
+                  <span class="name">radius</span>: <span class="number">5</span>
+              }
+
+              <span class="comment">// This mouse region covers the entire delegate.</span>
+              <span class="comment">// When clicked it changes mode to 'Details'.  If we are already</span>
+              <span class="comment">// in Details mode, then no change will happen.</span>
+              <span class="type"><a href="qml-qtquick-mousearea.html">MouseArea</a></span> {
+                  <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                  <span class="name">onClicked</span>: <span class="name">recipe</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">'Details'</span>;
+              }
+
+              <span class="comment">// Lay out the page: picture, title and ingredients at the top, and method at the</span>
+              <span class="comment">// bottom.  Note that elements that should not be visible in the list</span>
+              <span class="comment">// mode have their opacity set to recipe.detailsOpacity.</span>
+
+              <span class="type"><a href="qml-qtquick-row.html">Row</a></span> {
+                  <span class="name">id</span>: <span class="name">topLayout</span>
+                  <span class="name">x</span>: <span class="number">10</span>; <span class="name">y</span>: <span class="number">10</span>; <span class="name">height</span>: <span class="name">recipeImage</span>.<span class="name">height</span>; <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+                  <span class="name">spacing</span>: <span class="number">10</span>
+
+                  <span class="type"><a href="qml-qtquick-image.html">Image</a></span> {
+                      <span class="name">id</span>: <span class="name">recipeImage</span>
+                      <span class="name">width</span>: <span class="number">50</span>; <span class="name">height</span>: <span class="number">50</span>
+                      <span class="name">source</span>: <span class="name">picture</span>
+                  }
+                  <span class="type"><a href="qml-qtquick-column.html">Column</a></span> {
+                      <span class="name">width</span>: <span class="name">background</span>.<span class="name">width</span> <span class="operator">-</span> <span class="name">recipeImage</span>.<span class="name">width</span> <span class="operator">-</span> <span class="number">20</span>; <span class="name">height</span>: <span class="name">recipeImage</span>.<span class="name">height</span>
+                      <span class="name">spacing</span>: <span class="number">5</span>
+
+                      <span class="type"><a href="qml-qtquick-text.html">Text</a></span> {
+                          <span class="name">text</span>: <span class="name">title</span>
+                          <span class="name">font</span>.bold: <span class="number">true</span>; <span class="name">font</span>.pointSize: <span class="number">16</span>
+                      }
+
+                      <span class="type">SmallText</span> {
+                          <span class="name">text</span>: <span class="string">&quot;Ingredients&quot;</span>
+                          <span class="name">font</span>.bold: <span class="number">true</span>
+                          <span class="name">opacity</span>: <span class="name">recipe</span>.<span class="name">detailsOpacity</span>
+                      }
+
+                      <span class="type">SmallText</span> {
+                          <span class="name">text</span>: <span class="name">ingredients</span>
+                          <span class="name">wrapMode</span>: <span class="name">Text</span>.<span class="name">WordWrap</span>
+                          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+                          <span class="name">opacity</span>: <span class="name">recipe</span>.<span class="name">detailsOpacity</span>
+                      }
+                  }
+              }
+
+              <span class="type"><a href="qml-qtquick-item.html">Item</a></span> {
+                  <span class="name">id</span>: <span class="name">details</span>
+                  <span class="name">x</span>: <span class="number">10</span>; <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">-</span> <span class="number">20</span>
+
+                  <span class="type">anchors</span> { <span class="name">top</span>: <span class="name">topLayout</span>.<span class="name">bottom</span>; <span class="name">topMargin</span>: <span class="number">10</span>; <span class="name">bottom</span>: <span class="name">parent</span>.<span class="name">bottom</span>; <span class="name">bottomMargin</span>: <span class="number">10</span> }
+                  <span class="name">opacity</span>: <span class="name">recipe</span>.<span class="name">detailsOpacity</span>
+                  <span class="type">SmallText</span> {
+                      <span class="name">id</span>: <span class="name">methodTitle</span>
+                      <span class="name">anchors</span>.top: <span class="name">parent</span>.<span class="name">top</span>
+                      <span class="name">text</span>: <span class="string">&quot;Method&quot;</span>
+                      <span class="name">font</span>.pointSize: <span class="number">12</span>; <span class="name">font</span>.bold: <span class="number">true</span>
+                  }
+
+                  <span class="type"><a href="qml-qtquick-flickable.html">Flickable</a></span> {
+                      <span class="name">id</span>: <span class="name">flick</span>
+                      <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+                      <span class="type">anchors</span> { <span class="name">top</span>: <span class="name">methodTitle</span>.<span class="name">bottom</span>; <span class="name">bottom</span>: <span class="name">parent</span>.<span class="name">bottom</span> }
+                      <span class="name">contentHeight</span>: <span class="name">methodText</span>.<span class="name">height</span>
+                      <span class="name">clip</span>: <span class="number">true</span>
+
+                      <span class="type"><a href="qml-qtquick-text.html">Text</a></span> { <span class="name">id</span>: <span class="name">methodText</span>; <span class="name">text</span>: <span class="name">method</span>; <span class="name">wrapMode</span>: <span class="name">Text</span>.<span class="name">WordWrap</span>; <span class="name">width</span>: <span class="name">details</span>.<span class="name">width</span> }
+                  }
+
+                  <span class="type"><a href="qml-qtquick-image.html">Image</a></span> {
+                      <span class="type">anchors</span> { <span class="name">right</span>: <span class="name">flick</span>.<span class="name">right</span>; <span class="name">top</span>: <span class="name">flick</span>.<span class="name">top</span> }
+                      <span class="name">source</span>: <span class="string">&quot;content/pics/moreUp.png&quot;</span>
+                      <span class="name">opacity</span>: <span class="name">flick</span>.<span class="name">atYBeginning</span> ? <span class="number">0</span> : <span class="number">1</span>
+                  }
+
+                  <span class="type"><a href="qml-qtquick-image.html">Image</a></span> {
+                      <span class="type">anchors</span> { <span class="name">right</span>: <span class="name">flick</span>.<span class="name">right</span>; <span class="name">bottom</span>: <span class="name">flick</span>.<span class="name">bottom</span> }
+                      <span class="name">source</span>: <span class="string">&quot;content/pics/moreDown.png&quot;</span>
+                      <span class="name">opacity</span>: <span class="name">flick</span>.<span class="name">atYEnd</span> ? <span class="number">0</span> : <span class="number">1</span>
+                  }
+              }
+
+              <span class="comment">// A button to close the detailed view, i.e. set the state back to default ('').</span>
+              <span class="type">TextButton</span> {
+                  <span class="name">y</span>: <span class="number">10</span>
+                  <span class="type">anchors</span> { <span class="name">right</span>: <span class="name">background</span>.<span class="name">right</span>; <span class="name">rightMargin</span>: <span class="number">10</span> }
+                  <span class="name">opacity</span>: <span class="name">recipe</span>.<span class="name">detailsOpacity</span>
+                  <span class="name">text</span>: <span class="string">&quot;Close&quot;</span>
+
+                  <span class="name">onClicked</span>: <span class="name">recipe</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">''</span>;
+              }
+
+              <span class="name">states</span>: <span class="name">State</span> {
+                  <span class="name">name</span>: <span class="string">&quot;Details&quot;</span>
+
+                  <span class="type"><a href="qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">background</span>; <span class="name">color</span>: <span class="string">&quot;white&quot;</span> }
+                  <span class="type"><a href="qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">recipeImage</span>; <span class="name">width</span>: <span class="number">130</span>; <span class="name">height</span>: <span class="number">130</span> } <span class="comment">// Make picture bigger</span>
+                  <span class="type"><a href="qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">recipe</span>; <span class="name">detailsOpacity</span>: <span class="number">1</span>; <span class="name">x</span>: <span class="number">0</span> } <span class="comment">// Make details visible</span>
+                  <span class="type"><a href="qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">recipe</span>; <span class="name">height</span>: <span class="name">listView</span>.<span class="name">height</span> } <span class="comment">// Fill the entire list area with the detailed view</span>
+
+                  <span class="comment">// Move the list so that this item is at the top.</span>
+                  <span class="type"><a href="qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">recipe</span>.<span class="name">ListView</span>.<span class="name">view</span>; <span class="name">explicit</span>: <span class="number">true</span>; <span class="name">contentY</span>: <span class="name">recipe</span>.<span class="name">y</span> }
+
+                  <span class="comment">// Disallow flicking while we're in detailed view</span>
+                  <span class="type"><a href="qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">recipe</span>.<span class="name">ListView</span>.<span class="name">view</span>; <span class="name">interactive</span>: <span class="number">false</span> }
+              }
+
+              <span class="name">transitions</span>: <span class="name">Transition</span> {
+                  <span class="comment">// Make the state changes smooth</span>
+                  <span class="type"><a href="qml-qtquick-parallelanimation.html">ParallelAnimation</a></span> {
+                      <span class="type"><a href="qml-qtquick-coloranimation.html">ColorAnimation</a></span> { <span class="name">property</span>: <span class="string">&quot;color&quot;</span>; <span class="name">duration</span>: <span class="number">500</span> }
+                      <span class="type"><a href="qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">duration</span>: <span class="number">300</span>; <span class="name">properties</span>: <span class="string">&quot;detailsOpacity,x,contentY,height,width&quot;</span> }
+                  }
+              }
+          }
+      }
+
+      <span class="comment">// The actual list</span>
+      <span class="type"><a href="qml-qtquick-listview.html">ListView</a></span> {
+          <span class="name">id</span>: <span class="name">listView</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">model</span>: <span class="name">RecipesModel</span> {}
+          <span class="name">delegate</span>: <span class="name">recipeDelegate</span>
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@views/listview/expandingdelegates.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

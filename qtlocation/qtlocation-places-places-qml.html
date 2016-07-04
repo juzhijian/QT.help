@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>places.qml Example File | Qt Location 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtlocation-index.html">Qt Location</a></td><td ><a href="qtlocation-index.html#places">Places (QML)</a></td><td >places.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">places.qml Example File</h1>
+<span class="subtitle">places/places.qml</span>
+<!-- $$$places/places.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.5
+  import QtQuick.Controls 1.4
+  import QtQuick.Layouts 1.2
+  import QtPositioning 5.5
+  import QtLocation 5.6
+  import &quot;items&quot;
+
+  <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls-applicationwindow.html">ApplicationWindow</a></span> {
+      <span class="name">id</span>: <span class="name">appWindow</span>
+      property <span class="type"><a href="qml-qtlocation-map.html">Map</a></span> <span class="name">map</span>
+      property <span class="type">variant</span> <span class="name">parameters</span>
+      property <span class="type">variant</span> <span class="name">searchLocation</span>: <span class="name">map</span> ? <span class="name">map</span>.<span class="name">center</span> : <span class="name">QtPositioning</span>.<span class="name">coordinate</span>()
+      property <span class="type">variant</span> <span class="name">searchRegion</span>: <span class="name">QtPositioning</span>.<span class="name">circle</span>(<span class="name">searchLocation</span>)
+      property <span class="type">variant</span> <span class="name">searchRegionItem</span>
+
+      property <span class="type"><a href="qml-qtlocation-plugin.html">Plugin</a></span> <span class="name">favoritesPlugin</span>
+
+      <span class="keyword">function</span> <span class="name">getPlugins</span>() {
+          var <span class="name">plugin</span> = <span class="name">Qt</span>.<span class="name">createQmlObject</span>(<span class="string">'import QtLocation 5.3; Plugin {}'</span>, <span class="name">appWindow</span>);
+          var <span class="name">myArray</span> = new <span class="name">Array</span>;
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">plugin</span>.<span class="name">availableServiceProviders</span>.<span class="name">length</span>; i++) {
+              var <span class="name">tempPlugin</span> = <span class="name">Qt</span>.<span class="name">createQmlObject</span> (<span class="string">'import QtLocation 5.3; Plugin {name: &quot;'</span> <span class="operator">+</span> <span class="name">plugin</span>.<span class="name">availableServiceProviders</span>[<span class="name">i</span>]<span class="operator">+</span> <span class="string">'&quot;}'</span>, <span class="name">appWindow</span>)
+
+              <span class="keyword">if</span> (<span class="name">tempPlugin</span>.<span class="name">supportsPlaces</span>() <span class="operator">&amp;&amp;</span> <span class="name">tempPlugin</span>.<span class="name">supportsMapping</span>() )
+                  <span class="name">myArray</span>.<span class="name">push</span>(<span class="name">tempPlugin</span>.<span class="name">name</span>)
+          }
+          <span class="name">myArray</span>.<span class="name">sort</span>()
+          <span class="keyword">return</span> <span class="name">myArray</span>;
+      }
+
+      <span class="keyword">function</span> <span class="name">initializeProviders</span>(<span class="name">pluginParameters</span>)
+      {
+          var <span class="name">parameters</span> = new <span class="name">Array</span>()
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">prop</span> in <span class="name">pluginParameters</span>) {
+              var <span class="name">parameter</span> = <span class="name">Qt</span>.<span class="name">createQmlObject</span>(<span class="string">'import QtLocation 5.3; PluginParameter{ name: &quot;'</span><span class="operator">+</span> <span class="name">prop</span> <span class="operator">+</span> <span class="string">'&quot;; value: &quot;'</span> <span class="operator">+</span> <span class="name">pluginParameters</span>[<span class="name">prop</span>]<span class="operator">+</span><span class="string">'&quot;}'</span>,<span class="name">appWindow</span>)
+              <span class="name">parameters</span>.<span class="name">push</span>(<span class="name">parameter</span>)
+          }
+          <span class="name">appWindow</span>.<span class="name">parameters</span> <span class="operator">=</span> <span class="name">parameters</span>
+          var <span class="name">plugins</span> = <span class="name">getPlugins</span>()
+          <span class="name">mainMenu</span>.<span class="name">providerMenu</span>.<span class="name">createMenu</span>(<span class="name">plugins</span>)
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span><span class="operator">&lt;</span><span class="name">plugins</span>.<span class="name">length</span>; i++) {
+              <span class="keyword">if</span> (<span class="name">plugins</span>[<span class="name">i</span>] <span class="operator">===</span> <span class="string">&quot;osm&quot;</span>)
+                  <span class="name">mainMenu</span>.<span class="name">selectProvider</span>(<span class="name">plugins</span>[<span class="name">i</span>])
+          }
+      }
+
+      <span class="keyword">function</span> <span class="name">createMap</span>(<span class="name">provider</span>) {
+          var <span class="name">plugin</span>;
+          <span class="keyword">if</span> (<span class="name">parameters</span> <span class="operator">&amp;&amp;</span> <span class="name">parameters</span>.<span class="name">length</span><span class="operator">&gt;</span><span class="number">0</span>)
+              <span class="name">plugin</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">createQmlObject</span> (<span class="string">'import QtLocation 5.3; Plugin{ name:&quot;'</span> <span class="operator">+</span> <span class="name">provider</span> <span class="operator">+</span> <span class="string">'&quot;; parameters: appWindow.parameters}'</span>, <span class="name">appWindow</span>)
+          <span class="keyword">else</span>
+              <span class="name">plugin</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">createQmlObject</span> (<span class="string">'import QtLocation 5.3; Plugin{ name:&quot;'</span> <span class="operator">+</span> <span class="name">provider</span> <span class="operator">+</span> <span class="string">'&quot;}'</span>, <span class="name">appWindow</span>)
+
+          <span class="keyword">if</span> (<span class="name">map</span>)
+              <span class="name">map</span>.<span class="name">destroy</span>();
+          <span class="name">map</span> <span class="operator">=</span> <span class="name">mapComponent</span>.<span class="name">createObject</span>(<span class="name">page</span>);
+          <span class="name">map</span>.<span class="name">plugin</span> <span class="operator">=</span> <span class="name">plugin</span>;
+          <span class="name">map</span>.<span class="name">zoomLevel</span> <span class="operator">=</span> (<span class="name">map</span>.<span class="name">maximumZoomLevel</span> <span class="operator">-</span> <span class="name">map</span>.<span class="name">minimumZoomLevel</span>)<span class="operator">/</span><span class="number">2</span>
+          <span class="name">categoryModel</span>.<span class="name">plugin</span> <span class="operator">=</span> <span class="name">plugin</span>;
+          <span class="name">categoryModel</span>.<span class="name">update</span>();
+          <span class="name">placeSearchModel</span>.<span class="name">plugin</span> <span class="operator">=</span> <span class="name">plugin</span>;
+          <span class="name">suggestionModel</span>.<span class="name">plugin</span> <span class="operator">=</span> <span class="name">plugin</span>;
+      }
+
+      <span class="name">title</span>: <span class="name">qsTr</span>(<span class="string">&quot;Places&quot;</span>)
+      <span class="name">width</span>: <span class="number">360</span>
+      <span class="name">height</span>: <span class="number">640</span>
+      <span class="name">visible</span>: <span class="number">true</span>
+      <span class="name">menuBar</span>: <span class="name">mainMenu</span>
+      <span class="name">toolBar</span>: <span class="name">searchBar</span>
+
+      <span class="type">MainMenu</span> {
+          <span class="name">id</span>: <span class="name">mainMenu</span>
+          <span class="name">onSelectProvider</span>: {
+              <span class="name">stackView</span>.<span class="name">pop</span>(<span class="name">page</span>)
+              <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">providerMenu</span>.<span class="name">items</span>.<span class="name">length</span>; i++) {
+                  <span class="name">providerMenu</span>.<span class="name">items</span>[<span class="name">i</span>].<span class="name">checked</span> <span class="operator">=</span> <span class="name">providerMenu</span>.<span class="name">items</span>[<span class="name">i</span>].<span class="name">text</span> <span class="operator">===</span> <span class="name">providerName</span>
+              }
+
+              <span class="name">createMap</span>(<span class="name">providerName</span>)
+              <span class="keyword">if</span> (<span class="name">map</span>.<span class="name">error</span> <span class="operator">===</span> <span class="name">Map</span>.<span class="name">NoError</span>) {
+                  <span class="name">settingsMenu</span>.<span class="name">createMenu</span>(<span class="name">map</span>);
+              } <span class="keyword">else</span> {
+                  <span class="name">settingsMenu</span>.<span class="name">clear</span>();
+              }
+          }
+          <span class="name">onSelectSetting</span>: {
+              <span class="name">stackView</span>.<span class="name">pop</span>({tem:<span class="name">page</span>,immediate: <span class="number">true</span>})
+              <span class="keyword">switch</span> (<span class="name">setting</span>) {
+              <span class="keyword">case</span> <span class="string">&quot;searchCenter&quot;</span>:
+                  <span class="name">stackView</span>.<span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;forms/SearchCenter.qml&quot;</span>) ,
+                                     properties: { &quot;coordinate&quot;: <span class="name">map</span>.<span class="name">center</span>}})
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">changeSearchCenter</span>.<span class="name">connect</span>(<span class="name">stackView</span>.<span class="name">changeSearchCenter</span>)
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">closeForm</span>.<span class="name">connect</span>(<span class="name">stackView</span>.<span class="name">closeForm</span>)
+                  <span class="keyword">break</span>
+              <span class="keyword">case</span> <span class="string">&quot;searchBoundingBox&quot;</span>:
+                  <span class="name">stackView</span>.<span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;forms/SearchBoundingBox.qml&quot;</span>) ,
+                                     properties: { &quot;searchRegion&quot;: <span class="name">searchRegion</span>}})
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">changeSearchBoundingBox</span>.<span class="name">connect</span>(<span class="name">stackView</span>.<span class="name">changeSearchBoundingBox</span>)
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">closeForm</span>.<span class="name">connect</span>(<span class="name">stackView</span>.<span class="name">closeForm</span>)
+                  <span class="keyword">break</span>
+              <span class="keyword">case</span> <span class="string">&quot;searchBoundingCircle&quot;</span>:
+                  <span class="name">stackView</span>.<span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;forms/SearchBoundingCircle.qml&quot;</span>) ,
+                                     properties: { &quot;searchRegion&quot;: <span class="name">searchRegion</span>}})
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">changeSearchBoundingCircle</span>.<span class="name">connect</span>(<span class="name">stackView</span>.<span class="name">changeSearchBoundingCircle</span>)
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">closeForm</span>.<span class="name">connect</span>(<span class="name">stackView</span>.<span class="name">closeForm</span>)
+                  <span class="keyword">break</span>
+              <span class="keyword">case</span> <span class="string">&quot;SearchOptions&quot;</span>:
+                  <span class="name">stackView</span>.<span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;forms/SearchOptions.qml&quot;</span>) ,
+                                     properties: { &quot;plugin&quot;: <span class="name">map</span>.<span class="name">plugin</span>,
+                                         &quot;model&quot;: <span class="name">placeSearchModel</span>}})
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">changeSearchSettings</span>.<span class="name">connect</span>(<span class="name">stackView</span>.<span class="name">changeSearchSettings</span>)
+                  <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">closeForm</span>.<span class="name">connect</span>(<span class="name">stackView</span>.<span class="name">closeForm</span>)
+                  <span class="keyword">break</span>
+              <span class="keyword">default</span>:
+                  <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Unsupported setting !&quot;</span>)
+              }
+          }
+      }
+
+      <span class="type">SearchBar</span> {
+          <span class="name">id</span>: <span class="name">searchBar</span>
+          <span class="name">width</span>: <span class="name">appWindow</span>.<span class="name">width</span>
+          <span class="name">searchBarVisbile</span>: <span class="name">stackView</span>.<span class="name">depth</span> <span class="operator">&gt;</span> <span class="number">1</span> <span class="operator">&amp;&amp;</span>
+                            <span class="name">stackView</span>.<span class="name">currentItem</span> <span class="operator">&amp;&amp;</span>
+                            <span class="name">stackView</span>.<span class="name">currentItem</span>.<span class="name">objectName</span> <span class="operator">!=</span> <span class="string">&quot;suggestionView&quot;</span> ? <span class="number">false</span> : <span class="number">true</span>
+          <span class="name">onShowCategories</span>: {
+              <span class="keyword">if</span> (<span class="name">map</span> <span class="operator">&amp;&amp;</span> <span class="name">map</span>.<span class="name">plugin</span>) {
+                  <span class="name">stackView</span>.<span class="name">pop</span>({tem:<span class="name">page</span>,immediate: <span class="number">true</span>})
+                  <span class="name">stackView</span>.<span class="name">enterCategory</span>()
+              }
+          }
+          <span class="name">onGoBack</span>: <span class="name">stackView</span>.<span class="name">pop</span>()
+          <span class="name">onSearchTextChanged</span>: {
+              <span class="keyword">if</span> (<span class="name">searchText</span>.<span class="name">length</span> <span class="operator">&gt;=</span> <span class="number">3</span> <span class="operator">&amp;&amp;</span> <span class="name">suggestionModel</span> <span class="operator">!=</span> <span class="number">null</span>) {
+                  <span class="name">suggestionModel</span>.<span class="name">searchTerm</span> <span class="operator">=</span> <span class="name">searchText</span>;
+                  <span class="name">suggestionModel</span>.<span class="name">update</span>();
+              }
+          }
+          <span class="name">onDoSearch</span>: {
+              <span class="keyword">if</span> (<span class="name">searchText</span>.<span class="name">length</span> <span class="operator">&gt;</span> <span class="number">0</span>)
+                  <span class="name">placeSearchModel</span>.<span class="name">searchForText</span>(<span class="name">searchText</span>);
+          }
+          <span class="name">onShowMap</span>: <span class="name">stackView</span>.<span class="name">pop</span>(<span class="name">page</span>)
+      }
+
+      <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls-stackview.html">StackView</a></span> {
+          <span class="name">id</span>: <span class="name">stackView</span>
+
+          <span class="keyword">function</span> <span class="name">showMessage</span>(<span class="name">title</span>,message,backPage)
+          {
+              <span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;forms/Message.qml&quot;</span>) ,
+                       properties: {
+                           &quot;title&quot; : <span class="name">title</span>,
+                           &quot;message&quot; : <span class="name">message</span>,
+                           &quot;backPage&quot; : <span class="name">backPage</span>
+                       }})
+              <span class="name">currentItem</span>.<span class="name">closeForm</span>.<span class="name">connect</span>(<span class="name">closeMessage</span>)
+          }
+
+          <span class="keyword">function</span> <span class="name">closeMessage</span>(<span class="name">backPage</span>)
+          {
+              <span class="name">pop</span>(<span class="name">backPage</span>)
+          }
+
+          <span class="keyword">function</span> <span class="name">closeForm</span>()
+          {
+              <span class="name">pop</span>(<span class="name">page</span>)
+          }
+
+          <span class="keyword">function</span> <span class="name">enterCategory</span>(<span class="name">index</span>)
+          {
+              <span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;views/CategoryView.qml&quot;</span>) ,
+                       properties: { &quot;categoryModel&quot;: <span class="name">categoryModel</span>,
+                           &quot;rootIndex&quot; : <span class="name">index</span>
+                       }})
+              <span class="name">currentItem</span>.<span class="name">showSubcategories</span>.<span class="name">connect</span>(<span class="name">stackView</span>.<span class="name">enterCategory</span>)
+              <span class="name">currentItem</span>.<span class="name">searchCategory</span>.<span class="name">connect</span>(<span class="name">placeSearchModel</span>.<span class="name">searchForCategory</span>)
+          }
+
+          <span class="keyword">function</span> <span class="name">showSuggestions</span>()
+          {
+              <span class="keyword">if</span> (<span class="name">currentItem</span>.<span class="name">objectName</span> <span class="operator">!=</span> <span class="string">&quot;suggestionView&quot;</span>) {
+                  <span class="name">stackView</span>.<span class="name">pop</span>(<span class="name">page</span>)
+                  <span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;views/SuggestionView.qml&quot;</span>) ,
+                           properties: { &quot;suggestionModel&quot;: <span class="name">suggestionModel</span> }
+                       })
+                  <span class="name">currentItem</span>.<span class="name">objectName</span> <span class="operator">=</span> <span class="string">&quot;suggestionView&quot;</span>
+                  <span class="name">currentItem</span>.<span class="name">suggestionSelected</span>.<span class="name">connect</span>(<span class="name">searchBar</span>.<span class="name">showSearch</span>)
+                  <span class="name">currentItem</span>.<span class="name">suggestionSelected</span>.<span class="name">connect</span>(<span class="name">placeSearchModel</span>.<span class="name">searchForText</span>)
+              }
+          }
+
+          <span class="keyword">function</span> <span class="name">showPlaces</span>()
+          {
+              <span class="keyword">if</span> (<span class="name">currentItem</span>.<span class="name">objectName</span> <span class="operator">!=</span> <span class="string">&quot;searchResultView&quot;</span>) {
+                  <span class="name">stackView</span>.<span class="name">pop</span>({tem:<span class="name">page</span>,immediate: <span class="number">true</span>})
+                  <span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;views/SearchResultView.qml&quot;</span>) ,
+                           properties: { &quot;placeSearchModel&quot;: <span class="name">placeSearchModel</span> }
+                       })
+                  <span class="name">currentItem</span>.<span class="name">showPlaceDetails</span>.<span class="name">connect</span>(<span class="name">showPlaceDatails</span>)
+                  <span class="name">currentItem</span>.<span class="name">showMap</span>.<span class="name">connect</span>(<span class="name">searchBar</span>.<span class="name">showMap</span>)
+                  <span class="name">currentItem</span>.<span class="name">objectName</span> <span class="operator">=</span> <span class="string">&quot;searchResultView&quot;</span>
+              }
+          }
+
+          <span class="keyword">function</span> <span class="name">showPlaceDatails</span>(<span class="name">place</span>, distance)
+          {
+              <span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;forms/PlaceDetails.qml&quot;</span>) ,
+                       properties: { &quot;place&quot;: <span class="name">place</span>,
+                           &quot;distanceToPlace&quot;: <span class="name">distance</span> }
+                   })
+              <span class="name">currentItem</span>.<span class="name">searchForSimilar</span>.<span class="name">connect</span>(<span class="name">searchForSimilar</span>)
+              <span class="name">currentItem</span>.<span class="name">showReviews</span>.<span class="name">connect</span>(<span class="name">showReviews</span>)
+              <span class="name">currentItem</span>.<span class="name">showEditorials</span>.<span class="name">connect</span>(<span class="name">showEditorials</span>)
+              <span class="name">currentItem</span>.<span class="name">showImages</span>.<span class="name">connect</span>(<span class="name">showImages</span>)
+          }
+
+          <span class="keyword">function</span> <span class="name">showEditorials</span>(<span class="name">place</span>)
+          {
+              <span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;views/EditorialView.qml&quot;</span>) ,
+                       properties: { &quot;place&quot;: <span class="name">place</span> }
+                   })
+              <span class="name">currentItem</span>.<span class="name">showEditorial</span>.<span class="name">connect</span>(<span class="name">showEditorial</span>)
+          }
+
+          <span class="keyword">function</span> <span class="name">showReviews</span>(<span class="name">place</span>)
+          {
+              <span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;views/ReviewView.qml&quot;</span>) ,
+                       properties: { &quot;place&quot;: <span class="name">place</span> }
+                   })
+              <span class="name">currentItem</span>.<span class="name">showReview</span>.<span class="name">connect</span>(<span class="name">showReview</span>)
+          }
+
+          <span class="keyword">function</span> <span class="name">showImages</span>(<span class="name">place</span>)
+          {
+              <span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;views/ImageView.qml&quot;</span>) ,
+                       properties: { &quot;place&quot;: <span class="name">place</span> }
+                   })
+          }
+
+          <span class="keyword">function</span> <span class="name">showEditorial</span>(<span class="name">editorial</span>)
+          {
+              <span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;views/EditorialPage.qml&quot;</span>) ,
+                       properties: { &quot;editorial&quot;: <span class="name">editorial</span> }
+                   })
+          }
+
+          <span class="keyword">function</span> <span class="name">showReview</span>(<span class="name">review</span>)
+          {
+              <span class="name">push</span>({ item: <span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;views/ReviewPage.qml&quot;</span>) ,
+                       properties: { &quot;review&quot;: <span class="name">review</span> }
+                   })
+          }
+
+          <span class="keyword">function</span> <span class="name">changeSearchCenter</span>(<span class="name">coordinate</span>)
+          {
+              <span class="name">stackView</span>.<span class="name">pop</span>(<span class="name">page</span>)
+              <span class="name">map</span>.<span class="name">center</span> <span class="operator">=</span> <span class="name">coordinate</span>;
+              <span class="keyword">if</span> (<span class="name">searchRegionItem</span>) {
+                  <span class="name">map</span>.<span class="name">removeMapItem</span>(<span class="name">searchRegionItem</span>);
+                  <span class="name">searchRegionItem</span>.<span class="name">destroy</span>();
+              }
+          }
+
+          <span class="keyword">function</span> <span class="name">changeSearchBoundingBox</span>(<span class="name">coordinate</span>,widthDeg,heightDeg)
+          {
+              <span class="name">stackView</span>.<span class="name">pop</span>(<span class="name">page</span>)
+              <span class="name">map</span>.<span class="name">center</span> <span class="operator">=</span> <span class="name">coordinate</span>
+              <span class="name">searchRegion</span> <span class="operator">=</span> <span class="name">QtPositioning</span>.<span class="name">rectangle</span>(<span class="name">map</span>.<span class="name">center</span>, <span class="name">widthDeg</span>, <span class="name">heightDeg</span>)
+              <span class="keyword">if</span> (<span class="name">searchRegionItem</span>) {
+                  <span class="name">map</span>.<span class="name">removeMapItem</span>(<span class="name">searchRegionItem</span>);
+                  <span class="name">searchRegionItem</span>.<span class="name">destroy</span>();
+              }
+              <span class="name">searchRegionItem</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">createQmlObject</span>(<span class="string">'import QtLocation 5.3; MapRectangle { color: &quot;#46a2da&quot;; border.color: &quot;#190a33&quot;; border.width: 2; opacity: 0.25 }'</span>, <span class="name">page</span>, <span class="string">&quot;MapRectangle&quot;</span>);
+              <span class="name">searchRegionItem</span>.<span class="name">topLeft</span> <span class="operator">=</span> <span class="name">searchRegion</span>.<span class="name">topLeft</span>;
+              <span class="name">searchRegionItem</span>.<span class="name">bottomRight</span> <span class="operator">=</span> <span class="name">searchRegion</span>.<span class="name">bottomRight</span>;
+              <span class="name">map</span>.<span class="name">addMapItem</span>(<span class="name">searchRegionItem</span>);
+          }
+
+          <span class="keyword">function</span> <span class="name">changeSearchBoundingCircle</span>(<span class="name">coordinate</span>,radius)
+          {
+              <span class="name">stackView</span>.<span class="name">pop</span>(<span class="name">page</span>)
+              <span class="name">map</span>.<span class="name">center</span> <span class="operator">=</span> <span class="name">coordinate</span>;
+              <span class="name">searchRegion</span> <span class="operator">=</span> <span class="name">QtPositioning</span>.<span class="name">circle</span>(<span class="name">coordinate</span>, <span class="name">radius</span>)
+
+              <span class="keyword">if</span> (<span class="name">searchRegionItem</span>) {
+                  <span class="name">map</span>.<span class="name">removeMapItem</span>(<span class="name">searchRegionItem</span>);
+                  <span class="name">searchRegionItem</span>.<span class="name">destroy</span>();
+              }
+              <span class="name">searchRegionItem</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">createQmlObject</span>(<span class="string">'import QtLocation 5.3; MapCircle { color: &quot;#46a2da&quot;; border.color: &quot;#190a33&quot;; border.width: 2; opacity: 0.25 }'</span>, <span class="name">page</span>, <span class="string">&quot;MapRectangle&quot;</span>);
+              <span class="name">searchRegionItem</span>.<span class="name">center</span> <span class="operator">=</span> <span class="name">searchRegion</span>.<span class="name">center</span>;
+              <span class="name">searchRegionItem</span>.<span class="name">radius</span> <span class="operator">=</span> <span class="name">searchRegion</span>.<span class="name">radius</span>;
+              <span class="name">map</span>.<span class="name">addMapItem</span>(<span class="name">searchRegionItem</span>);
+          }
+
+          <span class="keyword">function</span> <span class="name">changeSearchSettings</span>(<span class="name">orderByDistance</span>, orderByName, locales)
+          {
+              <span class="name">stackView</span>.<span class="name">pop</span>(<span class="name">page</span>)
+              <span class="comment">/*if (isFavoritesEnabled) {
+                  if (favoritesPlugin == null)
+                      favoritesPlugin = Qt.createQmlObject('import QtLocation 5.3; Plugin { name: &quot;places_jsondb&quot; }', page);
+                  favoritesPlugin.parameters = pluginParametersFromMap(pluginParameters);
+                  placeSearchModel.favoritesPlugin = favoritesPlugin;
+              } else {
+                  placeSearchModel.favoritesPlugin = null;
+              }*/</span>
+              <span class="name">placeSearchModel</span>.<span class="name">favoritesPlugin</span> <span class="operator">=</span> <span class="number">null</span>;
+
+              <span class="name">placeSearchModel</span>.<span class="name">relevanceHint</span> <span class="operator">=</span> <span class="name">orderByDistance</span> ? <span class="name">PlaceSearchModel</span>.<span class="name">DistanceHint</span> :
+                                                                 <span class="name">orderByName</span> ? <span class="name">PlaceSearchModel</span>.<span class="name">LexicalPlaceNameHint</span> :
+                                                                               <span class="name">PlaceSearchModel</span>.<span class="name">UnspecifiedHint</span>;
+              <span class="name">map</span>.<span class="name">plugin</span>.<span class="name">locales</span> <span class="operator">=</span> <span class="name">locales</span>.<span class="name">split</span>(<span class="name">Qt</span>.<span class="name">locale</span>().<span class="name">groupSeparator</span>);
+          }
+
+          <span class="keyword">function</span> <span class="name">searchForSimilar</span>(<span class="name">place</span>) {
+              <span class="name">stackView</span>.<span class="name">pop</span>(<span class="name">page</span>)
+              <span class="name">searchBar</span>.<span class="name">showSearch</span>(<span class="name">place</span>.<span class="name">name</span>)
+              <span class="name">placeSearchModel</span>.<span class="name">searchForRecommendations</span>(<span class="name">place</span>.<span class="name">placeId</span>);
+          }
+
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">focus</span>: <span class="number">true</span>
+          <span class="name">initialItem</span>:  <span class="name">Item</span> {
+              <span class="name">id</span>: <span class="name">page</span>
+
+              <span class="type"><a href="qml-qtlocation-placesearchmodel.html">PlaceSearchModel</a></span> {
+                  <span class="name">id</span>: <span class="name">placeSearchModel</span>
+                  <span class="name">searchArea</span>: <span class="name">searchRegion</span>
+
+                  <span class="keyword">function</span> <span class="name">searchForCategory</span>(<span class="name">category</span>) {
+                      <span class="name">searchTerm</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+                      <span class="name">categories</span> <span class="operator">=</span> <span class="name">category</span>;
+                      <span class="name">recommendationId</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+                      <span class="name">searchArea</span> <span class="operator">=</span> <span class="name">searchRegion</span>
+                      <span class="name">limit</span> <span class="operator">=</span> -<span class="number">1</span>;
+                      <span class="name">update</span>();
+                  }
+
+                  <span class="keyword">function</span> <span class="name">searchForText</span>(<span class="name">text</span>) {
+                      <span class="name">searchTerm</span> <span class="operator">=</span> <span class="name">text</span>;
+                      <span class="name">categories</span> <span class="operator">=</span> <span class="number">null</span>;
+                      <span class="name">recommendationId</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+                      <span class="name">searchArea</span> <span class="operator">=</span> <span class="name">searchRegion</span>
+                      <span class="name">limit</span> <span class="operator">=</span> -<span class="number">1</span>;
+                      <span class="name">update</span>();
+                  }
+
+                  <span class="keyword">function</span> <span class="name">searchForRecommendations</span>(<span class="name">placeId</span>) {
+                      <span class="name">searchTerm</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+                      <span class="name">categories</span> <span class="operator">=</span> <span class="number">null</span>;
+                      <span class="name">recommendationId</span> <span class="operator">=</span> <span class="name">placeId</span>;
+                      <span class="name">searchArea</span> <span class="operator">=</span> <span class="number">null</span>;
+                      <span class="name">limit</span> <span class="operator">=</span> -<span class="number">1</span>;
+                      <span class="name">update</span>();
+                  }
+
+                  <span class="name">onStatusChanged</span>: {
+                      <span class="keyword">switch</span> (<span class="name">status</span>) {
+                      <span class="keyword">case</span> <span class="name">PlaceSearchModel</span>.<span class="name">Ready</span>:
+                          <span class="keyword">if</span> (<span class="name">count</span> <span class="operator">&gt;</span> <span class="number">0</span>)
+                              <span class="name">stackView</span>.<span class="name">showPlaces</span>()
+                          <span class="keyword">else</span>
+                              <span class="name">stackView</span>.<span class="name">showMessage</span>(<span class="name">qsTr</span>(<span class="string">&quot;Search Place Error&quot;</span>),<span class="name">qsTr</span>(<span class="string">&quot;Place not found !&quot;</span>))
+                          <span class="keyword">break</span>;
+                      <span class="keyword">case</span> <span class="name">PlaceSearchModel</span>.<span class="name">Error</span>:
+                          <span class="name">stackView</span>.<span class="name">showMessage</span>(<span class="name">qsTr</span>(<span class="string">&quot;Search Place Error&quot;</span>),<span class="name">errorString</span>())
+                          <span class="keyword">break</span>;
+                      }
+                  }
+              }
+
+              <span class="type"><a href="qml-qtlocation-placesearchsuggestionmodel.html">PlaceSearchSuggestionModel</a></span> {
+                  <span class="name">id</span>: <span class="name">suggestionModel</span>
+                  <span class="name">searchArea</span>: <span class="name">searchRegion</span>
+
+                  <span class="name">onStatusChanged</span>: {
+                      <span class="keyword">if</span> (<span class="name">status</span> <span class="operator">==</span> <span class="name">PlaceSearchSuggestionModel</span>.<span class="name">Ready</span>)
+                          <span class="name">stackView</span>.<span class="name">showSuggestions</span>()
+                  }
+              }
+
+              <span class="type"><a href="qml-qtlocation-categorymodel.html">CategoryModel</a></span> {
+                  <span class="name">id</span>: <span class="name">categoryModel</span>
+                  <span class="name">hierarchical</span>: <span class="number">true</span>
+              }
+
+              <span class="type"><a href="../qtqml/qml-qtqml-component.html">Component</a></span> {
+                  <span class="name">id</span>: <span class="name">mapComponent</span>
+
+                  <span class="type">MapComponent</span> {
+                      <span class="name">width</span>: <span class="name">page</span>.<span class="name">width</span>
+                      <span class="name">height</span>: <span class="name">page</span>.<span class="name">height</span>
+
+                      <span class="name">onErrorChanged</span>: {
+                          <span class="keyword">if</span> (<span class="name">map</span>.<span class="name">error</span> <span class="operator">!=</span> <span class="name">Map</span>.<span class="name">NoError</span>) {
+                              var <span class="name">title</span> = <span class="name">qsTr</span>(<span class="string">&quot;ProviderError&quot;</span>);
+                              var <span class="name">message</span> =  <span class="name">map</span>.<span class="name">errorString</span> <span class="operator">+</span> <span class="string">&quot;&lt;br/&gt;&lt;br/&gt;&lt;b&gt;&quot;</span> <span class="operator">+</span> <span class="name">qsTr</span>(<span class="string">&quot;Try to select other provider&quot;</span>) <span class="operator">+</span> <span class="string">&quot;&lt;/b&gt;&quot;</span>;
+                              <span class="keyword">if</span> (<span class="name">map</span>.<span class="name">error</span> <span class="operator">==</span> <span class="name">Map</span>.<span class="name">MissingRequiredParameterError</span>)
+                                  <span class="name">message</span> <span class="operator">+=</span> <span class="string">&quot;&lt;br/&gt;&quot;</span> <span class="operator">+</span> <span class="name">qsTr</span>(<span class="string">&quot;or see&quot;</span>) <span class="operator">+</span> <span class="string">&quot; \'mapviewer --help\' &quot;</span>
+                                          <span class="operator">+</span> <span class="name">qsTr</span>(<span class="string">&quot;how to pass plugin parameters.&quot;</span>);
+                              <span class="name">stackView</span>.<span class="name">showMessage</span>(<span class="name">title</span>,<span class="name">message</span>);
+                          }
+                      }
+
+                      <span class="type"><a href="qml-qtlocation-mapitemview.html">MapItemView</a></span> {
+                          <span class="name">model</span>: <span class="name">placeSearchModel</span>
+                          <span class="name">delegate</span>: <span class="name">MapQuickItem</span> {
+                              <span class="name">coordinate</span>: <span class="name">model</span>.<span class="name">type</span> <span class="operator">===</span> <span class="name">PlaceSearchModel</span>.<span class="name">PlaceResult</span> ? <span class="name">place</span>.<span class="name">location</span>.<span class="name">coordinate</span> : <span class="name">QtPositioning</span>.<span class="name">coordinate</span>()
+
+                              <span class="name">visible</span>: <span class="name">model</span>.<span class="name">type</span> <span class="operator">===</span> <span class="name">PlaceSearchModel</span>.<span class="name">PlaceResult</span>
+
+                              <span class="name">anchorPoint</span>.x: <span class="name">image</span>.<span class="name">width</span> <span class="operator">*</span> <span class="number">0.28</span>
+                              <span class="name">anchorPoint</span>.y: <span class="name">image</span>.<span class="name">height</span>
+
+                              <span class="name">sourceItem</span>: <span class="name">Image</span> {
+                                  <span class="name">id</span>: <span class="name">image</span>
+                                  <span class="name">source</span>: <span class="string">&quot;resources/marker.png&quot;</span>
+                                  <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+                                      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                                      <span class="name">onClicked</span>: <span class="name">stackView</span>.<span class="name">showPlaceDatails</span>(<span class="name">model</span>.<span class="name">place</span>,<span class="name">model</span>.<span class="name">distance</span>)
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">color</span>: <span class="string">&quot;white&quot;</span>
+          <span class="name">opacity</span>: <span class="name">busyIndicator</span>.<span class="name">running</span> ? <span class="number">0.8</span> : <span class="number">0</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          Behavior on <span class="name">opacity</span> { <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span>{} }
+      }
+      <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls-busyindicator.html">BusyIndicator</a></span> {
+          <span class="name">id</span>: <span class="name">busyIndicator</span>
+          <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+          <span class="name">running</span>: <span class="name">placeSearchModel</span>.<span class="name">status</span> <span class="operator">==</span> <span class="name">PlaceSearchModel</span>.<span class="name">Loading</span> <span class="operator">||</span>
+                   <span class="name">categoryModel</span>.<span class="name">status</span> <span class="operator">===</span> <span class="name">CategoryModel</span>.<span class="name">Loading</span>
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@places/places.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

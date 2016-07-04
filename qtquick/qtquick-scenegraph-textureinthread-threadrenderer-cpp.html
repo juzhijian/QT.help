@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>threadrenderer.cpp Example File | Qt Quick 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-scenegraph-textureinthread-example.html">Scene Graph - Rendering FBOs in a thread</a></td><td >threadrenderer.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">threadrenderer.cpp Example File</h1>
+<span class="subtitle">scenegraph/textureinthread/threadrenderer.cpp</span>
+<!-- $$$scenegraph/textureinthread/threadrenderer.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;threadrenderer.h&quot;</span>
+  <span class="preprocessor">#include &quot;logorenderer.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtCore/QMutex&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QThread&gt;</span>
+
+  <span class="preprocessor">#include &lt;QtGui/QOpenGLContext&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QOpenGLFramebufferObject&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QGuiApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QOffscreenSurface&gt;</span>
+
+  <span class="preprocessor">#include &lt;QtQuick/QQuickWindow&gt;</span>
+  <span class="preprocessor">#include &lt;qsgsimpletexturenode.h&gt;</span>
+
+  <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qthread.html">QThread</a></span> <span class="operator">*</span><span class="operator">&gt;</span> ThreadRenderer<span class="operator">::</span>threads;
+
+  <span class="comment">/*
+   * The render thread shares a context with the scene graph and will
+   * render into two separate FBOs, one to use for display and one
+   * to use for rendering
+   */</span>
+  <span class="keyword">class</span> RenderThread : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qthread.html">QThread</a></span>
+  {
+      Q_OBJECT
+  <span class="keyword">public</span>:
+      RenderThread(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> <span class="operator">&amp;</span>size)
+          : surface(<span class="number">0</span>)
+          <span class="operator">,</span> context(<span class="number">0</span>)
+          <span class="operator">,</span> m_renderFbo(<span class="number">0</span>)
+          <span class="operator">,</span> m_displayFbo(<span class="number">0</span>)
+          <span class="operator">,</span> m_logoRenderer(<span class="number">0</span>)
+          <span class="operator">,</span> m_size(size)
+      {
+          ThreadRenderer<span class="operator">::</span>threads <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="keyword">this</span>;
+      }
+
+      <span class="type"><a href="../qtgui/qoffscreensurface.html">QOffscreenSurface</a></span> <span class="operator">*</span>surface;
+      <span class="type"><a href="../qtgui/qopenglcontext.html">QOpenGLContext</a></span> <span class="operator">*</span>context;
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> renderNext()
+      {
+          context<span class="operator">-</span><span class="operator">&gt;</span>makeCurrent(surface);
+
+          <span class="keyword">if</span> (<span class="operator">!</span>m_renderFbo) {
+              <span class="comment">// Initialize the buffers and renderer</span>
+              <span class="type"><a href="../qtgui/qopenglframebufferobjectformat.html">QOpenGLFramebufferObjectFormat</a></span> format;
+              format<span class="operator">.</span>setAttachment(<span class="type"><a href="../qtgui/qopenglframebufferobject.html">QOpenGLFramebufferObject</a></span><span class="operator">::</span>CombinedDepthStencil);
+              m_renderFbo <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtgui/qopenglframebufferobject.html">QOpenGLFramebufferObject</a></span>(m_size<span class="operator">,</span> format);
+              m_displayFbo <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtgui/qopenglframebufferobject.html">QOpenGLFramebufferObject</a></span>(m_size<span class="operator">,</span> format);
+              m_logoRenderer <span class="operator">=</span> <span class="keyword">new</span> LogoRenderer();
+              m_logoRenderer<span class="operator">-</span><span class="operator">&gt;</span>initialize();
+          }
+
+          m_renderFbo<span class="operator">-</span><span class="operator">&gt;</span>bind();
+          context<span class="operator">-</span><span class="operator">&gt;</span>functions()<span class="operator">-</span><span class="operator">&gt;</span>glViewport(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> m_size<span class="operator">.</span>width()<span class="operator">,</span> m_size<span class="operator">.</span>height());
+
+          m_logoRenderer<span class="operator">-</span><span class="operator">&gt;</span>render();
+
+          <span class="comment">// We need to flush the contents to the FBO before posting</span>
+          <span class="comment">// the texture to the other thread, otherwise, we might</span>
+          <span class="comment">// get unexpected results.</span>
+          context<span class="operator">-</span><span class="operator">&gt;</span>functions()<span class="operator">-</span><span class="operator">&gt;</span>glFlush();
+
+          m_renderFbo<span class="operator">-</span><span class="operator">&gt;</span>bindDefault();
+          <a href="../qtcore/qtalgorithms-obsolete.html#qSwap-1">qSwap</a>(m_renderFbo<span class="operator">,</span> m_displayFbo);
+
+          <span class="keyword">emit</span> textureReady(m_displayFbo<span class="operator">-</span><span class="operator">&gt;</span>texture()<span class="operator">,</span> m_size);
+      }
+
+      <span class="type">void</span> shutDown()
+      {
+          context<span class="operator">-</span><span class="operator">&gt;</span>makeCurrent(surface);
+          <span class="keyword">delete</span> m_renderFbo;
+          <span class="keyword">delete</span> m_displayFbo;
+          <span class="keyword">delete</span> m_logoRenderer;
+          context<span class="operator">-</span><span class="operator">&gt;</span>doneCurrent();
+          <span class="keyword">delete</span> context;
+
+          <span class="comment">// schedule this to be deleted only after we're done cleaning up</span>
+          surface<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+
+          <span class="comment">// Stop event processing, move the thread to GUI and make sure it is deleted.</span>
+          exit();
+          moveToThread(<span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span><span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>thread());
+      }
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> textureReady(<span class="type">int</span> id<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> <span class="operator">&amp;</span>size);
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtgui/qopenglframebufferobject.html">QOpenGLFramebufferObject</a></span> <span class="operator">*</span>m_renderFbo;
+      <span class="type"><a href="../qtgui/qopenglframebufferobject.html">QOpenGLFramebufferObject</a></span> <span class="operator">*</span>m_displayFbo;
+
+      LogoRenderer <span class="operator">*</span>m_logoRenderer;
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> m_size;
+  };
+
+  <span class="keyword">class</span> TextureNode : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">,</span> <span class="keyword">public</span> <span class="type"><a href="qsgsimpletexturenode.html">QSGSimpleTextureNode</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      TextureNode(<span class="type"><a href="qquickwindow.html">QQuickWindow</a></span> <span class="operator">*</span>window)
+          : m_id(<span class="number">0</span>)
+          <span class="operator">,</span> m_size(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span>)
+          <span class="operator">,</span> m_texture(<span class="number">0</span>)
+          <span class="operator">,</span> m_window(window)
+      {
+          <span class="comment">// Our texture node must have a texture, so use the default 0 texture.</span>
+          m_texture <span class="operator">=</span> m_window<span class="operator">-</span><span class="operator">&gt;</span>createTextureFromId(<span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">1</span><span class="operator">,</span> <span class="number">1</span>));
+          setTexture(m_texture);
+          setFiltering(<span class="type"><a href="qsgtexture.html">QSGTexture</a></span><span class="operator">::</span>Linear);
+      }
+
+      <span class="operator">~</span>TextureNode()
+      {
+          <span class="keyword">delete</span> m_texture;
+      }
+
+  <span class="keyword">signals</span>:
+      <span class="type">void</span> textureInUse();
+      <span class="type">void</span> pendingNewTexture();
+
+  <span class="keyword">public</span> <span class="keyword">slots</span>:
+
+      <span class="comment">// This function gets called on the FBO rendering thread and will store the</span>
+      <span class="comment">// texture id and size and schedule an update on the window.</span>
+      <span class="type">void</span> newTexture(<span class="type">int</span> id<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> <span class="operator">&amp;</span>size) {
+          m_mutex<span class="operator">.</span>lock();
+          m_id <span class="operator">=</span> id;
+          m_size <span class="operator">=</span> size;
+          m_mutex<span class="operator">.</span>unlock();
+
+          <span class="comment">// We cannot call QQuickWindow::update directly here, as this is only allowed</span>
+          <span class="comment">// from the rendering thread or GUI thread.</span>
+          <span class="keyword">emit</span> pendingNewTexture();
+      }
+
+      <span class="comment">// Before the scene graph starts to render, we update to the pending texture</span>
+      <span class="type">void</span> prepareNode() {
+          m_mutex<span class="operator">.</span>lock();
+          <span class="type">int</span> newId <span class="operator">=</span> m_id;
+          <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> size <span class="operator">=</span> m_size;
+          m_id <span class="operator">=</span> <span class="number">0</span>;
+          m_mutex<span class="operator">.</span>unlock();
+          <span class="keyword">if</span> (newId) {
+              <span class="keyword">delete</span> m_texture;
+              <span class="comment">// note: include QQuickWindow::TextureHasAlphaChannel if the rendered content</span>
+              <span class="comment">// has alpha.</span>
+              m_texture <span class="operator">=</span> m_window<span class="operator">-</span><span class="operator">&gt;</span>createTextureFromId(newId<span class="operator">,</span> size);
+              setTexture(m_texture);
+
+              markDirty(DirtyMaterial);
+
+              <span class="comment">// This will notify the rendering thread that the texture is now being rendered</span>
+              <span class="comment">// and it can start rendering to the other one.</span>
+              <span class="keyword">emit</span> textureInUse();
+          }
+      }
+
+  <span class="keyword">private</span>:
+
+      <span class="type">int</span> m_id;
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> m_size;
+
+      <span class="type"><a href="../qtcore/qmutex.html">QMutex</a></span> m_mutex;
+
+      <span class="type"><a href="qsgtexture.html">QSGTexture</a></span> <span class="operator">*</span>m_texture;
+      <span class="type"><a href="qquickwindow.html">QQuickWindow</a></span> <span class="operator">*</span>m_window;
+  };
+
+  ThreadRenderer<span class="operator">::</span>ThreadRenderer()
+      : m_renderThread(<span class="number">0</span>)
+  {
+      setFlag(ItemHasContents<span class="operator">,</span> <span class="keyword">true</span>);
+      m_renderThread <span class="operator">=</span> <span class="keyword">new</span> RenderThread(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">512</span><span class="operator">,</span> <span class="number">512</span>));
+  }
+
+  <span class="type">void</span> ThreadRenderer<span class="operator">::</span>ready()
+  {
+      m_renderThread<span class="operator">-</span><span class="operator">&gt;</span>surface <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtgui/qoffscreensurface.html">QOffscreenSurface</a></span>();
+      m_renderThread<span class="operator">-</span><span class="operator">&gt;</span>surface<span class="operator">-</span><span class="operator">&gt;</span>setFormat(m_renderThread<span class="operator">-</span><span class="operator">&gt;</span>context<span class="operator">-</span><span class="operator">&gt;</span>format());
+      m_renderThread<span class="operator">-</span><span class="operator">&gt;</span>surface<span class="operator">-</span><span class="operator">&gt;</span>create();
+
+      m_renderThread<span class="operator">-</span><span class="operator">&gt;</span>moveToThread(m_renderThread);
+
+      connect(window()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qquickwindow.html">QQuickWindow</a></span><span class="operator">::</span>sceneGraphInvalidated<span class="operator">,</span> m_renderThread<span class="operator">,</span> <span class="operator">&amp;</span>RenderThread<span class="operator">::</span>shutDown<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>QueuedConnection);
+
+      m_renderThread<span class="operator">-</span><span class="operator">&gt;</span>start();
+      update();
+  }
+
+  <span class="type"><a href="qsgnode.html">QSGNode</a></span> <span class="operator">*</span>ThreadRenderer<span class="operator">::</span>updatePaintNode(<span class="type"><a href="qsgnode.html">QSGNode</a></span> <span class="operator">*</span>oldNode<span class="operator">,</span> UpdatePaintNodeData <span class="operator">*</span>)
+  {
+      TextureNode <span class="operator">*</span>node <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>TextureNode <span class="operator">*</span><span class="operator">&gt;</span>(oldNode);
+
+      <span class="keyword">if</span> (<span class="operator">!</span>m_renderThread<span class="operator">-</span><span class="operator">&gt;</span>context) {
+          <span class="type"><a href="../qtgui/qopenglcontext.html">QOpenGLContext</a></span> <span class="operator">*</span>current <span class="operator">=</span> window()<span class="operator">-</span><span class="operator">&gt;</span>openglContext();
+          <span class="comment">// Some GL implementations requres that the currently bound context is</span>
+          <span class="comment">// made non-current before we set up sharing, so we doneCurrent here</span>
+          <span class="comment">// and makeCurrent down below while setting up our own context.</span>
+          current<span class="operator">-</span><span class="operator">&gt;</span>doneCurrent();
+
+          m_renderThread<span class="operator">-</span><span class="operator">&gt;</span>context <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtgui/qopenglcontext.html">QOpenGLContext</a></span>();
+          m_renderThread<span class="operator">-</span><span class="operator">&gt;</span>context<span class="operator">-</span><span class="operator">&gt;</span>setFormat(current<span class="operator">-</span><span class="operator">&gt;</span>format());
+          m_renderThread<span class="operator">-</span><span class="operator">&gt;</span>context<span class="operator">-</span><span class="operator">&gt;</span>setShareContext(current);
+          m_renderThread<span class="operator">-</span><span class="operator">&gt;</span>context<span class="operator">-</span><span class="operator">&gt;</span>create();
+          m_renderThread<span class="operator">-</span><span class="operator">&gt;</span>context<span class="operator">-</span><span class="operator">&gt;</span>moveToThread(m_renderThread);
+
+          current<span class="operator">-</span><span class="operator">&gt;</span>makeCurrent(window());
+
+          <span class="type"><a href="../qtcore/qmetaobject.html">QMetaObject</a></span><span class="operator">::</span>invokeMethod(<span class="keyword">this</span><span class="operator">,</span> <span class="string">&quot;ready&quot;</span>);
+          <span class="keyword">return</span> <span class="number">0</span>;
+      }
+
+      <span class="keyword">if</span> (<span class="operator">!</span>node) {
+          node <span class="operator">=</span> <span class="keyword">new</span> TextureNode(window());
+
+          <span class="comment">/* Set up connections to get the production of FBO textures in sync with vsync on the
+           * rendering thread.
+           *
+           * When a new texture is ready on the rendering thread, we use a direct connection to
+           * the texture node to let it know a new texture can be used. The node will then
+           * emit pendingNewTexture which we bind to QQuickWindow::update to schedule a redraw.
+           *
+           * When the scene graph starts rendering the next frame, the prepareNode() function
+           * is used to update the node with the new texture. Once it completes, it emits
+           * textureInUse() which we connect to the FBO rendering thread's renderNext() to have
+           * it start producing content into its current &quot;back buffer&quot;.
+           *
+           * This FBO rendering pipeline is throttled by vsync on the scene graph rendering thread.
+           */</span>
+          connect(m_renderThread<span class="operator">,</span> <span class="operator">&amp;</span>RenderThread<span class="operator">::</span>textureReady<span class="operator">,</span> node<span class="operator">,</span> <span class="operator">&amp;</span>TextureNode<span class="operator">::</span>newTexture<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DirectConnection);
+          connect(node<span class="operator">,</span> <span class="operator">&amp;</span>TextureNode<span class="operator">::</span>pendingNewTexture<span class="operator">,</span> window()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qquickwindow.html">QQuickWindow</a></span><span class="operator">::</span>update<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>QueuedConnection);
+          connect(window()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qquickwindow.html">QQuickWindow</a></span><span class="operator">::</span>beforeRendering<span class="operator">,</span> node<span class="operator">,</span> <span class="operator">&amp;</span>TextureNode<span class="operator">::</span>prepareNode<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DirectConnection);
+          connect(node<span class="operator">,</span> <span class="operator">&amp;</span>TextureNode<span class="operator">::</span>textureInUse<span class="operator">,</span> m_renderThread<span class="operator">,</span> <span class="operator">&amp;</span>RenderThread<span class="operator">::</span>renderNext<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>QueuedConnection);
+
+          <span class="comment">// Get the production of FBO textures started..</span>
+          <span class="type"><a href="../qtcore/qmetaobject.html">QMetaObject</a></span><span class="operator">::</span>invokeMethod(m_renderThread<span class="operator">,</span> <span class="string">&quot;renderNext&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>QueuedConnection);
+      }
+
+      node<span class="operator">-</span><span class="operator">&gt;</span>setRect(boundingRect());
+
+      <span class="keyword">return</span> node;
+  }
+
+  <span class="preprocessor">#include &quot;threadrenderer.moc&quot;</span>
+
+</pre>
+</div>
+<!-- @@@scenegraph/textureinthread/threadrenderer.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- build.qdoc -->
+  <title>Building Qt Virtual Keyboard | Qt Virtual Keyboard 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td >Qt 5.7</td><td ><a href="qtvirtualkeyboard-index.html">Qt Virtual Keyboard</a></td><td >Building Qt Virtual Keyboard</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<p class="naviNextPrevious headerNavi">
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#overview">Overview</a></li>
+<li class="level1"><a href="#build-instructions">Build Instructions</a></li>
+<li class="level2"><a href="#configuration-options">Configuration Options</a></li>
+<li class="level2"><a href="#building-documentation">Building Documentation</a></li>
+<li class="level2"><a href="#hunspell-integration">Hunspell Integration</a></li>
+<li class="level2"><a href="#static-builds">Static builds</a></li>
+<li class="level1"><a href="#deployment">Deployment</a></li>
+<li class="level2"><a href="#desktop-targets">Desktop Targets</a></li>
+<li class="level2"><a href="#boot2qt-targets">Boot2Qt Targets</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Building Qt Virtual Keyboard</h1>
+<span class="subtitle"></span>
+<!-- $$$build.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="overview"></a>
+<h2 id="overview">Overview</h2>
+<p>This document describes how to build the Qt Virtual Keyboard plugin.</p>
+<p>The project is split into the following subprojects:</p>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><i>examples/virtualkeyboard/basic/basic.pro</i></td><td >Qt Virtual Keyboard Demo application</td></tr>
+<tr valign="top" class="even"><td ><i>src/virtualkeyboard/virtualkeyboard.pro</i></td><td >Qt Virtual Keyboard plugin</td></tr>
+<tr valign="top" class="odd"><td ><i>src/virtualkeyboard/styles/styles.pro</i></td><td >Qt Virtual Keyboard Style plugin that enables style decorations for the keyboard</td></tr>
+<tr valign="top" class="even"><td ><i>src/virtualkeyboard/3rdparty/hunspell/hunspell.pro</i></td><td >A project file for compiling the Hunspell library.<p><b>Note: </b>This project is used if the Hunspell library is built from sources rather than depending on the system library. The project will be activated when the source code is extracted to this directory.</p></td></tr>
+<tr valign="top" class="odd"><td ><i>src/virtualkeyboard/3rdparty/lipi-toolkit/lipi-toolkit.pro</i></td><td >A project file for compiling the lipi-toolkit library.</td></tr>
+<tr valign="top" class="even"><td ><i>src/virtualkeyboard/3rdparty/openwnn/openwnn.pro</i></td><td >A project file for compiling the OpenWNN library.</td></tr>
+<tr valign="top" class="odd"><td ><i>src/virtualkeyboard/3rdparty/pinyin/pinyin.pro</i></td><td >A project file for compiling the PinyinIME library.</td></tr>
+<tr valign="top" class="even"><td ><i>src/virtualkeyboard/3rdparty/t9write/t9write.pro</i></td><td >A project file for including T9 Write dictionaries as resources.</td></tr>
+<tr valign="top" class="odd"><td ><i>src/virtualkeyboard/3rdparty/tcime/tcime.pro</i></td><td >A project file for compiling the TCIME library.</td></tr>
+</table></div>
+<p>The input methods are implemented either in C++ or QML. Qt Virtual Keyboard provides implementations of <i>PlainInputMethod</i>, <i>MultitapInputMethod</i> and <i>HunspellInputMethod</i>. The <i>MultitapInputMethod</i> is implemented in QML while the others are implemented in C++.</p>
+<a name="build-instructions"></a>
+<h2 id="build-instructions">Build Instructions</h2>
+<p>The Qt Virtual Keyboard can be built for Linux Desktop/X11, Windows Desktop or Boot2Qt targets. The target is automatically detected by QMAKE and requires no special configuration parameters.</p>
+<p>Qt Creator is the preferred build environment for Qt Virtual Keyboard as you can then leverage the shadow build functionality and rapidly switch between build targets.</p>
+<a name="configuration-options"></a>
+<h3 >Configuration Options</h3>
+<p>The table below contains the top-level options for configuring the virtual keyboard features.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >CONFIG</th><th >Description</th><th >Remarks</th></tr></thead>
+<tr valign="top" class="odd"><td ><i>lang-&lt;code&gt;</i></td><td >Enables the specified language</td><td >The specified language can be activated using <i>lang-&lt;code&gt;</i> option, which has the format &quot;language[_country]&quot;, where:<ul>
+<li>language is a lowercase, two-letter, ISO 639 language code</li>
+<li>country is an uppercase, two-letter, ISO 3166 country code</li>
+</ul>
+<p>This option can be used to define the language support as required. The virtual keyboard can support one or more languages at a time.</p>
+<p>For example, <code>CONFIG+=lang-fi</code> activates the Finnish language.</p>
+<p>The virtual keyboard automatically includes the English language if no other languages are specified.</p>
+</td></tr>
+<tr valign="top" class="even"><td ><i>lang-all</i></td><td >Enables all the languages</td><td >Enables all the languages supported by the virtual keyboard. This flag is essentially an alias for <code>CONFIG+=&quot;lang-ar_AR lang-da_DK lang-de_DE lang-en_GB lang-es_ES lang-fa_FA lang-fi_FI lang-fr_FR lang-hi_IN lang-it_IT lang-ja_JP lang-ko_KR lang-nb_NO lang-pl_PL lang-pt_PT lang-ru_RU lang-sv_SE lang-zh_CN lang-zh_TW&quot;</code></td></tr>
+<tr valign="top" class="odd"><td ><i>handwriting</i></td><td >Enables handwriting input</td><td >This flag enables handwriting input using the first engine available at build time in the following order: <code>t9write</code>, <code>lipi-toolkit</code>. To enable handwriting input using a specific engine, use the feature-specific configuration instead. For example, <code>CONFIG+=lipi-toolkit</code>.</td></tr>
+<tr valign="top" class="even"><td ><i>arrow-key-navigation</i></td><td >Enables arrow key navigation for the keyboard</td><td >Allows controlling the keyboard using the arrow and return keys.</td></tr>
+</table></div>
+<a name="advanced-configuration-options"></a>
+<h4 >Advanced Configuration Options</h4>
+<p>The table below shows the advanced configuration options that will be applied automatically when activating a certain top-level feature. The options can also be used for enabling or disabling a specific feature.</p>
+<p>In most cases, these options are not needed, but there are also cases where their use is justified. For example, the Traditional Chinese language (CONFIG=lang-zh_TW) will include both Zhuyin and Cangjie input methods by default. This behavior can be changed by adding the preferred input method to the configuration, e.g&#x2e;, <code>CONFIG+=&quot;lang-zh_TW</code> zhuyin&quot;.</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Advanced CONFIG</th><th >Top-level CONFIG</th><th >Description</th><th >Remarks</th></tr></thead>
+<tr valign="top" class="odd"><td ><i>disable-desktop</i></td><td ><i>n/a</i></td><td >Disables Desktop integration</td><td >By default, the desktop integration is enabled when the target environment is X11 or Windows desktop. With this option, the desktop integration can be disabled.<p><b>Note: </b>For embedded integration, where the <a href="qml-qtquick-virtualkeyboard-inputpanel.html">InputPanel</a> is instantitated by the application, there is no need to use this option explicitly. The virtual keyboard will not create the desktop input panel if the application creates <a href="qml-qtquick-virtualkeyboard-inputpanel.html">InputPanel</a> before the focus is set to an input field.</p></td></tr>
+<tr valign="top" class="even"><td ><i>disable-xcb</i></td><td ><i>n/a</i></td><td >Disables X11 integration</td><td ><p><b>Note: </b>Deprecated since 1.3&#x2e; Use <i>disable-desktop</i> instead.</p></td></tr>
+<tr valign="top" class="odd"><td ><i>disable-hunspell</i></td><td ><i>n/a</i></td><td >Disables Hunspell integration</td><td >Hunspell integration is enabled if the Hunspell library is available on the system, or if it is built using the local project file. Integration can be disabled using this option.</td></tr>
+<tr valign="top" class="even"><td ><i>static</i></td><td >Enables static builds of the virtual keyboard</td><td >This option enables static builds.</td></tr>
+<tr valign="top" class="odd"><td ><i>retro-style</i></td><td ><i>n/a</i></td><td >Enables Retro style</td><td >Changes the default keyboard style to the Retro style. Both styles are still included in the package, but this option allows you to change the built-in default style.</td></tr>
+<tr valign="top" class="even"><td ><i>pinyin</i></td><td ><i>lang-zh_CN</i></td><td >Enables the Pinyin input method for Simplified Chinese.</td><td >This option activates the Pinyin input method for the Simplified Chinese language.</td></tr>
+<tr valign="top" class="odd"><td ><i>tcime</i></td><td ><i>lang-zh_TW</i></td><td >Enables the both Cangjie and Zhuyin input methods for Traditional Chinese.</td><td >This option activates the both Cangjie and Zhuyin input methods for the Traditional Chinese language.</td></tr>
+<tr valign="top" class="even"><td ><i>cangjie</i></td><td ><i>lang-zh_TW</i></td><td >Enables the Cangjie input method for Traditional Chinese.</td><td >This option activates the Cangjie input method for the Traditional Chinese language.</td></tr>
+<tr valign="top" class="odd"><td ><i>zhuyin</i></td><td ><i>lang-zh_TW</i></td><td >Enables the Zhuyin input method for Traditional Chinese.</td><td >This option activates the Zhuyin input method for the Traditional Chinese language.</td></tr>
+<tr valign="top" class="even"><td ><i>hangul</i></td><td ><i>lang-ko_KR</i></td><td >Enables the Hangul input method for Korean.</td><td >This option activates the Hangul input method for the Korean language.</td></tr>
+<tr valign="top" class="odd"><td ><i>openwnn</i></td><td ><i>lang-ja_JP</i></td><td >Enables the OpenWnn input method for Japanese.</td><td >This option activates the OpenWnn input method for the Japanese language.</td></tr>
+<tr valign="top" class="even"><td ><i>lipi-toolkit</i></td><td ><i>handwriting</i></td><td >Enables the handwriting input method using Lipi Toolkit.</td><td >Handwriting recognition is based on the open source Lipi Toolkit.</td></tr>
+<tr valign="top" class="odd"><td ><i>t9write</i></td><td ><i>handwriting</i></td><td >Enables the handwriting input method using T9 Write.</td><td >Handwriting recognition is based on the commercial T9 Write product from Nuance Communications.</td></tr>
+</table></div>
+<a name="building-documentation"></a>
+<h3 >Building Documentation</h3>
+<div class="table"><table class="generic">
+ <tr valign="top" class="odd"><td ><i>make docs</i></td><td >Generates documentation</td></tr>
+</table></div>
+<a name="hunspell-integration"></a>
+<h3 >Hunspell Integration</h3>
+<p>By default, <i>HunspellInputMethod</i> will not be available unless the Hunspell library and development headers are found. For Linux/X11 targets, the Hunspell library can be provided by installing the libhunspell-dev package. Alternatively, the Hunspell sources can be extracted into the <i>src/virtualkeyboard/3rdparty/hunspell</i> directory. If Hunspell sources are used, then the dictionary files must also be copied into the <i>src/virtualkeyboard/3rdparty/hunspell/data</i> directory. Furthermore, if Hunspell sources are used, <i>hunspell.pro</i> will be used for all targets.</p>
+<a name="static-builds"></a>
+<h3 >Static builds</h3>
+<p>The virtual keyboard can be built and linked statically against the application. This implies that Qt is also built statically (using the -static option in the configure command line).</p>
+<p>Static builds of the virtual keyboard are enabled by adding <code>CONFIG+=static</code> to the qmake command line and then rebuilding.</p>
+<p>Some third party modules used by the virtual keyboard are always built as shared libraries. These modules are Hunspell and Lipi Toolkit.</p>
+<a name="using-the-static-plugin"></a>
+<h4 >Using the static plugin</h4>
+<p>The following section should be added to the application project file that uses the statically built virtual keyboard.</p>
+<pre class="cpp">
+
+  <span class="keyword">static</span> {
+      QTPLUGIN <span class="operator">+</span><span class="operator">=</span> qtvirtualkeyboardplugin
+      QT <span class="operator">+</span><span class="operator">=</span> svg
+  }
+
+</pre>
+<p><code>QTPLUGIN</code> causes qmake to pull linker dependencies for the virtual keyboard plugin. The SVG module is required as an extra dependency for Qt, since the SVG format is required by the default styles.</p>
+<p>From here on, using a statically built virtual keyboard is no different from the normal case.</p>
+<a name="deployment"></a>
+<h2 id="deployment">Deployment</h2>
+<a name="desktop-targets"></a>
+<h3 >Desktop Targets</h3>
+<p>Add a Deploy Step that executes the <i>make install</i> command, then deploy using the <i>Deploy All</i> command.</p>
+<a name="boot2qt-targets"></a>
+<h3 >Boot2Qt Targets</h3>
+<p>The installation is done by copying the necessary files to the memory card, or by using the adb push command.</p>
+</div>
+<!-- @@@build.html -->
+<p class="naviNextPrevious footerNavi">
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

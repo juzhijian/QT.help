@@ -1,0 +1,621 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>appmodel.cpp Example File | Qt Positioning 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtpositioning-index.html">Qt Positioning</a></td><td ><a href="qtpositioning-weatherinfo-example.html">Weather Info (C++/QML)</a></td><td >appmodel.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">appmodel.cpp Example File</h1>
+<span class="subtitle">weatherinfo/appmodel.cpp</span>
+<!-- $$$weatherinfo/appmodel.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;appmodel.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;qgeopositioninfosource.h&gt;</span>
+  <span class="preprocessor">#include &lt;qgeosatelliteinfosource.h&gt;</span>
+  <span class="preprocessor">#include &lt;qnmeapositioninfosource.h&gt;</span>
+  <span class="preprocessor">#include &lt;qgeopositioninfo.h&gt;</span>
+  <span class="preprocessor">#include &lt;qnetworkconfigmanager.h&gt;</span>
+  <span class="preprocessor">#include &lt;qnetworksession.h&gt;</span>
+
+  <span class="preprocessor">#include &lt;QSignalMapper&gt;</span>
+  <span class="preprocessor">#include &lt;QJsonDocument&gt;</span>
+  <span class="preprocessor">#include &lt;QJsonObject&gt;</span>
+  <span class="preprocessor">#include &lt;QJsonArray&gt;</span>
+  <span class="preprocessor">#include &lt;QStringList&gt;</span>
+  <span class="preprocessor">#include &lt;QTimer&gt;</span>
+  <span class="preprocessor">#include &lt;QUrlQuery&gt;</span>
+  <span class="preprocessor">#include &lt;QElapsedTimer&gt;</span>
+  <span class="preprocessor">#include &lt;QLoggingCategory&gt;</span>
+
+  <span class="comment">/*
+   *This application uses http://openweathermap.org/api
+   **/</span>
+
+  <span class="preprocessor">#define ZERO_KELVIN 273.15</span>
+
+  Q_LOGGING_CATEGORY(requestsLog<span class="operator">,</span><span class="string">&quot;wapp.requests&quot;</span>)
+
+  WeatherData<span class="operator">::</span>WeatherData(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent) :
+          <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>(parent)
+  {
+  }
+
+  WeatherData<span class="operator">::</span>WeatherData(<span class="keyword">const</span> WeatherData <span class="operator">&amp;</span>other) :
+          <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>(<span class="number">0</span>)<span class="operator">,</span>
+          m_dayOfWeek(other<span class="operator">.</span>m_dayOfWeek)<span class="operator">,</span>
+          m_weather(other<span class="operator">.</span>m_weather)<span class="operator">,</span>
+          m_weatherDescription(other<span class="operator">.</span>m_weatherDescription)<span class="operator">,</span>
+          m_temperature(other<span class="operator">.</span>m_temperature)
+  {
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> WeatherData<span class="operator">::</span>dayOfWeek() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_dayOfWeek;
+  }
+
+  <span class="comment">/*!
+   * The icon value is based on OpenWeatherMap.org icon set. For details
+   * see http://bugs.openweathermap.org/projects/api/wiki/Weather_Condition_Codes
+   *
+   * e.g. 01d -&gt;sunny day
+   *
+   * The icon string will be translated to
+   * http://openweathermap.org/img/w/01d.png
+   */</span>
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> WeatherData<span class="operator">::</span>weatherIcon() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_weather;
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> WeatherData<span class="operator">::</span>weatherDescription() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_weatherDescription;
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> WeatherData<span class="operator">::</span>temperature() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_temperature;
+  }
+
+  <span class="type">void</span> WeatherData<span class="operator">::</span>setDayOfWeek(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>value)
+  {
+      m_dayOfWeek <span class="operator">=</span> value;
+      <span class="keyword">emit</span> dataChanged();
+  }
+
+  <span class="type">void</span> WeatherData<span class="operator">::</span>setWeatherIcon(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>value)
+  {
+      m_weather <span class="operator">=</span> value;
+      <span class="keyword">emit</span> dataChanged();
+  }
+
+  <span class="type">void</span> WeatherData<span class="operator">::</span>setWeatherDescription(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>value)
+  {
+      m_weatherDescription <span class="operator">=</span> value;
+      <span class="keyword">emit</span> dataChanged();
+  }
+
+  <span class="type">void</span> WeatherData<span class="operator">::</span>setTemperature(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>value)
+  {
+      m_temperature <span class="operator">=</span> value;
+      <span class="keyword">emit</span> dataChanged();
+  }
+
+  <span class="keyword">class</span> AppModelPrivate
+  {
+  <span class="keyword">public</span>:
+      <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">int</span> baseMsBeforeNewRequest <span class="operator">=</span> <span class="number">5</span> <span class="operator">*</span> <span class="number">1000</span>; <span class="comment">// 5 s, increased after each missing answer up to 10x</span>
+      <span class="type"><a href="qgeopositioninfosource.html">QGeoPositionInfoSource</a></span> <span class="operator">*</span>src;
+      <span class="type"><a href="qgeocoordinate.html">QGeoCoordinate</a></span> coord;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> longitude<span class="operator">,</span> latitude;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> city;
+      <span class="type"><a href="../qtnetwork/qnetworkaccessmanager.html">QNetworkAccessManager</a></span> <span class="operator">*</span>nam;
+      <span class="type"><a href="../qtnetwork/qnetworksession.html">QNetworkSession</a></span> <span class="operator">*</span>ns;
+      WeatherData now;
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>WeatherData<span class="operator">*</span><span class="operator">&gt;</span> forecast;
+      <span class="type"><a href="../qtqml/qqmllistproperty.html">QQmlListProperty</a></span><span class="operator">&lt;</span>WeatherData<span class="operator">&gt;</span> <span class="operator">*</span>fcProp;
+      <span class="type"><a href="../qtcore/qsignalmapper.html">QSignalMapper</a></span> <span class="operator">*</span>geoReplyMapper;
+      <span class="type"><a href="../qtcore/qsignalmapper.html">QSignalMapper</a></span> <span class="operator">*</span>weatherReplyMapper<span class="operator">,</span> <span class="operator">*</span>forecastReplyMapper;
+      bool ready;
+      bool useGps;
+      <span class="type"><a href="../qtcore/qelapsedtimer.html">QElapsedTimer</a></span> throttle;
+      <span class="type">int</span> nErrors;
+      <span class="type">int</span> minMsBeforeNewRequest;
+      <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span> delayedCityRequestTimer;
+      <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span> requestNewWeatherTimer;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> app_ident;
+
+      AppModelPrivate() :
+              src(NULL)<span class="operator">,</span>
+              nam(NULL)<span class="operator">,</span>
+              ns(NULL)<span class="operator">,</span>
+              fcProp(NULL)<span class="operator">,</span>
+              ready(<span class="keyword">false</span>)<span class="operator">,</span>
+              useGps(<span class="keyword">true</span>)<span class="operator">,</span>
+              nErrors(<span class="number">0</span>)<span class="operator">,</span>
+              minMsBeforeNewRequest(baseMsBeforeNewRequest)
+      {
+          delayedCityRequestTimer<span class="operator">.</span>setSingleShot(<span class="keyword">true</span>);
+          delayedCityRequestTimer<span class="operator">.</span>setInterval(<span class="number">1000</span>); <span class="comment">// 1 s</span>
+          requestNewWeatherTimer<span class="operator">.</span>setSingleShot(<span class="keyword">false</span>);
+          requestNewWeatherTimer<span class="operator">.</span>setInterval(<span class="number">20</span><span class="operator">*</span><span class="number">60</span><span class="operator">*</span><span class="number">1000</span>); <span class="comment">// 20 min</span>
+          throttle<span class="operator">.</span>invalidate();
+          app_ident <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;36496bad1955bf3365448965a42b9eac&quot;</span>);
+      }
+  };
+
+  <span class="keyword">static</span> <span class="type">void</span> forecastAppend(<span class="type"><a href="../qtqml/qqmllistproperty.html">QQmlListProperty</a></span><span class="operator">&lt;</span>WeatherData<span class="operator">&gt;</span> <span class="operator">*</span>prop<span class="operator">,</span> WeatherData <span class="operator">*</span>val)
+  {
+      Q_UNUSED(val);
+      Q_UNUSED(prop);
+  }
+
+  <span class="keyword">static</span> WeatherData <span class="operator">*</span>forecastAt(<span class="type"><a href="../qtqml/qqmllistproperty.html">QQmlListProperty</a></span><span class="operator">&lt;</span>WeatherData<span class="operator">&gt;</span> <span class="operator">*</span>prop<span class="operator">,</span> <span class="type">int</span> index)
+  {
+      AppModelPrivate <span class="operator">*</span>d <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>AppModelPrivate<span class="operator">*</span><span class="operator">&gt;</span>(prop<span class="operator">-</span><span class="operator">&gt;</span>data);
+      <span class="keyword">return</span> d<span class="operator">-</span><span class="operator">&gt;</span>forecast<span class="operator">.</span>at(index);
+  }
+
+  <span class="keyword">static</span> <span class="type">int</span> forecastCount(<span class="type"><a href="../qtqml/qqmllistproperty.html">QQmlListProperty</a></span><span class="operator">&lt;</span>WeatherData<span class="operator">&gt;</span> <span class="operator">*</span>prop)
+  {
+      AppModelPrivate <span class="operator">*</span>d <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>AppModelPrivate<span class="operator">*</span><span class="operator">&gt;</span>(prop<span class="operator">-</span><span class="operator">&gt;</span>data);
+      <span class="keyword">return</span> d<span class="operator">-</span><span class="operator">&gt;</span>forecast<span class="operator">.</span>size();
+  }
+
+  <span class="keyword">static</span> <span class="type">void</span> forecastClear(<span class="type"><a href="../qtqml/qqmllistproperty.html">QQmlListProperty</a></span><span class="operator">&lt;</span>WeatherData<span class="operator">&gt;</span> <span class="operator">*</span>prop)
+  {
+      <span class="keyword">static_cast</span><span class="operator">&lt;</span>AppModelPrivate<span class="operator">*</span><span class="operator">&gt;</span>(prop<span class="operator">-</span><span class="operator">&gt;</span>data)<span class="operator">-</span><span class="operator">&gt;</span>forecast<span class="operator">.</span>clear();
+  }
+
+  AppModel<span class="operator">::</span>AppModel(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent) :
+          <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>(parent)<span class="operator">,</span>
+          d(<span class="keyword">new</span> AppModelPrivate)
+  {
+      d<span class="operator">-</span><span class="operator">&gt;</span>fcProp <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtqml/qqmllistproperty.html">QQmlListProperty</a></span><span class="operator">&lt;</span>WeatherData<span class="operator">&gt;</span>(<span class="keyword">this</span><span class="operator">,</span> d<span class="operator">,</span>
+                                                            forecastAppend<span class="operator">,</span>
+                                                            forecastCount<span class="operator">,</span>
+                                                            forecastAt<span class="operator">,</span>
+                                                            forecastClear);
+
+      d<span class="operator">-</span><span class="operator">&gt;</span>geoReplyMapper <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qsignalmapper.html">QSignalMapper</a></span>(<span class="keyword">this</span>);
+      d<span class="operator">-</span><span class="operator">&gt;</span>weatherReplyMapper <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qsignalmapper.html">QSignalMapper</a></span>(<span class="keyword">this</span>);
+      d<span class="operator">-</span><span class="operator">&gt;</span>forecastReplyMapper <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qsignalmapper.html">QSignalMapper</a></span>(<span class="keyword">this</span>);
+
+      connect(d<span class="operator">-</span><span class="operator">&gt;</span>geoReplyMapper<span class="operator">,</span> SIGNAL(mapped(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">*</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(handleGeoNetworkData(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">*</span>)));
+      connect(d<span class="operator">-</span><span class="operator">&gt;</span>weatherReplyMapper<span class="operator">,</span> SIGNAL(mapped(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">*</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(handleWeatherNetworkData(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">*</span>)));
+      connect(d<span class="operator">-</span><span class="operator">&gt;</span>forecastReplyMapper<span class="operator">,</span> SIGNAL(mapped(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">*</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(handleForecastNetworkData(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">*</span>)));
+      connect(<span class="operator">&amp;</span>d<span class="operator">-</span><span class="operator">&gt;</span>delayedCityRequestTimer<span class="operator">,</span> SIGNAL(timeout())<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(queryCity()));
+      connect(<span class="operator">&amp;</span>d<span class="operator">-</span><span class="operator">&gt;</span>requestNewWeatherTimer<span class="operator">,</span> SIGNAL(timeout())<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(refreshWeather()));
+      d<span class="operator">-</span><span class="operator">&gt;</span>requestNewWeatherTimer<span class="operator">.</span>start();
+
+      <span class="comment">// make sure we have an active network session</span>
+      d<span class="operator">-</span><span class="operator">&gt;</span>nam <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtnetwork/qnetworkaccessmanager.html">QNetworkAccessManager</a></span>(<span class="keyword">this</span>);
+
+      <span class="type"><a href="../qtnetwork/qnetworkconfigurationmanager.html">QNetworkConfigurationManager</a></span> ncm;
+      d<span class="operator">-</span><span class="operator">&gt;</span>ns <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtnetwork/qnetworksession.html">QNetworkSession</a></span>(ncm<span class="operator">.</span>defaultConfiguration()<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(d<span class="operator">-</span><span class="operator">&gt;</span>ns<span class="operator">,</span> SIGNAL(opened())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(networkSessionOpened()));
+      <span class="comment">// the session may be already open. if it is, run the slot directly</span>
+      <span class="keyword">if</span> (d<span class="operator">-</span><span class="operator">&gt;</span>ns<span class="operator">-</span><span class="operator">&gt;</span>isOpen())
+          <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>networkSessionOpened();
+      <span class="comment">// tell the system we want network</span>
+      d<span class="operator">-</span><span class="operator">&gt;</span>ns<span class="operator">-</span><span class="operator">&gt;</span>open();
+  }
+
+  AppModel<span class="operator">::</span><span class="operator">~</span>AppModel()
+  {
+      d<span class="operator">-</span><span class="operator">&gt;</span>ns<span class="operator">-</span><span class="operator">&gt;</span>close();
+      <span class="keyword">if</span> (d<span class="operator">-</span><span class="operator">&gt;</span>src)
+          d<span class="operator">-</span><span class="operator">&gt;</span>src<span class="operator">-</span><span class="operator">&gt;</span>stopUpdates();
+      <span class="keyword">delete</span> d;
+  }
+
+  <span class="type">void</span> AppModel<span class="operator">::</span>networkSessionOpened()
+  {
+      d<span class="operator">-</span><span class="operator">&gt;</span>src <span class="operator">=</span> <span class="type"><a href="qgeopositioninfosource.html">QGeoPositionInfoSource</a></span><span class="operator">::</span>createDefaultSource(<span class="keyword">this</span>);
+
+      <span class="keyword">if</span> (d<span class="operator">-</span><span class="operator">&gt;</span>src) {
+          d<span class="operator">-</span><span class="operator">&gt;</span>useGps <span class="operator">=</span> <span class="keyword">true</span>;
+          connect(d<span class="operator">-</span><span class="operator">&gt;</span>src<span class="operator">,</span> SIGNAL(positionUpdated(<span class="type"><a href="qgeopositioninfo.html">QGeoPositionInfo</a></span>))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(positionUpdated(<span class="type"><a href="qgeopositioninfo.html">QGeoPositionInfo</a></span>)));
+          connect(d<span class="operator">-</span><span class="operator">&gt;</span>src<span class="operator">,</span> SIGNAL(error(<span class="type"><a href="qgeopositioninfosource.html">QGeoPositionInfoSource</a></span><span class="operator">::</span>Error))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(positionError(<span class="type"><a href="qgeopositioninfosource.html">QGeoPositionInfoSource</a></span><span class="operator">::</span>Error)));
+          d<span class="operator">-</span><span class="operator">&gt;</span>src<span class="operator">-</span><span class="operator">&gt;</span>startUpdates();
+      } <span class="keyword">else</span> {
+          d<span class="operator">-</span><span class="operator">&gt;</span>useGps <span class="operator">=</span> <span class="keyword">false</span>;
+          d<span class="operator">-</span><span class="operator">&gt;</span>city <span class="operator">=</span> <span class="string">&quot;Brisbane&quot;</span>;
+          <span class="keyword">emit</span> cityChanged();
+          <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>refreshWeather();
+      }
+  }
+
+  <span class="type">void</span> AppModel<span class="operator">::</span>positionUpdated(<span class="type"><a href="qgeopositioninfo.html">QGeoPositionInfo</a></span> gpsPos)
+  {
+      d<span class="operator">-</span><span class="operator">&gt;</span>coord <span class="operator">=</span> gpsPos<span class="operator">.</span>coordinate();
+
+      <span class="keyword">if</span> (<span class="operator">!</span>(d<span class="operator">-</span><span class="operator">&gt;</span>useGps))
+          <span class="keyword">return</span>;
+
+      queryCity();
+  }
+
+  <span class="type">void</span> AppModel<span class="operator">::</span>queryCity()
+  {
+      <span class="comment">//don't update more often then once a minute</span>
+      <span class="comment">//to keep load on server low</span>
+      <span class="keyword">if</span> (d<span class="operator">-</span><span class="operator">&gt;</span>throttle<span class="operator">.</span>isValid() <span class="operator">&amp;</span><span class="operator">&amp;</span> d<span class="operator">-</span><span class="operator">&gt;</span>throttle<span class="operator">.</span>elapsed() <span class="operator">&lt;</span> d<span class="operator">-</span><span class="operator">&gt;</span>minMsBeforeNewRequest ) {
+          qCDebug(requestsLog) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;delaying query of city&quot;</span>;
+          <span class="keyword">if</span> (<span class="operator">!</span>d<span class="operator">-</span><span class="operator">&gt;</span>delayedCityRequestTimer<span class="operator">.</span>isActive())
+              d<span class="operator">-</span><span class="operator">&gt;</span>delayedCityRequestTimer<span class="operator">.</span>start();
+          <span class="keyword">return</span>;
+      }
+      <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>(requestsLog) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;requested query of city&quot;</span>;
+      d<span class="operator">-</span><span class="operator">&gt;</span>throttle<span class="operator">.</span>start();
+      d<span class="operator">-</span><span class="operator">&gt;</span>minMsBeforeNewRequest <span class="operator">=</span> (d<span class="operator">-</span><span class="operator">&gt;</span>nErrors <span class="operator">+</span> <span class="number">1</span>) <span class="operator">*</span> d<span class="operator">-</span><span class="operator">&gt;</span>baseMsBeforeNewRequest;
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> latitude<span class="operator">,</span> longitude;
+      longitude<span class="operator">.</span>setNum(d<span class="operator">-</span><span class="operator">&gt;</span>coord<span class="operator">.</span>longitude());
+      latitude<span class="operator">.</span>setNum(d<span class="operator">-</span><span class="operator">&gt;</span>coord<span class="operator">.</span>latitude());
+
+      <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> url(<span class="string">&quot;http://api.openweathermap.org/data/2.5/weather&quot;</span>);
+      <span class="type"><a href="../qtcore/qurlquery.html">QUrlQuery</a></span> query;
+      query<span class="operator">.</span>addQueryItem(<span class="string">&quot;lat&quot;</span><span class="operator">,</span> latitude);
+      query<span class="operator">.</span>addQueryItem(<span class="string">&quot;lon&quot;</span><span class="operator">,</span> longitude);
+      query<span class="operator">.</span>addQueryItem(<span class="string">&quot;mode&quot;</span><span class="operator">,</span> <span class="string">&quot;json&quot;</span>);
+      query<span class="operator">.</span>addQueryItem(<span class="string">&quot;APPID&quot;</span><span class="operator">,</span> d<span class="operator">-</span><span class="operator">&gt;</span>app_ident);
+      url<span class="operator">.</span>setQuery(query);
+      qCDebug(requestsLog) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;submitting request&quot;</span>;
+
+      <span class="type"><a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a></span> <span class="operator">*</span>rep <span class="operator">=</span> d<span class="operator">-</span><span class="operator">&gt;</span>nam<span class="operator">-</span><span class="operator">&gt;</span>get(<span class="type"><a href="../qtnetwork/qnetworkrequest.html">QNetworkRequest</a></span>(url));
+      <span class="comment">// connect up the signal right away</span>
+      d<span class="operator">-</span><span class="operator">&gt;</span>geoReplyMapper<span class="operator">-</span><span class="operator">&gt;</span>setMapping(rep<span class="operator">,</span> rep);
+      connect(rep<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span>
+              d<span class="operator">-</span><span class="operator">&gt;</span>geoReplyMapper<span class="operator">,</span> SLOT(map()));
+  }
+
+  <span class="type">void</span> AppModel<span class="operator">::</span>positionError(<span class="type"><a href="qgeopositioninfosource.html">QGeoPositionInfoSource</a></span><span class="operator">::</span>Error e)
+  {
+      Q_UNUSED(e);
+      <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Position source error. Falling back to simulation mode.&quot;</span>;
+      <span class="comment">// cleanup insufficient QGeoPositionInfoSource instance</span>
+      d<span class="operator">-</span><span class="operator">&gt;</span>src<span class="operator">-</span><span class="operator">&gt;</span>stopUpdates();
+      d<span class="operator">-</span><span class="operator">&gt;</span>src<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+      d<span class="operator">-</span><span class="operator">&gt;</span>src <span class="operator">=</span> <span class="number">0</span>;
+
+      <span class="comment">// activate simulation mode</span>
+      d<span class="operator">-</span><span class="operator">&gt;</span>useGps <span class="operator">=</span> <span class="keyword">false</span>;
+      d<span class="operator">-</span><span class="operator">&gt;</span>city <span class="operator">=</span> <span class="string">&quot;Brisbane&quot;</span>;
+      <span class="keyword">emit</span> cityChanged();
+      <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>refreshWeather();
+  }
+
+  <span class="type">void</span> AppModel<span class="operator">::</span>hadError(bool tryAgain)
+  {
+      qCDebug(requestsLog) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;hadError, will &quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> (tryAgain <span class="operator">?</span> <span class="string">&quot;&quot;</span> : <span class="string">&quot;not &quot;</span>) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;rety&quot;</span>;
+      d<span class="operator">-</span><span class="operator">&gt;</span>throttle<span class="operator">.</span>start();
+      <span class="keyword">if</span> (d<span class="operator">-</span><span class="operator">&gt;</span>nErrors <span class="operator">&lt;</span> <span class="number">10</span>)
+          <span class="operator">+</span><span class="operator">+</span>d<span class="operator">-</span><span class="operator">&gt;</span>nErrors;
+      d<span class="operator">-</span><span class="operator">&gt;</span>minMsBeforeNewRequest <span class="operator">=</span> (d<span class="operator">-</span><span class="operator">&gt;</span>nErrors <span class="operator">+</span> <span class="number">1</span>) <span class="operator">*</span> d<span class="operator">-</span><span class="operator">&gt;</span>baseMsBeforeNewRequest;
+      <span class="keyword">if</span> (tryAgain)
+          d<span class="operator">-</span><span class="operator">&gt;</span>delayedCityRequestTimer<span class="operator">.</span>start();
+  }
+
+  <span class="type">void</span> AppModel<span class="operator">::</span>handleGeoNetworkData(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>replyObj)
+  {
+      <span class="type"><a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a></span> <span class="operator">*</span>networkReply <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a></span><span class="operator">*</span><span class="operator">&gt;</span>(replyObj);
+      <span class="keyword">if</span> (<span class="operator">!</span>networkReply) {
+          hadError(<span class="keyword">false</span>); <span class="comment">// should retry?</span>
+          <span class="keyword">return</span>;
+      }
+
+      <span class="keyword">if</span> (<span class="operator">!</span>networkReply<span class="operator">-</span><span class="operator">&gt;</span>error()) {
+          d<span class="operator">-</span><span class="operator">&gt;</span>nErrors <span class="operator">=</span> <span class="number">0</span>;
+          <span class="keyword">if</span> (<span class="operator">!</span>d<span class="operator">-</span><span class="operator">&gt;</span>throttle<span class="operator">.</span>isValid())
+              d<span class="operator">-</span><span class="operator">&gt;</span>throttle<span class="operator">.</span>start();
+          d<span class="operator">-</span><span class="operator">&gt;</span>minMsBeforeNewRequest <span class="operator">=</span> d<span class="operator">-</span><span class="operator">&gt;</span>baseMsBeforeNewRequest;
+          <span class="comment">//convert coordinates to city name</span>
+          <span class="type"><a href="../qtcore/qjsondocument.html">QJsonDocument</a></span> document <span class="operator">=</span> <span class="type"><a href="../qtcore/qjsondocument.html">QJsonDocument</a></span><span class="operator">::</span>fromJson(networkReply<span class="operator">-</span><span class="operator">&gt;</span>readAll());
+
+          <span class="type"><a href="../qtcore/qjsonobject.html">QJsonObject</a></span> jo <span class="operator">=</span> document<span class="operator">.</span>object();
+          <span class="type"><a href="../qtcore/qjsonvalue.html">QJsonValue</a></span> jv <span class="operator">=</span> jo<span class="operator">.</span>value(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;name&quot;</span>));
+
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> city <span class="operator">=</span> jv<span class="operator">.</span>toString();
+          qCDebug(requestsLog) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;got city: &quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> city;
+          <span class="keyword">if</span> (city <span class="operator">!</span><span class="operator">=</span> d<span class="operator">-</span><span class="operator">&gt;</span>city) {
+              d<span class="operator">-</span><span class="operator">&gt;</span>city <span class="operator">=</span> city;
+              <span class="keyword">emit</span> cityChanged();
+              refreshWeather();
+          }
+      } <span class="keyword">else</span> {
+          hadError(<span class="keyword">true</span>);
+      }
+      networkReply<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+  }
+
+  <span class="type">void</span> AppModel<span class="operator">::</span>refreshWeather()
+  {
+      <span class="keyword">if</span> (d<span class="operator">-</span><span class="operator">&gt;</span>city<span class="operator">.</span>isEmpty()) {
+          qCDebug(requestsLog) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;refreshing weather skipped (no city)&quot;</span>;
+          <span class="keyword">return</span>;
+      }
+      qCDebug(requestsLog) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;refreshing weather&quot;</span>;
+      <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> url(<span class="string">&quot;http://api.openweathermap.org/data/2.5/weather&quot;</span>);
+      <span class="type"><a href="../qtcore/qurlquery.html">QUrlQuery</a></span> query;
+
+      query<span class="operator">.</span>addQueryItem(<span class="string">&quot;q&quot;</span><span class="operator">,</span> d<span class="operator">-</span><span class="operator">&gt;</span>city);
+      query<span class="operator">.</span>addQueryItem(<span class="string">&quot;mode&quot;</span><span class="operator">,</span> <span class="string">&quot;json&quot;</span>);
+      query<span class="operator">.</span>addQueryItem(<span class="string">&quot;APPID&quot;</span><span class="operator">,</span> d<span class="operator">-</span><span class="operator">&gt;</span>app_ident);
+      url<span class="operator">.</span>setQuery(query);
+
+      <span class="type"><a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a></span> <span class="operator">*</span>rep <span class="operator">=</span> d<span class="operator">-</span><span class="operator">&gt;</span>nam<span class="operator">-</span><span class="operator">&gt;</span>get(<span class="type"><a href="../qtnetwork/qnetworkrequest.html">QNetworkRequest</a></span>(url));
+      <span class="comment">// connect up the signal right away</span>
+      d<span class="operator">-</span><span class="operator">&gt;</span>weatherReplyMapper<span class="operator">-</span><span class="operator">&gt;</span>setMapping(rep<span class="operator">,</span> rep);
+      connect(rep<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span>
+              d<span class="operator">-</span><span class="operator">&gt;</span>weatherReplyMapper<span class="operator">,</span> SLOT(map()));
+  }
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> niceTemperatureString(<span class="type">double</span> t)
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(<a href="../qtcore/qtglobal.html#qRound">qRound</a>(t<span class="operator">-</span>ZERO_KELVIN)) <span class="operator">+</span> <span class="type"><a href="../qtcore/qchar.html">QChar</a></span>(<span class="number">0xB0</span>);
+  }
+
+  <span class="type">void</span> AppModel<span class="operator">::</span>handleWeatherNetworkData(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>replyObj)
+  {
+      qCDebug(requestsLog) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;got weather network data&quot;</span>;
+      <span class="type"><a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a></span> <span class="operator">*</span>networkReply <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a></span><span class="operator">*</span><span class="operator">&gt;</span>(replyObj);
+      <span class="keyword">if</span> (<span class="operator">!</span>networkReply)
+          <span class="keyword">return</span>;
+
+      <span class="keyword">if</span> (<span class="operator">!</span>networkReply<span class="operator">-</span><span class="operator">&gt;</span>error()) {
+          foreach (WeatherData <span class="operator">*</span>inf<span class="operator">,</span> d<span class="operator">-</span><span class="operator">&gt;</span>forecast)
+              <span class="keyword">delete</span> inf;
+          d<span class="operator">-</span><span class="operator">&gt;</span>forecast<span class="operator">.</span>clear();
+
+          <span class="type"><a href="../qtcore/qjsondocument.html">QJsonDocument</a></span> document <span class="operator">=</span> <span class="type"><a href="../qtcore/qjsondocument.html">QJsonDocument</a></span><span class="operator">::</span>fromJson(networkReply<span class="operator">-</span><span class="operator">&gt;</span>readAll());
+
+          <span class="keyword">if</span> (document<span class="operator">.</span>isObject()) {
+              <span class="type"><a href="../qtcore/qjsonobject.html">QJsonObject</a></span> obj <span class="operator">=</span> document<span class="operator">.</span>object();
+              <span class="type"><a href="../qtcore/qjsonobject.html">QJsonObject</a></span> tempObject;
+              <span class="type"><a href="../qtcore/qjsonvalue.html">QJsonValue</a></span> val;
+
+              <span class="keyword">if</span> (obj<span class="operator">.</span>contains(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;weather&quot;</span>))) {
+                  val <span class="operator">=</span> obj<span class="operator">.</span>value(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;weather&quot;</span>));
+                  <span class="type"><a href="../qtcore/qjsonarray.html">QJsonArray</a></span> weatherArray <span class="operator">=</span> val<span class="operator">.</span>toArray();
+                  val <span class="operator">=</span> weatherArray<span class="operator">.</span>at(<span class="number">0</span>);
+                  tempObject <span class="operator">=</span> val<span class="operator">.</span>toObject();
+                  d<span class="operator">-</span><span class="operator">&gt;</span>now<span class="operator">.</span>setWeatherDescription(tempObject<span class="operator">.</span>value(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;description&quot;</span>))<span class="operator">.</span>toString());
+                  d<span class="operator">-</span><span class="operator">&gt;</span>now<span class="operator">.</span>setWeatherIcon(tempObject<span class="operator">.</span>value(<span class="string">&quot;icon&quot;</span>)<span class="operator">.</span>toString());
+              }
+              <span class="keyword">if</span> (obj<span class="operator">.</span>contains(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;main&quot;</span>))) {
+                  val <span class="operator">=</span> obj<span class="operator">.</span>value(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;main&quot;</span>));
+                  tempObject <span class="operator">=</span> val<span class="operator">.</span>toObject();
+                  val <span class="operator">=</span> tempObject<span class="operator">.</span>value(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;temp&quot;</span>));
+                  d<span class="operator">-</span><span class="operator">&gt;</span>now<span class="operator">.</span>setTemperature(niceTemperatureString(val<span class="operator">.</span>toDouble()));
+              }
+          }
+      }
+      networkReply<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+
+      <span class="comment">//retrieve the forecast</span>
+      <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> url(<span class="string">&quot;http://api.openweathermap.org/data/2.5/forecast/daily&quot;</span>);
+      <span class="type"><a href="../qtcore/qurlquery.html">QUrlQuery</a></span> query;
+
+      query<span class="operator">.</span>addQueryItem(<span class="string">&quot;q&quot;</span><span class="operator">,</span> d<span class="operator">-</span><span class="operator">&gt;</span>city);
+      query<span class="operator">.</span>addQueryItem(<span class="string">&quot;mode&quot;</span><span class="operator">,</span> <span class="string">&quot;json&quot;</span>);
+      query<span class="operator">.</span>addQueryItem(<span class="string">&quot;cnt&quot;</span><span class="operator">,</span> <span class="string">&quot;5&quot;</span>);
+      query<span class="operator">.</span>addQueryItem(<span class="string">&quot;APPID&quot;</span><span class="operator">,</span> d<span class="operator">-</span><span class="operator">&gt;</span>app_ident);
+      url<span class="operator">.</span>setQuery(query);
+
+      <span class="type"><a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a></span> <span class="operator">*</span>rep <span class="operator">=</span> d<span class="operator">-</span><span class="operator">&gt;</span>nam<span class="operator">-</span><span class="operator">&gt;</span>get(<span class="type"><a href="../qtnetwork/qnetworkrequest.html">QNetworkRequest</a></span>(url));
+      <span class="comment">// connect up the signal right away</span>
+      d<span class="operator">-</span><span class="operator">&gt;</span>forecastReplyMapper<span class="operator">-</span><span class="operator">&gt;</span>setMapping(rep<span class="operator">,</span> rep);
+      connect(rep<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> d<span class="operator">-</span><span class="operator">&gt;</span>forecastReplyMapper<span class="operator">,</span> SLOT(map()));
+  }
+
+  <span class="type">void</span> AppModel<span class="operator">::</span>handleForecastNetworkData(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>replyObj)
+  {
+      qCDebug(requestsLog) <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;got forecast&quot;</span>;
+      <span class="type"><a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a></span> <span class="operator">*</span>networkReply <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a></span><span class="operator">*</span><span class="operator">&gt;</span>(replyObj);
+      <span class="keyword">if</span> (<span class="operator">!</span>networkReply)
+          <span class="keyword">return</span>;
+
+      <span class="keyword">if</span> (<span class="operator">!</span>networkReply<span class="operator">-</span><span class="operator">&gt;</span>error()) {
+          <span class="type"><a href="../qtcore/qjsondocument.html">QJsonDocument</a></span> document <span class="operator">=</span> <span class="type"><a href="../qtcore/qjsondocument.html">QJsonDocument</a></span><span class="operator">::</span>fromJson(networkReply<span class="operator">-</span><span class="operator">&gt;</span>readAll());
+
+          <span class="type"><a href="../qtcore/qjsonobject.html">QJsonObject</a></span> jo;
+          <span class="type"><a href="../qtcore/qjsonvalue.html">QJsonValue</a></span> jv;
+          <span class="type"><a href="../qtcore/qjsonobject.html">QJsonObject</a></span> root <span class="operator">=</span> document<span class="operator">.</span>object();
+          jv <span class="operator">=</span> root<span class="operator">.</span>value(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;list&quot;</span>));
+          <span class="keyword">if</span> (<span class="operator">!</span>jv<span class="operator">.</span>isArray())
+              <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Invalid forecast object&quot;</span>;
+          <span class="type"><a href="../qtcore/qjsonarray.html">QJsonArray</a></span> ja <span class="operator">=</span> jv<span class="operator">.</span>toArray();
+          <span class="comment">//we need 4 days of forecast -&gt; first entry is today</span>
+          <span class="keyword">if</span> (ja<span class="operator">.</span>count() <span class="operator">!</span><span class="operator">=</span> <span class="number">5</span>)
+              <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Invalid forecast object&quot;</span>;
+
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> data;
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">1</span>; i<span class="operator">&lt;</span>ja<span class="operator">.</span>count(); i<span class="operator">+</span><span class="operator">+</span>) {
+              WeatherData <span class="operator">*</span>forecastEntry <span class="operator">=</span> <span class="keyword">new</span> WeatherData();
+
+              <span class="comment">//min/max temperature</span>
+              <span class="type"><a href="../qtcore/qjsonobject.html">QJsonObject</a></span> subtree <span class="operator">=</span> ja<span class="operator">.</span>at(i)<span class="operator">.</span>toObject();
+              jo <span class="operator">=</span> subtree<span class="operator">.</span>value(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;temp&quot;</span>))<span class="operator">.</span>toObject();
+              jv <span class="operator">=</span> jo<span class="operator">.</span>value(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;min&quot;</span>));
+              data<span class="operator">.</span>clear();
+              data <span class="operator">+</span><span class="operator">=</span> niceTemperatureString(jv<span class="operator">.</span>toDouble());
+              data <span class="operator">+</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qchar.html">QChar</a></span>(<span class="char">'/'</span>);
+              jv <span class="operator">=</span> jo<span class="operator">.</span>value(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;max&quot;</span>));
+              data <span class="operator">+</span><span class="operator">=</span> niceTemperatureString(jv<span class="operator">.</span>toDouble());
+              forecastEntry<span class="operator">-</span><span class="operator">&gt;</span>setTemperature(data);
+
+              <span class="comment">//get date</span>
+              jv <span class="operator">=</span> subtree<span class="operator">.</span>value(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;dt&quot;</span>));
+              <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> dt <span class="operator">=</span> <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span><span class="operator">::</span>fromMSecsSinceEpoch((<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span>)jv<span class="operator">.</span>toDouble()<span class="operator">*</span><span class="number">1000</span>);
+              forecastEntry<span class="operator">-</span><span class="operator">&gt;</span>setDayOfWeek(dt<span class="operator">.</span>date()<span class="operator">.</span>toString(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;ddd&quot;</span>)));
+
+              <span class="comment">//get icon</span>
+              <span class="type"><a href="../qtcore/qjsonarray.html">QJsonArray</a></span> weatherArray <span class="operator">=</span> subtree<span class="operator">.</span>value(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;weather&quot;</span>))<span class="operator">.</span>toArray();
+              jo <span class="operator">=</span> weatherArray<span class="operator">.</span>at(<span class="number">0</span>)<span class="operator">.</span>toObject();
+              forecastEntry<span class="operator">-</span><span class="operator">&gt;</span>setWeatherIcon(jo<span class="operator">.</span>value(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;icon&quot;</span>))<span class="operator">.</span>toString());
+
+              <span class="comment">//get description</span>
+              forecastEntry<span class="operator">-</span><span class="operator">&gt;</span>setWeatherDescription(jo<span class="operator">.</span>value(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;description&quot;</span>))<span class="operator">.</span>toString());
+
+              d<span class="operator">-</span><span class="operator">&gt;</span>forecast<span class="operator">.</span>append(forecastEntry);
+          }
+
+          <span class="keyword">if</span> (<span class="operator">!</span>(d<span class="operator">-</span><span class="operator">&gt;</span>ready)) {
+              d<span class="operator">-</span><span class="operator">&gt;</span>ready <span class="operator">=</span> <span class="keyword">true</span>;
+              <span class="keyword">emit</span> readyChanged();
+          }
+
+          <span class="keyword">emit</span> weatherChanged();
+      }
+      networkReply<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+  }
+
+  bool AppModel<span class="operator">::</span>hasValidCity() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> (<span class="operator">!</span>(d<span class="operator">-</span><span class="operator">&gt;</span>city<span class="operator">.</span>isEmpty()) <span class="operator">&amp;</span><span class="operator">&amp;</span> d<span class="operator">-</span><span class="operator">&gt;</span>city<span class="operator">.</span>size() <span class="operator">&gt;</span> <span class="number">1</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> d<span class="operator">-</span><span class="operator">&gt;</span>city <span class="operator">!</span><span class="operator">=</span> <span class="string">&quot;&quot;</span>);
+  }
+
+  bool AppModel<span class="operator">::</span>hasValidWeather() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> hasValidCity() <span class="operator">&amp;</span><span class="operator">&amp;</span> (<span class="operator">!</span>(d<span class="operator">-</span><span class="operator">&gt;</span>now<span class="operator">.</span>weatherIcon()<span class="operator">.</span>isEmpty()) <span class="operator">&amp;</span><span class="operator">&amp;</span>
+                                (d<span class="operator">-</span><span class="operator">&gt;</span>now<span class="operator">.</span>weatherIcon()<span class="operator">.</span>size() <span class="operator">&gt;</span> <span class="number">1</span>) <span class="operator">&amp;</span><span class="operator">&amp;</span>
+                                d<span class="operator">-</span><span class="operator">&gt;</span>now<span class="operator">.</span>weatherIcon() <span class="operator">!</span><span class="operator">=</span> <span class="string">&quot;&quot;</span>);
+  }
+
+  WeatherData <span class="operator">*</span>AppModel<span class="operator">::</span>weather() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="operator">&amp;</span>(d<span class="operator">-</span><span class="operator">&gt;</span>now);
+  }
+
+  <span class="type"><a href="../qtqml/qqmllistproperty.html">QQmlListProperty</a></span><span class="operator">&lt;</span>WeatherData<span class="operator">&gt;</span> AppModel<span class="operator">::</span>forecast() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="operator">*</span>(d<span class="operator">-</span><span class="operator">&gt;</span>fcProp);
+  }
+
+  bool AppModel<span class="operator">::</span>ready() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> d<span class="operator">-</span><span class="operator">&gt;</span>ready;
+  }
+
+  bool AppModel<span class="operator">::</span>hasSource() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> (d<span class="operator">-</span><span class="operator">&gt;</span>src <span class="operator">!</span><span class="operator">=</span> NULL);
+  }
+
+  bool AppModel<span class="operator">::</span>useGps() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> d<span class="operator">-</span><span class="operator">&gt;</span>useGps;
+  }
+
+  <span class="type">void</span> AppModel<span class="operator">::</span>setUseGps(bool value)
+  {
+      d<span class="operator">-</span><span class="operator">&gt;</span>useGps <span class="operator">=</span> value;
+      <span class="keyword">if</span> (value) {
+          d<span class="operator">-</span><span class="operator">&gt;</span>city <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+          d<span class="operator">-</span><span class="operator">&gt;</span>throttle<span class="operator">.</span>invalidate();
+          <span class="keyword">emit</span> cityChanged();
+          <span class="keyword">emit</span> weatherChanged();
+      }
+      <span class="keyword">emit</span> useGpsChanged();
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> AppModel<span class="operator">::</span>city() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> d<span class="operator">-</span><span class="operator">&gt;</span>city;
+  }
+
+  <span class="type">void</span> AppModel<span class="operator">::</span>setCity(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>value)
+  {
+      d<span class="operator">-</span><span class="operator">&gt;</span>city <span class="operator">=</span> value;
+      <span class="keyword">emit</span> cityChanged();
+      refreshWeather();
+  }
+
+</pre>
+</div>
+<!-- @@@weatherinfo/appmodel.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

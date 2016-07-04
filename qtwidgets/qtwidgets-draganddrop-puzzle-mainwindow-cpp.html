@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mainwindow.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-draganddrop-puzzle-example.html">Drag and Drop Puzzle Example</a></td><td >mainwindow.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mainwindow.cpp Example File</h1>
+<span class="subtitle">draganddrop/puzzle/mainwindow.cpp</span>
+<!-- $$$draganddrop/puzzle/mainwindow.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;mainwindow.h&quot;</span>
+  <span class="preprocessor">#include &quot;pieceslist.h&quot;</span>
+  <span class="preprocessor">#include &quot;puzzlewidget.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+  <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+
+  MainWindow<span class="operator">::</span>MainWindow(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qmainwindow.html">QMainWindow</a></span>(parent)
+  {
+      setupMenus();
+      setupWidgets();
+
+      setSizePolicy(<span class="type"><a href="qsizepolicy.html">QSizePolicy</a></span>(<span class="type"><a href="qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>Fixed<span class="operator">,</span> <span class="type"><a href="qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>Fixed));
+      setWindowTitle(tr(<span class="string">&quot;Puzzle&quot;</span>));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>openImage()
+  {
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span>
+          <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getOpenFileName(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Open Image&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>()<span class="operator">,</span>
+                                       tr(<span class="string">&quot;Image Files (*.png *.jpg *.bmp)&quot;</span>));
+
+      <span class="keyword">if</span> (<span class="operator">!</span>fileName<span class="operator">.</span>isEmpty())
+          loadImage(fileName);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>loadImage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> newImage;
+      <span class="keyword">if</span> (<span class="operator">!</span>newImage<span class="operator">.</span>load(fileName)) {
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Open Image&quot;</span>)<span class="operator">,</span>
+                               tr(<span class="string">&quot;The image file could not be loaded.&quot;</span>)<span class="operator">,</span>
+                               <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Close);
+          <span class="keyword">return</span>;
+      }
+      puzzleImage <span class="operator">=</span> newImage;
+      setupPuzzle();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>setCompleted()
+  {
+      <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Puzzle Completed&quot;</span>)<span class="operator">,</span>
+                               tr(<span class="string">&quot;Congratulations! You have completed the puzzle!\n&quot;</span>
+                                  <span class="string">&quot;Click OK to start again.&quot;</span>)<span class="operator">,</span>
+                               <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Ok);
+
+      setupPuzzle();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>setupPuzzle()
+  {
+      <span class="type">int</span> size <span class="operator">=</span> <a href="../qtcore/qtglobal.html#qMin">qMin</a>(puzzleImage<span class="operator">.</span>width()<span class="operator">,</span> puzzleImage<span class="operator">.</span>height());
+      puzzleImage <span class="operator">=</span> puzzleImage<span class="operator">.</span>copy((puzzleImage<span class="operator">.</span>width() <span class="operator">-</span> size)<span class="operator">/</span><span class="number">2</span><span class="operator">,</span>
+          (puzzleImage<span class="operator">.</span>height() <span class="operator">-</span> size)<span class="operator">/</span><span class="number">2</span><span class="operator">,</span> size<span class="operator">,</span> size)<span class="operator">.</span>scaled(puzzleWidget<span class="operator">-</span><span class="operator">&gt;</span>width()<span class="operator">,</span>
+              puzzleWidget<span class="operator">-</span><span class="operator">&gt;</span>height()<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>IgnoreAspectRatio<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>SmoothTransformation);
+
+      piecesList<span class="operator">-</span><span class="operator">&gt;</span>clear();
+
+      <span class="keyword">for</span> (<span class="type">int</span> y <span class="operator">=</span> <span class="number">0</span>; y <span class="operator">&lt;</span> <span class="number">5</span>; <span class="operator">+</span><span class="operator">+</span>y) {
+          <span class="keyword">for</span> (<span class="type">int</span> x <span class="operator">=</span> <span class="number">0</span>; x <span class="operator">&lt;</span> <span class="number">5</span>; <span class="operator">+</span><span class="operator">+</span>x) {
+              <span class="type">int</span> pieceSize <span class="operator">=</span> puzzleWidget<span class="operator">-</span><span class="operator">&gt;</span>pieceSize();
+              <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> pieceImage <span class="operator">=</span> puzzleImage<span class="operator">.</span>copy(x <span class="operator">*</span> pieceSize<span class="operator">,</span> y <span class="operator">*</span> pieceSize<span class="operator">,</span> pieceSize<span class="operator">,</span> pieceSize);
+              piecesList<span class="operator">-</span><span class="operator">&gt;</span>addPiece(pieceImage<span class="operator">,</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(x<span class="operator">,</span> y));
+          }
+      }
+
+      qsrand(<span class="type"><a href="../qtgui/qcursor.html">QCursor</a></span><span class="operator">::</span>pos()<span class="operator">.</span>x() <span class="operator">^</span> <span class="type"><a href="../qtgui/qcursor.html">QCursor</a></span><span class="operator">::</span>pos()<span class="operator">.</span>y());
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> piecesList<span class="operator">-</span><span class="operator">&gt;</span>count(); <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="keyword">if</span> (<span class="type">int</span>(<span class="number">2.0</span><span class="operator">*</span>qrand()<span class="operator">/</span>(RAND_MAX<span class="operator">+</span><span class="number">1.0</span>)) <span class="operator">=</span><span class="operator">=</span> <span class="number">1</span>) {
+              <span class="type"><a href="qlistwidgetitem.html">QListWidgetItem</a></span> <span class="operator">*</span>item <span class="operator">=</span> piecesList<span class="operator">-</span><span class="operator">&gt;</span>takeItem(i);
+              piecesList<span class="operator">-</span><span class="operator">&gt;</span>insertItem(<span class="number">0</span><span class="operator">,</span> item);
+          }
+      }
+
+      puzzleWidget<span class="operator">-</span><span class="operator">&gt;</span>clear();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>setupMenus()
+  {
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>fileMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;File&quot;</span>));
+
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>openAction <span class="operator">=</span> fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Open...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>openImage);
+      openAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Open);
+
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>exitAction <span class="operator">=</span> fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;E&amp;xit&quot;</span>)<span class="operator">,</span> qApp<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>quit);
+      exitAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Quit);
+
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>gameMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Game&quot;</span>));
+
+      gameMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Restart&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>setupPuzzle);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>setupWidgets()
+  {
+      <span class="type"><a href="qframe.html">QFrame</a></span> <span class="operator">*</span>frame <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qframe.html">QFrame</a></span>;
+      <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>frameLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span>(frame);
+      puzzleWidget <span class="operator">=</span> <span class="keyword">new</span> PuzzleWidget(<span class="number">400</span>);
+
+      piecesList <span class="operator">=</span> <span class="keyword">new</span> PiecesList(puzzleWidget<span class="operator">-</span><span class="operator">&gt;</span>pieceSize()<span class="operator">,</span> <span class="keyword">this</span>);
+
+      connect(puzzleWidget<span class="operator">,</span> <span class="operator">&amp;</span>PuzzleWidget<span class="operator">::</span>puzzleCompleted<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>setCompleted<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>QueuedConnection);
+
+      frameLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(piecesList);
+      frameLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(puzzleWidget);
+      setCentralWidget(frame);
+  }
+
+</pre>
+</div>
+<!-- @@@draganddrop/puzzle/mainwindow.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

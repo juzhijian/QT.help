@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>callout.cpp Example File | Qt Charts 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcharts-index.html">Qt Charts</a></td><td ><a href="qtcharts-callout-example.html">Callout Example</a></td><td >callout.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">callout.cpp Example File</h1>
+<span class="subtitle">callout/callout.cpp</span>
+<!-- $$$callout/callout.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Charts module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;callout.h&quot;</span>
+  <span class="preprocessor">#include &lt;QtGui/QPainter&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QFontMetrics&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QGraphicsSceneMouseEvent&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QMouseEvent&gt;</span>
+
+  Callout<span class="operator">::</span>Callout(<span class="type"><a href="../qtwidgets/qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span> parent):
+      <span class="type"><a href="../qtwidgets/qgraphicsitem.html">QGraphicsItem</a></span>(parent)
+  {
+  }
+
+  <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> Callout<span class="operator">::</span>boundingRect() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> anchor <span class="operator">=</span> mapFromParent(m_anchor);
+      <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> rect;
+      rect<span class="operator">.</span>setLeft(<a href="../qtcore/qtglobal.html#qMin">qMin</a>(m_rect<span class="operator">.</span>left()<span class="operator">,</span> anchor<span class="operator">.</span>x()));
+      rect<span class="operator">.</span>setRight(<a href="../qtcore/qtglobal.html#qMax">qMax</a>(m_rect<span class="operator">.</span>right()<span class="operator">,</span> anchor<span class="operator">.</span>x()));
+      rect<span class="operator">.</span>setTop(<a href="../qtcore/qtglobal.html#qMin">qMin</a>(m_rect<span class="operator">.</span>top()<span class="operator">,</span> anchor<span class="operator">.</span>y()));
+      rect<span class="operator">.</span>setBottom(<a href="../qtcore/qtglobal.html#qMax">qMax</a>(m_rect<span class="operator">.</span>bottom()<span class="operator">,</span> anchor<span class="operator">.</span>y()));
+      <span class="keyword">return</span> rect;
+  }
+
+  <span class="type">void</span> Callout<span class="operator">::</span>paint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> <span class="operator">*</span>painter<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtwidgets/qstyleoptiongraphicsitem.html">QStyleOptionGraphicsItem</a></span> <span class="operator">*</span>option<span class="operator">,</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>widget)
+  {
+      Q_UNUSED(option)
+      Q_UNUSED(widget)
+      <span class="type"><a href="../qtgui/qpainterpath.html">QPainterPath</a></span> path;
+      path<span class="operator">.</span>addRoundedRect(m_rect<span class="operator">,</span> <span class="number">5</span><span class="operator">,</span> <span class="number">5</span>);
+
+      <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> anchor <span class="operator">=</span> mapFromParent(m_anchor);
+      <span class="keyword">if</span> (<span class="operator">!</span>m_rect<span class="operator">.</span>contains(anchor)) {
+          <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> point1<span class="operator">,</span> point2;
+
+          <span class="comment">// establish the position of the anchor point in relation to m_rect</span>
+          bool above <span class="operator">=</span> anchor<span class="operator">.</span>y() <span class="operator">&lt;</span><span class="operator">=</span> m_rect<span class="operator">.</span>top();
+          bool aboveCenter <span class="operator">=</span> anchor<span class="operator">.</span>y() <span class="operator">&gt;</span> m_rect<span class="operator">.</span>top() <span class="operator">&amp;</span><span class="operator">&amp;</span> anchor<span class="operator">.</span>y() <span class="operator">&lt;</span><span class="operator">=</span> m_rect<span class="operator">.</span>center()<span class="operator">.</span>y();
+          bool belowCenter <span class="operator">=</span> anchor<span class="operator">.</span>y() <span class="operator">&gt;</span> m_rect<span class="operator">.</span>center()<span class="operator">.</span>y() <span class="operator">&amp;</span><span class="operator">&amp;</span> anchor<span class="operator">.</span>y() <span class="operator">&lt;</span><span class="operator">=</span> m_rect<span class="operator">.</span>bottom();
+          bool below <span class="operator">=</span> anchor<span class="operator">.</span>y() <span class="operator">&gt;</span> m_rect<span class="operator">.</span>bottom();
+
+          bool onLeft <span class="operator">=</span> anchor<span class="operator">.</span>x() <span class="operator">&lt;</span><span class="operator">=</span> m_rect<span class="operator">.</span>left();
+          bool leftOfCenter <span class="operator">=</span> anchor<span class="operator">.</span>x() <span class="operator">&gt;</span> m_rect<span class="operator">.</span>left() <span class="operator">&amp;</span><span class="operator">&amp;</span> anchor<span class="operator">.</span>x() <span class="operator">&lt;</span><span class="operator">=</span> m_rect<span class="operator">.</span>center()<span class="operator">.</span>x();
+          bool rightOfCenter <span class="operator">=</span> anchor<span class="operator">.</span>x() <span class="operator">&gt;</span> m_rect<span class="operator">.</span>center()<span class="operator">.</span>x() <span class="operator">&amp;</span><span class="operator">&amp;</span> anchor<span class="operator">.</span>x() <span class="operator">&lt;</span><span class="operator">=</span> m_rect<span class="operator">.</span>right();
+          bool onRight <span class="operator">=</span> anchor<span class="operator">.</span>x() <span class="operator">&gt;</span> m_rect<span class="operator">.</span>right();
+
+          <span class="comment">// get the nearest m_rect corner.</span>
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> x <span class="operator">=</span> (onRight <span class="operator">+</span> rightOfCenter) <span class="operator">*</span> m_rect<span class="operator">.</span>width();
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> y <span class="operator">=</span> (below <span class="operator">+</span> belowCenter) <span class="operator">*</span> m_rect<span class="operator">.</span>height();
+          bool cornerCase <span class="operator">=</span> (above <span class="operator">&amp;</span><span class="operator">&amp;</span> onLeft) <span class="operator">|</span><span class="operator">|</span> (above <span class="operator">&amp;</span><span class="operator">&amp;</span> onRight) <span class="operator">|</span><span class="operator">|</span> (below <span class="operator">&amp;</span><span class="operator">&amp;</span> onLeft) <span class="operator">|</span><span class="operator">|</span> (below <span class="operator">&amp;</span><span class="operator">&amp;</span> onRight);
+          bool vertical <span class="operator">=</span> <a href="../qtcore/qtglobal.html#qAbs">qAbs</a>(anchor<span class="operator">.</span>x() <span class="operator">-</span> x) <span class="operator">&gt;</span> <a href="../qtcore/qtglobal.html#qAbs">qAbs</a>(anchor<span class="operator">.</span>y() <span class="operator">-</span> y);
+
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> x1 <span class="operator">=</span> x <span class="operator">+</span> leftOfCenter <span class="operator">*</span> <span class="number">10</span> <span class="operator">-</span> rightOfCenter <span class="operator">*</span> <span class="number">20</span> <span class="operator">+</span> cornerCase <span class="operator">*</span> <span class="operator">!</span>vertical <span class="operator">*</span> (onLeft <span class="operator">*</span> <span class="number">10</span> <span class="operator">-</span> onRight <span class="operator">*</span> <span class="number">20</span>);
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> y1 <span class="operator">=</span> y <span class="operator">+</span> aboveCenter <span class="operator">*</span> <span class="number">10</span> <span class="operator">-</span> belowCenter <span class="operator">*</span> <span class="number">20</span> <span class="operator">+</span> cornerCase <span class="operator">*</span> vertical <span class="operator">*</span> (above <span class="operator">*</span> <span class="number">10</span> <span class="operator">-</span> below <span class="operator">*</span> <span class="number">20</span>);;
+          point1<span class="operator">.</span>setX(x1);
+          point1<span class="operator">.</span>setY(y1);
+
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> x2 <span class="operator">=</span> x <span class="operator">+</span> leftOfCenter <span class="operator">*</span> <span class="number">20</span> <span class="operator">-</span> rightOfCenter <span class="operator">*</span> <span class="number">10</span> <span class="operator">+</span> cornerCase <span class="operator">*</span> <span class="operator">!</span>vertical <span class="operator">*</span> (onLeft <span class="operator">*</span> <span class="number">20</span> <span class="operator">-</span> onRight <span class="operator">*</span> <span class="number">10</span>);;
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> y2 <span class="operator">=</span> y <span class="operator">+</span> aboveCenter <span class="operator">*</span> <span class="number">20</span> <span class="operator">-</span> belowCenter <span class="operator">*</span> <span class="number">10</span> <span class="operator">+</span> cornerCase <span class="operator">*</span> vertical <span class="operator">*</span> (above <span class="operator">*</span> <span class="number">20</span> <span class="operator">-</span> below <span class="operator">*</span> <span class="number">10</span>);;
+          point2<span class="operator">.</span>setX(x2);
+          point2<span class="operator">.</span>setY(y2);
+
+          path<span class="operator">.</span>moveTo(point1);
+          path<span class="operator">.</span>lineTo(mapFromParent(m_anchor));
+          path<span class="operator">.</span>lineTo(point2);
+          path <span class="operator">=</span> path<span class="operator">.</span>simplified();
+      }
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="number">255</span><span class="operator">,</span> <span class="number">255</span><span class="operator">,</span> <span class="number">255</span>));
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawPath(path);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawText(m_textRect<span class="operator">,</span> m_text);
+  }
+
+  <span class="type">void</span> Callout<span class="operator">::</span>mousePressEvent(<span class="type"><a href="../qtwidgets/qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      event<span class="operator">-</span><span class="operator">&gt;</span>setAccepted(<span class="keyword">true</span>);
+  }
+
+  <span class="type">void</span> Callout<span class="operator">::</span>mouseMoveEvent(<span class="type"><a href="../qtwidgets/qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>buttons() <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftButton){
+          setPos(mapToParent(event<span class="operator">-</span><span class="operator">&gt;</span>pos() <span class="operator">-</span> event<span class="operator">-</span><span class="operator">&gt;</span>buttonDownPos(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftButton)));
+          event<span class="operator">-</span><span class="operator">&gt;</span>setAccepted(<span class="keyword">true</span>);
+      } <span class="keyword">else</span> {
+          event<span class="operator">-</span><span class="operator">&gt;</span>setAccepted(<span class="keyword">false</span>);
+      }
+  }
+
+  <span class="type">void</span> Callout<span class="operator">::</span>setText(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>text)
+  {
+      m_text <span class="operator">=</span> text;
+      <span class="type"><a href="../qtgui/qfontmetrics.html">QFontMetrics</a></span> metrics(m_font);
+      m_textRect <span class="operator">=</span> metrics<span class="operator">.</span>boundingRect(<span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">150</span><span class="operator">,</span> <span class="number">150</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignLeft<span class="operator">,</span> m_text);
+      m_textRect<span class="operator">.</span>translate(<span class="number">5</span><span class="operator">,</span> <span class="number">5</span>);
+      prepareGeometryChange();
+      m_rect <span class="operator">=</span> m_textRect<span class="operator">.</span>adjusted(<span class="operator">-</span><span class="number">5</span><span class="operator">,</span> <span class="operator">-</span><span class="number">5</span><span class="operator">,</span> <span class="number">5</span><span class="operator">,</span> <span class="number">5</span>);
+  }
+
+  <span class="type">void</span> Callout<span class="operator">::</span>setAnchor(<span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> point)
+  {
+      m_anchor <span class="operator">=</span> point;
+  }
+
+</pre>
+</div>
+<!-- @@@callout/callout.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

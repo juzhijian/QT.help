@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mdichild.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-mainwindows-mdi-example.html">MDI Example</a></td><td >mdichild.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mdichild.cpp Example File</h1>
+<span class="subtitle">mainwindows/mdi/mdichild.cpp</span>
+<!-- $$$mainwindows/mdi/mdichild.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+
+  <span class="preprocessor">#include &quot;mdichild.h&quot;</span>
+
+  MdiChild<span class="operator">::</span>MdiChild()
+  {
+      setAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WA_DeleteOnClose);
+      isUntitled <span class="operator">=</span> <span class="keyword">true</span>;
+  }
+
+  <span class="type">void</span> MdiChild<span class="operator">::</span>newFile()
+  {
+      <span class="keyword">static</span> <span class="type">int</span> sequenceNumber <span class="operator">=</span> <span class="number">1</span>;
+
+      isUntitled <span class="operator">=</span> <span class="keyword">true</span>;
+      curFile <span class="operator">=</span> tr(<span class="string">&quot;document%1.txt&quot;</span>)<span class="operator">.</span>arg(sequenceNumber<span class="operator">+</span><span class="operator">+</span>);
+      setWindowTitle(curFile <span class="operator">+</span> <span class="string">&quot;[*]&quot;</span>);
+
+      connect(document()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtgui/qtextdocument.html">QTextDocument</a></span><span class="operator">::</span>contentsChanged<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MdiChild<span class="operator">::</span>documentWasModified);
+  }
+
+  bool MdiChild<span class="operator">::</span>loadFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+      <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>ReadOnly <span class="operator">|</span> <span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>Text)) {
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;MDI&quot;</span>)<span class="operator">,</span>
+                               tr(<span class="string">&quot;Cannot read file %1:\n%2.&quot;</span>)
+                               <span class="operator">.</span>arg(fileName)
+                               <span class="operator">.</span>arg(file<span class="operator">.</span>errorString()));
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span> in(<span class="operator">&amp;</span>file);
+      <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>setOverrideCursor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WaitCursor);
+      setPlainText(in<span class="operator">.</span>readAll());
+      <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>restoreOverrideCursor();
+
+      setCurrentFile(fileName);
+
+      connect(document()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtgui/qtextdocument.html">QTextDocument</a></span><span class="operator">::</span>contentsChanged<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MdiChild<span class="operator">::</span>documentWasModified);
+
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  bool MdiChild<span class="operator">::</span>save()
+  {
+      <span class="keyword">if</span> (isUntitled) {
+          <span class="keyword">return</span> saveAs();
+      } <span class="keyword">else</span> {
+          <span class="keyword">return</span> saveFile(curFile);
+      }
+  }
+
+  bool MdiChild<span class="operator">::</span>saveAs()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getSaveFileName(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Save As&quot;</span>)<span class="operator">,</span>
+                                                      curFile);
+      <span class="keyword">if</span> (fileName<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      <span class="keyword">return</span> saveFile(fileName);
+  }
+
+  bool MdiChild<span class="operator">::</span>saveFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+      <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>WriteOnly <span class="operator">|</span> <span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>Text)) {
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;MDI&quot;</span>)<span class="operator">,</span>
+                               tr(<span class="string">&quot;Cannot write file %1:\n%2.&quot;</span>)
+                               <span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(fileName)<span class="operator">,</span> file<span class="operator">.</span>errorString()));
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span> out(<span class="operator">&amp;</span>file);
+      <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>setOverrideCursor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WaitCursor);
+      out <span class="operator">&lt;</span><span class="operator">&lt;</span> toPlainText();
+      <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>restoreOverrideCursor();
+
+      setCurrentFile(fileName);
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> MdiChild<span class="operator">::</span>userFriendlyCurrentFile()
+  {
+      <span class="keyword">return</span> strippedName(curFile);
+  }
+
+  <span class="type">void</span> MdiChild<span class="operator">::</span>closeEvent(<span class="type"><a href="../qtgui/qcloseevent.html">QCloseEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (maybeSave()) {
+          event<span class="operator">-</span><span class="operator">&gt;</span>accept();
+      } <span class="keyword">else</span> {
+          event<span class="operator">-</span><span class="operator">&gt;</span>ignore();
+      }
+  }
+
+  <span class="type">void</span> MdiChild<span class="operator">::</span>documentWasModified()
+  {
+      setWindowModified(document()<span class="operator">-</span><span class="operator">&gt;</span>isModified());
+  }
+
+  bool MdiChild<span class="operator">::</span>maybeSave()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>document()<span class="operator">-</span><span class="operator">&gt;</span>isModified())
+          <span class="keyword">return</span> <span class="keyword">true</span>;
+      <span class="keyword">const</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>StandardButton ret
+              <span class="operator">=</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;MDI&quot;</span>)<span class="operator">,</span>
+                                     tr(<span class="string">&quot;'%1' has been modified.\n&quot;</span>
+                                        <span class="string">&quot;Do you want to save your changes?&quot;</span>)
+                                     <span class="operator">.</span>arg(userFriendlyCurrentFile())<span class="operator">,</span>
+                                     <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Save <span class="operator">|</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Discard
+                                     <span class="operator">|</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Cancel);
+      <span class="keyword">switch</span> (ret) {
+      <span class="keyword">case</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Save:
+          <span class="keyword">return</span> save();
+      <span class="keyword">case</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Cancel:
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      <span class="keyword">default</span>:
+          <span class="keyword">break</span>;
+      }
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  <span class="type">void</span> MdiChild<span class="operator">::</span>setCurrentFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      curFile <span class="operator">=</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span>(fileName)<span class="operator">.</span>canonicalFilePath();
+      isUntitled <span class="operator">=</span> <span class="keyword">false</span>;
+      document()<span class="operator">-</span><span class="operator">&gt;</span>setModified(<span class="keyword">false</span>);
+      setWindowModified(<span class="keyword">false</span>);
+      setWindowTitle(userFriendlyCurrentFile() <span class="operator">+</span> <span class="string">&quot;[*]&quot;</span>);
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> MdiChild<span class="operator">::</span>strippedName(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fullFileName)
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span>(fullFileName)<span class="operator">.</span>fileName();
+  }
+
+</pre>
+</div>
+<!-- @@@mainwindows/mdi/mdichild.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

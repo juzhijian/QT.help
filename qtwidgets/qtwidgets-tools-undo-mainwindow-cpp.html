@@ -1,0 +1,505 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mainwindow.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-tools-undo-example.html">Undo Framework</a></td><td >mainwindow.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mainwindow.cpp Example File</h1>
+<span class="subtitle">tools/undo/mainwindow.cpp</span>
+<!-- $$$tools/undo/mainwindow.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QUndoGroup&gt;</span>
+  <span class="preprocessor">#include &lt;QUndoStack&gt;</span>
+  <span class="preprocessor">#include &lt;QFileDialog&gt;</span>
+  <span class="preprocessor">#include &lt;QMessageBox&gt;</span>
+  <span class="preprocessor">#include &lt;QTextStream&gt;</span>
+  <span class="preprocessor">#include &lt;QToolButton&gt;</span>
+  <span class="preprocessor">#include &quot;document.h&quot;</span>
+  <span class="preprocessor">#include &quot;mainwindow.h&quot;</span>
+  <span class="preprocessor">#include &quot;commands.h&quot;</span>
+
+  MainWindow<span class="operator">::</span>MainWindow(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qmainwindow.html">QMainWindow</a></span>(parent)
+  {
+      setupUi(<span class="keyword">this</span>);
+
+      <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>w <span class="operator">=</span> documentTabs<span class="operator">-</span><span class="operator">&gt;</span>widget(<span class="number">0</span>);
+      documentTabs<span class="operator">-</span><span class="operator">&gt;</span>removeTab(<span class="number">0</span>);
+      <span class="keyword">delete</span> w;
+
+      connect(actionOpen<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(openDocument()));
+      connect(actionClose<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(closeDocument()));
+      connect(actionNew<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(newDocument()));
+      connect(actionSave<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(saveDocument()));
+      connect(actionExit<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(close()));
+      connect(actionRed<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(setShapeColor()));
+      connect(actionGreen<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(setShapeColor()));
+      connect(actionBlue<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(setShapeColor()));
+      connect(actionAddCircle<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(addShape()));
+      connect(actionAddRectangle<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(addShape()));
+      connect(actionAddTriangle<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(addShape()));
+      connect(actionRemoveShape<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(removeShape()));
+      connect(actionAddRobot<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(addRobot()));
+      connect(actionAddSnowman<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(addSnowman()));
+      connect(actionAbout<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(about()));
+      connect(actionAboutQt<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(aboutQt()));
+
+      connect(undoLimit<span class="operator">,</span> SIGNAL(valueChanged(<span class="type">int</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateActions()));
+      connect(documentTabs<span class="operator">,</span> SIGNAL(currentChanged(<span class="type">int</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateActions()));
+
+      actionOpen<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;Ctrl+O&quot;</span>));
+      actionClose<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;Ctrl+W&quot;</span>));
+      actionNew<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;Ctrl+N&quot;</span>));
+      actionSave<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;Ctrl+S&quot;</span>));
+      actionExit<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;Ctrl+Q&quot;</span>));
+      actionRemoveShape<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;Del&quot;</span>));
+      actionRed<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;Alt+R&quot;</span>));
+      actionGreen<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;Alt+G&quot;</span>));
+      actionBlue<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;Alt+B&quot;</span>));
+      actionAddCircle<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;Alt+C&quot;</span>));
+      actionAddRectangle<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;Alt+L&quot;</span>));
+      actionAddTriangle<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;Alt+T&quot;</span>));
+
+      m_undoGroup <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qundogroup.html">QUndoGroup</a></span>(<span class="keyword">this</span>);
+      undoView<span class="operator">-</span><span class="operator">&gt;</span>setGroup(m_undoGroup);
+      undoView<span class="operator">-</span><span class="operator">&gt;</span>setCleanIcon(<span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(<span class="string">&quot;:/icons/ok.png&quot;</span>));
+
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>undoAction <span class="operator">=</span> m_undoGroup<span class="operator">-</span><span class="operator">&gt;</span>createUndoAction(<span class="keyword">this</span>);
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>redoAction <span class="operator">=</span> m_undoGroup<span class="operator">-</span><span class="operator">&gt;</span>createRedoAction(<span class="keyword">this</span>);
+      undoAction<span class="operator">-</span><span class="operator">&gt;</span>setIcon(<span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(<span class="string">&quot;:/icons/undo.png&quot;</span>));
+      redoAction<span class="operator">-</span><span class="operator">&gt;</span>setIcon(<span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(<span class="string">&quot;:/icons/redo.png&quot;</span>));
+      menuShape<span class="operator">-</span><span class="operator">&gt;</span>insertAction(menuShape<span class="operator">-</span><span class="operator">&gt;</span>actions()<span class="operator">.</span>at(<span class="number">0</span>)<span class="operator">,</span> undoAction);
+      menuShape<span class="operator">-</span><span class="operator">&gt;</span>insertAction(undoAction<span class="operator">,</span> redoAction);
+
+      toolBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(undoAction);
+      toolBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(redoAction);
+
+      newDocument();
+      updateActions();
+  };
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>updateActions()
+  {
+      Document <span class="operator">*</span>doc <span class="operator">=</span> currentDocument();
+      m_undoGroup<span class="operator">-</span><span class="operator">&gt;</span>setActiveStack(doc <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">?</span> <span class="number">0</span> : doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack());
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> shapeName <span class="operator">=</span> doc <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">?</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>() : doc<span class="operator">-</span><span class="operator">&gt;</span>currentShapeName();
+
+      actionAddRobot<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(doc <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>);
+      actionAddSnowman<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(doc <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>);
+      actionAddCircle<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(doc <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>);
+      actionAddRectangle<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(doc <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>);
+      actionAddTriangle<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(doc <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>);
+      actionClose<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(doc <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>);
+      actionSave<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(doc <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">-</span><span class="operator">&gt;</span>isClean());
+      undoLimit<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(doc <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">-</span><span class="operator">&gt;</span>count() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>);
+
+      <span class="keyword">if</span> (shapeName<span class="operator">.</span>isEmpty()) {
+          actionRed<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+          actionGreen<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+          actionBlue<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+          actionRemoveShape<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      } <span class="keyword">else</span> {
+          Shape shape <span class="operator">=</span> doc<span class="operator">-</span><span class="operator">&gt;</span>shape(shapeName);
+          actionRed<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(shape<span class="operator">.</span>color() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>red);
+          actionGreen<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(shape<span class="operator">.</span>color() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>green);
+          actionBlue<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(shape<span class="operator">.</span>color() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>blue);
+          actionRemoveShape<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+      }
+
+      <span class="keyword">if</span> (doc <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>) {
+          <span class="type">int</span> index <span class="operator">=</span> documentTabs<span class="operator">-</span><span class="operator">&gt;</span>indexOf(doc);
+          Q_ASSERT(index <span class="operator">!</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>);
+          <span class="keyword">static</span> <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> unsavedIcon(<span class="string">&quot;:/icons/filesave.png&quot;</span>);
+          documentTabs<span class="operator">-</span><span class="operator">&gt;</span>setTabIcon(index<span class="operator">,</span> doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">-</span><span class="operator">&gt;</span>isClean() <span class="operator">?</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>() : unsavedIcon);
+
+          <span class="keyword">if</span> (doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">-</span><span class="operator">&gt;</span>count() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+              doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">-</span><span class="operator">&gt;</span>setUndoLimit(undoLimit<span class="operator">-</span><span class="operator">&gt;</span>value());
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>openDocument()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getOpenFileName(<span class="keyword">this</span>);
+      <span class="keyword">if</span> (fileName<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+      <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly)) {
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span>
+                              tr(<span class="string">&quot;File error&quot;</span>)<span class="operator">,</span>
+                              tr(<span class="string">&quot;Failed to open\n%1&quot;</span>)<span class="operator">.</span>arg(fileName));
+          <span class="keyword">return</span>;
+      }
+      <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span> stream(<span class="operator">&amp;</span>file);
+
+      Document <span class="operator">*</span>doc <span class="operator">=</span> <span class="keyword">new</span> Document();
+      <span class="keyword">if</span> (<span class="operator">!</span>doc<span class="operator">-</span><span class="operator">&gt;</span>load(stream)) {
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span>
+                              tr(<span class="string">&quot;Parse error&quot;</span>)<span class="operator">,</span>
+                              tr(<span class="string">&quot;Failed to parse\n%1&quot;</span>)<span class="operator">.</span>arg(fileName));
+          <span class="keyword">delete</span> doc;
+          <span class="keyword">return</span>;
+      }
+
+      doc<span class="operator">-</span><span class="operator">&gt;</span>setFileName(fileName);
+      addDocument(doc);
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> MainWindow<span class="operator">::</span>fixedWindowTitle(<span class="keyword">const</span> Document <span class="operator">*</span>doc) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> title <span class="operator">=</span> doc<span class="operator">-</span><span class="operator">&gt;</span>fileName();
+
+      <span class="keyword">if</span> (title<span class="operator">.</span>isEmpty())
+          title <span class="operator">=</span> tr(<span class="string">&quot;Unnamed&quot;</span>);
+      <span class="keyword">else</span>
+          title <span class="operator">=</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span>(title)<span class="operator">.</span>fileName();
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> result;
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; ; <span class="operator">+</span><span class="operator">+</span>i) {
+          result <span class="operator">=</span> title;
+          <span class="keyword">if</span> (i <span class="operator">&gt;</span> <span class="number">0</span>)
+              result <span class="operator">+</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(i);
+
+          bool unique <span class="operator">=</span> <span class="keyword">true</span>;
+          <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> documentTabs<span class="operator">-</span><span class="operator">&gt;</span>count(); <span class="operator">+</span><span class="operator">+</span>j) {
+              <span class="keyword">const</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>widget <span class="operator">=</span> documentTabs<span class="operator">-</span><span class="operator">&gt;</span>widget(j);
+              <span class="keyword">if</span> (widget <span class="operator">=</span><span class="operator">=</span> doc)
+                  <span class="keyword">continue</span>;
+              <span class="keyword">if</span> (result <span class="operator">=</span><span class="operator">=</span> documentTabs<span class="operator">-</span><span class="operator">&gt;</span>tabText(j)) {
+                  unique <span class="operator">=</span> <span class="keyword">false</span>;
+                  <span class="keyword">break</span>;
+              }
+          }
+
+          <span class="keyword">if</span> (unique)
+              <span class="keyword">break</span>;
+      }
+
+      <span class="keyword">return</span> result;
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>addDocument(Document <span class="operator">*</span>doc)
+  {
+      <span class="keyword">if</span> (documentTabs<span class="operator">-</span><span class="operator">&gt;</span>indexOf(doc) <span class="operator">!</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+          <span class="keyword">return</span>;
+      m_undoGroup<span class="operator">-</span><span class="operator">&gt;</span>addStack(doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack());
+      documentTabs<span class="operator">-</span><span class="operator">&gt;</span>addTab(doc<span class="operator">,</span> fixedWindowTitle(doc));
+      connect(doc<span class="operator">,</span> SIGNAL(currentShapeChanged(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateActions()));
+      connect(doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">,</span> SIGNAL(indexChanged(<span class="type">int</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateActions()));
+      connect(doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">,</span> SIGNAL(cleanChanged(bool))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateActions()));
+
+      setCurrentDocument(doc);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>setCurrentDocument(Document <span class="operator">*</span>doc)
+  {
+      documentTabs<span class="operator">-</span><span class="operator">&gt;</span>setCurrentWidget(doc);
+  }
+
+  Document <span class="operator">*</span>MainWindow<span class="operator">::</span>currentDocument() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> qobject_cast<span class="operator">&lt;</span>Document<span class="operator">*</span><span class="operator">&gt;</span>(documentTabs<span class="operator">-</span><span class="operator">&gt;</span>currentWidget());
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>removeDocument(Document <span class="operator">*</span>doc)
+  {
+      <span class="type">int</span> index <span class="operator">=</span> documentTabs<span class="operator">-</span><span class="operator">&gt;</span>indexOf(doc);
+      <span class="keyword">if</span> (index <span class="operator">=</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+          <span class="keyword">return</span>;
+
+      documentTabs<span class="operator">-</span><span class="operator">&gt;</span>removeTab(index);
+      m_undoGroup<span class="operator">-</span><span class="operator">&gt;</span>removeStack(doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack());
+      disconnect(doc<span class="operator">,</span> SIGNAL(currentShapeChanged(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateActions()));
+      disconnect(doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">,</span> SIGNAL(indexChanged(<span class="type">int</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateActions()));
+      disconnect(doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">,</span> SIGNAL(cleanChanged(bool))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateActions()));
+
+      <span class="keyword">if</span> (documentTabs<span class="operator">-</span><span class="operator">&gt;</span>count() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>) {
+          newDocument();
+          updateActions();
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>saveDocument()
+  {
+      Document <span class="operator">*</span>doc <span class="operator">=</span> currentDocument();
+      <span class="keyword">if</span> (doc <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="keyword">return</span>;
+
+      <span class="keyword">for</span> (;;) {
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> doc<span class="operator">-</span><span class="operator">&gt;</span>fileName();
+
+          <span class="keyword">if</span> (fileName<span class="operator">.</span>isEmpty())
+              fileName <span class="operator">=</span> <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getSaveFileName(<span class="keyword">this</span>);
+          <span class="keyword">if</span> (fileName<span class="operator">.</span>isEmpty())
+              <span class="keyword">break</span>;
+
+          <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+          <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>WriteOnly)) {
+              <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span>
+                                  tr(<span class="string">&quot;File error&quot;</span>)<span class="operator">,</span>
+                                  tr(<span class="string">&quot;Failed to open\n%1&quot;</span>)<span class="operator">.</span>arg(fileName));
+              doc<span class="operator">-</span><span class="operator">&gt;</span>setFileName(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>());
+          } <span class="keyword">else</span> {
+              <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span> stream(<span class="operator">&amp;</span>file);
+              doc<span class="operator">-</span><span class="operator">&gt;</span>save(stream);
+              doc<span class="operator">-</span><span class="operator">&gt;</span>setFileName(fileName);
+
+              <span class="type">int</span> index <span class="operator">=</span> documentTabs<span class="operator">-</span><span class="operator">&gt;</span>indexOf(doc);
+              Q_ASSERT(index <span class="operator">!</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>);
+              documentTabs<span class="operator">-</span><span class="operator">&gt;</span>setTabText(index<span class="operator">,</span> fixedWindowTitle(doc));
+
+              <span class="keyword">break</span>;
+          }
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>closeDocument()
+  {
+      Document <span class="operator">*</span>doc <span class="operator">=</span> currentDocument();
+      <span class="keyword">if</span> (doc <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="keyword">return</span>;
+
+      <span class="keyword">if</span> (<span class="operator">!</span>doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">-</span><span class="operator">&gt;</span>isClean()) {
+          <span class="type">int</span> button
+              <span class="operator">=</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span>
+                              tr(<span class="string">&quot;Unsaved changes&quot;</span>)<span class="operator">,</span>
+                              tr(<span class="string">&quot;Would you like to save this document?&quot;</span>)<span class="operator">,</span>
+                              <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Yes<span class="operator">,</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>No);
+          <span class="keyword">if</span> (button <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Yes)
+              saveDocument();
+      }
+
+      removeDocument(doc);
+      <span class="keyword">delete</span> doc;
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>newDocument()
+  {
+      addDocument(<span class="keyword">new</span> Document());
+  }
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> randomColor()
+  {
+      <span class="type">int</span> r <span class="operator">=</span> (<span class="type">int</span>) (<span class="number">3.0</span><span class="operator">*</span>(rand()<span class="operator">/</span>(RAND_MAX <span class="operator">+</span> <span class="number">1.0</span>)));
+      <span class="keyword">switch</span> (r) {
+          <span class="keyword">case</span> <span class="number">0</span>:
+              <span class="keyword">return</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>red;
+          <span class="keyword">case</span> <span class="number">1</span>:
+              <span class="keyword">return</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>green;
+          <span class="keyword">default</span>:
+              <span class="keyword">break</span>;
+      }
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>blue;
+  }
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> randomRect(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> <span class="operator">&amp;</span>s)
+  {
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> min <span class="operator">=</span> Shape<span class="operator">::</span>minSize;
+
+      <span class="type">int</span> left <span class="operator">=</span> (<span class="type">int</span>) ((<span class="number">0.0</span> <span class="operator">+</span> s<span class="operator">.</span>width() <span class="operator">-</span> min<span class="operator">.</span>width())<span class="operator">*</span>(rand()<span class="operator">/</span>(RAND_MAX <span class="operator">+</span> <span class="number">1.0</span>)));
+      <span class="type">int</span> top <span class="operator">=</span> (<span class="type">int</span>) ((<span class="number">0.0</span> <span class="operator">+</span> s<span class="operator">.</span>height() <span class="operator">-</span> min<span class="operator">.</span>height())<span class="operator">*</span>(rand()<span class="operator">/</span>(RAND_MAX <span class="operator">+</span> <span class="number">1.0</span>)));
+      <span class="type">int</span> width <span class="operator">=</span> (<span class="type">int</span>) ((<span class="number">0.0</span> <span class="operator">+</span> s<span class="operator">.</span>width() <span class="operator">-</span> left <span class="operator">-</span> min<span class="operator">.</span>width())<span class="operator">*</span>(rand()<span class="operator">/</span>(RAND_MAX <span class="operator">+</span> <span class="number">1.0</span>))) <span class="operator">+</span> min<span class="operator">.</span>width();
+      <span class="type">int</span> height <span class="operator">=</span> (<span class="type">int</span>) ((<span class="number">0.0</span> <span class="operator">+</span> s<span class="operator">.</span>height() <span class="operator">-</span> top <span class="operator">-</span> min<span class="operator">.</span>height())<span class="operator">*</span>(rand()<span class="operator">/</span>(RAND_MAX <span class="operator">+</span> <span class="number">1.0</span>))) <span class="operator">+</span> min<span class="operator">.</span>height();
+
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(left<span class="operator">,</span> top<span class="operator">,</span> width<span class="operator">,</span> height);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>addShape()
+  {
+      Document <span class="operator">*</span>doc <span class="operator">=</span> currentDocument();
+      <span class="keyword">if</span> (doc <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="keyword">return</span>;
+
+      Shape<span class="operator">::</span>Type type;
+
+      <span class="keyword">if</span> (sender() <span class="operator">=</span><span class="operator">=</span> actionAddCircle)
+          type <span class="operator">=</span> Shape<span class="operator">::</span>Circle;
+      <span class="keyword">else</span> <span class="keyword">if</span> (sender() <span class="operator">=</span><span class="operator">=</span> actionAddRectangle)
+          type <span class="operator">=</span> Shape<span class="operator">::</span>Rectangle;
+      <span class="keyword">else</span> <span class="keyword">if</span> (sender() <span class="operator">=</span><span class="operator">=</span> actionAddTriangle)
+          type <span class="operator">=</span> Shape<span class="operator">::</span>Triangle;
+      <span class="keyword">else</span> <span class="keyword">return</span>;
+
+      Shape newShape(type<span class="operator">,</span> randomColor()<span class="operator">,</span> randomRect(doc<span class="operator">-</span><span class="operator">&gt;</span>size()));
+      doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">-</span><span class="operator">&gt;</span>push(<span class="keyword">new</span> AddShapeCommand(doc<span class="operator">,</span> newShape));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>removeShape()
+  {
+      Document <span class="operator">*</span>doc <span class="operator">=</span> currentDocument();
+      <span class="keyword">if</span> (doc <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> shapeName <span class="operator">=</span> doc<span class="operator">-</span><span class="operator">&gt;</span>currentShapeName();
+      <span class="keyword">if</span> (shapeName<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+
+      doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">-</span><span class="operator">&gt;</span>push(<span class="keyword">new</span> RemoveShapeCommand(doc<span class="operator">,</span> shapeName));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>setShapeColor()
+  {
+      Document <span class="operator">*</span>doc <span class="operator">=</span> currentDocument();
+      <span class="keyword">if</span> (doc <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> shapeName <span class="operator">=</span> doc<span class="operator">-</span><span class="operator">&gt;</span>currentShapeName();
+      <span class="keyword">if</span> (shapeName<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> color;
+
+      <span class="keyword">if</span> (sender() <span class="operator">=</span><span class="operator">=</span> actionRed)
+          color <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>red;
+      <span class="keyword">else</span> <span class="keyword">if</span> (sender() <span class="operator">=</span><span class="operator">=</span> actionGreen)
+          color <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>green;
+      <span class="keyword">else</span> <span class="keyword">if</span> (sender() <span class="operator">=</span><span class="operator">=</span> actionBlue)
+          color <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>blue;
+      <span class="keyword">else</span>
+          <span class="keyword">return</span>;
+
+      <span class="keyword">if</span> (color <span class="operator">=</span><span class="operator">=</span> doc<span class="operator">-</span><span class="operator">&gt;</span>shape(shapeName)<span class="operator">.</span>color())
+          <span class="keyword">return</span>;
+
+      doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">-</span><span class="operator">&gt;</span>push(<span class="keyword">new</span> SetShapeColorCommand(doc<span class="operator">,</span> shapeName<span class="operator">,</span> color));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>addSnowman()
+  {
+      Document <span class="operator">*</span>doc <span class="operator">=</span> currentDocument();
+      <span class="keyword">if</span> (doc <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="keyword">return</span>;
+
+      <span class="comment">// Create a macro command using beginMacro() and endMacro()</span>
+
+      doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">-</span><span class="operator">&gt;</span>beginMacro(tr(<span class="string">&quot;Add snowman&quot;</span>));
+      doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">-</span><span class="operator">&gt;</span>push(<span class="keyword">new</span> AddShapeCommand(doc<span class="operator">,</span>
+                              Shape(Shape<span class="operator">::</span>Circle<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>blue<span class="operator">,</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(<span class="number">51</span><span class="operator">,</span> <span class="number">30</span><span class="operator">,</span> <span class="number">97</span><span class="operator">,</span> <span class="number">95</span>))));
+      doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">-</span><span class="operator">&gt;</span>push(<span class="keyword">new</span> AddShapeCommand(doc<span class="operator">,</span>
+                              Shape(Shape<span class="operator">::</span>Circle<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>blue<span class="operator">,</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(<span class="number">27</span><span class="operator">,</span> <span class="number">123</span><span class="operator">,</span> <span class="number">150</span><span class="operator">,</span> <span class="number">133</span>))));
+      doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">-</span><span class="operator">&gt;</span>push(<span class="keyword">new</span> AddShapeCommand(doc<span class="operator">,</span>
+                              Shape(Shape<span class="operator">::</span>Circle<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>blue<span class="operator">,</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(<span class="number">11</span><span class="operator">,</span> <span class="number">253</span><span class="operator">,</span> <span class="number">188</span><span class="operator">,</span> <span class="number">146</span>))));
+      doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">-</span><span class="operator">&gt;</span>endMacro();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>addRobot()
+  {
+      Document <span class="operator">*</span>doc <span class="operator">=</span> currentDocument();
+      <span class="keyword">if</span> (doc <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="keyword">return</span>;
+
+      <span class="comment">// Compose a macro command by explicitly adding children to a parent command</span>
+
+      <span class="type"><a href="qundocommand.html">QUndoCommand</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qundocommand.html">QUndoCommand</a></span>(tr(<span class="string">&quot;Add robot&quot;</span>));
+
+      <span class="keyword">new</span> AddShapeCommand(doc<span class="operator">,</span> Shape(Shape<span class="operator">::</span>Rectangle<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>green<span class="operator">,</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(<span class="number">115</span><span class="operator">,</span> <span class="number">15</span><span class="operator">,</span> <span class="number">81</span><span class="operator">,</span> <span class="number">70</span>))<span class="operator">,</span> parent);
+      <span class="keyword">new</span> AddShapeCommand(doc<span class="operator">,</span> Shape(Shape<span class="operator">::</span>Rectangle<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>green<span class="operator">,</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(<span class="number">82</span><span class="operator">,</span> <span class="number">89</span><span class="operator">,</span> <span class="number">148</span><span class="operator">,</span> <span class="number">188</span>))<span class="operator">,</span> parent);
+      <span class="keyword">new</span> AddShapeCommand(doc<span class="operator">,</span> Shape(Shape<span class="operator">::</span>Rectangle<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>green<span class="operator">,</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(<span class="number">76</span><span class="operator">,</span> <span class="number">280</span><span class="operator">,</span> <span class="number">80</span><span class="operator">,</span> <span class="number">165</span>))<span class="operator">,</span> parent);
+      <span class="keyword">new</span> AddShapeCommand(doc<span class="operator">,</span> Shape(Shape<span class="operator">::</span>Rectangle<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>green<span class="operator">,</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(<span class="number">163</span><span class="operator">,</span> <span class="number">280</span><span class="operator">,</span> <span class="number">80</span><span class="operator">,</span> <span class="number">164</span>))<span class="operator">,</span> parent);
+      <span class="keyword">new</span> AddShapeCommand(doc<span class="operator">,</span> Shape(Shape<span class="operator">::</span>Circle<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>blue<span class="operator">,</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(<span class="number">116</span><span class="operator">,</span> <span class="number">25</span><span class="operator">,</span> <span class="number">80</span><span class="operator">,</span> <span class="number">50</span>))<span class="operator">,</span> parent);
+      <span class="keyword">new</span> AddShapeCommand(doc<span class="operator">,</span> Shape(Shape<span class="operator">::</span>Rectangle<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>green<span class="operator">,</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(<span class="number">232</span><span class="operator">,</span> <span class="number">92</span><span class="operator">,</span> <span class="number">80</span><span class="operator">,</span> <span class="number">127</span>))<span class="operator">,</span> parent);
+      <span class="keyword">new</span> AddShapeCommand(doc<span class="operator">,</span> Shape(Shape<span class="operator">::</span>Rectangle<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>green<span class="operator">,</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(<span class="number">2</span><span class="operator">,</span> <span class="number">92</span><span class="operator">,</span> <span class="number">80</span><span class="operator">,</span> <span class="number">125</span>))<span class="operator">,</span> parent);
+
+      doc<span class="operator">-</span><span class="operator">&gt;</span>undoStack()<span class="operator">-</span><span class="operator">&gt;</span>push(parent);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>about()
+  {
+      <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>about(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;About Undo&quot;</span>)<span class="operator">,</span> tr(<span class="string">&quot;The Undo demonstration shows how to use the Qt Undo framework.&quot;</span>));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>aboutQt()
+  {
+      <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>aboutQt(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;About Qt&quot;</span>));
+  }
+
+</pre>
+</div>
+<!-- @@@tools/undo/mainwindow.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

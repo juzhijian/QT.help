@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>audiooutput.cpp Example File | Qt Multimedia 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtmultimedia-index.html">Qt Multimedia</a></td><td ><a href="qtmultimedia-multimedia-audiooutput-example.html">Audio Output Example</a></td><td >audiooutput.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">audiooutput.cpp Example File</h1>
+<span class="subtitle">multimedia/audiooutput/audiooutput.cpp</span>
+<!-- $$$multimedia/audiooutput/audiooutput.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QAudioDeviceInfo&gt;</span>
+  <span class="preprocessor">#include &lt;QAudioOutput&gt;</span>
+  <span class="preprocessor">#include &lt;QDebug&gt;</span>
+  <span class="preprocessor">#include &lt;QVBoxLayout&gt;</span>
+  <span class="preprocessor">#include &lt;qmath.h&gt;</span>
+  <span class="preprocessor">#include &lt;qendian.h&gt;</span>
+
+  <span class="preprocessor">#include &quot;audiooutput.h&quot;</span>
+
+  <span class="preprocessor">#define PUSH_MODE_LABEL &quot;Enable push mode&quot;</span>
+  <span class="preprocessor">#define PULL_MODE_LABEL &quot;Enable pull mode&quot;</span>
+  <span class="preprocessor">#define SUSPEND_LABEL   &quot;Suspend playback&quot;</span>
+  <span class="preprocessor">#define RESUME_LABEL    &quot;Resume playback&quot;</span>
+  <span class="preprocessor">#define VOLUME_LABEL    &quot;Volume:&quot;</span>
+
+  <span class="keyword">const</span> <span class="type">int</span> DurationSeconds <span class="operator">=</span> <span class="number">1</span>;
+  <span class="keyword">const</span> <span class="type">int</span> ToneSampleRateHz <span class="operator">=</span> <span class="number">600</span>;
+  <span class="keyword">const</span> <span class="type">int</span> DataSampleRateHz <span class="operator">=</span> <span class="number">44100</span>;
+  <span class="keyword">const</span> <span class="type">int</span> BufferSize      <span class="operator">=</span> <span class="number">32768</span>;
+
+  Generator<span class="operator">::</span>Generator(<span class="keyword">const</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span> <span class="operator">&amp;</span>format<span class="operator">,</span>
+                       <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> durationUs<span class="operator">,</span>
+                       <span class="type">int</span> sampleRate<span class="operator">,</span>
+                       <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      :   <span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span>(parent)
+      <span class="operator">,</span>   m_pos(<span class="number">0</span>)
+  {
+      <span class="keyword">if</span> (format<span class="operator">.</span>isValid())
+          generateData(format<span class="operator">,</span> durationUs<span class="operator">,</span> sampleRate);
+  }
+
+  Generator<span class="operator">::</span><span class="operator">~</span>Generator()
+  {
+
+  }
+
+  <span class="type">void</span> Generator<span class="operator">::</span>start()
+  {
+      open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly);
+  }
+
+  <span class="type">void</span> Generator<span class="operator">::</span>stop()
+  {
+      m_pos <span class="operator">=</span> <span class="number">0</span>;
+      close();
+  }
+
+  <span class="type">void</span> Generator<span class="operator">::</span>generateData(<span class="keyword">const</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span> <span class="operator">&amp;</span>format<span class="operator">,</span> <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> durationUs<span class="operator">,</span> <span class="type">int</span> sampleRate)
+  {
+      <span class="keyword">const</span> <span class="type">int</span> channelBytes <span class="operator">=</span> format<span class="operator">.</span>sampleSize() <span class="operator">/</span> <span class="number">8</span>;
+      <span class="keyword">const</span> <span class="type">int</span> sampleBytes <span class="operator">=</span> format<span class="operator">.</span>channelCount() <span class="operator">*</span> channelBytes;
+
+      <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> length <span class="operator">=</span> (format<span class="operator">.</span>sampleRate() <span class="operator">*</span> format<span class="operator">.</span>channelCount() <span class="operator">*</span> (format<span class="operator">.</span>sampleSize() <span class="operator">/</span> <span class="number">8</span>))
+                          <span class="operator">*</span> durationUs <span class="operator">/</span> <span class="number">100000</span>;
+
+      Q_ASSERT(length <span class="operator">%</span> sampleBytes <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>);
+      Q_UNUSED(sampleBytes) <span class="comment">// suppress warning in release builds</span>
+
+      m_buffer<span class="operator">.</span>resize(length);
+      <span class="type">unsigned</span> <span class="type">char</span> <span class="operator">*</span>ptr <span class="operator">=</span> <span class="keyword">reinterpret_cast</span><span class="operator">&lt;</span><span class="type">unsigned</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">&gt;</span>(m_buffer<span class="operator">.</span>data());
+      <span class="type">int</span> sampleIndex <span class="operator">=</span> <span class="number">0</span>;
+
+      <span class="keyword">while</span> (length) {
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> x <span class="operator">=</span> <a href="../qtcore/qtmath.html#qSin">qSin</a>(<span class="number">2</span> <span class="operator">*</span> M_PI <span class="operator">*</span> sampleRate <span class="operator">*</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>(sampleIndex <span class="operator">%</span> format<span class="operator">.</span>sampleRate()) <span class="operator">/</span> format<span class="operator">.</span>sampleRate());
+          <span class="keyword">for</span> (<span class="type">int</span> i<span class="operator">=</span><span class="number">0</span>; i<span class="operator">&lt;</span>format<span class="operator">.</span>channelCount(); <span class="operator">+</span><span class="operator">+</span>i) {
+              <span class="keyword">if</span> (format<span class="operator">.</span>sampleSize() <span class="operator">=</span><span class="operator">=</span> <span class="number">8</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> format<span class="operator">.</span>sampleType() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>UnSignedInt) {
+                  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span> value <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span><span class="operator">&gt;</span>((<span class="number">1.0</span> <span class="operator">+</span> x) <span class="operator">/</span> <span class="number">2</span> <span class="operator">*</span> <span class="number">255</span>);
+                  <span class="operator">*</span><span class="keyword">reinterpret_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span><span class="operator">*</span><span class="operator">&gt;</span>(ptr) <span class="operator">=</span> value;
+              } <span class="keyword">else</span> <span class="keyword">if</span> (format<span class="operator">.</span>sampleSize() <span class="operator">=</span><span class="operator">=</span> <span class="number">8</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> format<span class="operator">.</span>sampleType() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>SignedInt) {
+                  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#qint8-typedef">qint8</a></span> value <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#qint8-typedef">qint8</a></span><span class="operator">&gt;</span>(x <span class="operator">*</span> <span class="number">127</span>);
+                  <span class="operator">*</span><span class="keyword">reinterpret_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#quint8-typedef">quint8</a></span><span class="operator">*</span><span class="operator">&gt;</span>(ptr) <span class="operator">=</span> value;
+              } <span class="keyword">else</span> <span class="keyword">if</span> (format<span class="operator">.</span>sampleSize() <span class="operator">=</span><span class="operator">=</span> <span class="number">16</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> format<span class="operator">.</span>sampleType() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>UnSignedInt) {
+                  <span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> value <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span><span class="operator">&gt;</span>((<span class="number">1.0</span> <span class="operator">+</span> x) <span class="operator">/</span> <span class="number">2</span> <span class="operator">*</span> <span class="number">65535</span>);
+                  <span class="keyword">if</span> (format<span class="operator">.</span>byteOrder() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>LittleEndian)
+                      <a href="../qtcore/qtendian.html#qToLittleEndian">qToLittleEndian</a><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span><span class="operator">&gt;</span>(value<span class="operator">,</span> ptr);
+                  <span class="keyword">else</span>
+                      <a href="../qtcore/qtendian.html#qToBigEndian">qToBigEndian</a><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span><span class="operator">&gt;</span>(value<span class="operator">,</span> ptr);
+              } <span class="keyword">else</span> <span class="keyword">if</span> (format<span class="operator">.</span>sampleSize() <span class="operator">=</span><span class="operator">=</span> <span class="number">16</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> format<span class="operator">.</span>sampleType() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>SignedInt) {
+                  <span class="type"><a href="../qtcore/qtglobal.html#qint16-typedef">qint16</a></span> value <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#qint16-typedef">qint16</a></span><span class="operator">&gt;</span>(x <span class="operator">*</span> <span class="number">32767</span>);
+                  <span class="keyword">if</span> (format<span class="operator">.</span>byteOrder() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>LittleEndian)
+                      <a href="../qtcore/qtendian.html#qToLittleEndian">qToLittleEndian</a><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#qint16-typedef">qint16</a></span><span class="operator">&gt;</span>(value<span class="operator">,</span> ptr);
+                  <span class="keyword">else</span>
+                      <a href="../qtcore/qtendian.html#qToBigEndian">qToBigEndian</a><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#qint16-typedef">qint16</a></span><span class="operator">&gt;</span>(value<span class="operator">,</span> ptr);
+              }
+
+              ptr <span class="operator">+</span><span class="operator">=</span> channelBytes;
+              length <span class="operator">-</span><span class="operator">=</span> channelBytes;
+          }
+          <span class="operator">+</span><span class="operator">+</span>sampleIndex;
+      }
+  }
+
+  <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> Generator<span class="operator">::</span>readData(<span class="type">char</span> <span class="operator">*</span>data<span class="operator">,</span> <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> len)
+  {
+      <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> total <span class="operator">=</span> <span class="number">0</span>;
+      <span class="keyword">if</span> (<span class="operator">!</span>m_buffer<span class="operator">.</span>isEmpty()) {
+          <span class="keyword">while</span> (len <span class="operator">-</span> total <span class="operator">&gt;</span> <span class="number">0</span>) {
+              <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> chunk <span class="operator">=</span> <a href="../qtcore/qtglobal.html#qMin">qMin</a>((m_buffer<span class="operator">.</span>size() <span class="operator">-</span> m_pos)<span class="operator">,</span> len <span class="operator">-</span> total);
+              memcpy(data <span class="operator">+</span> total<span class="operator">,</span> m_buffer<span class="operator">.</span>constData() <span class="operator">+</span> m_pos<span class="operator">,</span> chunk);
+              m_pos <span class="operator">=</span> (m_pos <span class="operator">+</span> chunk) <span class="operator">%</span> m_buffer<span class="operator">.</span>size();
+              total <span class="operator">+</span><span class="operator">=</span> chunk;
+          }
+      }
+      <span class="keyword">return</span> total;
+  }
+
+  <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> Generator<span class="operator">::</span>writeData(<span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>data<span class="operator">,</span> <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> len)
+  {
+      Q_UNUSED(data);
+      Q_UNUSED(len);
+
+      <span class="keyword">return</span> <span class="number">0</span>;
+  }
+
+  <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> Generator<span class="operator">::</span>bytesAvailable() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_buffer<span class="operator">.</span>size() <span class="operator">+</span> <span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>bytesAvailable();
+  }
+
+  AudioTest<span class="operator">::</span>AudioTest()
+      :   m_pushTimer(<span class="keyword">new</span> <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span>(<span class="keyword">this</span>))
+      <span class="operator">,</span>   m_modeButton(<span class="number">0</span>)
+      <span class="operator">,</span>   m_suspendResumeButton(<span class="number">0</span>)
+      <span class="operator">,</span>   m_deviceBox(<span class="number">0</span>)
+      <span class="operator">,</span>   m_device(<span class="type"><a href="qaudiodeviceinfo.html">QAudioDeviceInfo</a></span><span class="operator">::</span>defaultOutputDevice())
+      <span class="operator">,</span>   m_generator(<span class="number">0</span>)
+      <span class="operator">,</span>   m_audioOutput(<span class="number">0</span>)
+      <span class="operator">,</span>   m_output(<span class="number">0</span>)
+      <span class="operator">,</span>   m_pullMode(<span class="keyword">true</span>)
+      <span class="operator">,</span>   m_buffer(BufferSize<span class="operator">,</span> <span class="number">0</span>)
+  {
+      initializeWindow();
+      initializeAudio();
+  }
+
+  <span class="type">void</span> AudioTest<span class="operator">::</span>initializeWindow()
+  {
+      <span class="type"><a href="../qtcore/qscopedpointer.html">QScopedPointer</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span><span class="operator">&gt;</span> window(<span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>);
+      <span class="type"><a href="../qtcore/qscopedpointer.html">QScopedPointer</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtwidgets/qvboxlayout.html">QVBoxLayout</a></span><span class="operator">&gt;</span> layout(<span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qvboxlayout.html">QVBoxLayout</a></span>);
+
+      m_deviceBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qcombobox.html">QComboBox</a></span>(<span class="keyword">this</span>);
+      <span class="keyword">const</span> <span class="type"><a href="qaudiodeviceinfo.html">QAudioDeviceInfo</a></span> <span class="operator">&amp;</span>defaultDeviceInfo <span class="operator">=</span> <span class="type"><a href="qaudiodeviceinfo.html">QAudioDeviceInfo</a></span><span class="operator">::</span>defaultOutputDevice();
+      m_deviceBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(defaultDeviceInfo<span class="operator">.</span>deviceName()<span class="operator">,</span> <a href="../qtcore/qvariant-obsolete.html#qVariantFromValue-1">qVariantFromValue</a>(defaultDeviceInfo));
+      foreach (<span class="keyword">const</span> <span class="type"><a href="qaudiodeviceinfo.html">QAudioDeviceInfo</a></span> <span class="operator">&amp;</span>deviceInfo<span class="operator">,</span> <span class="type"><a href="qaudiodeviceinfo.html">QAudioDeviceInfo</a></span><span class="operator">::</span>availableDevices(<span class="type"><a href="qaudio.html">QAudio</a></span><span class="operator">::</span>AudioOutput)) {
+          <span class="keyword">if</span> (deviceInfo <span class="operator">!</span><span class="operator">=</span> defaultDeviceInfo)
+              m_deviceBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(deviceInfo<span class="operator">.</span>deviceName()<span class="operator">,</span> <a href="../qtcore/qvariant-obsolete.html#qVariantFromValue-1">qVariantFromValue</a>(deviceInfo));
+      }
+      connect(m_deviceBox<span class="operator">,</span>SIGNAL(activated(<span class="type">int</span>))<span class="operator">,</span>SLOT(deviceChanged(<span class="type">int</span>)));
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_deviceBox);
+
+      m_modeButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(<span class="keyword">this</span>);
+      m_modeButton<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(PUSH_MODE_LABEL));
+      connect(m_modeButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> SLOT(toggleMode()));
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_modeButton);
+
+      m_suspendResumeButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(<span class="keyword">this</span>);
+      m_suspendResumeButton<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(SUSPEND_LABEL));
+      connect(m_suspendResumeButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> SLOT(toggleSuspendResume()));
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_suspendResumeButton);
+
+      <span class="type"><a href="../qtwidgets/qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>volumeBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qhboxlayout.html">QHBoxLayout</a></span>;
+      m_volumeLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlabel.html">QLabel</a></span>;
+      m_volumeLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(VOLUME_LABEL));
+      m_volumeSlider <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qslider.html">QSlider</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal);
+      m_volumeSlider<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(<span class="number">0</span>);
+      m_volumeSlider<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(<span class="number">100</span>);
+      m_volumeSlider<span class="operator">-</span><span class="operator">&gt;</span>setSingleStep(<span class="number">10</span>);
+      connect(m_volumeSlider<span class="operator">,</span> SIGNAL(valueChanged(<span class="type">int</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(volumeChanged(<span class="type">int</span>)));
+      volumeBox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_volumeLabel);
+      volumeBox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_volumeSlider);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(volumeBox);
+
+      window<span class="operator">-</span><span class="operator">&gt;</span>setLayout(layout<span class="operator">.</span>data());
+      layout<span class="operator">.</span>take(); <span class="comment">// ownership transferred</span>
+
+      setCentralWidget(window<span class="operator">.</span>data());
+      <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span><span class="keyword">const</span> windowPtr <span class="operator">=</span> window<span class="operator">.</span>take(); <span class="comment">// ownership transferred</span>
+      windowPtr<span class="operator">-</span><span class="operator">&gt;</span>show();
+  }
+
+  <span class="type">void</span> AudioTest<span class="operator">::</span>initializeAudio()
+  {
+      connect(m_pushTimer<span class="operator">,</span> SIGNAL(timeout())<span class="operator">,</span> SLOT(pushTimerExpired()));
+
+      m_format<span class="operator">.</span>setSampleRate(DataSampleRateHz);
+      m_format<span class="operator">.</span>setChannelCount(<span class="number">1</span>);
+      m_format<span class="operator">.</span>setSampleSize(<span class="number">16</span>);
+      m_format<span class="operator">.</span>setCodec(<span class="string">&quot;audio/pcm&quot;</span>);
+      m_format<span class="operator">.</span>setByteOrder(<span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>LittleEndian);
+      m_format<span class="operator">.</span>setSampleType(<span class="type"><a href="qaudioformat.html">QAudioFormat</a></span><span class="operator">::</span>SignedInt);
+
+      <span class="type"><a href="qaudiodeviceinfo.html">QAudioDeviceInfo</a></span> info(m_device);
+      <span class="keyword">if</span> (<span class="operator">!</span>info<span class="operator">.</span>isFormatSupported(m_format)) {
+          <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Default format not supported - trying to use nearest&quot;</span>;
+          m_format <span class="operator">=</span> info<span class="operator">.</span>nearestFormat(m_format);
+      }
+
+      <span class="keyword">if</span> (m_generator)
+          <span class="keyword">delete</span> m_generator;
+      m_generator <span class="operator">=</span> <span class="keyword">new</span> Generator(m_format<span class="operator">,</span> DurationSeconds<span class="operator">*</span><span class="number">1000000</span><span class="operator">,</span> ToneSampleRateHz<span class="operator">,</span> <span class="keyword">this</span>);
+
+      createAudioOutput();
+  }
+
+  <span class="type">void</span> AudioTest<span class="operator">::</span>createAudioOutput()
+  {
+      <span class="keyword">delete</span> m_audioOutput;
+      m_audioOutput <span class="operator">=</span> <span class="number">0</span>;
+      m_audioOutput <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaudiooutput.html">QAudioOutput</a></span>(m_device<span class="operator">,</span> m_format<span class="operator">,</span> <span class="keyword">this</span>);
+      m_generator<span class="operator">-</span><span class="operator">&gt;</span>start();
+      m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>start(m_generator);
+      m_volumeSlider<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="type">int</span>(m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>volume()<span class="operator">*</span><span class="number">100.0f</span>));
+  }
+
+  AudioTest<span class="operator">::</span><span class="operator">~</span>AudioTest()
+  {
+
+  }
+
+  <span class="type">void</span> AudioTest<span class="operator">::</span>deviceChanged(<span class="type">int</span> index)
+  {
+      m_pushTimer<span class="operator">-</span><span class="operator">&gt;</span>stop();
+      m_generator<span class="operator">-</span><span class="operator">&gt;</span>stop();
+      m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>stop();
+      m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>disconnect(<span class="keyword">this</span>);
+      m_device <span class="operator">=</span> m_deviceBox<span class="operator">-</span><span class="operator">&gt;</span>itemData(index)<span class="operator">.</span>value<span class="operator">&lt;</span><span class="type"><a href="qaudiodeviceinfo.html">QAudioDeviceInfo</a></span><span class="operator">&gt;</span>();
+      initializeAudio();
+  }
+
+  <span class="type">void</span> AudioTest<span class="operator">::</span>volumeChanged(<span class="type">int</span> value)
+  {
+      <span class="keyword">if</span> (m_audioOutput)
+          m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>setVolume(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>(value<span class="operator">/</span><span class="number">100.0f</span>));
+  }
+
+  <span class="type">void</span> AudioTest<span class="operator">::</span>pushTimerExpired()
+  {
+      <span class="keyword">if</span> (m_audioOutput <span class="operator">&amp;</span><span class="operator">&amp;</span> m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>state() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="qaudio.html">QAudio</a></span><span class="operator">::</span>StoppedState) {
+          <span class="type">int</span> chunks <span class="operator">=</span> m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>bytesFree()<span class="operator">/</span>m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>periodSize();
+          <span class="keyword">while</span> (chunks) {
+             <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> len <span class="operator">=</span> m_generator<span class="operator">-</span><span class="operator">&gt;</span>read(m_buffer<span class="operator">.</span>data()<span class="operator">,</span> m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>periodSize());
+             <span class="keyword">if</span> (len)
+                 m_output<span class="operator">-</span><span class="operator">&gt;</span>write(m_buffer<span class="operator">.</span>data()<span class="operator">,</span> len);
+             <span class="keyword">if</span> (len <span class="operator">!</span><span class="operator">=</span> m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>periodSize())
+                 <span class="keyword">break</span>;
+             <span class="operator">-</span><span class="operator">-</span>chunks;
+          }
+      }
+  }
+
+  <span class="type">void</span> AudioTest<span class="operator">::</span>toggleMode()
+  {
+      m_pushTimer<span class="operator">-</span><span class="operator">&gt;</span>stop();
+      m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>stop();
+
+      <span class="keyword">if</span> (m_pullMode) {
+          <span class="comment">//switch to push mode (periodically push to QAudioOutput using a timer)</span>
+          m_modeButton<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(PULL_MODE_LABEL));
+          m_output <span class="operator">=</span> m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>start();
+          m_pullMode <span class="operator">=</span> <span class="keyword">false</span>;
+          m_pushTimer<span class="operator">-</span><span class="operator">&gt;</span>start(<span class="number">20</span>);
+      } <span class="keyword">else</span> {
+          <span class="comment">//switch to pull mode (QAudioOutput pulls from Generator as needed)</span>
+          m_modeButton<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(PUSH_MODE_LABEL));
+          m_pullMode <span class="operator">=</span> <span class="keyword">true</span>;
+          m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>start(m_generator);
+      }
+
+      m_suspendResumeButton<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(SUSPEND_LABEL));
+  }
+
+  <span class="type">void</span> AudioTest<span class="operator">::</span>toggleSuspendResume()
+  {
+      <span class="keyword">if</span> (m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>state() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qaudio.html">QAudio</a></span><span class="operator">::</span>SuspendedState) {
+          m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>resume();
+          m_suspendResumeButton<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(SUSPEND_LABEL));
+      } <span class="keyword">else</span> <span class="keyword">if</span> (m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>state() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qaudio.html">QAudio</a></span><span class="operator">::</span>ActiveState) {
+          m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>suspend();
+          m_suspendResumeButton<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(RESUME_LABEL));
+      } <span class="keyword">else</span> <span class="keyword">if</span> (m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>state() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qaudio.html">QAudio</a></span><span class="operator">::</span>StoppedState) {
+          m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>resume();
+          m_suspendResumeButton<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(SUSPEND_LABEL));
+      } <span class="keyword">else</span> <span class="keyword">if</span> (m_audioOutput<span class="operator">-</span><span class="operator">&gt;</span>state() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qaudio.html">QAudio</a></span><span class="operator">::</span>IdleState) {
+          <span class="comment">// no-op</span>
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@multimedia/audiooutput/audiooutput.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

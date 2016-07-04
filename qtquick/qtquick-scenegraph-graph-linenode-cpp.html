@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>linenode.cpp Example File | Qt Quick 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-scenegraph-graph-example.html">Scene Graph - Graph</a></td><td >linenode.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">linenode.cpp Example File</h1>
+<span class="subtitle">scenegraph/graph/linenode.cpp</span>
+<!-- $$$scenegraph/graph/linenode.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;linenode.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtGui/QColor&gt;</span>
+
+  <span class="preprocessor">#include &lt;QtQuick/QSGSimpleMaterial&gt;</span>
+
+  <span class="keyword">struct</span> LineMaterial
+  {
+      <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> color;
+      <span class="type">float</span> spread;
+      <span class="type">float</span> size;
+  };
+
+  <span class="keyword">class</span> LineShader : <span class="keyword">public</span> <span class="type"><a href="qsgsimplematerialshader.html">QSGSimpleMaterialShader</a></span><span class="operator">&lt;</span>LineMaterial<span class="operator">&gt;</span>
+  {
+      QSG_DECLARE_SIMPLE_SHADER(LineShader<span class="operator">,</span> LineMaterial)
+
+  <span class="keyword">public</span>:
+      LineShader() {
+          setShaderSourceFile(<span class="type"><a href="../qtgui/qopenglshader.html">QOpenGLShader</a></span><span class="operator">::</span>Vertex<span class="operator">,</span> <span class="string">&quot;:/scenegraph/graph/shaders/line.vsh&quot;</span>);
+          setShaderSourceFile(<span class="type"><a href="../qtgui/qopenglshader.html">QOpenGLShader</a></span><span class="operator">::</span>Fragment<span class="operator">,</span> <span class="string">&quot;:/scenegraph/graph/shaders/line.fsh&quot;</span>);
+      }
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> attributes() <span class="keyword">const</span> {  <span class="keyword">return</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;pos&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;t&quot;</span>; }
+
+      <span class="type">void</span> updateState(<span class="keyword">const</span> LineMaterial <span class="operator">*</span>m<span class="operator">,</span> <span class="keyword">const</span> LineMaterial <span class="operator">*</span>) {
+          program()<span class="operator">-</span><span class="operator">&gt;</span>setUniformValue(id_color<span class="operator">,</span> m<span class="operator">-</span><span class="operator">&gt;</span>color);
+          program()<span class="operator">-</span><span class="operator">&gt;</span>setUniformValue(id_spread<span class="operator">,</span> m<span class="operator">-</span><span class="operator">&gt;</span>spread);
+          program()<span class="operator">-</span><span class="operator">&gt;</span>setUniformValue(id_size<span class="operator">,</span> m<span class="operator">-</span><span class="operator">&gt;</span>size);
+      }
+
+      <span class="type">void</span> resolveUniforms() {
+          id_spread <span class="operator">=</span> program()<span class="operator">-</span><span class="operator">&gt;</span>uniformLocation(<span class="string">&quot;spread&quot;</span>);
+          id_size <span class="operator">=</span> program()<span class="operator">-</span><span class="operator">&gt;</span>uniformLocation(<span class="string">&quot;size&quot;</span>);
+          id_color <span class="operator">=</span> program()<span class="operator">-</span><span class="operator">&gt;</span>uniformLocation(<span class="string">&quot;color&quot;</span>);
+      }
+
+  <span class="keyword">private</span>:
+      <span class="type">int</span> id_color;
+      <span class="type">int</span> id_spread;
+      <span class="type">int</span> id_size;
+  };
+
+  <span class="keyword">struct</span> LineVertex {
+      <span class="type">float</span> x;
+      <span class="type">float</span> y;
+      <span class="type">float</span> t;
+      <span class="keyword">inline</span> <span class="type">void</span> set(<span class="type">float</span> xx<span class="operator">,</span> <span class="type">float</span> yy<span class="operator">,</span> <span class="type">float</span> tt) { x <span class="operator">=</span> xx; y <span class="operator">=</span> yy; t <span class="operator">=</span> tt; }
+  };
+
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type"><a href="qsggeometry.html">QSGGeometry</a></span><span class="operator">::</span>AttributeSet <span class="operator">&amp;</span>attributes()
+  {
+      <span class="keyword">static</span> <span class="type"><a href="qsggeometry.html">QSGGeometry</a></span><span class="operator">::</span>Attribute attr<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> {
+          <span class="type"><a href="qsggeometry.html">QSGGeometry</a></span><span class="operator">::</span>Attribute<span class="operator">::</span>create(<span class="number">0</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> GL_FLOAT<span class="operator">,</span> <span class="keyword">true</span>)<span class="operator">,</span>
+          <span class="type"><a href="qsggeometry.html">QSGGeometry</a></span><span class="operator">::</span>Attribute<span class="operator">::</span>create(<span class="number">1</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> GL_FLOAT)
+      };
+      <span class="keyword">static</span> <span class="type"><a href="qsggeometry.html">QSGGeometry</a></span><span class="operator">::</span>AttributeSet set <span class="operator">=</span> { <span class="number">2</span><span class="operator">,</span> <span class="number">3</span> <span class="operator">*</span> <span class="keyword">sizeof</span>(<span class="type">float</span>)<span class="operator">,</span> attr };
+      <span class="keyword">return</span> set;
+  }
+
+  LineNode<span class="operator">::</span>LineNode(<span class="type">float</span> size<span class="operator">,</span> <span class="type">float</span> spread<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>color)
+      : m_geometry(attributes()<span class="operator">,</span> <span class="number">0</span>)
+  {
+      setGeometry(<span class="operator">&amp;</span>m_geometry);
+      m_geometry<span class="operator">.</span>setDrawingMode(GL_TRIANGLE_STRIP);
+
+      <span class="type"><a href="qsgsimplematerial.html">QSGSimpleMaterial</a></span><span class="operator">&lt;</span>LineMaterial<span class="operator">&gt;</span> <span class="operator">*</span>m <span class="operator">=</span> LineShader<span class="operator">::</span>createMaterial();
+      m<span class="operator">-</span><span class="operator">&gt;</span>state()<span class="operator">-</span><span class="operator">&gt;</span>color <span class="operator">=</span> color;
+      m<span class="operator">-</span><span class="operator">&gt;</span>state()<span class="operator">-</span><span class="operator">&gt;</span>size <span class="operator">=</span> size;
+      m<span class="operator">-</span><span class="operator">&gt;</span>state()<span class="operator">-</span><span class="operator">&gt;</span>spread <span class="operator">=</span> spread;
+      m<span class="operator">-</span><span class="operator">&gt;</span>setFlag(<span class="type"><a href="qsgmaterial.html">QSGMaterial</a></span><span class="operator">::</span>Blending);
+      setMaterial(m);
+      setFlag(OwnsMaterial);
+  }
+
+  <span class="comment">/*
+   * Assumes that samples have values in the range of 0 to 1 and scales them to
+   * the height of bounds. The samples are stretched out horizontally along the
+   * width of the bounds.
+   *
+   * The position of each pair of points is identical, but we use the third value
+   * &quot;t&quot; to shift the point up or down and to add antialiasing.
+   */</span>
+  <span class="type">void</span> LineNode<span class="operator">::</span>updateGeometry(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> <span class="operator">&amp;</span>bounds<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span><span class="operator">&gt;</span> <span class="operator">&amp;</span>samples)
+  {
+      m_geometry<span class="operator">.</span>allocate(samples<span class="operator">.</span>size() <span class="operator">*</span> <span class="number">2</span>);
+
+      <span class="type">float</span> x <span class="operator">=</span> bounds<span class="operator">.</span>x();
+      <span class="type">float</span> y <span class="operator">=</span> bounds<span class="operator">.</span>y();
+      <span class="type">float</span> w <span class="operator">=</span> bounds<span class="operator">.</span>width();
+      <span class="type">float</span> h <span class="operator">=</span> bounds<span class="operator">.</span>height();
+
+      <span class="type">float</span> dx <span class="operator">=</span> w <span class="operator">/</span> (samples<span class="operator">.</span>size() <span class="operator">-</span> <span class="number">1</span>);
+
+      LineVertex <span class="operator">*</span>v <span class="operator">=</span> (LineVertex <span class="operator">*</span>) m_geometry<span class="operator">.</span>vertexData();
+      <span class="keyword">for</span> (<span class="type">int</span> i<span class="operator">=</span><span class="number">0</span>; i<span class="operator">&lt;</span>samples<span class="operator">.</span>size(); <span class="operator">+</span><span class="operator">+</span>i) {
+          v<span class="operator">[</span>i<span class="operator">*</span><span class="number">2</span><span class="operator">+</span><span class="number">0</span><span class="operator">]</span><span class="operator">.</span>set(x <span class="operator">+</span> dx <span class="operator">*</span> i<span class="operator">,</span> y <span class="operator">+</span> samples<span class="operator">.</span>at(i) <span class="operator">*</span> h<span class="operator">,</span> <span class="number">0</span>);
+          v<span class="operator">[</span>i<span class="operator">*</span><span class="number">2</span><span class="operator">+</span><span class="number">1</span><span class="operator">]</span><span class="operator">.</span>set(x <span class="operator">+</span> dx <span class="operator">*</span> i<span class="operator">,</span> y <span class="operator">+</span> samples<span class="operator">.</span>at(i) <span class="operator">*</span> h<span class="operator">,</span> <span class="number">1</span>);
+      }
+
+      markDirty(<span class="type"><a href="qsgnode.html">QSGNode</a></span><span class="operator">::</span>DirtyGeometry);
+  }
+
+</pre>
+</div>
+<!-- @@@scenegraph/graph/linenode.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

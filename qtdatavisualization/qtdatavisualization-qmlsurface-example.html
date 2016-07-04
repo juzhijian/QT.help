@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmlsurface.qdoc -->
+  <title>Qt Quick 2 Surface Example | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td >Qt Quick 2 Surface Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#adding-data-to-the-graph">Adding data to the graph</a></li>
+<li class="level1"><a href="#showing-data">Showing data</a></li>
+<li class="level1"><a href="#example-contents">Example contents</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Quick 2 Surface Example</h1>
+<span class="subtitle"></span>
+<!-- $$$qmlsurface-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Qt Quick 2 surface example shows how to make a simple 3D surface plot using <a href="qml-qtdatavisualization-surface3d.html">Surface3D</a> with Qt Quick 2.</p>
+<p class="centerAlign"><img src="images/qmlsurface-example.png" alt="" /></p><p>The focus in this example is on generating a surface graph from height data, so in this section we skip explaining the application creation. For more detailed QML example documentation, see <a href="qtdatavisualization-qmlscatter-example.html">Qt Quick 2 Scatter Example</a>.</p>
+<a name="adding-data-to-the-graph"></a>
+<h2 id="adding-data-to-the-graph">Adding data to the graph</h2>
+<p>This example shows two methods to set data to surface graph, using the <a href="qml-qtdatavisualization-heightmapsurfacedataproxy.html">HeightMapSurfaceDataProxy</a> and <a href="qml-qtdatavisualization-itemmodelsurfacedataproxy.html">ItemModelSurfaceDataProxy</a>. First we go through setting the data using the height map specific data proxy. It is done with the code snippet below. The proxy itself is contained in a <a href="qml-qtdatavisualization-surface3dseries.html">Surface3DSeries</a>. Inside the <a href="qml-qtdatavisualization-heightmapsurfacedataproxy.html">HeightMapSurfaceDataProxy</a> the <code>heightMapFile</code> specifies the image file containing the height data. The value properties in the proxy define the minimum and maximum values for surface area width and depth. This example shows the terrain around Tycho crater at imaginary position from 67 to 97 and from 30 to 60. Note that on the graph the scale on the Y dimension exaggerates the height.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtdatavisualization-surface3dseries.html">Surface3DSeries</a></span> {
+      <span class="name">id</span>: <span class="name">heightSeries</span>
+      <span class="name">flatShadingEnabled</span>: <span class="number">false</span>
+      <span class="name">drawMode</span>: <span class="name">Surface3DSeries</span>.<span class="name">DrawSurface</span>
+      <span class="name">visible</span>: <span class="number">false</span>
+
+      <span class="type"><a href="qml-qtdatavisualization-heightmapsurfacedataproxy.html">HeightMapSurfaceDataProxy</a></span> {
+          <span class="name">heightMapFile</span>: <span class="string">&quot;:/heightmaps/image&quot;</span>
+          <span class="comment">// We don't want the default data values set by heightmap proxy.</span>
+          <span class="name">minZValue</span>: <span class="number">30</span>
+          <span class="name">maxZValue</span>: <span class="number">60</span>
+          <span class="name">minXValue</span>: <span class="number">67</span>
+          <span class="name">maxXValue</span>: <span class="number">97</span>
+      }
+
+      <span class="name">onDrawModeChanged</span>: <span class="name">checkState</span>()
+  }
+
+</pre>
+<p>The other method to set surface data used in this example is with model mapping. We do that by first defining a <code>ListModel</code> containing the data for the surface:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtqml/qml-qtqml-models-listmodel.html">ListModel</a></span> {
+      <span class="name">id</span>: <span class="name">dataModel</span>
+      <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span>{ <span class="name">longitude</span>: <span class="string">&quot;0&quot;</span>; <span class="name">latitude</span>: <span class="string">&quot;0&quot;</span>; <span class="name">height</span>: <span class="string">&quot;124&quot;</span>; }
+      <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span>{ <span class="name">longitude</span>: <span class="string">&quot;0&quot;</span>; <span class="name">latitude</span>: <span class="string">&quot;1&quot;</span>; <span class="name">height</span>: <span class="string">&quot;125&quot;</span>; }
+      <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span>{ <span class="name">longitude</span>: <span class="string">&quot;0&quot;</span>; <span class="name">latitude</span>: <span class="string">&quot;2&quot;</span>; <span class="name">height</span>: <span class="string">&quot;124&quot;</span>; }
+      ...
+
+</pre>
+<p>Then we set up a <a href="qml-qtdatavisualization-surface3dseries.html">Surface3DSeries</a> with a <a href="qml-qtdatavisualization-itemmodelsurfacedataproxy.html">ItemModelSurfaceDataProxy</a>:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtdatavisualization-surface3dseries.html">Surface3DSeries</a></span> {
+      <span class="name">id</span>: <span class="name">surfaceSeries</span>
+      <span class="name">flatShadingEnabled</span>: <span class="number">false</span>
+      <span class="name">drawMode</span>: <span class="name">Surface3DSeries</span>.<span class="name">DrawSurface</span>
+
+      <span class="type"><a href="qml-qtdatavisualization-itemmodelsurfacedataproxy.html">ItemModelSurfaceDataProxy</a></span> {
+      ...
+
+</pre>
+<p>We add the actual data to the <code>itemModel</code> of the <a href="qml-qtdatavisualization-itemmodelsurfacedataproxy.html">ItemModelSurfaceDataProxy</a>. We also define the roles for columns, rows and values. In this example the row holds values for longitude, column for latitude and the value is for height.</p>
+<pre class="qml">
+
+  ...
+  <span class="name">itemModel</span>: <span class="name">surfaceData</span>.<span class="name">model</span>
+  <span class="name">rowRole</span>: <span class="string">&quot;longitude&quot;</span>
+  <span class="name">columnRole</span>: <span class="string">&quot;latitude&quot;</span>
+  <span class="name">yPosRole</span>: <span class="string">&quot;height&quot;</span>
+  }
+
+</pre>
+<a name="showing-data"></a>
+<h2 id="showing-data">Showing data</h2>
+<p>In the <code>main.qml</code>, we set up the <a href="qml-qtdatavisualization-surface3d.html">Surface3D</a> element to show the data and various UI elements to illustrate few interesting features.</p>
+<p>First is the gradient to be used for the surface, which can be defined as seen in the following snippet. With the <a href="qml-qtdatavisualization-colorgradient.html">ColorGradient</a> we set example colors from position 0.0 to 1.0&#x2e;</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtdatavisualization-colorgradient.html">ColorGradient</a></span> {
+      <span class="name">id</span>: <span class="name">surfaceGradient</span>
+      <span class="type"><a href="qml-qtdatavisualization-colorgradientstop.html">ColorGradientStop</a></span> { <span class="name">position</span>: <span class="number">0.0</span>; <span class="name">color</span>: <span class="string">&quot;darkslategray&quot;</span> }
+      <span class="type"><a href="qml-qtdatavisualization-colorgradientstop.html">ColorGradientStop</a></span> { <span class="name">id</span>: <span class="name">middleGradient</span>; <span class="name">position</span>: <span class="number">0.25</span>; <span class="name">color</span>: <span class="string">&quot;peru&quot;</span> }
+      <span class="type"><a href="qml-qtdatavisualization-colorgradientstop.html">ColorGradientStop</a></span> { <span class="name">position</span>: <span class="number">1.0</span>; <span class="name">color</span>: <span class="string">&quot;red&quot;</span> }
+  }
+
+</pre>
+<p>This element is set into the <code>baseGradients</code> property in the <code>theme</code> used in <a href="qml-qtdatavisualization-surface3d.html">Surface3D</a>:</p>
+<pre class="qml">
+
+  <span class="name">theme</span>: <span class="name">Theme3D</span> {
+      <span class="name">type</span>: <span class="name">Theme3D</span>.<span class="name">ThemeStoneMoss</span>
+      <span class="name">font</span>.family: <span class="string">&quot;STCaiyun&quot;</span>
+      <span class="name">font</span>.pointSize: <span class="number">35</span>
+      <span class="name">colorStyle</span>: <span class="name">Theme3D</span>.<span class="name">ColorStyleRangeGradient</span>
+      <span class="name">baseGradients</span>: [<span class="name">surfaceGradient</span>]
+  }
+
+</pre>
+<p>Other interesting features can be controlled with buttons.</p>
+<p>The first button is to toggle on and off the surface grid, for which we use the following code:</p>
+<pre class="qml">
+
+  <span class="name">onClicked</span>: {
+      <span class="keyword">if</span> (<span class="name">surfaceSeries</span>.<span class="name">drawMode</span> <span class="operator">&amp;</span> <span class="name">Surface3DSeries</span>.<span class="name">DrawWireframe</span>) {
+          <span class="name">surfaceSeries</span>.<span class="name">drawMode</span> <span class="operator">&amp;=</span> ~<span class="name">Surface3DSeries</span>.<span class="name">DrawWireframe</span>;
+          <span class="name">heightSeries</span>.<span class="name">drawMode</span> <span class="operator">&amp;=</span> ~<span class="name">Surface3DSeries</span>.<span class="name">DrawWireframe</span>;
+      } <span class="keyword">else</span> {
+          <span class="name">surfaceSeries</span>.<span class="name">drawMode</span> <span class="operator">|=</span> <span class="name">Surface3DSeries</span>.<span class="name">DrawWireframe</span>;
+          <span class="name">heightSeries</span>.<span class="name">drawMode</span> <span class="operator">|=</span> <span class="name">Surface3DSeries</span>.<span class="name">DrawWireframe</span>;
+      }
+  }
+
+</pre>
+<p>Second button is for surface shading mode, which is controlled with this code:</p>
+<pre class="qml">
+
+  <span class="name">onClicked</span>: {
+      <span class="keyword">if</span> (<span class="name">surfaceSeries</span>.<span class="name">flatShadingEnabled</span> <span class="operator">===</span> <span class="number">true</span>) {
+          <span class="name">surfaceSeries</span>.<span class="name">flatShadingEnabled</span> <span class="operator">=</span> <span class="number">false</span>;
+          <span class="name">heightSeries</span>.<span class="name">flatShadingEnabled</span> <span class="operator">=</span> <span class="number">false</span>;
+          <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Show Flat&quot;</span>
+      } <span class="keyword">else</span> {
+          <span class="name">surfaceSeries</span>.<span class="name">flatShadingEnabled</span> <span class="operator">=</span> <span class="number">true</span>;
+          <span class="name">heightSeries</span>.<span class="name">flatShadingEnabled</span> <span class="operator">=</span> <span class="number">true</span>;
+          <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Show Smooth&quot;</span>
+      }
+  }
+
+</pre>
+<p>Third button is for series visibility, which is controlled with this code:</p>
+<pre class="qml">
+
+  <span class="name">onClicked</span>: {
+      <span class="keyword">if</span> (<span class="name">surfaceSeries</span>.<span class="name">drawMode</span> <span class="operator">&amp;</span> <span class="name">Surface3DSeries</span>.<span class="name">DrawSurface</span>) {
+          <span class="name">surfaceSeries</span>.<span class="name">drawMode</span> <span class="operator">&amp;=</span> ~<span class="name">Surface3DSeries</span>.<span class="name">DrawSurface</span>;
+          <span class="name">heightSeries</span>.<span class="name">drawMode</span> <span class="operator">&amp;=</span> ~<span class="name">Surface3DSeries</span>.<span class="name">DrawSurface</span>;
+      } <span class="keyword">else</span> {
+          <span class="name">surfaceSeries</span>.<span class="name">drawMode</span> <span class="operator">|=</span> <span class="name">Surface3DSeries</span>.<span class="name">DrawSurface</span>;
+          <span class="name">heightSeries</span>.<span class="name">drawMode</span> <span class="operator">|=</span> <span class="name">Surface3DSeries</span>.<span class="name">DrawSurface</span>;
+      }
+  }
+
+</pre>
+<p>Notice that the <code>drawMode</code> and <code>flatShadingEnable</code> properties are set for both series.</p>
+<p>Fourth and fifth buttons are for controlling background features.</p>
+<p>The last button is for switching between the two series, one of which uses <a href="qml-qtdatavisualization-heightmapsurfacedataproxy.html">HeightMapSurfaceDataProxy</a> and the other one <a href="qml-qtdatavisualization-itemmodelsurfacedataproxy.html">ItemModelSurfaceDataProxy</a>. For this we use the following code:</p>
+<pre class="qml">
+
+  <span class="name">onClicked</span>: {
+      <span class="keyword">if</span> (<span class="name">surfaceSeries</span>.<span class="name">visible</span> <span class="operator">===</span> <span class="number">false</span>) {
+          <span class="name">surfacePlot</span>.<span class="name">axisY</span>.<span class="name">max</span> <span class="operator">=</span> <span class="number">500.0</span>
+          <span class="name">surfaceSeries</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">true</span>
+          <span class="name">heightSeries</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">false</span>
+          <span class="name">middleGradient</span>.<span class="name">position</span> <span class="operator">=</span> <span class="number">0.25</span>
+          <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Switch to Height Map Series&quot;</span>
+      } <span class="keyword">else</span> {
+          <span class="name">surfacePlot</span>.<span class="name">axisY</span>.<span class="name">max</span> <span class="operator">=</span> <span class="number">250.0</span>
+          <span class="name">surfaceSeries</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">false</span>
+          <span class="name">heightSeries</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">true</span>
+          <span class="name">middleGradient</span>.<span class="name">position</span> <span class="operator">=</span> <span class="number">0.50</span>
+          <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Switch to Item Model Series&quot;</span>
+      }
+  }
+
+</pre>
+<p>We also set the maximum value to 500 in model proxy to make the surface flatter and 250 on height map proxy to show exaggerated height. At the same time the middle color position on the gradient is modified to match the value range change.</p>
+<a name="example-contents"></a>
+<h2 id="example-contents">Example contents</h2>
+<p>Files:</p>
+<ul>
+<li><a href="qtdatavisualization-qmlsurface-qml-qmlsurface-data-qml.html">qmlsurface/qml/qmlsurface/Data.qml</a></li>
+<li><a href="qtdatavisualization-qmlsurface-qml-qmlsurface-newbutton-qml.html">qmlsurface/qml/qmlsurface/NewButton.qml</a></li>
+<li><a href="qtdatavisualization-qmlsurface-qml-qmlsurface-main-qml.html">qmlsurface/qml/qmlsurface/main.qml</a></li>
+<li><a href="qtdatavisualization-qmlsurface-main-cpp.html">qmlsurface/main.cpp</a></li>
+<li><a href="qtdatavisualization-qmlsurface-qmlsurface-pro.html">qmlsurface/qmlsurface.pro</a></li>
+<li><a href="qtdatavisualization-qmlsurface-qmlsurface-qrc.html">qmlsurface/qmlsurface.qrc</a></li>
+</ul>
+</div>
+<!-- @@@qmlsurface -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

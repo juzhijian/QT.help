@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- examples-qmloscilloscope.qdoc -->
+  <title>Qml Oscilloscope | Qt Charts 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcharts-index.html">Qt Charts</a></td><td >Qml Oscilloscope</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qml Oscilloscope</h1>
+<span class="subtitle"></span>
+<!-- $$$qmloscilloscope-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/examples_qmloscilloscope.png" alt="" /></p><p>The oscilloscope application demonstrates how to use the Qt Charts QML API to implement an application with strict performance requirements. The application uses generated data with configurable characteristics to mimic a simple oscilloscope user interface.</p>
+<p>To get information about actual rendering speed shown in the application output console, you can set QSG_RENDER_TIMING = 1 to your run environment settings. To do so go to Projects - Run - Run environment in Qt Creator and select Add. Then you can experiment with the different configurable options of the example application to find the configuration that gives you the best performance in your environment.</p>
+<p>The application window is shared by control and scope views:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">main</span>
+      <span class="name">width</span>: <span class="number">600</span>
+      <span class="name">height</span>: <span class="number">400</span>
+
+      <span class="type">ControlPanel</span> {
+          <span class="name">id</span>: <span class="name">controlPanel</span>
+          <span class="name">anchors</span>.top: <span class="name">parent</span>.<span class="name">top</span>
+          <span class="name">anchors</span>.topMargin: <span class="number">10</span>
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+          <span class="name">anchors</span>.leftMargin: <span class="number">10</span>
+      ...
+      <span class="type">ScopeView</span> {
+          <span class="name">id</span>: <span class="name">scopeView</span>
+          <span class="name">anchors</span>.top: <span class="name">parent</span>.<span class="name">top</span>
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+          <span class="name">anchors</span>.left: <span class="name">controlPanel</span>.<span class="name">right</span>
+          <span class="name">height</span>: <span class="name">main</span>.<span class="name">height</span>
+      }
+
+</pre>
+<p>ControlView implements the buttons used for configuring. ScopeView uses a <a href="qml-qtcharts-chartview.html">ChartView</a> to show a chart with two line series:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtcharts-chartview.html">ChartView</a></span> {
+      <span class="name">id</span>: <span class="name">chartView</span>
+      <span class="name">animationOptions</span>: <span class="name">ChartView</span>.<span class="name">NoAnimation</span>
+      <span class="name">theme</span>: <span class="name">ChartView</span>.<span class="name">ChartThemeDark</span>
+      property <span class="type">bool</span> <span class="name">openGL</span>: <span class="number">true</span>
+      <span class="name">onOpenGLChanged</span>: {
+          <span class="name">series</span>(<span class="string">&quot;signal 1&quot;</span>).<span class="name">useOpenGL</span> <span class="operator">=</span> <span class="name">openGL</span>;
+          <span class="name">series</span>(<span class="string">&quot;signal 2&quot;</span>).<span class="name">useOpenGL</span> <span class="operator">=</span> <span class="name">openGL</span>;
+      }
+
+      <span class="type"><a href="qml-qtcharts-valueaxis.html">ValueAxis</a></span> {
+          <span class="name">id</span>: <span class="name">axisY1</span>
+          <span class="name">min</span>: -<span class="number">1</span>
+          <span class="name">max</span>: <span class="number">4</span>
+      }
+
+      <span class="type"><a href="qml-qtcharts-valueaxis.html">ValueAxis</a></span> {
+          <span class="name">id</span>: <span class="name">axisY2</span>
+          <span class="name">min</span>: -<span class="number">10</span>
+          <span class="name">max</span>: <span class="number">5</span>
+      }
+
+      <span class="type"><a href="qml-qtcharts-valueaxis.html">ValueAxis</a></span> {
+          <span class="name">id</span>: <span class="name">axisX</span>
+          <span class="name">min</span>: <span class="number">0</span>
+          <span class="name">max</span>: <span class="number">1024</span>
+      }
+
+      <span class="type"><a href="qml-qtcharts-lineseries.html">LineSeries</a></span> {
+          <span class="name">id</span>: <span class="name">lineSeries1</span>
+          <span class="name">name</span>: <span class="string">&quot;signal 1&quot;</span>
+          <span class="name">axisX</span>: <span class="name">axisX</span>
+          <span class="name">axisY</span>: <span class="name">axisY1</span>
+          <span class="name">useOpenGL</span>: <span class="name">chartView</span>.<span class="name">openGL</span>
+      }
+      <span class="type"><a href="qml-qtcharts-lineseries.html">LineSeries</a></span> {
+          <span class="name">id</span>: <span class="name">lineSeries2</span>
+          <span class="name">name</span>: <span class="string">&quot;signal 2&quot;</span>
+          <span class="name">axisX</span>: <span class="name">axisX</span>
+          <span class="name">axisYRight</span>: <span class="name">axisY2</span>
+          <span class="name">useOpenGL</span>: <span class="name">chartView</span>.<span class="name">openGL</span>
+      }
+      ...
+
+</pre>
+<p>The data of the line series is updated with a QML timer. In a real life application the updating could be triggered with a signal from Qt C++ code.</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtqml/qml-qtqml-timer.html">Timer</a></span> {
+      <span class="name">id</span>: <span class="name">refreshTimer</span>
+      <span class="name">interval</span>: <span class="number">1</span> <span class="operator">/</span> <span class="number">60</span> <span class="operator">*</span> <span class="number">1000</span> <span class="comment">// 60 Hz</span>
+      <span class="name">running</span>: <span class="number">true</span>
+      <span class="name">repeat</span>: <span class="number">true</span>
+      <span class="name">onTriggered</span>: {
+          <span class="name">dataSource</span>.<span class="name">update</span>(<span class="name">chartView</span>.<span class="name">series</span>(<span class="number">0</span>));
+          <span class="name">dataSource</span>.<span class="name">update</span>(<span class="name">chartView</span>.<span class="name">series</span>(<span class="number">1</span>));
+      }
+  }
+
+</pre>
+<p>The oscilloscope also allows you to switch the type of the series used for visualizing the signal sources. This is implemented by dynamically destroying and creating series:</p>
+<pre class="qml">
+
+  <span class="keyword">function</span> <span class="name">changeSeriesType</span>(<span class="name">type</span>) {
+      <span class="name">chartView</span>.<span class="name">removeAllSeries</span>();
+
+      <span class="comment">// Create two new series of the correct type. Axis x is the same for both of the series,</span>
+      <span class="comment">// but the series have their own y-axes to make it possible to control the y-offset</span>
+      <span class="comment">// of the &quot;signal sources&quot;.</span>
+      <span class="keyword">if</span> (<span class="name">type</span> <span class="operator">==</span> <span class="string">&quot;line&quot;</span>) {
+          var <span class="name">series1</span> = <span class="name">chartView</span>.<span class="name">createSeries</span>(<span class="name">ChartView</span>.<span class="name">SeriesTypeLine</span>, <span class="string">&quot;signal 1&quot;</span>,
+                                               <span class="name">axisX</span>, <span class="name">axisY1</span>);
+          <span class="name">series1</span>.<span class="name">useOpenGL</span> <span class="operator">=</span> <span class="name">chartView</span>.<span class="name">openGL</span>
+
+          var <span class="name">series2</span> = <span class="name">chartView</span>.<span class="name">createSeries</span>(<span class="name">ChartView</span>.<span class="name">SeriesTypeLine</span>, <span class="string">&quot;signal 2&quot;</span>,
+                                               <span class="name">axisX</span>, <span class="name">axisY2</span>);
+          <span class="name">series2</span>.<span class="name">useOpenGL</span> <span class="operator">=</span> <span class="name">chartView</span>.<span class="name">openGL</span>
+      } <span class="keyword">else</span> {
+          var <span class="name">series1</span> = <span class="name">chartView</span>.<span class="name">createSeries</span>(<span class="name">ChartView</span>.<span class="name">SeriesTypeScatter</span>, <span class="string">&quot;signal 1&quot;</span>,
+                                               <span class="name">axisX</span>, <span class="name">axisY1</span>);
+          <span class="name">series1</span>.<span class="name">markerSize</span> <span class="operator">=</span> <span class="number">2</span>;
+          <span class="name">series1</span>.<span class="name">borderColor</span> <span class="operator">=</span> <span class="string">&quot;transparent&quot;</span>;
+          <span class="name">series1</span>.<span class="name">useOpenGL</span> <span class="operator">=</span> <span class="name">chartView</span>.<span class="name">openGL</span>
+
+          var <span class="name">series2</span> = <span class="name">chartView</span>.<span class="name">createSeries</span>(<span class="name">ChartView</span>.<span class="name">SeriesTypeScatter</span>, <span class="string">&quot;signal 2&quot;</span>,
+                                               <span class="name">axisX</span>, <span class="name">axisY2</span>);
+          <span class="name">series2</span>.<span class="name">markerSize</span> <span class="operator">=</span> <span class="number">2</span>;
+          <span class="name">series2</span>.<span class="name">borderColor</span> <span class="operator">=</span> <span class="string">&quot;transparent&quot;</span>;
+          <span class="name">series2</span>.<span class="name">useOpenGL</span> <span class="operator">=</span> <span class="name">chartView</span>.<span class="name">openGL</span>
+      }
+  }
+
+  <span class="keyword">function</span> <span class="name">createAxis</span>(<span class="name">min</span>, max) {
+      <span class="comment">// The following creates a ValueAxis object that can be then set as a x or y axis for a series</span>
+      <span class="keyword">return</span> <span class="name">Qt</span>.<span class="name">createQmlObject</span>(<span class="string">&quot;import QtQuick 2.0; import QtCharts 2.0; ValueAxis { min: &quot;</span>
+                                <span class="operator">+</span> <span class="name">min</span> <span class="operator">+</span> <span class="string">&quot;; max: &quot;</span> <span class="operator">+</span> <span class="name">max</span> <span class="operator">+</span> <span class="string">&quot; }&quot;</span>, <span class="name">chartView</span>);
+  }
+
+</pre>
+<p>Files:</p>
+<ul>
+<li><a href="qtcharts-qmloscilloscope-datasource-cpp.html">qmloscilloscope/datasource.cpp</a></li>
+<li><a href="qtcharts-qmloscilloscope-datasource-h.html">qmloscilloscope/datasource.h</a></li>
+<li><a href="qtcharts-qmloscilloscope-qml-qmloscilloscope-controlpanel-qml.html">qmloscilloscope/qml/qmloscilloscope/ControlPanel.qml</a></li>
+<li><a href="qtcharts-qmloscilloscope-qml-qmloscilloscope-multibutton-qml.html">qmloscilloscope/qml/qmloscilloscope/MultiButton.qml</a></li>
+<li><a href="qtcharts-qmloscilloscope-qml-qmloscilloscope-scopeview-qml.html">qmloscilloscope/qml/qmloscilloscope/ScopeView.qml</a></li>
+<li><a href="qtcharts-qmloscilloscope-qml-qmloscilloscope-main-qml.html">qmloscilloscope/qml/qmloscilloscope/main.qml</a></li>
+<li><a href="qtcharts-qmloscilloscope-main-cpp.html">qmloscilloscope/main.cpp</a></li>
+<li><a href="qtcharts-qmloscilloscope-qmloscilloscope-pro.html">qmloscilloscope/qmloscilloscope.pro</a></li>
+<li><a href="qtcharts-qmloscilloscope-resources-qrc.html">qmloscilloscope/resources.qrc</a></li>
+</ul>
+</div>
+<!-- @@@qmloscilloscope -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

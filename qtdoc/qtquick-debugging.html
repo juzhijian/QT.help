@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- debugging.qdoc -->
+  <title>Debugging QML Applications | Qt 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.7</a></td><td >Debugging QML Applications</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#console-api">Console API</a></li>
+<li class="level2"><a href="#log">Log</a></li>
+<li class="level2"><a href="#assert">Assert</a></li>
+<li class="level2"><a href="#timer">Timer</a></li>
+<li class="level2"><a href="#trace">Trace</a></li>
+<li class="level2"><a href="#count">Count</a></li>
+<li class="level2"><a href="#profile">Profile</a></li>
+<li class="level2"><a href="#exception">Exception</a></li>
+<li class="level1"><a href="#debugging-module-imports">Debugging Module Imports</a></li>
+<li class="level1"><a href="#qml-debugging-infrastructure">QML Debugging Infrastructure</a></li>
+<li class="level2"><a href="#enabling-the-infrastructure">Enabling the Infrastructure</a></li>
+<li class="level2"><a href="#starting-applications">Starting Applications</a></li>
+<li class="level2"><a href="#connecting-to-applications">Connecting to Applications</a></li>
+<li class="level1"><a href="#debugging-with-qt-creator">Debugging with Qt Creator</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Debugging QML Applications</h1>
+<span class="subtitle"></span>
+<!-- $$$qtquick-debugging.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="console-api"></a>
+<h2 id="console-api">Console API</h2>
+<a name="log"></a>
+<h3 >Log</h3>
+<p><code>console.log</code>, console.debug, console.info, console.warn and console.error can be used to print debugging information to the console. For example:</p>
+<pre class="cpp">
+
+  function f(a<span class="operator">,</span> b) {
+    console<span class="operator">.</span>log(<span class="string">&quot;a is &quot;</span><span class="operator">,</span> a<span class="operator">,</span> <span class="string">&quot;b is &quot;</span><span class="operator">,</span> b);
+  }
+
+</pre>
+<p>The output is generated using the <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>, <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>, <a href="../qtcore/qtglobal.html#qCritical">qCritical</a> methods in C++ (see also <a href="debug.html">Debugging Techniques</a>).</p>
+<a name="assert"></a>
+<h3 >Assert</h3>
+<p><code>console.assert</code> tests that an expression is true. If not, it will write an optional message to the console and print the stack trace.</p>
+<pre class="cpp">
+
+  function f() {
+    var x <span class="operator">=</span> <span class="number">12</span>
+    console<span class="operator">.</span>assert(x <span class="operator">=</span><span class="operator">=</span> <span class="number">12</span><span class="operator">,</span> <span class="string">&quot;This will pass&quot;</span>);
+    console<span class="operator">.</span>assert(x <span class="operator">&gt;</span> <span class="number">12</span><span class="operator">,</span> <span class="string">&quot;This will fail&quot;</span>);
+  }
+
+</pre>
+<a name="timer"></a>
+<h3 >Timer</h3>
+<p><code>console.time</code> and console.timeEnd log the time (in milliseconds) that was spent between the calls. Both take a string argument that identifies the measurement. For example:</p>
+<pre class="cpp">
+
+  function f() {
+      console<span class="operator">.</span>time(<span class="string">&quot;wholeFunction&quot;</span>);
+      console<span class="operator">.</span>time(<span class="string">&quot;firstPart&quot;</span>);
+      <span class="comment">// first part</span>
+      console<span class="operator">.</span>timeEnd(<span class="string">&quot;firstPart&quot;</span>);
+      <span class="comment">// second part</span>
+      console<span class="operator">.</span>timeEnd(<span class="string">&quot;wholeFunction&quot;</span>);
+  }
+
+</pre>
+<a name="trace"></a>
+<h3 >Trace</h3>
+<p><code>console.trace</code> prints the stack trace of the JavaScript execution at the point where it was called. The stack trace info contains the function name, file name, line number and column number. The stack trace is limited to last 10 stack frames.</p>
+<a name="count"></a>
+<h3 >Count</h3>
+<p><code>console.count</code> prints the current number of times a particular piece of code has been executed, along with a message. That is,</p>
+<pre class="cpp">
+
+  function f() {
+    console<span class="operator">.</span>count(<span class="string">&quot;f called&quot;</span>);
+  }
+
+</pre>
+<p>will print <code>f called: 1</code>, <code>f called: 2</code> ..&#x2e; whenever <code>f()</code> is executed.</p>
+<a name="profile"></a>
+<h3 >Profile</h3>
+<p><code>console.profile</code> turns on the QML and JavaScript profilers. Nested calls are not supported and a warning will be printed to the console.</p>
+<p><code>console.profileEnd</code> turns off the QML and JavaScript profilers. Calling this function without a previous call to console.profile will print a warning to the console. A profiling client should have been attached before this call to receive and store the profiling data. For example:</p>
+<pre class="cpp">
+
+  function f() {
+      console<span class="operator">.</span>profile();
+      <span class="comment">//Call some function that needs to be profiled.</span>
+      <span class="comment">//Ensure that a client is attached before ending</span>
+      <span class="comment">//the profiling session.</span>
+      console<span class="operator">.</span>profileEnd();
+  }
+
+</pre>
+<a name="exception"></a>
+<h3 >Exception</h3>
+<p><code>console.exception</code> prints an error message together with the stack trace of JavaScript execution at the point where it is called.</p>
+<a name="debugging-module-imports"></a>
+<h2 id="debugging-module-imports">Debugging Module Imports</h2>
+<p>The <code>QML_IMPORT_TRACE</code> environment variable can be set to enable debug output from QML's import loading mechanisms.</p>
+<p>For example, for a simple QML file like this:</p>
+<pre class="qml">
+
+  import QtQuick 2.3
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> { <span class="name">width</span>: <span class="number">100</span>; <span class="name">height</span>: <span class="number">100</span> }
+
+</pre>
+<p>If you set <code>QML_IMPORT_TRACE=1</code> before running the <a href="qtquick-qmlscene.html">QML Scene</a> (or your QML C++ application), you will see output similar to this:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtqml/qqmlimportdatabase.html">QQmlImportDatabase</a></span><span class="operator">::</span>addImportPath <span class="string">&quot;/qt-sdk/imports&quot;</span>
+  <span class="type"><a href="../qtqml/qqmlimportdatabase.html">QQmlImportDatabase</a></span><span class="operator">::</span>addImportPath <span class="string">&quot;/qt-sdk/bin/QMLViewer.app/Contents/MacOS&quot;</span>
+  <span class="type"><a href="../qtqml/qqmlimportdatabase.html">QQmlImportDatabase</a></span><span class="operator">::</span>addToImport <span class="number">0x106237370</span> <span class="string">&quot;.&quot;</span> <span class="operator">-</span><span class="number">1.</span><span class="operator">-</span><span class="number">1</span> File as <span class="string">&quot;&quot;</span>
+  <span class="type"><a href="../qtqml/qqmlimportdatabase.html">QQmlImportDatabase</a></span><span class="operator">::</span>addToImport <span class="number">0x106237370</span> <span class="string">&quot;Qt&quot;</span> <span class="number">4.7</span> Library as <span class="string">&quot;&quot;</span>
+  <span class="type"><a href="../qtqml/qqmlimportdatabase.html">QQmlImportDatabase</a></span><span class="operator">::</span>resolveType <span class="string">&quot;Rectangle&quot;</span> <span class="operator">=</span> <span class="string">&quot;QDeclarativeRectangle&quot;</span>
+
+</pre>
+<a name="qml-debugging-infrastructure"></a>
+<h2 id="qml-debugging-infrastructure">QML Debugging Infrastructure</h2>
+<p>The <a href="../qtqml/qtqml-index.html">Qt QML</a> module provides services for debugging, inspecting, and profiling applications via a TCP port.</p>
+<a name="enabling-the-infrastructure"></a>
+<h3 >Enabling the Infrastructure</h3>
+<p>You have to explicitly enable the debugging infrastructure when compiling your application. If you use qmake, you can add the configuration parameters to the project .pro file:</p>
+<ul>
+<li>Qt Quick 1: <code>CONFIG+=declarative_debug</code></li>
+<li>Qt Quick 2: <code>CONFIG+=qml_debug</code></li>
+</ul>
+<p>If you use some other build system, you can pass the following defines to the compiler:</p>
+<ul>
+<li>Qt Quick 1: <code>QT_DECLARATIVE_DEBUG</code></li>
+<li>Qt Quick 2: <code>QT_QML_DEBUG</code></li>
+</ul>
+<p><b>Note: </b>Enabling the debugging infrastructure might compromise the integrity of the application and system, and therefore, you should only enable it in a controlled environment. When the infrastructure is enabled, the application displays the following warning:</p><p><code>QML debugging is enabled. Only use this in a safe environment.</code></p>
+<a name="starting-applications"></a>
+<h3 >Starting Applications</h3>
+<p>Start the application with the following arguments:</p>
+<p><code>-qmljsdebugger=port:&lt;port_from&gt;[,port_to][,host:&lt;ip address&gt;][,block]</code></p>
+<p>Where <code>port_from</code> (mandatory) specifies either the debugging port or the start port of a range of ports when <code>port_to</code> is specified, <code>ip address</code> (optional) specifies the IP address of the host where the application is running, and <code>block</code> (optional) prevents the application from running until the debug client connects to the server. This enables debugging from the start.</p>
+<p>After the application has successfully started, it displays the following message:</p>
+<p><code>QML Debugger: Waiting for connection on port &lt;port_number&gt;</code></p>
+<a name="connecting-to-applications"></a>
+<h3 >Connecting to Applications</h3>
+<p>When the application is running, an IDE or a tool that implements the binary protocol can connect to the open port.</p>
+<p>Qt provides a <code>qmlprofiler</code> command line tool to capture profiling data in a file. To run the tool, enter the following command:</p>
+<p><code>qmlprofiler -p &lt;port&gt; -attach &lt;ip address&gt;</code></p>
+<a name="debugging-with-qt-creator"></a>
+<h2 id="debugging-with-qt-creator">Debugging with Qt Creator</h2>
+<p>Qt Creator uses the debugging infrastructure to debug, inspect and profile Qt Quick applications on the desktop as well as on remote devices. Qt Creator provides integrated clients for debugging JS, inspecting the object tree, and profiling the activities of a QML engine. For more information, see <a href="http://doc.qt.io/qtcreator/creator-debugging-qml.html">Qt Creator: Debugging Qt Quick Projects</a>.</p>
+</div>
+<!-- @@@qtquick-debugging.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

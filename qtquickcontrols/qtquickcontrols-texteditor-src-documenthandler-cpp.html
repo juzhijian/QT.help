@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>documenthandler.cpp Example File | Qt Quick Controls 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquickcontrols-texteditor-example.html">Qt Quick Controls - Text Editor Example</a></td><td >documenthandler.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">documenthandler.cpp Example File</h1>
+<span class="subtitle">texteditor/src/documenthandler.cpp</span>
+<!-- $$$texteditor/src/documenthandler.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;documenthandler.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtGui/QTextDocument&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QTextCursor&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QFontDatabase&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QFileInfo&gt;</span>
+
+  DocumentHandler<span class="operator">::</span>DocumentHandler()
+      : m_target(<span class="number">0</span>)
+      <span class="operator">,</span> m_doc(<span class="number">0</span>)
+      <span class="operator">,</span> m_cursorPosition(<span class="operator">-</span><span class="number">1</span>)
+      <span class="operator">,</span> m_selectionStart(<span class="number">0</span>)
+      <span class="operator">,</span> m_selectionEnd(<span class="number">0</span>)
+  {
+  }
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>setTarget(<span class="type"><a href="../qtquick/qquickitem.html">QQuickItem</a></span> <span class="operator">*</span>target)
+  {
+      m_doc <span class="operator">=</span> <span class="number">0</span>;
+      m_target <span class="operator">=</span> target;
+      <span class="keyword">if</span> (<span class="operator">!</span>m_target)
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> doc <span class="operator">=</span> m_target<span class="operator">-</span><span class="operator">&gt;</span>property(<span class="string">&quot;textDocument&quot;</span>);
+      <span class="keyword">if</span> (doc<span class="operator">.</span>canConvert<span class="operator">&lt;</span><span class="type"><a href="../qtquick/qquicktextdocument.html">QQuickTextDocument</a></span><span class="operator">*</span><span class="operator">&gt;</span>()) {
+          <span class="type"><a href="../qtquick/qquicktextdocument.html">QQuickTextDocument</a></span> <span class="operator">*</span>qqdoc <span class="operator">=</span> doc<span class="operator">.</span>value<span class="operator">&lt;</span><span class="type"><a href="../qtquick/qquicktextdocument.html">QQuickTextDocument</a></span><span class="operator">*</span><span class="operator">&gt;</span>();
+          <span class="keyword">if</span> (qqdoc)
+              m_doc <span class="operator">=</span> qqdoc<span class="operator">-</span><span class="operator">&gt;</span>textDocument();
+      }
+      <span class="keyword">emit</span> targetChanged();
+  }
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>setFileUrl(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>arg)
+  {
+      <span class="keyword">if</span> (m_fileUrl <span class="operator">!</span><span class="operator">=</span> arg) {
+          m_fileUrl <span class="operator">=</span> arg;
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="../qtqml/qqmlfile.html">QQmlFile</a></span><span class="operator">::</span>urlToLocalFileOrQrc(arg);
+          <span class="keyword">if</span> (<span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>exists(fileName)) {
+              <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+              <span class="keyword">if</span> (file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>ReadOnly)) {
+                  <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> data <span class="operator">=</span> file<span class="operator">.</span>readAll();
+                  <span class="type"><a href="../qtcore/qtextcodec.html">QTextCodec</a></span> <span class="operator">*</span>codec <span class="operator">=</span> <span class="type"><a href="../qtcore/qtextcodec.html">QTextCodec</a></span><span class="operator">::</span>codecForHtml(data);
+                  setText(codec<span class="operator">-</span><span class="operator">&gt;</span>toUnicode(data));
+                  <span class="keyword">if</span> (m_doc)
+                      m_doc<span class="operator">-</span><span class="operator">&gt;</span>setModified(<span class="keyword">false</span>);
+                  <span class="keyword">if</span> (fileName<span class="operator">.</span>isEmpty())
+                      m_documentTitle <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;untitled.txt&quot;</span>);
+                  <span class="keyword">else</span>
+                      m_documentTitle <span class="operator">=</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span>(fileName)<span class="operator">.</span>fileName();
+
+                  <span class="keyword">emit</span> textChanged();
+                  <span class="keyword">emit</span> documentTitleChanged();
+
+                  reset();
+              }
+          }
+          <span class="keyword">emit</span> fileUrlChanged();
+      }
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> DocumentHandler<span class="operator">::</span>documentTitle() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_documentTitle;
+  }
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>setDocumentTitle(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> arg)
+  {
+      <span class="keyword">if</span> (m_documentTitle <span class="operator">!</span><span class="operator">=</span> arg) {
+          m_documentTitle <span class="operator">=</span> arg;
+          <span class="keyword">emit</span> documentTitleChanged();
+      }
+  }
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>setText(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>arg)
+  {
+      <span class="keyword">if</span> (m_text <span class="operator">!</span><span class="operator">=</span> arg) {
+          m_text <span class="operator">=</span> arg;
+          <span class="keyword">emit</span> textChanged();
+      }
+  }
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>saveAs(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>arg<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileType)
+  {
+      bool isHtml <span class="operator">=</span> fileType<span class="operator">.</span>contains(QLatin1String(<span class="string">&quot;htm&quot;</span>));
+      QLatin1String ext(isHtml <span class="operator">?</span> <span class="string">&quot;.html&quot;</span> : <span class="string">&quot;.txt&quot;</span>);
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> localPath <span class="operator">=</span> arg<span class="operator">.</span>toLocalFile();
+      <span class="keyword">if</span> (<span class="operator">!</span>localPath<span class="operator">.</span>endsWith(ext))
+          localPath <span class="operator">+</span><span class="operator">=</span> ext;
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> f(localPath);
+      <span class="keyword">if</span> (<span class="operator">!</span>f<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>WriteOnly <span class="operator">|</span> <span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>Truncate <span class="operator">|</span> (isHtml <span class="operator">?</span> <span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>NotOpen : <span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>Text))) {
+          <span class="keyword">emit</span> error(tr(<span class="string">&quot;Cannot save: &quot;</span>) <span class="operator">+</span> f<span class="operator">.</span>errorString());
+          <span class="keyword">return</span>;
+      }
+      f<span class="operator">.</span>write((isHtml <span class="operator">?</span> m_doc<span class="operator">-</span><span class="operator">&gt;</span>toHtml() : m_doc<span class="operator">-</span><span class="operator">&gt;</span>toPlainText())<span class="operator">.</span>toLocal8Bit());
+      f<span class="operator">.</span>close();
+      setFileUrl(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromLocalFile(localPath));
+  }
+
+  <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> DocumentHandler<span class="operator">::</span>fileUrl() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_fileUrl;
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> DocumentHandler<span class="operator">::</span>text() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_text;
+  }
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>setCursorPosition(<span class="type">int</span> position)
+  {
+      <span class="keyword">if</span> (position <span class="operator">=</span><span class="operator">=</span> m_cursorPosition)
+          <span class="keyword">return</span>;
+
+      m_cursorPosition <span class="operator">=</span> position;
+
+      reset();
+  }
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>reset()
+  {
+      <span class="keyword">emit</span> fontFamilyChanged();
+      <span class="keyword">emit</span> alignmentChanged();
+      <span class="keyword">emit</span> boldChanged();
+      <span class="keyword">emit</span> italicChanged();
+      <span class="keyword">emit</span> underlineChanged();
+      <span class="keyword">emit</span> fontSizeChanged();
+      <span class="keyword">emit</span> textColorChanged();
+  }
+
+  <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> DocumentHandler<span class="operator">::</span>textCursor() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span>(m_doc);
+      <span class="keyword">if</span> (m_selectionStart <span class="operator">!</span><span class="operator">=</span> m_selectionEnd) {
+          cursor<span class="operator">.</span>setPosition(m_selectionStart);
+          cursor<span class="operator">.</span>setPosition(m_selectionEnd<span class="operator">,</span> <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span><span class="operator">::</span>KeepAnchor);
+      } <span class="keyword">else</span> {
+          cursor<span class="operator">.</span>setPosition(m_cursorPosition);
+      }
+      <span class="keyword">return</span> cursor;
+  }
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>mergeFormatOnWordOrSelection(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> <span class="operator">&amp;</span>format)
+  {
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> textCursor();
+      <span class="keyword">if</span> (<span class="operator">!</span>cursor<span class="operator">.</span>hasSelection())
+          cursor<span class="operator">.</span>select(<span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span><span class="operator">::</span>WordUnderCursor);
+      cursor<span class="operator">.</span>mergeCharFormat(format);
+  }
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>setSelectionStart(<span class="type">int</span> position)
+  {
+      m_selectionStart <span class="operator">=</span> position;
+  }
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>setSelectionEnd(<span class="type">int</span> position)
+  {
+      m_selectionEnd <span class="operator">=</span> position;
+  }
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>setAlignment(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Alignment a)
+  {
+      <span class="type"><a href="../qtgui/qtextblockformat.html">QTextBlockFormat</a></span> fmt;
+      fmt<span class="operator">.</span>setAlignment((<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Alignment) a);
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span>(m_doc);
+      cursor<span class="operator">.</span>setPosition(m_selectionStart<span class="operator">,</span> <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span><span class="operator">::</span>MoveAnchor);
+      cursor<span class="operator">.</span>setPosition(m_selectionEnd<span class="operator">,</span> <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span><span class="operator">::</span>KeepAnchor);
+      cursor<span class="operator">.</span>mergeBlockFormat(fmt);
+      <span class="keyword">emit</span> alignmentChanged();
+  }
+
+  <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Alignment DocumentHandler<span class="operator">::</span>alignment() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> textCursor();
+      <span class="keyword">if</span> (cursor<span class="operator">.</span>isNull())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignLeft;
+      <span class="keyword">return</span> textCursor()<span class="operator">.</span>blockFormat()<span class="operator">.</span>alignment();
+  }
+
+  bool DocumentHandler<span class="operator">::</span>bold() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> textCursor();
+      <span class="keyword">if</span> (cursor<span class="operator">.</span>isNull())
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      <span class="keyword">return</span> textCursor()<span class="operator">.</span>charFormat()<span class="operator">.</span>fontWeight() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtgui/qfont.html">QFont</a></span><span class="operator">::</span>Bold;
+  }
+
+  bool DocumentHandler<span class="operator">::</span>italic() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> textCursor();
+      <span class="keyword">if</span> (cursor<span class="operator">.</span>isNull())
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      <span class="keyword">return</span> textCursor()<span class="operator">.</span>charFormat()<span class="operator">.</span>fontItalic();
+  }
+
+  bool DocumentHandler<span class="operator">::</span>underline() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> textCursor();
+      <span class="keyword">if</span> (cursor<span class="operator">.</span>isNull())
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      <span class="keyword">return</span> textCursor()<span class="operator">.</span>charFormat()<span class="operator">.</span>fontUnderline();
+  }
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>setBold(bool arg)
+  {
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> fmt;
+      fmt<span class="operator">.</span>setFontWeight(arg <span class="operator">?</span> <span class="type"><a href="../qtgui/qfont.html">QFont</a></span><span class="operator">::</span>Bold : <span class="type"><a href="../qtgui/qfont.html">QFont</a></span><span class="operator">::</span>Normal);
+      mergeFormatOnWordOrSelection(fmt);
+      <span class="keyword">emit</span> boldChanged();
+  }
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>setItalic(bool arg)
+  {
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> fmt;
+      fmt<span class="operator">.</span>setFontItalic(arg);
+      mergeFormatOnWordOrSelection(fmt);
+      <span class="keyword">emit</span> italicChanged();
+  }
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>setUnderline(bool arg)
+  {
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> fmt;
+      fmt<span class="operator">.</span>setFontUnderline(arg);
+      mergeFormatOnWordOrSelection(fmt);
+      <span class="keyword">emit</span> underlineChanged();
+  }
+
+  <span class="type">int</span> DocumentHandler<span class="operator">::</span>fontSize() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> textCursor();
+      <span class="keyword">if</span> (cursor<span class="operator">.</span>isNull())
+          <span class="keyword">return</span> <span class="number">0</span>;
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> format <span class="operator">=</span> cursor<span class="operator">.</span>charFormat();
+      <span class="keyword">return</span> format<span class="operator">.</span>font()<span class="operator">.</span>pointSize();
+  }
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>setFontSize(<span class="type">int</span> arg)
+  {
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> textCursor();
+      <span class="keyword">if</span> (cursor<span class="operator">.</span>isNull())
+          <span class="keyword">return</span>;
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> format;
+      format<span class="operator">.</span>setFontPointSize(arg);
+      mergeFormatOnWordOrSelection(format);
+      <span class="keyword">emit</span> fontSizeChanged();
+  }
+
+  <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> DocumentHandler<span class="operator">::</span>textColor() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> textCursor();
+      <span class="keyword">if</span> (cursor<span class="operator">.</span>isNull())
+          <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black);
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> format <span class="operator">=</span> cursor<span class="operator">.</span>charFormat();
+      <span class="keyword">return</span> format<span class="operator">.</span>foreground()<span class="operator">.</span>color();
+  }
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>setTextColor(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>c)
+  {
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> textCursor();
+      <span class="keyword">if</span> (cursor<span class="operator">.</span>isNull())
+          <span class="keyword">return</span>;
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> format;
+      format<span class="operator">.</span>setForeground(<span class="type"><a href="../qtgui/qbrush.html">QBrush</a></span>(c));
+      mergeFormatOnWordOrSelection(format);
+      <span class="keyword">emit</span> textColorChanged();
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> DocumentHandler<span class="operator">::</span>fontFamily() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> textCursor();
+      <span class="keyword">if</span> (cursor<span class="operator">.</span>isNull())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> format <span class="operator">=</span> cursor<span class="operator">.</span>charFormat();
+      <span class="keyword">return</span> format<span class="operator">.</span>font()<span class="operator">.</span>family();
+  }
+
+  <span class="type">void</span> DocumentHandler<span class="operator">::</span>setFontFamily(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>arg)
+  {
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> textCursor();
+      <span class="keyword">if</span> (cursor<span class="operator">.</span>isNull())
+          <span class="keyword">return</span>;
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> format;
+      format<span class="operator">.</span>setFontFamily(arg);
+      mergeFormatOnWordOrSelection(format);
+      <span class="keyword">emit</span> fontFamilyChanged();
+  }
+
+  <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> DocumentHandler<span class="operator">::</span>defaultFontSizes() <span class="keyword">const</span>
+  {
+      <span class="comment">// uhm... this is quite ugly</span>
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> sizes;
+      <span class="type"><a href="../qtgui/qfontdatabase.html">QFontDatabase</a></span> db;
+      foreach (<span class="type">int</span> size<span class="operator">,</span> db<span class="operator">.</span>standardSizes())
+          sizes<span class="operator">.</span>append(<span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(size));
+      <span class="keyword">return</span> sizes;
+  }
+
+</pre>
+</div>
+<!-- @@@texteditor/src/documenthandler.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

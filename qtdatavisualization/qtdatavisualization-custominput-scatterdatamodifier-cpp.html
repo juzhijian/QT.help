@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>scatterdatamodifier.cpp Example File | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td ><a href="qtdatavisualization-custominput-example.html">Custom Input Example</a></td><td >scatterdatamodifier.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">scatterdatamodifier.cpp Example File</h1>
+<span class="subtitle">custominput/scatterdatamodifier.cpp</span>
+<!-- $$$custominput/scatterdatamodifier.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Data Visualization module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;scatterdatamodifier.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtDataVisualization/QScatterDataProxy&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/QValue3DAxis&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/Q3DScene&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/Q3DCamera&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/QScatter3DSeries&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/Q3DTheme&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/qmath.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QTextStream&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QDebug&gt;</span>
+
+  <span class="keyword">using</span> <span class="keyword">namespace</span> <span class="type"><a href="qtdatavisualization-qmlmodule.html">QtDataVisualization</a></span>;
+
+  ScatterDataModifier<span class="operator">::</span>ScatterDataModifier(<span class="type"><a href="q3dscatter.html">Q3DScatter</a></span> <span class="operator">*</span>scatter)
+      : m_graph(scatter)<span class="operator">,</span>
+        m_inputHandler(<span class="keyword">new</span> CustomInputHandler())
+  {
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setType(<span class="type"><a href="q3dtheme.html">Q3DTheme</a></span><span class="operator">::</span>ThemeDigia);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setShadowQuality(QAbstract3DGraph<span class="operator">::</span>ShadowQualityMedium);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">-</span><span class="operator">&gt;</span>setCameraPreset(<span class="type"><a href="q3dcamera.html">Q3DCamera</a></span><span class="operator">::</span>CameraPresetFront);
+
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setAxisX(<span class="keyword">new</span> QValue3DAxis);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setAxisY(<span class="keyword">new</span> QValue3DAxis);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setAxisZ(<span class="keyword">new</span> QValue3DAxis);
+
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span><span class="number">10.0f</span><span class="operator">,</span> <span class="number">10.0f</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span><span class="number">5.0f</span><span class="operator">,</span> <span class="number">5.0f</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span><span class="number">5.0f</span><span class="operator">,</span> <span class="number">5.0f</span>);
+
+      QScatter3DSeries <span class="operator">*</span>series <span class="operator">=</span> <span class="keyword">new</span> QScatter3DSeries;
+      series<span class="operator">-</span><span class="operator">&gt;</span>setItemLabelFormat(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;@xLabel, @yLabel, @zLabel&quot;</span>));
+      series<span class="operator">-</span><span class="operator">&gt;</span>setMesh(QAbstract3DSeries<span class="operator">::</span>MeshCube);
+      series<span class="operator">-</span><span class="operator">&gt;</span>setItemSize(<span class="number">0.15f</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>addSeries(series);
+
+      m_animationCameraX <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span>(m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">,</span> <span class="string">&quot;xRotation&quot;</span>);
+      m_animationCameraX<span class="operator">-</span><span class="operator">&gt;</span>setDuration(<span class="number">20000</span>);
+      m_animationCameraX<span class="operator">-</span><span class="operator">&gt;</span>setStartValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="number">0.0f</span>));
+      m_animationCameraX<span class="operator">-</span><span class="operator">&gt;</span>setEndValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="number">360.0f</span>));
+      m_animationCameraX<span class="operator">-</span><span class="operator">&gt;</span>setLoopCount(<span class="operator">-</span><span class="number">1</span>);
+
+      <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span> <span class="operator">*</span>upAnimation <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span>(m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">,</span> <span class="string">&quot;yRotation&quot;</span>);
+      upAnimation<span class="operator">-</span><span class="operator">&gt;</span>setDuration(<span class="number">9000</span>);
+      upAnimation<span class="operator">-</span><span class="operator">&gt;</span>setStartValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="number">5.0f</span>));
+      upAnimation<span class="operator">-</span><span class="operator">&gt;</span>setEndValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="number">45.0f</span>));
+
+      <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span> <span class="operator">*</span>downAnimation <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span>(m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">,</span> <span class="string">&quot;yRotation&quot;</span>);
+      downAnimation<span class="operator">-</span><span class="operator">&gt;</span>setDuration(<span class="number">9000</span>);
+      downAnimation<span class="operator">-</span><span class="operator">&gt;</span>setStartValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="number">45.0f</span>));
+      downAnimation<span class="operator">-</span><span class="operator">&gt;</span>setEndValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="number">5.0f</span>));
+
+      m_animationCameraY <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qsequentialanimationgroup.html">QSequentialAnimationGroup</a></span>();
+      m_animationCameraY<span class="operator">-</span><span class="operator">&gt;</span>setLoopCount(<span class="operator">-</span><span class="number">1</span>);
+      m_animationCameraY<span class="operator">-</span><span class="operator">&gt;</span>addAnimation(upAnimation);
+      m_animationCameraY<span class="operator">-</span><span class="operator">&gt;</span>addAnimation(downAnimation);
+
+      m_animationCameraX<span class="operator">-</span><span class="operator">&gt;</span>start();
+      m_animationCameraY<span class="operator">-</span><span class="operator">&gt;</span>start();
+
+      <span class="comment">// Give ownership of the handler to the graph and make it the active handler</span>
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setActiveInputHandler(m_inputHandler);
+
+      m_selectionTimer <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span>(<span class="keyword">this</span>);
+      m_selectionTimer<span class="operator">-</span><span class="operator">&gt;</span>setInterval(<span class="number">10</span>);
+      m_selectionTimer<span class="operator">-</span><span class="operator">&gt;</span>setSingleShot(<span class="keyword">false</span>);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(m_selectionTimer<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span><span class="operator">::</span>timeout<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span>
+                       <span class="operator">&amp;</span>ScatterDataModifier<span class="operator">::</span>triggerSelection);
+      m_selectionTimer<span class="operator">-</span><span class="operator">&gt;</span>start();
+  }
+
+  ScatterDataModifier<span class="operator">::</span><span class="operator">~</span>ScatterDataModifier()
+  {
+      <span class="keyword">delete</span> m_graph;
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>start()
+  {
+      addData();
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>addData()
+  {
+      <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span>QVector3D<span class="operator">&gt;</span> itemList;
+
+      <span class="comment">// Read data items from the file to QVector</span>
+      <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span> stream;
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> dataFile(<span class="string">&quot;:/data/data.txt&quot;</span>);
+      <span class="keyword">if</span> (dataFile<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly <span class="operator">|</span> <span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>Text)) {
+          stream<span class="operator">.</span>setDevice(<span class="operator">&amp;</span>dataFile);
+          <span class="keyword">while</span> (<span class="operator">!</span>stream<span class="operator">.</span>atEnd()) {
+              <span class="type"><a href="../qtcore/qstring.html">QString</a></span> line <span class="operator">=</span> stream<span class="operator">.</span>readLine();
+              <span class="keyword">if</span> (line<span class="operator">.</span>startsWith(<span class="string">&quot;#&quot;</span>)) <span class="comment">// Ignore comments</span>
+                  <span class="keyword">continue</span>;
+              <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> strList <span class="operator">=</span> line<span class="operator">.</span>split(<span class="string">&quot;,&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>SkipEmptyParts);
+              <span class="comment">// Each line has three data items: xPos, yPos and zPos value</span>
+              <span class="keyword">if</span> (strList<span class="operator">.</span>size() <span class="operator">&lt;</span> <span class="number">3</span>) {
+                  <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Invalid row read from data:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> line;
+                  <span class="keyword">continue</span>;
+              }
+              itemList<span class="operator">.</span>append(QVector3D(
+                                   strList<span class="operator">.</span>at(<span class="number">0</span>)<span class="operator">.</span>trimmed()<span class="operator">.</span>toFloat()<span class="operator">,</span>
+                                   strList<span class="operator">.</span>at(<span class="number">1</span>)<span class="operator">.</span>trimmed()<span class="operator">.</span>toFloat()<span class="operator">,</span>
+                                   strList<span class="operator">.</span>at(<span class="number">2</span>)<span class="operator">.</span>trimmed()<span class="operator">.</span>toFloat()));
+          }
+      } <span class="keyword">else</span> {
+          <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Unable to open data file:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> dataFile<span class="operator">.</span>fileName();
+      }
+
+      <span class="comment">// Add data from the QVector to datamodel</span>
+      <span class="type">QScatterDataArray</span> <span class="operator">*</span>dataArray <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QScatterDataArray</span>;
+      dataArray<span class="operator">-</span><span class="operator">&gt;</span>resize(itemList<span class="operator">.</span>count());
+      <span class="type"><a href="qscatterdataitem.html">QScatterDataItem</a></span> <span class="operator">*</span>ptrToDataArray <span class="operator">=</span> <span class="operator">&amp;</span>dataArray<span class="operator">-</span><span class="operator">&gt;</span>first();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> itemList<span class="operator">.</span>count(); i<span class="operator">+</span><span class="operator">+</span>) {
+          ptrToDataArray<span class="operator">-</span><span class="operator">&gt;</span>setPosition(itemList<span class="operator">.</span>at(i));
+          ptrToDataArray<span class="operator">+</span><span class="operator">+</span>;
+      }
+
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>seriesList()<span class="operator">.</span>at(<span class="number">0</span>)<span class="operator">-</span><span class="operator">&gt;</span>dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>resetArray(dataArray);
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>toggleCameraAnimation()
+  {
+      <span class="keyword">if</span> (m_animationCameraX<span class="operator">-</span><span class="operator">&gt;</span>state() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qabstractanimation.html">QAbstractAnimation</a></span><span class="operator">::</span>Paused) {
+          m_animationCameraX<span class="operator">-</span><span class="operator">&gt;</span>pause();
+          m_animationCameraY<span class="operator">-</span><span class="operator">&gt;</span>pause();
+      } <span class="keyword">else</span> {
+          m_animationCameraX<span class="operator">-</span><span class="operator">&gt;</span>resume();
+          m_animationCameraY<span class="operator">-</span><span class="operator">&gt;</span>resume();
+      }
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>triggerSelection()
+  {
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>setSelectionQueryPosition(m_inputHandler<span class="operator">-</span><span class="operator">&gt;</span>inputPosition());
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>shadowQualityUpdatedByVisual(QAbstract3DGraph<span class="operator">::</span>ShadowQuality sq)
+  {
+      <span class="type">int</span> quality <span class="operator">=</span> <span class="type">int</span>(sq);
+      <span class="keyword">emit</span> shadowQualityChanged(quality); <span class="comment">// connected to a checkbox in main.cpp</span>
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>changeShadowQuality(<span class="type">int</span> quality)
+  {
+      QAbstract3DGraph<span class="operator">::</span>ShadowQuality sq <span class="operator">=</span> QAbstract3DGraph<span class="operator">::</span>ShadowQuality(quality);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setShadowQuality(sq);
+  }
+
+</pre>
+</div>
+<!-- @@@custominput/scatterdatamodifier.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

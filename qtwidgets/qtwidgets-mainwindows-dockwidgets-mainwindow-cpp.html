@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mainwindow.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-mainwindows-dockwidgets-example.html">Dock Widgets Example</a></td><td >mainwindow.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mainwindow.cpp Example File</h1>
+<span class="subtitle">mainwindows/dockwidgets/mainwindow.cpp</span>
+<!-- $$$mainwindows/dockwidgets/mainwindow.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+  <span class="preprocessor">#ifndef QT_NO_PRINTDIALOG</span>
+  <span class="preprocessor">#include &lt;QtPrintSupport&gt;</span>
+  <span class="preprocessor">#endif</span>
+
+  <span class="preprocessor">#include &quot;mainwindow.h&quot;</span>
+
+  MainWindow<span class="operator">::</span>MainWindow()
+      : textEdit(<span class="keyword">new</span> <span class="type"><a href="qtextedit.html">QTextEdit</a></span>)
+  {
+      setCentralWidget(textEdit);
+
+      createActions();
+      createStatusBar();
+      createDockWindows();
+
+      setWindowTitle(tr(<span class="string">&quot;Dock Widgets&quot;</span>));
+
+      newLetter();
+      setUnifiedTitleAndToolBarOnMac(<span class="keyword">true</span>);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>newLetter()
+  {
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>clear();
+
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor(textEdit<span class="operator">-</span><span class="operator">&gt;</span>textCursor());
+      cursor<span class="operator">.</span>movePosition(<span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span><span class="operator">::</span>Start);
+      <span class="type"><a href="../qtgui/qtextframe.html">QTextFrame</a></span> <span class="operator">*</span>topFrame <span class="operator">=</span> cursor<span class="operator">.</span>currentFrame();
+      <span class="type"><a href="../qtgui/qtextframeformat.html">QTextFrameFormat</a></span> topFrameFormat <span class="operator">=</span> topFrame<span class="operator">-</span><span class="operator">&gt;</span>frameFormat();
+      topFrameFormat<span class="operator">.</span>setPadding(<span class="number">16</span>);
+      topFrame<span class="operator">-</span><span class="operator">&gt;</span>setFrameFormat(topFrameFormat);
+
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> textFormat;
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> boldFormat;
+      boldFormat<span class="operator">.</span>setFontWeight(<span class="type"><a href="../qtgui/qfont.html">QFont</a></span><span class="operator">::</span>Bold);
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> italicFormat;
+      italicFormat<span class="operator">.</span>setFontItalic(<span class="keyword">true</span>);
+
+      <span class="type"><a href="../qtgui/qtexttableformat.html">QTextTableFormat</a></span> tableFormat;
+      tableFormat<span class="operator">.</span>setBorder(<span class="number">1</span>);
+      tableFormat<span class="operator">.</span>setCellPadding(<span class="number">16</span>);
+      tableFormat<span class="operator">.</span>setAlignment(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignRight);
+      cursor<span class="operator">.</span>insertTable(<span class="number">1</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> tableFormat);
+      cursor<span class="operator">.</span>insertText(<span class="string">&quot;The Firm&quot;</span><span class="operator">,</span> boldFormat);
+      cursor<span class="operator">.</span>insertBlock();
+      cursor<span class="operator">.</span>insertText(<span class="string">&quot;321 City Street&quot;</span><span class="operator">,</span> textFormat);
+      cursor<span class="operator">.</span>insertBlock();
+      cursor<span class="operator">.</span>insertText(<span class="string">&quot;Industry Park&quot;</span>);
+      cursor<span class="operator">.</span>insertBlock();
+      cursor<span class="operator">.</span>insertText(<span class="string">&quot;Some Country&quot;</span>);
+      cursor<span class="operator">.</span>setPosition(topFrame<span class="operator">-</span><span class="operator">&gt;</span>lastPosition());
+      cursor<span class="operator">.</span>insertText(<span class="type"><a href="../qtcore/qdate.html">QDate</a></span><span class="operator">::</span>currentDate()<span class="operator">.</span>toString(<span class="string">&quot;d MMMM yyyy&quot;</span>)<span class="operator">,</span> textFormat);
+      cursor<span class="operator">.</span>insertBlock();
+      cursor<span class="operator">.</span>insertBlock();
+      cursor<span class="operator">.</span>insertText(<span class="string">&quot;Dear &quot;</span><span class="operator">,</span> textFormat);
+      cursor<span class="operator">.</span>insertText(<span class="string">&quot;NAME&quot;</span><span class="operator">,</span> italicFormat);
+      cursor<span class="operator">.</span>insertText(<span class="string">&quot;,&quot;</span><span class="operator">,</span> textFormat);
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> <span class="number">3</span>; <span class="operator">+</span><span class="operator">+</span>i)
+          cursor<span class="operator">.</span>insertBlock();
+      cursor<span class="operator">.</span>insertText(tr(<span class="string">&quot;Yours sincerely,&quot;</span>)<span class="operator">,</span> textFormat);
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> <span class="number">3</span>; <span class="operator">+</span><span class="operator">+</span>i)
+          cursor<span class="operator">.</span>insertBlock();
+      cursor<span class="operator">.</span>insertText(<span class="string">&quot;The Boss&quot;</span><span class="operator">,</span> textFormat);
+      cursor<span class="operator">.</span>insertBlock();
+      cursor<span class="operator">.</span>insertText(<span class="string">&quot;ADDRESS&quot;</span><span class="operator">,</span> italicFormat);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>print()
+  {
+  <span class="preprocessor">#ifndef QT_NO_PRINTDIALOG</span>
+      <span class="type"><a href="../qtgui/qtextdocument.html">QTextDocument</a></span> <span class="operator">*</span>document <span class="operator">=</span> textEdit<span class="operator">-</span><span class="operator">&gt;</span>document();
+      <span class="type">QPrinter</span> printer;
+
+      <span class="type">QPrintDialog</span> dlg(<span class="operator">&amp;</span>printer<span class="operator">,</span> <span class="keyword">this</span>);
+      <span class="keyword">if</span> (dlg<span class="operator">.</span>exec() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted) {
+          <span class="keyword">return</span>;
+      }
+
+      document<span class="operator">-</span><span class="operator">&gt;</span>print(<span class="operator">&amp;</span>printer);
+      statusBar()<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;Ready&quot;</span>)<span class="operator">,</span> <span class="number">2000</span>);
+  <span class="preprocessor">#endif</span>
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>save()
+  {
+      <span class="type"><a href="../qtcore/qmimedatabase.html">QMimeDatabase</a></span> mimeDatabase;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getSaveFileName(<span class="keyword">this</span><span class="operator">,</span>
+                          tr(<span class="string">&quot;Choose a file name&quot;</span>)<span class="operator">,</span> <span class="string">&quot;.&quot;</span><span class="operator">,</span>
+                          mimeDatabase<span class="operator">.</span>mimeTypeForName(<span class="string">&quot;text/html&quot;</span>)<span class="operator">.</span>filterString());
+      <span class="keyword">if</span> (fileName<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+      <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>WriteOnly <span class="operator">|</span> <span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>Text)) {
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Dock Widgets&quot;</span>)<span class="operator">,</span>
+                               tr(<span class="string">&quot;Cannot write file %1:\n%2.&quot;</span>)
+                               <span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(fileName)<span class="operator">,</span> file<span class="operator">.</span>errorString()));
+          <span class="keyword">return</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span> out(<span class="operator">&amp;</span>file);
+      <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>setOverrideCursor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WaitCursor);
+      out <span class="operator">&lt;</span><span class="operator">&lt;</span> textEdit<span class="operator">-</span><span class="operator">&gt;</span>toHtml();
+      <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>restoreOverrideCursor();
+
+      statusBar()<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;Saved '%1'&quot;</span>)<span class="operator">.</span>arg(fileName)<span class="operator">,</span> <span class="number">2000</span>);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>undo()
+  {
+      <span class="type"><a href="../qtgui/qtextdocument.html">QTextDocument</a></span> <span class="operator">*</span>document <span class="operator">=</span> textEdit<span class="operator">-</span><span class="operator">&gt;</span>document();
+      document<span class="operator">-</span><span class="operator">&gt;</span>undo();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>insertCustomer(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>customer)
+  {
+      <span class="keyword">if</span> (customer<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> customerList <span class="operator">=</span> customer<span class="operator">.</span>split(<span class="string">&quot;, &quot;</span>);
+      <span class="type"><a href="../qtgui/qtextdocument.html">QTextDocument</a></span> <span class="operator">*</span>document <span class="operator">=</span> textEdit<span class="operator">-</span><span class="operator">&gt;</span>document();
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> document<span class="operator">-</span><span class="operator">&gt;</span>find(<span class="string">&quot;NAME&quot;</span>);
+      <span class="keyword">if</span> (<span class="operator">!</span>cursor<span class="operator">.</span>isNull()) {
+          cursor<span class="operator">.</span>beginEditBlock();
+          cursor<span class="operator">.</span>insertText(customerList<span class="operator">.</span>at(<span class="number">0</span>));
+          <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> oldcursor <span class="operator">=</span> cursor;
+          cursor <span class="operator">=</span> document<span class="operator">-</span><span class="operator">&gt;</span>find(<span class="string">&quot;ADDRESS&quot;</span>);
+          <span class="keyword">if</span> (<span class="operator">!</span>cursor<span class="operator">.</span>isNull()) {
+              <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">1</span>; i <span class="operator">&lt;</span> customerList<span class="operator">.</span>size(); <span class="operator">+</span><span class="operator">+</span>i) {
+                  cursor<span class="operator">.</span>insertBlock();
+                  cursor<span class="operator">.</span>insertText(customerList<span class="operator">.</span>at(i));
+              }
+              cursor<span class="operator">.</span>endEditBlock();
+          }
+          <span class="keyword">else</span>
+              oldcursor<span class="operator">.</span>endEditBlock();
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>addParagraph(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>paragraph)
+  {
+      <span class="keyword">if</span> (paragraph<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+      <span class="type"><a href="../qtgui/qtextdocument.html">QTextDocument</a></span> <span class="operator">*</span>document <span class="operator">=</span> textEdit<span class="operator">-</span><span class="operator">&gt;</span>document();
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> document<span class="operator">-</span><span class="operator">&gt;</span>find(tr(<span class="string">&quot;Yours sincerely,&quot;</span>));
+      <span class="keyword">if</span> (cursor<span class="operator">.</span>isNull())
+          <span class="keyword">return</span>;
+      cursor<span class="operator">.</span>beginEditBlock();
+      cursor<span class="operator">.</span>movePosition(<span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span><span class="operator">::</span>PreviousBlock<span class="operator">,</span> <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span><span class="operator">::</span>MoveAnchor<span class="operator">,</span> <span class="number">2</span>);
+      cursor<span class="operator">.</span>insertBlock();
+      cursor<span class="operator">.</span>insertText(paragraph);
+      cursor<span class="operator">.</span>insertBlock();
+      cursor<span class="operator">.</span>endEditBlock();
+
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>about()
+  {
+     <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>about(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;About Dock Widgets&quot;</span>)<span class="operator">,</span>
+              tr(<span class="string">&quot;The &lt;b&gt;Dock Widgets&lt;/b&gt; example demonstrates how to &quot;</span>
+                 <span class="string">&quot;use Qt's dock widgets. You can enter your own text, &quot;</span>
+                 <span class="string">&quot;click a customer to add a customer name and &quot;</span>
+                 <span class="string">&quot;address, and click standard paragraphs to add them.&quot;</span>));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>createActions()
+  {
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>fileMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;File&quot;</span>));
+      <span class="type"><a href="qtoolbar.html">QToolBar</a></span> <span class="operator">*</span>fileToolBar <span class="operator">=</span> addToolBar(tr(<span class="string">&quot;File&quot;</span>));
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> newIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;document-new&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(<span class="string">&quot;:/images/new.png&quot;</span>));
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>newLetterAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(newIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;New Letter&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      newLetterAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>New);
+      newLetterAct<span class="operator">-</span><span class="operator">&gt;</span>setStatusTip(tr(<span class="string">&quot;Create a new form letter&quot;</span>));
+      connect(newLetterAct<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>newLetter);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(newLetterAct);
+      fileToolBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(newLetterAct);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> saveIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;document-save&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(<span class="string">&quot;:/images/save.png&quot;</span>));
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>saveAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(saveIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Save...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      saveAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Save);
+      saveAct<span class="operator">-</span><span class="operator">&gt;</span>setStatusTip(tr(<span class="string">&quot;Save the current form letter&quot;</span>));
+      connect(saveAct<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>save);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(saveAct);
+      fileToolBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(saveAct);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> printIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;document-print&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(<span class="string">&quot;:/images/print.png&quot;</span>));
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>printAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(printIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Print...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      printAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Print);
+      printAct<span class="operator">-</span><span class="operator">&gt;</span>setStatusTip(tr(<span class="string">&quot;Print the current form letter&quot;</span>));
+      connect(printAct<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>print);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(printAct);
+      fileToolBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(printAct);
+
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>quitAct <span class="operator">=</span> fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Quit&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qwidget.html">QWidget</a></span><span class="operator">::</span>close);
+      quitAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Quit);
+      quitAct<span class="operator">-</span><span class="operator">&gt;</span>setStatusTip(tr(<span class="string">&quot;Quit the application&quot;</span>));
+
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>editMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Edit&quot;</span>));
+      <span class="type"><a href="qtoolbar.html">QToolBar</a></span> <span class="operator">*</span>editToolBar <span class="operator">=</span> addToolBar(tr(<span class="string">&quot;Edit&quot;</span>));
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> undoIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;edit-undo&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(<span class="string">&quot;:/images/undo.png&quot;</span>));
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>undoAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(undoIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Undo&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      undoAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Undo);
+      undoAct<span class="operator">-</span><span class="operator">&gt;</span>setStatusTip(tr(<span class="string">&quot;Undo the last editing action&quot;</span>));
+      connect(undoAct<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>undo);
+      editMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(undoAct);
+      editToolBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(undoAct);
+
+      viewMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;View&quot;</span>));
+
+      menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>helpMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Help&quot;</span>));
+
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>aboutAct <span class="operator">=</span> helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;About&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>about);
+      aboutAct<span class="operator">-</span><span class="operator">&gt;</span>setStatusTip(tr(<span class="string">&quot;Show the application's About box&quot;</span>));
+
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>aboutQtAct <span class="operator">=</span> helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;About &amp;Qt&quot;</span>)<span class="operator">,</span> qApp<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>aboutQt);
+      aboutQtAct<span class="operator">-</span><span class="operator">&gt;</span>setStatusTip(tr(<span class="string">&quot;Show the Qt library's About box&quot;</span>));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>createStatusBar()
+  {
+      statusBar()<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;Ready&quot;</span>));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>createDockWindows()
+  {
+      <span class="type"><a href="qdockwidget.html">QDockWidget</a></span> <span class="operator">*</span>dock <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qdockwidget.html">QDockWidget</a></span>(tr(<span class="string">&quot;Customers&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      dock<span class="operator">-</span><span class="operator">&gt;</span>setAllowedAreas(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftDockWidgetArea <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightDockWidgetArea);
+      customerList <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlistwidget.html">QListWidget</a></span>(dock);
+      customerList<span class="operator">-</span><span class="operator">&gt;</span>addItems(<span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span>()
+              <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;John Doe, Harmony Enterprises, 12 Lakeside, Ambleton&quot;</span>
+              <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Jane Doe, Memorabilia, 23 Watersedge, Beaton&quot;</span>
+              <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Tammy Shea, Tiblanka, 38 Sea Views, Carlton&quot;</span>
+              <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Tim Sheen, Caraba Gifts, 48 Ocean Way, Deal&quot;</span>
+              <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Sol Harvey, Chicos Coffee, 53 New Springs, Eccleston&quot;</span>
+              <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Sally Hobart, Tiroli Tea, 67 Long River, Fedula&quot;</span>);
+      dock<span class="operator">-</span><span class="operator">&gt;</span>setWidget(customerList);
+      addDockWidget(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightDockWidgetArea<span class="operator">,</span> dock);
+      viewMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(dock<span class="operator">-</span><span class="operator">&gt;</span>toggleViewAction());
+
+      dock <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qdockwidget.html">QDockWidget</a></span>(tr(<span class="string">&quot;Paragraphs&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      paragraphsList <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlistwidget.html">QListWidget</a></span>(dock);
+      paragraphsList<span class="operator">-</span><span class="operator">&gt;</span>addItems(<span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span>()
+              <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Thank you for your payment which we have received today.&quot;</span>
+              <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Your order has been dispatched and should be with you &quot;</span>
+                 <span class="string">&quot;within 28 days.&quot;</span>
+              <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;We have dispatched those items that were in stock. The &quot;</span>
+                 <span class="string">&quot;rest of your order will be dispatched once all the &quot;</span>
+                 <span class="string">&quot;remaining items have arrived at our warehouse. No &quot;</span>
+                 <span class="string">&quot;additional shipping charges will be made.&quot;</span>
+              <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;You made a small overpayment (less than $5) which we &quot;</span>
+                 <span class="string">&quot;will keep on account for you, or return at your request.&quot;</span>
+              <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;You made a small underpayment (less than $1), but we have &quot;</span>
+                 <span class="string">&quot;sent your order anyway. We'll add this underpayment to &quot;</span>
+                 <span class="string">&quot;your next bill.&quot;</span>
+              <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Unfortunately you did not send enough money. Please remit &quot;</span>
+                 <span class="string">&quot;an additional $. Your order will be dispatched as soon as &quot;</span>
+                 <span class="string">&quot;the complete amount has been received.&quot;</span>
+              <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;You made an overpayment (more than $5). Do you wish to &quot;</span>
+                 <span class="string">&quot;buy more items, or should we return the excess to you?&quot;</span>);
+      dock<span class="operator">-</span><span class="operator">&gt;</span>setWidget(paragraphsList);
+      addDockWidget(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>RightDockWidgetArea<span class="operator">,</span> dock);
+      viewMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(dock<span class="operator">-</span><span class="operator">&gt;</span>toggleViewAction());
+
+      connect(customerList<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qlistwidget.html">QListWidget</a></span><span class="operator">::</span>currentTextChanged<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>insertCustomer);
+      connect(paragraphsList<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qlistwidget.html">QListWidget</a></span><span class="operator">::</span>currentTextChanged<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>addParagraph);
+  }
+
+</pre>
+</div>
+<!-- @@@mainwindows/dockwidgets/mainwindow.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

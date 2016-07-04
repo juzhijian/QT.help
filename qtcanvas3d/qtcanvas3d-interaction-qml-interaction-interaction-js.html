@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>interaction.js Example File | Qt Canvas 3D 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcanvas3d-index.html">Qt Canvas 3D</a></td><td ><a href="qtcanvas3d-interaction-example.html#interaction">Interaction Example</a></td><td >interaction.js Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">interaction.js Example File</h1>
+<span class="subtitle">interaction/qml/interaction/interaction.js</span>
+<!-- $$$interaction/qml/interaction/interaction.js-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="js">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the QtCanvas3D module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="name">Qt</span>.<span class="name">include</span>(<span class="string">&quot;gl-matrix.js&quot;</span>)
+  <span class="name">Qt</span>.<span class="name">include</span>(<span class="string">&quot;ThreeJSLoader.js&quot;</span>)
+
+  var <span class="name">gl</span>;
+
+  var <span class="name">texturedShaderProgram</span> = <span class="number">0</span>;
+  var <span class="name">vertexShader</span> = <span class="number">0</span>;
+  var <span class="name">fragmentShader</span> = <span class="number">0</span>;
+
+  var <span class="name">vertexPositionAttribute</span>;
+  var <span class="name">textureCoordAttribute</span>;
+  var <span class="name">vertexNormalAttribute</span>;
+
+  var <span class="name">pMatrixUniform</span>;
+  var <span class="name">mvMatrixUniform</span>;
+  var <span class="name">nMatrixUniform</span>;
+  var <span class="name">textureSamplerUniform</span>;
+
+  var <span class="name">barrelTexture</span> = <span class="number">0</span>;
+
+  var <span class="name">mvMatrix</span> = <span class="name">mat4</span>.<span class="name">create</span>();
+  var <span class="name">pMatrix</span>  = <span class="name">mat4</span>.<span class="name">create</span>();
+  var <span class="name">nMatrix</span>  = <span class="name">mat4</span>.<span class="name">create</span>();
+  var <span class="name">startTime</span>;
+
+  var <span class="name">canvas3d</span>;
+  var <span class="name">isLogEnabled</span> = <span class="number">false</span>;
+
+  <span class="keyword">function</span> <span class="name">log</span>(<span class="name">message</span>) {
+      <span class="keyword">if</span> (<span class="name">isLogEnabled</span>)
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">message</span>)
+  }
+
+  <span class="keyword">function</span> <span class="name">Model</span>() {
+      this.<span class="name">verticesVBO</span> <span class="operator">=</span> <span class="number">0</span>;
+      this.<span class="name">normalsVBO</span>  <span class="operator">=</span> <span class="number">0</span>;
+      this.<span class="name">texCoordVBO</span> <span class="operator">=</span> <span class="number">0</span>;
+      this.<span class="name">indexVBO</span>    <span class="operator">=</span> <span class="number">0</span>;
+      this.<span class="name">count</span>       <span class="operator">=</span> <span class="number">0</span>;
+  }
+
+  var <span class="name">theModel</span> = new <span class="name">Model</span>();
+
+  <span class="keyword">function</span> <span class="name">initializeGL</span>(<span class="name">canvas</span>) {
+      <span class="name">canvas3d</span> <span class="operator">=</span> <span class="name">canvas</span>
+      <span class="name">log</span>(<span class="string">&quot;*******************************************************************************************&quot;</span>)
+      <span class="name">log</span>(<span class="string">&quot;initializeGL ENTER...&quot;</span>)
+      <span class="keyword">try</span> {
+          <span class="name">startTime</span> <span class="operator">=</span> <span class="name">Date</span>.<span class="name">now</span>();
+
+          <span class="comment">// Get the OpenGL context jsonObj that represents the API we call</span>
+          <span class="name">log</span>(<span class="string">&quot;Getting Context&quot;</span>);
+          <span class="name">gl</span> <span class="operator">=</span> <span class="name">canvas</span>.<span class="name">getContext</span>(<span class="string">&quot;canvas3d&quot;</span>, {depth:<span class="number">true</span>, antialias:<span class="number">true</span>, alpha:<span class="number">false</span>});
+          <span class="name">log</span>(<span class="string">&quot;Context received &quot;</span><span class="operator">+</span><span class="name">gl</span>);
+
+          var <span class="name">contextConfig</span> = <span class="name">gl</span>.<span class="name">getContextAttributes</span>();
+          <span class="name">log</span>(<span class="string">&quot;Depth: &quot;</span><span class="operator">+</span><span class="name">contextConfig</span>.<span class="name">alpha</span>);
+          <span class="name">log</span>(<span class="string">&quot;Stencil: &quot;</span><span class="operator">+</span><span class="name">contextConfig</span>.<span class="name">stencil</span>);
+          <span class="name">log</span>(<span class="string">&quot;Antialiasing: &quot;</span><span class="operator">+</span><span class="name">contextConfig</span>.<span class="name">antialias</span>);
+          <span class="name">log</span>(<span class="string">&quot;Premultiplied alpha: &quot;</span><span class="operator">+</span><span class="name">contextConfig</span>.<span class="name">premultipliedAlpha</span>);
+          <span class="name">log</span>(<span class="string">&quot;Preserve drawingbuffer: &quot;</span><span class="operator">+</span><span class="name">contextConfig</span>.<span class="name">preserveDrawingBuffer</span>);
+          <span class="name">log</span>(<span class="string">&quot;Prefer Low Power To High Performance: &quot;</span><span class="operator">+</span><span class="name">contextConfig</span>.<span class="name">preferLowPowerToHighPerformance</span>);
+          <span class="name">log</span>(<span class="string">&quot;Fail If Major Performance Caveat: &quot;</span><span class="operator">+</span><span class="name">contextConfig</span>.<span class="name">failIfMajorPerformanceCaveat</span>);
+
+          <span class="comment">// Setup the OpenGL state</span>
+          <span class="name">gl</span>.<span class="name">enable</span>(<span class="name">gl</span>.<span class="name">DEPTH_TEST</span>);
+          <span class="name">gl</span>.<span class="name">enable</span>(<span class="name">gl</span>.<span class="name">CULL_FACE</span>);
+
+          <span class="name">gl</span>.<span class="name">frontFace</span>(<span class="name">gl</span>.<span class="name">CCW</span>);
+          <span class="name">gl</span>.<span class="name">cullFace</span>(<span class="name">gl</span>.<span class="name">BACK</span>);
+
+          <span class="name">gl</span>.<span class="name">disable</span>(<span class="name">gl</span>.<span class="name">BLEND</span>);
+
+          <span class="name">gl</span>.<span class="name">clearColor</span>(<span class="number">0.98</span>, <span class="number">0.98</span>, <span class="number">0.98</span>, <span class="number">1.0</span>);
+          <span class="name">gl</span>.<span class="name">clearDepth</span>(<span class="number">1.0</span>);
+
+          <span class="comment">// Set viewport</span>
+          <span class="name">gl</span>.<span class="name">viewport</span>(<span class="number">0</span>, <span class="number">0</span>,
+                      <span class="name">canvas</span>.<span class="name">width</span> <span class="operator">*</span> <span class="name">canvas</span>.<span class="name">devicePixelRatio</span>,
+                      <span class="name">canvas</span>.<span class="name">height</span> <span class="operator">*</span> <span class="name">canvas</span>.<span class="name">devicePixelRatio</span>);
+
+          <span class="comment">// Initialize the shader program</span>
+          <span class="name">initShaders</span>();
+
+          <span class="comment">// Initialize buffers</span>
+          <span class="name">theModel</span>.<span class="name">verticesVBO</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createBuffer</span>();
+          <span class="name">theModel</span>.<span class="name">verticesVBO</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;BarrelModel.verticesVBO&quot;</span>;
+          <span class="name">theModel</span>.<span class="name">normalsVBO</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createBuffer</span>();
+          <span class="name">theModel</span>.<span class="name">normalsVBO</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;BarrelModel.normalsVBO&quot;</span>;
+          <span class="name">theModel</span>.<span class="name">texCoordVBO</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createBuffer</span>();
+          <span class="name">theModel</span>.<span class="name">texCoordVBO</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;BarrelModel.texCoordVBO&quot;</span>;
+          <span class="name">theModel</span>.<span class="name">indexVBO</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createBuffer</span>();
+          <span class="name">theModel</span>.<span class="name">indexVBO</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;BarrelModel.indexVBO&quot;</span>;
+
+          <span class="comment">// Load the barrel texture</span>
+          <span class="name">gl</span>.<span class="name">pixelStorei</span>(<span class="name">gl</span>.<span class="name">UNPACK_FLIP_Y_WEBGL</span>, <span class="number">true</span>);
+          <span class="comment">// Load the Qt logo as texture</span>
+          var <span class="name">barrelImage</span> = <span class="name">TextureImageFactory</span>.<span class="name">newTexImage</span>();
+          <span class="name">barrelImage</span>.<span class="name">imageLoaded</span>.<span class="name">connect</span>(<span class="keyword">function</span>() {
+              <span class="name">barrelTexture</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createTexture</span>();
+              <span class="name">barrelTexture</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;barrelTexture&quot;</span>
+              <span class="name">gl</span>.<span class="name">bindTexture</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">barrelTexture</span>);
+              <span class="name">gl</span>.<span class="name">texImage2D</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>,    <span class="comment">// target</span>
+                            <span class="number">0</span>,                <span class="comment">// level</span>
+                            <span class="name">gl</span>.<span class="name">RGBA</span>,          <span class="comment">// internalformat</span>
+                            <span class="name">gl</span>.<span class="name">RGBA</span>,          <span class="comment">// format</span>
+                            <span class="name">gl</span>.<span class="name">UNSIGNED_BYTE</span>, <span class="comment">// type</span>
+                            <span class="name">barrelImage</span>);     <span class="comment">// pixels</span>
+
+              <span class="name">gl</span>.<span class="name">texParameteri</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">gl</span>.<span class="name">TEXTURE_MAG_FILTER</span>, <span class="name">gl</span>.<span class="name">LINEAR</span>);
+              <span class="name">gl</span>.<span class="name">texParameteri</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">gl</span>.<span class="name">TEXTURE_MIN_FILTER</span>, <span class="name">gl</span>.<span class="name">LINEAR_MIPMAP_NEAREST</span>);
+              <span class="name">gl</span>.<span class="name">generateMipmap</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>);
+          });
+          <span class="name">barrelImage</span>.<span class="name">imageLoadingFailed</span>.<span class="name">connect</span>(<span class="keyword">function</span>() {
+              <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Texture load FAILED, &quot;</span><span class="operator">+</span><span class="name">barrelImage</span>.<span class="name">errorString</span>);
+          });
+          <span class="comment">// Aliasing doesn't work correctly with QtQuick compiler for some reason,</span>
+          <span class="comment">// so use full names for barrel.jpg and barrel.json</span>
+          <span class="name">barrelImage</span>.<span class="name">src</span> <span class="operator">=</span> <span class="string">&quot;qrc:/qml/interaction/barrel.jpg&quot;</span>;
+
+          <span class="comment">// Load the model</span>
+          <span class="name">log</span>(<span class="string">&quot;    Create XMLHttpRequest&quot;</span>)
+          var <span class="name">request</span> = new <span class="name">XMLHttpRequest</span>();
+          <span class="name">log</span>(<span class="string">&quot;    XMLHttpRequest.open&quot;</span>)
+          <span class="name">request</span>.<span class="name">open</span>(<span class="string">&quot;GET&quot;</span>, <span class="string">&quot;qrc:/qml/interaction/barrel.json&quot;</span>);
+          <span class="name">log</span>(<span class="string">&quot;    XMLHttpRequest.onreadystatechange&quot;</span>)
+          <span class="name">request</span>.<span class="name">onreadystatechange</span> <span class="operator">=</span> <span class="keyword">function</span> () {
+              <span class="keyword">if</span> (<span class="name">request</span>.<span class="name">readyState</span> <span class="operator">===</span> <span class="name">XMLHttpRequest</span>.<span class="name">DONE</span>) {
+                  <span class="name">handleLoadedModel</span>(<span class="name">JSON</span>.<span class="name">parse</span>(<span class="name">request</span>.<span class="name">responseText</span>));
+              }
+          }
+          <span class="name">log</span>(<span class="string">&quot;    XMLHttpRequest.send&quot;</span>)
+          <span class="name">request</span>.<span class="name">send</span>();
+
+          <span class="name">log</span>(<span class="string">&quot;...initializeGL EXIT&quot;</span>);
+      } <span class="keyword">catch</span>(<span class="name">e</span>) {
+          console.log(&quot;...initializeGL FAILURE!&quot;);
+          console.log(&quot;&quot;+e);
+          console.log(&quot;&quot;+e.message);
+      }
+      <span class="name">log</span>(<span class="string">&quot;*******************************************************************************************&quot;</span>);
+  }
+
+  <span class="keyword">function</span> <span class="name">resizeGL</span>(<span class="name">canvas</span>)
+  {
+      var <span class="name">pixelRatio</span> = <span class="name">canvas</span>.<span class="name">devicePixelRatio</span>;
+      <span class="name">canvas</span>.<span class="name">pixelSize</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">size</span>(<span class="name">canvas</span>.<span class="name">width</span> <span class="operator">*</span> <span class="name">pixelRatio</span>,
+                                 <span class="name">canvas</span>.<span class="name">height</span> <span class="operator">*</span> <span class="name">pixelRatio</span>);
+      <span class="keyword">if</span> (<span class="name">gl</span>)
+          <span class="name">gl</span>.<span class="name">viewport</span>(<span class="number">0</span>, <span class="number">0</span>,
+                      <span class="name">canvas</span>.<span class="name">width</span> <span class="operator">*</span> <span class="name">canvas</span>.<span class="name">devicePixelRatio</span>,
+                      <span class="name">canvas</span>.<span class="name">height</span> <span class="operator">*</span> <span class="name">canvas</span>.<span class="name">devicePixelRatio</span>);
+  }
+
+  <span class="keyword">function</span> <span class="name">paintGL</span>(<span class="name">canvas</span>) {
+      <span class="comment">// draw</span>
+      <span class="name">gl</span>.<span class="name">clear</span>(<span class="name">gl</span>.<span class="name">COLOR_BUFFER_BIT</span> <span class="operator">|</span> <span class="name">gl</span>.<span class="name">DEPTH_BUFFER_BIT</span>);
+
+      <span class="comment">// draw only when we have the mesh and texture</span>
+      <span class="keyword">if</span> (<span class="name">theModel</span>.<span class="name">count</span> <span class="operator">&lt;=</span> <span class="number">0</span> <span class="operator">||</span> <span class="name">barrelTexture</span> <span class="operator">==</span> <span class="number">0</span>) <span class="keyword">return</span>;
+
+      <span class="name">gl</span>.<span class="name">useProgram</span>(<span class="name">texturedShaderProgram</span>);
+
+      <span class="comment">// Calculate the perspective projection</span>
+      <span class="name">mat4</span>.<span class="name">perspective</span>(<span class="name">pMatrix</span>, <span class="name">degToRad</span>(<span class="number">45</span>), <span class="name">canvas</span>.<span class="name">width</span> <span class="operator">/</span> <span class="name">canvas</span>.<span class="name">height</span>, <span class="number">0.1</span>, <span class="number">10000.0</span>);
+      <span class="name">gl</span>.<span class="name">uniformMatrix4fv</span>(<span class="name">pMatrixUniform</span>, <span class="number">false</span>, <span class="name">pMatrix</span>);
+
+      <span class="comment">// Bind the correct buffers</span>
+      <span class="name">gl</span>.<span class="name">bindBuffer</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>, <span class="name">theModel</span>.<span class="name">verticesVBO</span>);
+      <span class="name">gl</span>.<span class="name">enableVertexAttribArray</span>(<span class="name">vertexPositionAttribute</span>);
+      <span class="name">gl</span>.<span class="name">vertexAttribPointer</span>(<span class="name">vertexPositionAttribute</span>, <span class="number">3</span>, <span class="name">gl</span>.<span class="name">FLOAT</span>, <span class="number">false</span>, <span class="number">0</span>, <span class="number">0</span>);
+
+      <span class="name">gl</span>.<span class="name">bindBuffer</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>, <span class="name">theModel</span>.<span class="name">normalsVBO</span>);
+      <span class="name">gl</span>.<span class="name">enableVertexAttribArray</span>(<span class="name">vertexNormalAttribute</span>);
+      <span class="name">gl</span>.<span class="name">vertexAttribPointer</span>(<span class="name">vertexNormalAttribute</span>, <span class="number">3</span>, <span class="name">gl</span>.<span class="name">FLOAT</span>, <span class="number">false</span>, <span class="number">0</span>, <span class="number">0</span>);
+
+      <span class="name">gl</span>.<span class="name">bindBuffer</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>, <span class="name">theModel</span>.<span class="name">texCoordVBO</span>);
+      <span class="name">gl</span>.<span class="name">enableVertexAttribArray</span>(<span class="name">textureCoordAttribute</span>);
+      <span class="name">gl</span>.<span class="name">vertexAttribPointer</span>(<span class="name">textureCoordAttribute</span>, <span class="number">2</span>, <span class="name">gl</span>.<span class="name">FLOAT</span>, <span class="number">false</span>, <span class="number">0</span>, <span class="number">0</span>);
+
+      <span class="name">gl</span>.<span class="name">activeTexture</span>(<span class="name">gl</span>.<span class="name">TEXTURE0</span>);
+      <span class="name">gl</span>.<span class="name">bindTexture</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">barrelTexture</span>);
+      <span class="name">gl</span>.<span class="name">uniform1i</span>(<span class="name">textureSamplerUniform</span>, <span class="number">0</span>);
+
+      <span class="comment">// Calculate and apply the modelview matrix</span>
+      <span class="name">mvMatrix</span> <span class="operator">=</span> <span class="name">mat4</span>.<span class="name">identity</span>(<span class="name">mvMatrix</span>);
+      <span class="name">mvMatrix</span> <span class="operator">=</span> <span class="name">mat4</span>.<span class="name">translate</span>(<span class="name">mvMatrix</span>, <span class="name">mvMatrix</span>, [<span class="number">0</span>, -<span class="number">40</span>, -<span class="number">700</span>]);
+      <span class="name">mvMatrix</span> <span class="operator">=</span> <span class="name">mat4</span>.<span class="name">rotate</span>(<span class="name">mvMatrix</span>, <span class="name">mvMatrix</span>, <span class="name">degToRad</span>(<span class="name">canvas</span>.<span class="name">xRotSlider</span>), [<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>]);
+      <span class="name">mvMatrix</span> <span class="operator">=</span> <span class="name">mat4</span>.<span class="name">rotate</span>(<span class="name">mvMatrix</span>, <span class="name">mvMatrix</span>, <span class="name">degToRad</span>(<span class="name">canvas</span>.<span class="name">yRotSlider</span>), [<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>]);
+      <span class="name">mvMatrix</span> <span class="operator">=</span> <span class="name">mat4</span>.<span class="name">rotate</span>(<span class="name">mvMatrix</span>, <span class="name">mvMatrix</span>, <span class="name">degToRad</span>(<span class="name">canvas</span>.<span class="name">zRotSlider</span>), [<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>]);
+      <span class="name">gl</span>.<span class="name">uniformMatrix4fv</span>(<span class="name">mvMatrixUniform</span>, <span class="number">false</span>, <span class="name">mvMatrix</span>);
+
+      <span class="comment">// Calculate normal matrix</span>
+      <span class="name">nMatrix</span> <span class="operator">=</span> <span class="name">mat4</span>.<span class="name">invert</span>(<span class="name">nMatrix</span>, <span class="name">mvMatrix</span>);
+      <span class="name">nMatrix</span> <span class="operator">=</span> <span class="name">mat4</span>.<span class="name">transpose</span>(<span class="name">nMatrix</span>, <span class="name">nMatrix</span>);
+      <span class="name">gl</span>.<span class="name">uniformMatrix4fv</span>(<span class="name">nMatrixUniform</span>, <span class="number">false</span>, <span class="name">nMatrix</span>);
+
+      <span class="comment">// Draw the barrel</span>
+      <span class="name">gl</span>.<span class="name">bindBuffer</span>(<span class="name">gl</span>.<span class="name">ELEMENT_ARRAY_BUFFER</span>, <span class="name">theModel</span>.<span class="name">indexVBO</span>);
+      <span class="name">gl</span>.<span class="name">drawElements</span>(<span class="name">gl</span>.<span class="name">TRIANGLES</span>, <span class="name">theModel</span>.<span class="name">count</span>, <span class="name">gl</span>.<span class="name">UNSIGNED_SHORT</span>, <span class="number">0</span>);
+
+      <span class="comment">// Calculate and apply the modelview matrix</span>
+      <span class="name">mvMatrix</span> <span class="operator">=</span> <span class="name">mat4</span>.<span class="name">identity</span>(<span class="name">mvMatrix</span>);
+      <span class="name">mvMatrix</span> <span class="operator">=</span> <span class="name">mat4</span>.<span class="name">translate</span>(<span class="name">mvMatrix</span>, <span class="name">mvMatrix</span>, [-<span class="number">250</span>, -<span class="number">50</span>, -<span class="number">700</span>]);
+      <span class="name">mvMatrix</span> <span class="operator">=</span> <span class="name">mat4</span>.<span class="name">rotate</span>(<span class="name">mvMatrix</span>, <span class="name">mvMatrix</span>, <span class="name">degToRad</span>(<span class="name">canvas</span>.<span class="name">xRotSlider</span>), [<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>]);
+      <span class="name">gl</span>.<span class="name">uniformMatrix4fv</span>(<span class="name">mvMatrixUniform</span>, <span class="number">false</span>, <span class="name">mvMatrix</span>);
+
+      <span class="comment">// Calculate normal matrix</span>
+      <span class="name">nMatrix</span> <span class="operator">=</span> <span class="name">mat4</span>.<span class="name">invert</span>(<span class="name">nMatrix</span>, <span class="name">mvMatrix</span>);
+      <span class="name">nMatrix</span> <span class="operator">=</span> <span class="name">mat4</span>.<span class="name">transpose</span>(<span class="name">nMatrix</span>, <span class="name">nMatrix</span>);
+      <span class="name">gl</span>.<span class="name">uniformMatrix4fv</span>(<span class="name">nMatrixUniform</span>, <span class="number">false</span>, <span class="name">nMatrix</span>);
+
+      <span class="comment">// Draw the barrel</span>
+      <span class="name">gl</span>.<span class="name">bindBuffer</span>(<span class="name">gl</span>.<span class="name">ELEMENT_ARRAY_BUFFER</span>, <span class="name">theModel</span>.<span class="name">indexVBO</span>);
+      <span class="name">gl</span>.<span class="name">drawElements</span>(<span class="name">gl</span>.<span class="name">POINTS</span>, <span class="name">theModel</span>.<span class="name">count</span>, <span class="name">gl</span>.<span class="name">UNSIGNED_SHORT</span>, <span class="number">0</span>);
+
+      <span class="comment">// Calculate and apply the modelview matrix</span>
+      <span class="name">mvMatrix</span> <span class="operator">=</span> <span class="name">mat4</span>.<span class="name">identity</span>(<span class="name">mvMatrix</span>);
+      <span class="name">mvMatrix</span> <span class="operator">=</span> <span class="name">mat4</span>.<span class="name">translate</span>(<span class="name">mvMatrix</span>, <span class="name">mvMatrix</span>, [<span class="number">250</span>, -<span class="number">50</span>, -<span class="number">700</span>]);
+      <span class="name">mvMatrix</span> <span class="operator">=</span> <span class="name">mat4</span>.<span class="name">rotate</span>(<span class="name">mvMatrix</span>, <span class="name">mvMatrix</span>, <span class="name">degToRad</span>(<span class="name">canvas</span>.<span class="name">zRotSlider</span>), [<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>]);
+      <span class="name">gl</span>.<span class="name">uniformMatrix4fv</span>(<span class="name">mvMatrixUniform</span>, <span class="number">false</span>, <span class="name">mvMatrix</span>);
+
+      <span class="comment">// Calculate normal matrix</span>
+      <span class="name">nMatrix</span> <span class="operator">=</span> <span class="name">mat4</span>.<span class="name">invert</span>(<span class="name">nMatrix</span>, <span class="name">mvMatrix</span>);
+      <span class="name">nMatrix</span> <span class="operator">=</span> <span class="name">mat4</span>.<span class="name">transpose</span>(<span class="name">nMatrix</span>, <span class="name">nMatrix</span>);
+      <span class="name">gl</span>.<span class="name">uniformMatrix4fv</span>(<span class="name">nMatrixUniform</span>, <span class="number">false</span>, <span class="name">nMatrix</span>);
+
+      <span class="comment">// Draw the barrel</span>
+      <span class="name">gl</span>.<span class="name">bindBuffer</span>(<span class="name">gl</span>.<span class="name">ELEMENT_ARRAY_BUFFER</span>, <span class="name">theModel</span>.<span class="name">indexVBO</span>);
+      <span class="name">gl</span>.<span class="name">drawElements</span>(<span class="name">gl</span>.<span class="name">LINES</span>, <span class="name">theModel</span>.<span class="name">count</span>, <span class="name">gl</span>.<span class="name">UNSIGNED_SHORT</span>, <span class="number">0</span>);
+  }
+
+  <span class="keyword">function</span> <span class="name">handleLoadedModel</span>(<span class="name">jsonObj</span>) {
+      <span class="name">log</span>(<span class="string">&quot;*******************************************************************************************&quot;</span>);
+      <span class="name">log</span>(<span class="string">&quot;handleLoadedModel ENTER...&quot;</span>)
+      var <span class="name">modelData</span> = <span class="name">parseJSON3DModel</span>(<span class="name">jsonObj</span>, <span class="string">&quot;&quot;</span>);
+
+      <span class="name">log</span>(<span class="string">&quot;    &quot;</span><span class="operator">+</span><span class="name">theModel</span>.<span class="name">verticesVBO</span>);
+      <span class="name">gl</span>.<span class="name">bindBuffer</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>, <span class="name">theModel</span>.<span class="name">verticesVBO</span>);
+      <span class="name">gl</span>.<span class="name">bufferData</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>,
+                    new <span class="name">Float32Array</span>(<span class="name">modelData</span>.<span class="name">vertices</span>),
+                    <span class="name">gl</span>.<span class="name">STATIC_DRAW</span>);
+
+      <span class="name">log</span>(<span class="string">&quot;    &quot;</span><span class="operator">+</span><span class="name">theModel</span>.<span class="name">normalsVBO</span>);
+      <span class="name">gl</span>.<span class="name">bindBuffer</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>, <span class="name">theModel</span>.<span class="name">normalsVBO</span>);
+      <span class="name">gl</span>.<span class="name">bufferData</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>,
+                    new <span class="name">Float32Array</span>(<span class="name">modelData</span>.<span class="name">normals</span>),
+                    <span class="name">gl</span>.<span class="name">STATIC_DRAW</span>);
+
+      <span class="name">log</span>(<span class="string">&quot;    &quot;</span><span class="operator">+</span><span class="name">theModel</span>.<span class="name">texCoordVBO</span>);
+      <span class="name">gl</span>.<span class="name">bindBuffer</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>, <span class="name">theModel</span>.<span class="name">texCoordVBO</span>);
+      <span class="name">gl</span>.<span class="name">bufferData</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>,
+                    new <span class="name">Float32Array</span>(<span class="name">modelData</span>.<span class="name">texCoords</span>[<span class="number">0</span>]),
+                    <span class="name">gl</span>.<span class="name">STATIC_DRAW</span>);
+
+      <span class="name">log</span>(<span class="string">&quot;    &quot;</span><span class="operator">+</span><span class="name">theModel</span>.<span class="name">indexVBO</span>);
+      <span class="name">gl</span>.<span class="name">bindBuffer</span>(<span class="name">gl</span>.<span class="name">ELEMENT_ARRAY_BUFFER</span>, <span class="name">theModel</span>.<span class="name">indexVBO</span>);
+      <span class="name">gl</span>.<span class="name">bufferData</span>(<span class="name">gl</span>.<span class="name">ELEMENT_ARRAY_BUFFER</span>,
+                    new <span class="name">Uint16Array</span>(<span class="name">modelData</span>.<span class="name">indices</span>),
+                    <span class="name">gl</span>.<span class="name">STATIC_DRAW</span>);
+
+      <span class="name">theModel</span>.<span class="name">count</span> <span class="operator">=</span> <span class="name">modelData</span>.<span class="name">indices</span>.<span class="name">length</span>;
+      <span class="name">log</span>(<span class="string">&quot;...handleLoadedModel EXIT&quot;</span>);
+      <span class="name">log</span>(<span class="string">&quot;*******************************************************************************************&quot;</span>);
+  }
+
+  <span class="keyword">function</span> <span class="name">degToRad</span>(<span class="name">degrees</span>) {
+      <span class="keyword">return</span> <span class="name">degrees</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">PI</span> <span class="operator">/</span> <span class="number">180</span>;
+  }
+
+  <span class="keyword">function</span> <span class="name">initShaders</span>()
+  {
+      <span class="name">log</span>(<span class="string">&quot;    initShaders ENTER...&quot;</span>)
+
+      <span class="name">vertexShader</span> <span class="operator">=</span> <span class="name">getShader</span>(<span class="name">gl</span>,
+                               <span class="string">&quot;attribute highp vec3 aVertexNormal;       \
+                                attribute highp vec3 aVertexPosition;     \
+                                attribute highp vec2 aTextureCoord;       \
+                                                                          \
+                                uniform highp mat4 uNormalMatrix;         \
+                                uniform mat4 uMVMatrix;                   \
+                                uniform mat4 uPMatrix;                    \
+                                                                          \
+                                varying highp vec2 vTextureCoord;         \
+                                varying highp vec3 vLighting;             \
+                                                                          \
+                                void main(void) {                         \
+                                   gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0); \
+                                   vTextureCoord = aTextureCoord;                                   \
+                                   highp vec3 ambientLight = vec3(0.5, 0.5, 0.5);                   \
+                                   highp vec3 directionalLightColor = vec3(0.75, 0.75, 0.75);       \
+                                   highp vec3 directionalVector = vec3(0.85, 0.8, 0.75);            \
+                                   highp vec4 transformedNormal = uNormalMatrix * vec4(aVertexNormal, 1.0); \
+                                                                                                            \
+                                   highp float directional = max(dot(transformedNormal.xyz, directionalVector), 0.0); \
+                                   vLighting = ambientLight + (directionalLightColor * directional);                  \
+                                   gl_PointSize = 1.0; \
+                               }&quot;</span>, <span class="name">gl</span>.<span class="name">VERTEX_SHADER</span>);
+
+      <span class="name">fragmentShader</span> <span class="operator">=</span> <span class="name">getShader</span>(<span class="name">gl</span>,
+                                 <span class="string">&quot;varying highp vec2 vTextureCoord;             \
+                                  varying highp vec3 vLighting;                 \
+                                                                                \
+                                  uniform sampler2D uSampler;                   \
+                                                                                \
+                                  void main(void) {                             \
+                                      mediump vec4 texelColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));  \
+                                      gl_FragColor = vec4(texelColor.rgb * vLighting, 1.0);                                   \
+                                  }&quot;</span>, <span class="name">gl</span>.<span class="name">FRAGMENT_SHADER</span>);
+
+      <span class="name">texturedShaderProgram</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createProgram</span>();
+      <span class="name">texturedShaderProgram</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;TexturedShaderProgram&quot;</span>;
+      <span class="name">gl</span>.<span class="name">attachShader</span>(<span class="name">texturedShaderProgram</span>, <span class="name">vertexShader</span>);
+      <span class="name">gl</span>.<span class="name">attachShader</span>(<span class="name">texturedShaderProgram</span>, <span class="name">fragmentShader</span>);
+      <span class="name">gl</span>.<span class="name">linkProgram</span>(<span class="name">texturedShaderProgram</span>);
+
+      <span class="keyword">if</span> (!<span class="name">gl</span>.<span class="name">getProgramParameter</span>(<span class="name">texturedShaderProgram</span>, <span class="name">gl</span>.<span class="name">LINK_STATUS</span>)) {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Could not initialize shaders&quot;</span>);
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">gl</span>.<span class="name">getProgramInfoLog</span>(<span class="name">texturedShaderProgram</span>));
+      }
+
+      <span class="name">gl</span>.<span class="name">useProgram</span>(<span class="name">texturedShaderProgram</span>);
+
+      <span class="comment">// look up where the vertex data needs to go.</span>
+      <span class="name">vertexPositionAttribute</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">getAttribLocation</span>(<span class="name">texturedShaderProgram</span>, <span class="string">&quot;aVertexPosition&quot;</span>);
+      <span class="name">vertexPositionAttribute</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;aVertexPosition_AttribLocation&quot;</span>;
+      <span class="name">gl</span>.<span class="name">enableVertexAttribArray</span>(<span class="name">vertexPositionAttribute</span>);
+      <span class="name">vertexNormalAttribute</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">getAttribLocation</span>(<span class="name">texturedShaderProgram</span>, <span class="string">&quot;aVertexNormal&quot;</span>);
+      <span class="name">vertexPositionAttribute</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;aVertexNormal_AttribLocation&quot;</span>;
+      <span class="name">gl</span>.<span class="name">enableVertexAttribArray</span>(<span class="name">vertexNormalAttribute</span>);
+      <span class="name">textureCoordAttribute</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">getAttribLocation</span>(<span class="name">texturedShaderProgram</span>, <span class="string">&quot;aTextureCoord&quot;</span>);
+      <span class="name">vertexPositionAttribute</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;aTextureCoord_AttribLocation&quot;</span>;
+      <span class="name">gl</span>.<span class="name">enableVertexAttribArray</span>(<span class="name">textureCoordAttribute</span>);
+
+      <span class="name">pMatrixUniform</span>  <span class="operator">=</span> <span class="name">gl</span>.<span class="name">getUniformLocation</span>(<span class="name">texturedShaderProgram</span>, <span class="string">&quot;uPMatrix&quot;</span>);
+      <span class="name">pMatrixUniform</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;uPMatrix_UniformLocation&quot;</span>;
+      <span class="name">mvMatrixUniform</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">getUniformLocation</span>(<span class="name">texturedShaderProgram</span>, <span class="string">&quot;uMVMatrix&quot;</span>);
+      <span class="name">mvMatrixUniform</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;uMVMatrix_UniformLocation&quot;</span>;
+      <span class="name">textureSamplerUniform</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">getUniformLocation</span>(<span class="name">texturedShaderProgram</span>, <span class="string">&quot;uSampler&quot;</span>)
+      <span class="name">textureSamplerUniform</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;uSampler_UniformLocation&quot;</span>;
+      <span class="name">nMatrixUniform</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">getUniformLocation</span>(<span class="name">texturedShaderProgram</span>, <span class="string">&quot;uNormalMatrix&quot;</span>);
+      <span class="name">nMatrixUniform</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;uNormalMatrix_UniformLocation&quot;</span>;
+      <span class="name">log</span>(<span class="string">&quot;    ... initShaders EXIT&quot;</span>);
+  }
+
+  <span class="keyword">function</span> <span class="name">getShader</span>(<span class="name">gl</span>, str, type) {
+      var <span class="name">shader</span> = <span class="name">gl</span>.<span class="name">createShader</span>(<span class="name">type</span>);
+      <span class="name">gl</span>.<span class="name">shaderSource</span>(<span class="name">shader</span>, <span class="name">str</span>);
+      <span class="name">gl</span>.<span class="name">compileShader</span>(<span class="name">shader</span>);
+
+      <span class="keyword">if</span> (!<span class="name">gl</span>.<span class="name">getShaderParameter</span>(<span class="name">shader</span>, <span class="name">gl</span>.<span class="name">COMPILE_STATUS</span>)) {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;JS:Shader compile failed&quot;</span>);
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">gl</span>.<span class="name">getShaderInfoLog</span>(<span class="name">shader</span>));
+          <span class="keyword">return</span> <span class="number">null</span>;
+      }
+
+      <span class="keyword">return</span> <span class="name">shader</span>;
+  }
+
+</pre>
+</div>
+<!-- @@@interaction/qml/interaction/interaction.js -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

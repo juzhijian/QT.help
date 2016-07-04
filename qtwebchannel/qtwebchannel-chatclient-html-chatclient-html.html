@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>chatclient.html Example File | Qt WebChannel 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwebchannel-index.html">Qt WebChannel</a></td><td ><a href="qtwebchannel-chatclient-html-example.html">Qt WebChannel ChatClient HTML Example</a></td><td >chatclient.html Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">chatclient.html Example File</h1>
+<span class="subtitle">chatclient-html/chatclient.html</span>
+<!-- $$$chatclient-html/chatclient.html-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  &lt;!DOCTYPE html&gt;
+  &lt;html&gt;
+  &lt;head&gt;
+      &lt;title&gt;ChatClient&lt;/title&gt;
+
+      &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot; /&gt;
+
+      &lt;link rel=&quot;stylesheet&quot; href=&quot;http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.css&quot; /&gt;
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;http://www.jeasyui.com/easyui/themes/default/easyui.css&quot; /&gt;
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;http://www.jeasyui.com/easyui/themes/icon.css&quot; /&gt;
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;http://www.jeasyui.com/easyui/demo/demo.css&quot; /&gt;
+      &lt;script src=&quot;http://code.jquery.com/jquery-1.9.1.js&quot;&gt;&lt;/script&gt;
+      &lt;script type=&quot;text/javascript&quot; src=&quot;http://www.jeasyui.com/easyui/jquery.easyui.min.js&quot;&gt;&lt;/script&gt;
+      &lt;script type=&quot;text/javascript&quot; src=&quot;qwebchannel.js&quot;&gt;&lt;/script&gt;
+
+      &lt;script&gt;
+          'use strict';
+          var wsUri = &quot;ws://localhost:12345&quot;;
+          window.loggedin = false;
+
+          window.onload = function() {
+              var socket = new WebSocket(wsUri);
+
+              socket.onclose = function()
+              {
+                  console.error(&quot;web channel closed&quot;);
+              };
+              socket.onerror = function(error)
+              {
+                  console.error(&quot;web channel error: &quot; + error);
+              };
+              socket.onopen = function()
+              {
+                  window.channel = new QWebChannel(socket, function(channel) {
+                      //connect to the changed signal of a property
+                      channel.objects.chatserver.userListChanged.connect(function() {
+                          $('#userlist').empty();
+                          //access the property
+                          channel.objects.chatserver.userList.forEach(function(user) {
+                              $('#userlist').append(user + '&lt;br&gt;');
+                          });
+                      });
+                      //connect to a signal
+                      channel.objects.chatserver.newMessage.connect(function(time, user, message) {
+                          $('#chat').append(&quot;[&quot; + time + &quot;] &quot; + user + &quot;: &quot; +  message + '&lt;br&gt;');
+                      });
+                      //connect to a signal
+                      channel.objects.chatserver.keepAlive.connect(function(args) {
+                          if(window.loggedin) {
+                              //call a method
+                              channel.objects.chatserver.keepAliveResponse($('#loginname').val())
+                              console.log(&quot;sent alive&quot;);
+                          }
+                      });
+
+                  });
+              }
+          }
+      &lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+
+  &lt;div id=&quot;loginDialog&quot; class=&quot;easyui-dialog&quot; title=&quot;Chat Login&quot; data-options=&quot;iconCls:'icon-save'&quot; style=&quot;width:400px;height:200px;padding:10px&quot;&gt;
+      &lt;form id=&quot;loginForm&quot; method=&quot;post&quot;&gt;
+          &lt;table cellpadding=&quot;5&quot;&gt;
+          &lt;tr&gt;&lt;td&gt;Name:&lt;/td&gt;&lt;td&gt;&lt;input class=&quot;easyui-validatebox&quot; type=&quot;text&quot; id=&quot;loginname&quot; name=&quot;name&quot; data-options=&quot;required:true&quot;&gt;&lt;/input&gt;&lt;/td&gt;&lt;/tr&gt;
+          &lt;/table&gt;
+      &lt;/form&gt;
+      &lt;div style=&quot;text-align:center;padding:5px&quot;&gt;
+          &lt;a href=&quot;javascript:void(0)&quot; class=&quot;easyui-linkbutton&quot; onclick=&quot;submitForm()&quot;&gt;Login&lt;/a&gt;
+      &lt;/div&gt;
+      &lt;div style=&quot;text-align:center;padding:5px&quot; id=&quot;loginError&quot;&gt;
+          Username already in use.
+      &lt;/div&gt;
+      &lt;script&gt;
+      $('#loginForm').submit(submitForm);
+      function submitForm(event) {
+          console.log(&quot;DEBUG login: &quot; + channel);
+          channel.objects.chatserver.login($('#loginname').val(), function(arg) {
+              console.log(&quot;DEBUG login response: &quot; + arg);
+              if(arg === true) {
+                  $('#loginError').hide();
+                  $('#loginDialog').dialog('close');
+                  window.loggedin = true;
+              } else {
+                  $('#loginError').show();
+              }
+          });
+          console.log($('#loginname').val());
+          if(event !== undefined)
+              event.preventDefault();
+          return false;
+
+      }
+      &lt;/script&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;easyui-layout&quot; style=&quot;width:500px;height:300px;&quot;&gt;
+      &lt;div data-options=&quot;region:'east',split:true&quot; title=&quot;Users&quot; id=&quot;userlist&quot; style=&quot;width:100px;&quot;&gt;
+
+      &lt;/div&gt;
+      &lt;div data-options=&quot;region:'south',split:true&quot; style=&quot;height:50px;&quot;&gt;
+          &lt;form id=&quot;messageForm&quot;&gt;
+              &lt;input class=&quot;easyui-validatebox&quot; type=&quot;text&quot; id=&quot;message&quot; name=&quot;name&quot; style=&quot;width: 97%&quot;&gt;&lt;/input&gt;
+          &lt;/form&gt;
+      &lt;/div&gt;
+      &lt;div data-options=&quot;region:'center'&quot; id=&quot;chat&quot;&gt;
+
+      &lt;/div&gt;
+      &lt;script&gt;
+      $('#messageForm').submit(submitMessage);
+      function submitMessage(event) {
+          channel.objects.chatserver.sendMessage($('#loginname').val(), $('#message').val());
+          $('#message').val('');
+          if(event !== undefined)
+              event.preventDefault();
+          return false;
+      }
+      &lt;/script&gt;
+  &lt;/div&gt;
+
+  &lt;script type=&quot;text/javascript&quot;&gt;
+  $(document).ready(function(){
+      $('#loginError').hide();
+  });
+  &lt;/script&gt;
+
+  &lt;/body&gt;
+  &lt;/html&gt;
+
+</pre>
+</div>
+<!-- @@@chatclient-html/chatclient.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

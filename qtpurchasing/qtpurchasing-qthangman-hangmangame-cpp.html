@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>hangmangame.cpp Example File | Qt Purchasing 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtpurchasing-index.html">Qt Purchasing</a></td><td ><a href="qtpurchasing-qthangman-example.html">Qt Purchasing Examples - QtHangman</a></td><td >hangmangame.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">hangmangame.cpp Example File</h1>
+<span class="subtitle">qthangman/hangmangame.cpp</span>
+<!-- $$$qthangman/hangmangame.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the Purchasing module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:LGPL3-COMM$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see http://www.qt.io/terms-conditions. For further
+  ** information use the contact form at http://www.qt.io/contact-us.
+  **
+  ** GNU Lesser General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU Lesser
+  ** General Public License version 3 as published by the Free Software
+  ** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+  ** packaging of this file. Please review the following information to
+  ** ensure the GNU Lesser General Public License version 3 requirements
+  ** will be met: https://www.gnu.org/licenses/lgpl.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;hangmangame.h&quot;</span>
+  <span class="preprocessor">#include &lt;QFile&gt;</span>
+  <span class="preprocessor">#include &lt;QDebug&gt;</span>
+  <span class="preprocessor">#include &lt;time.h&gt;</span>
+  <span class="preprocessor">#include &lt;QBuffer&gt;</span>
+  <span class="preprocessor">#include &lt;QtConcurrent/QtConcurrentRun&gt;</span>
+
+  HangmanGame<span class="operator">::</span>HangmanGame(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>(parent)
+      <span class="operator">,</span> m_lock(<span class="type"><a href="../qtcore/qmutex.html">QMutex</a></span><span class="operator">::</span>Recursive)
+      <span class="operator">,</span> m_vowelsUnlocked(<span class="keyword">false</span>)
+  {
+      qsrand(<span class="operator">::</span>time(<span class="number">0</span>));
+      connect(<span class="keyword">this</span><span class="operator">,</span> SIGNAL(vowelBought(<span class="type"><a href="../qtcore/qchar.html">QChar</a></span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(registerLetterBought(<span class="type"><a href="../qtcore/qchar.html">QChar</a></span>)));
+
+      <span class="type">QtConcurrent</span><span class="operator">::</span>run(<span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>HangmanGame<span class="operator">::</span>initWordList);
+
+      m_vowelsUnlocked <span class="operator">=</span> m_persistentSettings<span class="operator">.</span>value(<span class="string">&quot;Hangman/vowelsUnlocked&quot;</span><span class="operator">,</span> <span class="keyword">false</span>)<span class="operator">.</span>toBool();
+      m_vowelsAvailable <span class="operator">=</span> m_persistentSettings<span class="operator">.</span>value(<span class="string">&quot;Hangman/vowelsAvailable&quot;</span><span class="operator">,</span> <span class="number">0</span>)<span class="operator">.</span>toInt();
+      m_wordsGiven <span class="operator">=</span> m_persistentSettings<span class="operator">.</span>value(<span class="string">&quot;Hangman/wordsGiven&quot;</span><span class="operator">,</span> <span class="number">0</span>)<span class="operator">.</span>toInt();
+      m_wordsGuessedCorrectly <span class="operator">=</span> m_persistentSettings<span class="operator">.</span>value(<span class="string">&quot;Hangman/wordsGuessedCorrectly&quot;</span><span class="operator">,</span> <span class="number">0</span>)<span class="operator">.</span>toInt();
+      m_score <span class="operator">=</span> m_persistentSettings<span class="operator">.</span>value(<span class="string">&quot;Hangman/score&quot;</span><span class="operator">,</span> <span class="number">0</span>)<span class="operator">.</span>toInt();
+  }
+
+  <span class="type">void</span> HangmanGame<span class="operator">::</span>reset()
+  {
+      m_lettersOwned<span class="operator">.</span>clear();
+      <span class="keyword">emit</span> lettersOwnedChanged();
+      <span class="keyword">emit</span> errorCountChanged();
+      chooseRandomWord();
+  }
+
+  <span class="type">void</span> HangmanGame<span class="operator">::</span>reveal()
+  {
+      m_lettersOwned <span class="operator">+</span><span class="operator">=</span> vowels() <span class="operator">+</span> consonants();
+      <span class="keyword">emit</span> errorCountChanged();
+      <span class="keyword">emit</span> lettersOwnedChanged();
+  }
+
+  <span class="type">void</span> HangmanGame<span class="operator">::</span>gameOverReveal()
+  {
+      m_lettersOwned <span class="operator">+</span><span class="operator">=</span> vowels() <span class="operator">+</span> consonants();
+      <span class="keyword">emit</span> lettersOwnedChanged();
+  }
+
+  <span class="type">void</span> HangmanGame<span class="operator">::</span>requestLetter(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>letterString)
+  {
+      Q_ASSERT(letterString<span class="operator">.</span>size() <span class="operator">=</span><span class="operator">=</span> <span class="number">1</span>);
+      <span class="type"><a href="../qtcore/qchar.html">QChar</a></span> letter <span class="operator">=</span> letterString<span class="operator">.</span>at(<span class="number">0</span>);
+      registerLetterBought(letter);
+  }
+
+  <span class="type">void</span> HangmanGame<span class="operator">::</span>guessWord(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>word)
+  {
+      <span class="keyword">if</span> (word<span class="operator">.</span>compare(m_word<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CaseInsensitive) <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>) {
+          <span class="comment">//Determine how many vowels were earned</span>
+          setVowelsAvailable(m_vowelsAvailable <span class="operator">+</span> calculateEarnedVowels());
+          <span class="comment">//score is number of remaining consonants + remaining errors</span>
+          setScore(m_score <span class="operator">+</span> calculateEarnedPoints());
+          m_lettersOwned <span class="operator">+</span><span class="operator">=</span> m_word<span class="operator">.</span>toUpper();
+      } <span class="keyword">else</span> {
+          <span class="comment">// Small hack to get an additional penalty for guessing wrong</span>
+          <span class="keyword">static</span> <span class="type">int</span> i<span class="operator">=</span><span class="number">0</span>;
+          Q_ASSERT(i <span class="operator">&lt;</span> <span class="number">10</span>);
+          m_lettersOwned <span class="operator">+</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(i<span class="operator">+</span><span class="operator">+</span>);
+          <span class="keyword">emit</span> errorCountChanged();
+      }
+      <span class="keyword">emit</span> lettersOwnedChanged();
+  }
+
+  bool HangmanGame<span class="operator">::</span>isVowel(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>letter)
+  {
+      Q_ASSERT(letter<span class="operator">.</span>size() <span class="operator">=</span><span class="operator">=</span> <span class="number">1</span>);
+      <span class="type"><a href="../qtcore/qchar.html">QChar</a></span> letterChar <span class="operator">=</span> letter<span class="operator">.</span>at(<span class="number">0</span>);
+      <span class="keyword">return</span> vowels()<span class="operator">.</span>contains(letterChar);
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> HangmanGame<span class="operator">::</span>vowels() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;AEIOU&quot;</span>);
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> HangmanGame<span class="operator">::</span>consonants() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;BCDFGHJKLMNPQRSTVWXYZ&quot;</span>);
+  }
+
+  <span class="type">int</span> HangmanGame<span class="operator">::</span>errorCount() <span class="keyword">const</span>
+  {
+      <span class="type">int</span> count <span class="operator">=</span> <span class="number">0</span>;
+      foreach (<span class="type"><a href="../qtcore/qchar.html">QChar</a></span> c<span class="operator">,</span> m_lettersOwned) {
+          <span class="keyword">if</span> (<span class="operator">!</span>m_word<span class="operator">.</span>contains(c))
+              <span class="operator">+</span><span class="operator">+</span>count;
+      }
+      <span class="keyword">return</span> count;
+  }
+
+  bool HangmanGame<span class="operator">::</span>vowelsUnlocked() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_vowelsUnlocked;
+  }
+
+  <span class="type">void</span> HangmanGame<span class="operator">::</span>setVowelsUnlocked(bool vowelsUnlocked)
+  {
+      <span class="keyword">if</span> (m_vowelsUnlocked <span class="operator">!</span><span class="operator">=</span> vowelsUnlocked) {
+          m_vowelsUnlocked <span class="operator">=</span> vowelsUnlocked;
+          m_persistentSettings<span class="operator">.</span>setValue(<span class="string">&quot;Hangman/vowelsUnlocked&quot;</span><span class="operator">,</span> m_vowelsUnlocked);
+          <span class="keyword">emit</span> vowelsUnlockedChanged(m_vowelsUnlocked);
+      }
+  }
+
+  <span class="type">int</span> HangmanGame<span class="operator">::</span>vowelsAvailable() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_vowelsAvailable;
+  }
+
+  <span class="type">int</span> HangmanGame<span class="operator">::</span>wordsGiven() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_wordsGiven;
+  }
+
+  <span class="type">int</span> HangmanGame<span class="operator">::</span>wordsGuessedCorrectly() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_wordsGuessedCorrectly;
+  }
+
+  <span class="type">int</span> HangmanGame<span class="operator">::</span>score() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_score;
+  }
+
+  <span class="type">void</span> HangmanGame<span class="operator">::</span>setScore(<span class="type">int</span> score)
+  {
+      <span class="keyword">if</span> (m_score <span class="operator">!</span><span class="operator">=</span> score) {
+          m_score <span class="operator">=</span> score;
+          m_persistentSettings<span class="operator">.</span>setValue(<span class="string">&quot;Hangman/score&quot;</span><span class="operator">,</span> m_score);
+          <span class="keyword">emit</span> scoreChanged(score);
+      }
+  }
+
+  <span class="type">void</span> HangmanGame<span class="operator">::</span>setWordsGiven(<span class="type">int</span> count)
+  {
+      <span class="keyword">if</span> (m_wordsGiven <span class="operator">!</span><span class="operator">=</span> count) {
+          m_wordsGiven <span class="operator">=</span> count;
+          m_persistentSettings<span class="operator">.</span>setValue(<span class="string">&quot;Hangman/wordsGiven&quot;</span><span class="operator">,</span> m_wordsGiven);
+          <span class="keyword">emit</span> wordsGivenChanged(count);
+      }
+  }
+
+  <span class="type">void</span> HangmanGame<span class="operator">::</span>setWordsGuessedCorrectly(<span class="type">int</span> count)
+  {
+      <span class="keyword">if</span> (m_wordsGuessedCorrectly <span class="operator">!</span><span class="operator">=</span> count) {
+          m_wordsGuessedCorrectly <span class="operator">=</span> count;
+          m_persistentSettings<span class="operator">.</span>setValue(<span class="string">&quot;Hangman/wordsGuessedCorrectly&quot;</span><span class="operator">,</span> m_wordsGuessedCorrectly);
+          <span class="keyword">emit</span> wordsGuessedCorrectlyChanged(count);
+      }
+  }
+
+  <span class="type">void</span> HangmanGame<span class="operator">::</span>setVowelsAvailable(<span class="type">int</span> count)
+  {
+      <span class="keyword">if</span> (m_vowelsAvailable <span class="operator">!</span><span class="operator">=</span> count) {
+          m_vowelsAvailable <span class="operator">=</span> count;
+          m_persistentSettings<span class="operator">.</span>setValue(<span class="string">&quot;Hangman/vowelsAvailable&quot;</span><span class="operator">,</span> m_vowelsAvailable);
+          <span class="keyword">emit</span> vowelsAvailableChanged(count);
+      }
+  }
+
+  <span class="type">void</span> HangmanGame<span class="operator">::</span>registerLetterBought(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qchar.html">QChar</a></span> <span class="operator">&amp;</span>letter)
+  {
+      <span class="keyword">if</span> (m_lettersOwned<span class="operator">.</span>contains(letter))
+          <span class="keyword">return</span>;
+
+      m_lettersOwned<span class="operator">.</span>append(letter);
+      <span class="keyword">emit</span> lettersOwnedChanged();
+
+      <span class="keyword">if</span> (<span class="operator">!</span>m_word<span class="operator">.</span>contains(letter))
+          <span class="keyword">emit</span> errorCountChanged();
+  }
+
+  <span class="type">void</span> HangmanGame<span class="operator">::</span>chooseRandomWord()
+  {
+      <span class="type"><a href="../qtcore/qmutexlocker.html">QMutexLocker</a></span> locker(<span class="operator">&amp;</span>m_lock);
+      <span class="keyword">if</span> (m_wordList<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+
+      m_word <span class="operator">=</span> m_wordList<span class="operator">.</span>at(qrand() <span class="operator">%</span> m_wordList<span class="operator">.</span>size());
+      <span class="keyword">emit</span> wordChanged();
+  }
+
+  <span class="type">void</span> HangmanGame<span class="operator">::</span>initWordList()
+  {
+      <span class="type"><a href="../qtcore/qmutexlocker.html">QMutexLocker</a></span> locker(<span class="operator">&amp;</span>m_lock);
+      qsrand(<span class="operator">::</span>time(<span class="number">0</span>) <span class="operator">+</span> <span class="number">1000</span>);
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(<span class="string">&quot;:/enable2.txt&quot;</span>);
+      <span class="keyword">if</span> (file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly)) {
+          <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> allData <span class="operator">=</span> file<span class="operator">.</span>readAll();
+          <span class="type"><a href="../qtcore/qbuffer.html">QBuffer</a></span> buffer(<span class="operator">&amp;</span>allData);
+          <span class="keyword">if</span> (<span class="operator">!</span>buffer<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly))
+              <a href="../qtcore/qtglobal.html#qFatal">qFatal</a>(<span class="string">&quot;Couldn't open buffer for reading!&quot;</span>);
+
+          <span class="keyword">while</span> (<span class="operator">!</span>buffer<span class="operator">.</span>atEnd()) {
+              <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> ba <span class="operator">=</span> buffer<span class="operator">.</span>readLine()<span class="operator">.</span>trimmed()<span class="operator">.</span>toUpper();
+              <span class="keyword">if</span> (<span class="operator">!</span>ba<span class="operator">.</span>isEmpty() <span class="operator">&amp;</span><span class="operator">&amp;</span> ba<span class="operator">.</span>length() <span class="operator">&lt;</span> <span class="number">10</span>)
+                  m_wordList<span class="operator">.</span>append(<span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>fromLatin1(ba));
+          }
+      }
+
+      chooseRandomWord();
+  }
+
+  <span class="type">int</span> HangmanGame<span class="operator">::</span>calculateEarnedVowels()
+  {
+      <span class="type">int</span> total <span class="operator">=</span> <span class="number">0</span>;
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_word<span class="operator">.</span>length(); <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="keyword">if</span> (isVowel(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(m_word<span class="operator">[</span>i<span class="operator">]</span>)) <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>m_lettersOwned<span class="operator">.</span>contains(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(m_word<span class="operator">[</span>i<span class="operator">]</span>)))
+              total<span class="operator">+</span><span class="operator">+</span>;
+      }
+      <span class="keyword">return</span> total;
+  }
+
+  <span class="type">int</span> HangmanGame<span class="operator">::</span>calculateEarnedPoints()
+  {
+      <span class="type">int</span> total <span class="operator">=</span> <span class="number">0</span>;
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_word<span class="operator">.</span>length(); <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="keyword">if</span> (consonants()<span class="operator">.</span>contains(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(m_word<span class="operator">[</span>i<span class="operator">]</span>)) <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>m_lettersOwned<span class="operator">.</span>contains(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(m_word<span class="operator">[</span>i<span class="operator">]</span>)))
+              total<span class="operator">+</span><span class="operator">+</span>;
+      }
+      total <span class="operator">+</span><span class="operator">=</span> <span class="number">8</span> <span class="operator">-</span> errorCount();
+      <span class="keyword">return</span> total;
+  }
+
+</pre>
+</div>
+<!-- @@@qthangman/hangmangame.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

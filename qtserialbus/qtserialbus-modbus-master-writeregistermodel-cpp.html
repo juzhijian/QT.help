@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>writeregistermodel.cpp Example File | Qt Serial Bus 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtserialbus-index.html">Qt Serial Bus</a></td><td ><a href="qtserialbus-modbus-master-example.html">Modbus Master example</a></td><td >writeregistermodel.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">writeregistermodel.cpp Example File</h1>
+<span class="subtitle">modbus/master/writeregistermodel.cpp</span>
+<!-- $$$modbus/master/writeregistermodel.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the QtSerialBus module.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;writeregistermodel.h&quot;</span>
+
+  <span class="keyword">enum</span> { NumColumn <span class="operator">=</span> <span class="number">0</span><span class="operator">,</span> CoilsColumn <span class="operator">=</span> <span class="number">1</span><span class="operator">,</span> HoldingColumn <span class="operator">=</span> <span class="number">2</span><span class="operator">,</span> ColumnCount <span class="operator">=</span> <span class="number">3</span><span class="operator">,</span> RowCount <span class="operator">=</span> <span class="number">10</span> };
+
+  WriteRegisterModel<span class="operator">::</span>WriteRegisterModel(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qabstracttablemodel.html">QAbstractTableModel</a></span>(parent)<span class="operator">,</span>
+        m_coils(RowCount<span class="operator">,</span> <span class="keyword">false</span>)<span class="operator">,</span> m_holdingRegisters(RowCount<span class="operator">,</span> <span class="number">0u</span>)
+  {
+  }
+
+  <span class="type">int</span> WriteRegisterModel<span class="operator">::</span>rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span><span class="comment">/*parent*/</span>) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> RowCount;
+  }
+
+  <span class="type">int</span> WriteRegisterModel<span class="operator">::</span>columnCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span><span class="comment">/*parent*/</span>) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> ColumnCount;
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> WriteRegisterModel<span class="operator">::</span>data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid() <span class="operator">|</span><span class="operator">|</span> index<span class="operator">.</span>row() <span class="operator">&gt;</span><span class="operator">=</span> RowCount <span class="operator">|</span><span class="operator">|</span> index<span class="operator">.</span>column() <span class="operator">&gt;</span><span class="operator">=</span> ColumnCount)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+      Q_ASSERT(m_coils<span class="operator">.</span>count() <span class="operator">=</span><span class="operator">=</span> RowCount);
+      Q_ASSERT(m_holdingRegisters<span class="operator">.</span>count() <span class="operator">=</span><span class="operator">=</span> RowCount);
+
+      <span class="keyword">if</span> (index<span class="operator">.</span>column() <span class="operator">=</span><span class="operator">=</span> NumColumn <span class="operator">&amp;</span><span class="operator">&amp;</span> role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(index<span class="operator">.</span>row());
+
+      <span class="keyword">if</span> (index<span class="operator">.</span>column() <span class="operator">=</span><span class="operator">=</span> CoilsColumn <span class="operator">&amp;</span><span class="operator">&amp;</span> role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CheckStateRole) <span class="comment">// coils</span>
+          <span class="keyword">return</span> m_coils<span class="operator">.</span>at(index<span class="operator">.</span>row()) <span class="operator">?</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked : <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Unchecked;
+
+      <span class="keyword">else</span> <span class="keyword">if</span> (index<span class="operator">.</span>column() <span class="operator">=</span><span class="operator">=</span> HoldingColumn <span class="operator">&amp;</span><span class="operator">&amp;</span> role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole) <span class="comment">//holding registers</span>
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;0x%1&quot;</span>)<span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(m_holdingRegisters<span class="operator">.</span>at(index<span class="operator">.</span>row())<span class="operator">,</span> <span class="number">16</span>));
+
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> WriteRegisterModel<span class="operator">::</span>headerData(<span class="type">int</span> section<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Orientation orientation<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (role <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+      <span class="keyword">if</span> (orientation <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal) {
+          <span class="keyword">switch</span> (section) {
+          <span class="keyword">case</span> NumColumn:
+              <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;#&quot;</span>);
+          <span class="keyword">case</span> CoilsColumn:
+              <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Coils  &quot;</span>);
+          <span class="keyword">case</span> HoldingColumn:
+              <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Holding Registers&quot;</span>);
+          <span class="keyword">default</span>:
+              <span class="keyword">break</span>;
+          }
+      }
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+  }
+
+  bool WriteRegisterModel<span class="operator">::</span>setData(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> <span class="operator">&amp;</span>value<span class="operator">,</span> <span class="type">int</span> role)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid() <span class="operator">|</span><span class="operator">|</span>  index<span class="operator">.</span>row() <span class="operator">&gt;</span><span class="operator">=</span> RowCount <span class="operator">|</span><span class="operator">|</span> index<span class="operator">.</span>column() <span class="operator">&gt;</span><span class="operator">=</span> ColumnCount)
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      Q_ASSERT(m_coils<span class="operator">.</span>count() <span class="operator">=</span><span class="operator">=</span> RowCount);
+      Q_ASSERT(m_holdingRegisters<span class="operator">.</span>count() <span class="operator">=</span><span class="operator">=</span> RowCount);
+
+      <span class="keyword">if</span> (index<span class="operator">.</span>column() <span class="operator">=</span><span class="operator">=</span> CoilsColumn <span class="operator">&amp;</span><span class="operator">&amp;</span> role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CheckStateRole) { <span class="comment">// coils</span>
+          <span class="keyword">auto</span> s <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CheckState<span class="operator">&gt;</span>(value<span class="operator">.</span>toUInt());
+          s <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked <span class="operator">?</span> m_coils<span class="operator">.</span>setBit(index<span class="operator">.</span>row()) : m_coils<span class="operator">.</span>clearBit(index<span class="operator">.</span>row());
+          <span class="keyword">emit</span> dataChanged(index<span class="operator">,</span> index);
+          <span class="keyword">return</span> <span class="keyword">true</span>;
+      }
+
+      <span class="keyword">if</span> (index<span class="operator">.</span>column() <span class="operator">=</span><span class="operator">=</span> HoldingColumn <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole) { <span class="comment">// holding registers</span>
+          bool result <span class="operator">=</span> <span class="keyword">false</span>;
+          <span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> newValue <span class="operator">=</span> value<span class="operator">.</span>toString()<span class="operator">.</span>toUShort(<span class="operator">&amp;</span>result<span class="operator">,</span> <span class="number">16</span>);
+          <span class="keyword">if</span> (result)
+              m_holdingRegisters<span class="operator">[</span>index<span class="operator">.</span>row()<span class="operator">]</span> <span class="operator">=</span> newValue;
+
+          <span class="keyword">emit</span> dataChanged(index<span class="operator">,</span> index);
+          <span class="keyword">return</span> result;
+      }
+
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+  }
+
+  <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemFlags WriteRegisterModel<span class="operator">::</span>flags(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid() <span class="operator">|</span><span class="operator">|</span> index<span class="operator">.</span>row() <span class="operator">&gt;</span><span class="operator">=</span> RowCount <span class="operator">|</span><span class="operator">|</span> index<span class="operator">.</span>column() <span class="operator">&gt;</span><span class="operator">=</span> ColumnCount)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qabstracttablemodel.html">QAbstractTableModel</a></span><span class="operator">::</span>flags(index);
+
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemFlags flags <span class="operator">=</span> <span class="type"><a href="../qtcore/qabstracttablemodel.html">QAbstractTableModel</a></span><span class="operator">::</span>flags(index);
+      <span class="keyword">if</span> ((index<span class="operator">.</span>row() <span class="operator">&lt;</span> m_address) <span class="operator">|</span><span class="operator">|</span> (index<span class="operator">.</span>row() <span class="operator">&gt;</span><span class="operator">=</span> (m_address <span class="operator">+</span> m_number)))
+          flags <span class="operator">&amp;</span><span class="operator">=</span> <span class="operator">~</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsEnabled;
+
+      <span class="keyword">if</span> (index<span class="operator">.</span>column() <span class="operator">=</span><span class="operator">=</span> CoilsColumn) <span class="comment">//coils</span>
+          <span class="keyword">return</span> flags <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsUserCheckable;
+      <span class="keyword">if</span> (index<span class="operator">.</span>column() <span class="operator">=</span><span class="operator">=</span> HoldingColumn) <span class="comment">//holding registers</span>
+          <span class="keyword">return</span> flags <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsEditable;
+
+      <span class="keyword">return</span> flags;
+  }
+
+  <span class="type">void</span> WriteRegisterModel<span class="operator">::</span>setStartAddress(<span class="type">int</span> address)
+  {
+      m_address <span class="operator">=</span> address;
+      <span class="keyword">emit</span> updateViewport();
+  }
+
+  <span class="type">void</span> WriteRegisterModel<span class="operator">::</span>setNumberOfValues(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>number)
+  {
+      m_number <span class="operator">=</span> number<span class="operator">.</span>toInt();
+      <span class="keyword">emit</span> updateViewport();
+  }
+
+</pre>
+</div>
+<!-- @@@modbus/master/writeregistermodel.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

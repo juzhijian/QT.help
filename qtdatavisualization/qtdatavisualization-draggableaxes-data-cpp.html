@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>data.cpp Example File | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td ><a href="qtdatavisualization-draggableaxes-example.html">Axis Range Dragging With Labels Example</a></td><td >data.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">data.cpp Example File</h1>
+<span class="subtitle">draggableaxes/data.cpp</span>
+<!-- $$$draggableaxes/data.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Data Visualization module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;data.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtDataVisualization/QScatterDataProxy&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/Q3DScene&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/Q3DCamera&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/QScatter3DSeries&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/Q3DTheme&gt;</span>
+
+  <span class="keyword">using</span> <span class="keyword">namespace</span> <span class="type"><a href="qtdatavisualization-qmlmodule.html">QtDataVisualization</a></span>;
+
+  <span class="keyword">const</span> <span class="type">int</span> itemCount <span class="operator">=</span> <span class="number">500</span>;
+
+  Data<span class="operator">::</span>Data(<span class="type"><a href="q3dscatter.html">Q3DScatter</a></span> <span class="operator">*</span>scatter)
+      : m_graph(scatter)<span class="operator">,</span>
+        m_inputHandler(<span class="keyword">new</span> AxesInputHandler(scatter))<span class="operator">,</span>
+        m_autoAdjust(<span class="keyword">false</span>)
+  {
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setType(<span class="type"><a href="q3dtheme.html">Q3DTheme</a></span><span class="operator">::</span>ThemeEbony);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setLabelBorderEnabled(<span class="keyword">true</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setLabelBackgroundColor(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span>(<span class="number">0x151550</span>)));
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setLabelTextColor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>lightGray);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setFont(<span class="type"><a href="../qtgui/qfont.html">QFont</a></span>(<span class="string">&quot;Arial Black&quot;</span><span class="operator">,</span> <span class="number">30</span>));
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setShadowQuality(QAbstract3DGraph<span class="operator">::</span>ShadowQualityMedium);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">-</span><span class="operator">&gt;</span>setCameraPreset(<span class="type"><a href="q3dcamera.html">Q3DCamera</a></span><span class="operator">::</span>CameraPresetIsometricRight);
+
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span><span class="number">20.0f</span><span class="operator">,</span> <span class="number">20.0f</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span><span class="number">10.0f</span><span class="operator">,</span> <span class="number">10.0f</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span><span class="number">20.0f</span><span class="operator">,</span> <span class="number">20.0f</span>);
+
+      <span class="comment">// Give ownership of the handler to the graph and make it the active handler</span>
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setActiveInputHandler(m_inputHandler);
+
+      <span class="comment">// Give our axes to the input handler</span>
+      m_inputHandler<span class="operator">-</span><span class="operator">&gt;</span>setAxes(m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">,</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">,</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY());
+
+      addData();
+  }
+
+  Data<span class="operator">::</span><span class="operator">~</span>Data()
+  {
+      <span class="keyword">delete</span> m_graph;
+  }
+
+  <span class="type">void</span> Data<span class="operator">::</span>toggleRanges()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_autoAdjust) {
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>setAutoAdjustRange(<span class="keyword">true</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>setAutoAdjustRange(<span class="keyword">true</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>setAutoAdjustRange(<span class="keyword">true</span>);
+          m_inputHandler<span class="operator">-</span><span class="operator">&gt;</span>setDragSpeedModifier(<span class="number">1.5f</span>);
+          m_autoAdjust <span class="operator">=</span> <span class="keyword">true</span>;
+      } <span class="keyword">else</span> {
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span><span class="number">20.0f</span><span class="operator">,</span> <span class="number">20.0f</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span><span class="number">10.0f</span><span class="operator">,</span> <span class="number">10.0f</span>);
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span><span class="number">20.0f</span><span class="operator">,</span> <span class="number">20.0f</span>);
+          m_inputHandler<span class="operator">-</span><span class="operator">&gt;</span>setDragSpeedModifier(<span class="number">15.0f</span>);
+          m_autoAdjust <span class="operator">=</span> <span class="keyword">false</span>;
+      }
+  }
+
+  <span class="type">void</span> Data<span class="operator">::</span>addData()
+  {
+      QScatter3DSeries <span class="operator">*</span>series <span class="operator">=</span> <span class="keyword">new</span> QScatter3DSeries;
+      series<span class="operator">-</span><span class="operator">&gt;</span>setMesh(QAbstract3DSeries<span class="operator">::</span>MeshCube);
+      series<span class="operator">-</span><span class="operator">&gt;</span>setMeshSmooth(<span class="keyword">true</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>addSeries(series);
+
+      QScatter3DSeries <span class="operator">*</span>series2 <span class="operator">=</span> <span class="keyword">new</span> QScatter3DSeries;
+      series2<span class="operator">-</span><span class="operator">&gt;</span>setMesh(QAbstract3DSeries<span class="operator">::</span>MeshMinimal);
+      series2<span class="operator">-</span><span class="operator">&gt;</span>setMeshSmooth(<span class="keyword">true</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>addSeries(series2);
+
+      QScatter3DSeries <span class="operator">*</span>series3 <span class="operator">=</span> <span class="keyword">new</span> QScatter3DSeries;
+      series3<span class="operator">-</span><span class="operator">&gt;</span>setMesh(QAbstract3DSeries<span class="operator">::</span>MeshSphere);
+      series3<span class="operator">-</span><span class="operator">&gt;</span>setMeshSmooth(<span class="keyword">true</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>addSeries(series3);
+
+      QScatter3DSeries <span class="operator">*</span>series4 <span class="operator">=</span> <span class="keyword">new</span> QScatter3DSeries;
+      series4<span class="operator">-</span><span class="operator">&gt;</span>setMesh(QAbstract3DSeries<span class="operator">::</span>MeshBevelCube);
+      series4<span class="operator">-</span><span class="operator">&gt;</span>setMeshSmooth(<span class="keyword">true</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>addSeries(series4);
+
+      QScatter3DSeries <span class="operator">*</span>series5 <span class="operator">=</span> <span class="keyword">new</span> QScatter3DSeries;
+      series5<span class="operator">-</span><span class="operator">&gt;</span>setMesh(QAbstract3DSeries<span class="operator">::</span>MeshSphere);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>addSeries(series5);
+
+      <span class="type">QScatterDataArray</span> <span class="operator">*</span>dataArray <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QScatterDataArray</span>;
+      dataArray<span class="operator">-</span><span class="operator">&gt;</span>resize(itemCount);
+      <span class="type"><a href="qscatterdataitem.html">QScatterDataItem</a></span> <span class="operator">*</span>ptrToDataArray <span class="operator">=</span> <span class="operator">&amp;</span>dataArray<span class="operator">-</span><span class="operator">&gt;</span>first();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> itemCount; i<span class="operator">+</span><span class="operator">+</span>) {
+          ptrToDataArray<span class="operator">-</span><span class="operator">&gt;</span>setPosition(randVector());
+          ptrToDataArray<span class="operator">+</span><span class="operator">+</span>;
+      }
+      <span class="type">QScatterDataArray</span> <span class="operator">*</span>dataArray2 <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QScatterDataArray</span>;
+      dataArray2<span class="operator">-</span><span class="operator">&gt;</span>resize(itemCount);
+      ptrToDataArray <span class="operator">=</span> <span class="operator">&amp;</span>dataArray2<span class="operator">-</span><span class="operator">&gt;</span>first();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> itemCount; i<span class="operator">+</span><span class="operator">+</span>) {
+          ptrToDataArray<span class="operator">-</span><span class="operator">&gt;</span>setPosition(randVector());
+          ptrToDataArray<span class="operator">+</span><span class="operator">+</span>;
+      }
+      <span class="type">QScatterDataArray</span> <span class="operator">*</span>dataArray3 <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QScatterDataArray</span>;
+      dataArray3<span class="operator">-</span><span class="operator">&gt;</span>resize(itemCount);
+      ptrToDataArray <span class="operator">=</span> <span class="operator">&amp;</span>dataArray3<span class="operator">-</span><span class="operator">&gt;</span>first();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> itemCount; i<span class="operator">+</span><span class="operator">+</span>) {
+          ptrToDataArray<span class="operator">-</span><span class="operator">&gt;</span>setPosition(randVector());
+          ptrToDataArray<span class="operator">+</span><span class="operator">+</span>;
+      }
+      <span class="type">QScatterDataArray</span> <span class="operator">*</span>dataArray4 <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QScatterDataArray</span>;
+      dataArray4<span class="operator">-</span><span class="operator">&gt;</span>resize(itemCount);
+      ptrToDataArray <span class="operator">=</span> <span class="operator">&amp;</span>dataArray4<span class="operator">-</span><span class="operator">&gt;</span>first();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> itemCount; i<span class="operator">+</span><span class="operator">+</span>) {
+          ptrToDataArray<span class="operator">-</span><span class="operator">&gt;</span>setPosition(randVector());
+          ptrToDataArray<span class="operator">+</span><span class="operator">+</span>;
+      }
+      <span class="type">QScatterDataArray</span> <span class="operator">*</span>dataArray5 <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QScatterDataArray</span>;
+      dataArray5<span class="operator">-</span><span class="operator">&gt;</span>resize(itemCount);
+      ptrToDataArray <span class="operator">=</span> <span class="operator">&amp;</span>dataArray5<span class="operator">-</span><span class="operator">&gt;</span>first();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> itemCount; i<span class="operator">+</span><span class="operator">+</span>) {
+          ptrToDataArray<span class="operator">-</span><span class="operator">&gt;</span>setPosition(randVector());
+          ptrToDataArray<span class="operator">+</span><span class="operator">+</span>;
+      }
+
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>seriesList()<span class="operator">.</span>at(<span class="number">0</span>)<span class="operator">-</span><span class="operator">&gt;</span>dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>resetArray(dataArray);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>seriesList()<span class="operator">.</span>at(<span class="number">1</span>)<span class="operator">-</span><span class="operator">&gt;</span>dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>resetArray(dataArray2);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>seriesList()<span class="operator">.</span>at(<span class="number">2</span>)<span class="operator">-</span><span class="operator">&gt;</span>dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>resetArray(dataArray3);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>seriesList()<span class="operator">.</span>at(<span class="number">3</span>)<span class="operator">-</span><span class="operator">&gt;</span>dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>resetArray(dataArray4);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>seriesList()<span class="operator">.</span>at(<span class="number">4</span>)<span class="operator">-</span><span class="operator">&gt;</span>dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>resetArray(dataArray5);
+  }
+
+  QVector3D Data<span class="operator">::</span>randVector()
+  {
+      <span class="keyword">return</span> QVector3D(
+                  (<span class="type">float</span>)(rand() <span class="operator">%</span> <span class="number">100</span>) <span class="operator">/</span> <span class="number">2.0f</span> <span class="operator">-</span> (<span class="type">float</span>)(rand() <span class="operator">%</span> <span class="number">100</span>) <span class="operator">/</span> <span class="number">2.0f</span><span class="operator">,</span>
+                  (<span class="type">float</span>)(rand() <span class="operator">%</span> <span class="number">100</span>) <span class="operator">/</span> <span class="number">2.0f</span> <span class="operator">-</span> (<span class="type">float</span>)(rand() <span class="operator">%</span> <span class="number">100</span>) <span class="operator">/</span> <span class="number">2.0f</span><span class="operator">,</span>
+                  (<span class="type">float</span>)(rand() <span class="operator">%</span> <span class="number">100</span>) <span class="operator">/</span> <span class="number">2.0f</span> <span class="operator">-</span> (<span class="type">float</span>)(rand() <span class="operator">%</span> <span class="number">100</span>) <span class="operator">/</span> <span class="number">2.0f</span>);
+  }
+
+</pre>
+</div>
+<!-- @@@draggableaxes/data.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>searchlineedit.cpp Example File | Qt WebEngine 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwebengine-index.html">Qt WebEngine</a></td><td ><a href="qtwebengine-webenginewidgets-demobrowser-example.html">WebEngine Demo Browser Example</a></td><td >searchlineedit.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">searchlineedit.cpp Example File</h1>
+<span class="subtitle">webenginewidgets/demobrowser/searchlineedit.cpp</span>
+<!-- $$$webenginewidgets/demobrowser/searchlineedit.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;searchlineedit.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtGui/QPainter&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QMouseEvent&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QMenu&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QStyle&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QStyleOptionFrame&gt;</span>
+
+  ClearButton<span class="operator">::</span>ClearButton(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+    : <span class="type"><a href="../qtwidgets/qabstractbutton.html">QAbstractButton</a></span>(parent)
+  {
+  <span class="preprocessor">#ifndef QT_NO_CURSOR</span>
+      setCursor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ArrowCursor);
+  <span class="preprocessor">#endif // QT_NO_CURSOR</span>
+      setToolTip(tr(<span class="string">&quot;Clear&quot;</span>));
+      setVisible(<span class="keyword">false</span>);
+      setFocusPolicy(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoFocus);
+  }
+
+  <span class="type">void</span> ClearButton<span class="operator">::</span>paintEvent(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> <span class="operator">*</span>event)
+  {
+      Q_UNUSED(event);
+      <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter(<span class="keyword">this</span>);
+      <span class="type">int</span> height <span class="operator">=</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>height();
+
+      painter<span class="operator">.</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing<span class="operator">,</span> <span class="keyword">true</span>);
+      painter<span class="operator">.</span>setBrush(isDown()
+                       <span class="operator">?</span> palette()<span class="operator">.</span>color(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Dark)
+                       : palette()<span class="operator">.</span>color(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Mid));
+      painter<span class="operator">.</span>setPen(painter<span class="operator">.</span>brush()<span class="operator">.</span>color());
+      <span class="type">int</span> size <span class="operator">=</span> width();
+      <span class="type">int</span> offset <span class="operator">=</span> size <span class="operator">/</span> <span class="number">5</span>;
+      <span class="type">int</span> radius <span class="operator">=</span> size <span class="operator">-</span> offset <span class="operator">*</span> <span class="number">2</span>;
+      painter<span class="operator">.</span>drawEllipse(offset<span class="operator">,</span> offset<span class="operator">,</span> radius<span class="operator">,</span> radius);
+
+      painter<span class="operator">.</span>setPen(palette()<span class="operator">.</span>color(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Base));
+      <span class="type">int</span> border <span class="operator">=</span> offset <span class="operator">*</span> <span class="number">2</span>;
+      painter<span class="operator">.</span>drawLine(border<span class="operator">,</span> border<span class="operator">,</span> width() <span class="operator">-</span> border<span class="operator">,</span> height <span class="operator">-</span> border);
+      painter<span class="operator">.</span>drawLine(border<span class="operator">,</span> height <span class="operator">-</span> border<span class="operator">,</span> width() <span class="operator">-</span> border<span class="operator">,</span> border);
+  }
+
+  <span class="type">void</span> ClearButton<span class="operator">::</span>textChanged(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>text)
+  {
+      setVisible(<span class="operator">!</span>text<span class="operator">.</span>isEmpty());
+  }
+
+  <span class="comment">/*
+      Search icon on the left hand side of the search widget
+      When a menu is set a down arrow appears
+   */</span>
+  <span class="keyword">class</span> SearchButton : <span class="keyword">public</span> <span class="type"><a href="../qtwidgets/qabstractbutton.html">QAbstractButton</a></span> {
+  <span class="keyword">public</span>:
+      SearchButton(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+      <span class="type">void</span> paintEvent(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> <span class="operator">*</span>event);
+      <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>m_menu;
+
+  <span class="keyword">protected</span>:
+      <span class="type">void</span> mousePressEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>event);
+  };
+
+  SearchButton<span class="operator">::</span>SearchButton(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+    : <span class="type"><a href="../qtwidgets/qabstractbutton.html">QAbstractButton</a></span>(parent)<span class="operator">,</span>
+      m_menu(<span class="number">0</span>)
+  {
+      setObjectName(QLatin1String(<span class="string">&quot;SearchButton&quot;</span>));
+  <span class="preprocessor">#ifndef QT_NO_CURSOR</span>
+      setCursor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ArrowCursor);
+  <span class="preprocessor">#endif //QT_NO_CURSOR</span>
+      setFocusPolicy(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoFocus);
+  }
+
+  <span class="type">void</span> SearchButton<span class="operator">::</span>mousePressEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (m_menu <span class="operator">&amp;</span><span class="operator">&amp;</span> event<span class="operator">-</span><span class="operator">&gt;</span>button() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftButton) {
+          <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>p <span class="operator">=</span> parentWidget();
+          <span class="keyword">if</span> (p) {
+              <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> r <span class="operator">=</span> p<span class="operator">-</span><span class="operator">&gt;</span>mapToGlobal(<span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(<span class="number">0</span><span class="operator">,</span> p<span class="operator">-</span><span class="operator">&gt;</span>height()));
+              m_menu<span class="operator">-</span><span class="operator">&gt;</span>exec(<span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(r<span class="operator">.</span>x() <span class="operator">+</span> height() <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> r<span class="operator">.</span>y()));
+          }
+          event<span class="operator">-</span><span class="operator">&gt;</span>accept();
+      }
+      <span class="type"><a href="../qtwidgets/qabstractbutton.html">QAbstractButton</a></span><span class="operator">::</span>mousePressEvent(event);
+  }
+
+  <span class="type">void</span> SearchButton<span class="operator">::</span>paintEvent(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> <span class="operator">*</span>event)
+  {
+      Q_UNUSED(event);
+      <span class="type"><a href="../qtgui/qpainterpath.html">QPainterPath</a></span> myPath;
+
+      <span class="type">int</span> radius <span class="operator">=</span> (height() <span class="operator">/</span> <span class="number">5</span>) <span class="operator">*</span> <span class="number">2</span>;
+      <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> circle(height() <span class="operator">/</span> <span class="number">3</span> <span class="operator">-</span> <span class="number">1</span><span class="operator">,</span> height() <span class="operator">/</span> <span class="number">4</span><span class="operator">,</span> radius<span class="operator">,</span> radius);
+      myPath<span class="operator">.</span>addEllipse(circle);
+
+      myPath<span class="operator">.</span>arcMoveTo(circle<span class="operator">,</span> <span class="number">300</span>);
+      <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> c <span class="operator">=</span> myPath<span class="operator">.</span>currentPosition();
+      <span class="type">int</span> diff <span class="operator">=</span> height() <span class="operator">/</span> <span class="number">7</span>;
+      myPath<span class="operator">.</span>lineTo(<a href="../qtcore/qtglobal.html#qMin">qMin</a>(width() <span class="operator">-</span> <span class="number">2</span><span class="operator">,</span> (<span class="type">int</span>)c<span class="operator">.</span>x() <span class="operator">+</span> diff)<span class="operator">,</span> c<span class="operator">.</span>y() <span class="operator">+</span> diff);
+
+      <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter(<span class="keyword">this</span>);
+      painter<span class="operator">.</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing<span class="operator">,</span> <span class="keyword">true</span>);
+      painter<span class="operator">.</span>setPen(<span class="type"><a href="../qtgui/qpen.html">QPen</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>darkGray<span class="operator">,</span> <span class="number">2</span>));
+      painter<span class="operator">.</span>drawPath(myPath);
+
+      <span class="keyword">if</span> (m_menu) {
+          <span class="type"><a href="../qtgui/qpainterpath.html">QPainterPath</a></span> dropPath;
+          dropPath<span class="operator">.</span>arcMoveTo(circle<span class="operator">,</span> <span class="number">320</span>);
+          <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> c <span class="operator">=</span> dropPath<span class="operator">.</span>currentPosition();
+          c <span class="operator">=</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>(c<span class="operator">.</span>x() <span class="operator">+</span> <span class="number">3.5</span><span class="operator">,</span> c<span class="operator">.</span>y() <span class="operator">+</span> <span class="number">0.5</span>);
+          dropPath<span class="operator">.</span>moveTo(c);
+          dropPath<span class="operator">.</span>lineTo(c<span class="operator">.</span>x() <span class="operator">+</span> <span class="number">4</span><span class="operator">,</span> c<span class="operator">.</span>y());
+          dropPath<span class="operator">.</span>lineTo(c<span class="operator">.</span>x() <span class="operator">+</span> <span class="number">2</span><span class="operator">,</span> c<span class="operator">.</span>y() <span class="operator">+</span> <span class="number">2</span>);
+          dropPath<span class="operator">.</span>closeSubpath();
+          painter<span class="operator">.</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>darkGray);
+          painter<span class="operator">.</span>setBrush(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>darkGray);
+          painter<span class="operator">.</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing<span class="operator">,</span> <span class="keyword">false</span>);
+          painter<span class="operator">.</span>drawPath(dropPath);
+      }
+      painter<span class="operator">.</span>end();
+  }
+
+  <span class="comment">/*
+      SearchLineEdit is an enhanced QLineEdit
+      - A Search icon on the left with optional menu
+      - When there is no text and doesn't have focus an &quot;inactive text&quot; is displayed
+      - When there is text a clear button is displayed on the right hand side
+   */</span>
+  SearchLineEdit<span class="operator">::</span>SearchLineEdit(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent) : ExLineEdit(parent)<span class="operator">,</span>
+      m_searchButton(<span class="keyword">new</span> SearchButton(<span class="keyword">this</span>))
+  {
+      connect(lineEdit()<span class="operator">,</span> SIGNAL(textChanged(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SIGNAL(textChanged(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>)));
+      setLeftWidget(m_searchButton);
+      m_inactiveText <span class="operator">=</span> tr(<span class="string">&quot;Search&quot;</span>);
+
+      <span class="type"><a href="../qtwidgets/qsizepolicy.html">QSizePolicy</a></span> policy <span class="operator">=</span> sizePolicy();
+      setSizePolicy(<span class="type"><a href="../qtwidgets/qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>Preferred<span class="operator">,</span> policy<span class="operator">.</span>verticalPolicy());
+  }
+
+  <span class="type">void</span> SearchLineEdit<span class="operator">::</span>paintEvent(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (lineEdit()<span class="operator">-</span><span class="operator">&gt;</span>text()<span class="operator">.</span>isEmpty() <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>hasFocus() <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>m_inactiveText<span class="operator">.</span>isEmpty()) {
+          ExLineEdit<span class="operator">::</span>paintEvent(event);
+          <span class="type"><a href="../qtwidgets/qstyleoptionframe.html">QStyleOptionFrame</a></span> panel;
+          initStyleOption(<span class="operator">&amp;</span>panel);
+          <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> r <span class="operator">=</span> style()<span class="operator">-</span><span class="operator">&gt;</span>subElementRect(<span class="type"><a href="../qtwidgets/qstyle.html">QStyle</a></span><span class="operator">::</span>SE_LineEditContents<span class="operator">,</span> <span class="operator">&amp;</span>panel<span class="operator">,</span> <span class="keyword">this</span>);
+          <span class="type"><a href="../qtgui/qfontmetrics.html">QFontMetrics</a></span> fm <span class="operator">=</span> fontMetrics();
+          <span class="type">int</span> horizontalMargin <span class="operator">=</span> lineEdit()<span class="operator">-</span><span class="operator">&gt;</span>x();
+          <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> lineRect(horizontalMargin <span class="operator">+</span> r<span class="operator">.</span>x()<span class="operator">,</span> r<span class="operator">.</span>y() <span class="operator">+</span> (r<span class="operator">.</span>height() <span class="operator">-</span> fm<span class="operator">.</span>height() <span class="operator">+</span> <span class="number">1</span>) <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span>
+                         r<span class="operator">.</span>width() <span class="operator">-</span> <span class="number">2</span> <span class="operator">*</span> horizontalMargin<span class="operator">,</span> fm<span class="operator">.</span>height());
+          <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter(<span class="keyword">this</span>);
+          painter<span class="operator">.</span>setPen(palette()<span class="operator">.</span>brush(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Disabled<span class="operator">,</span> <span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Text)<span class="operator">.</span>color());
+          painter<span class="operator">.</span>drawText(lineRect<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignLeft<span class="operator">|</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignVCenter<span class="operator">,</span> m_inactiveText);
+      } <span class="keyword">else</span> {
+          ExLineEdit<span class="operator">::</span>paintEvent(event);
+      }
+  }
+
+  <span class="type">void</span> SearchLineEdit<span class="operator">::</span>resizeEvent(<span class="type"><a href="../qtgui/qresizeevent.html">QResizeEvent</a></span> <span class="operator">*</span>event)
+  {
+      updateGeometries();
+      ExLineEdit<span class="operator">::</span>resizeEvent(event);
+  }
+
+  <span class="type">void</span> SearchLineEdit<span class="operator">::</span>updateGeometries()
+  {
+      <span class="type">int</span> menuHeight <span class="operator">=</span> height();
+      <span class="type">int</span> menuWidth <span class="operator">=</span> menuHeight <span class="operator">+</span> <span class="number">1</span>;
+      <span class="keyword">if</span> (<span class="operator">!</span>m_searchButton<span class="operator">-</span><span class="operator">&gt;</span>m_menu)
+          menuWidth <span class="operator">=</span> (menuHeight <span class="operator">/</span> <span class="number">5</span>) <span class="operator">*</span> <span class="number">4</span>;
+      m_searchButton<span class="operator">-</span><span class="operator">&gt;</span>resize(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(menuWidth<span class="operator">,</span> menuHeight));
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> SearchLineEdit<span class="operator">::</span>inactiveText() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_inactiveText;
+  }
+
+  <span class="type">void</span> SearchLineEdit<span class="operator">::</span>setInactiveText(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>text)
+  {
+      m_inactiveText <span class="operator">=</span> text;
+  }
+
+  <span class="type">void</span> SearchLineEdit<span class="operator">::</span>setMenu(<span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>menu)
+  {
+      <span class="keyword">if</span> (m_searchButton<span class="operator">-</span><span class="operator">&gt;</span>m_menu)
+          m_searchButton<span class="operator">-</span><span class="operator">&gt;</span>m_menu<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+      m_searchButton<span class="operator">-</span><span class="operator">&gt;</span>m_menu <span class="operator">=</span> menu;
+      updateGeometries();
+  }
+
+  <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>SearchLineEdit<span class="operator">::</span>menu() <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_searchButton<span class="operator">-</span><span class="operator">&gt;</span>m_menu) {
+          m_searchButton<span class="operator">-</span><span class="operator">&gt;</span>m_menu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span>(m_searchButton);
+          <span class="keyword">if</span> (isVisible())
+              (<span class="keyword">const_cast</span><span class="operator">&lt;</span>SearchLineEdit<span class="operator">*</span><span class="operator">&gt;</span>(<span class="keyword">this</span>))<span class="operator">-</span><span class="operator">&gt;</span>updateGeometries();
+      }
+      <span class="keyword">return</span> m_searchButton<span class="operator">-</span><span class="operator">&gt;</span>m_menu;
+  }
+
+</pre>
+</div>
+<!-- @@@webenginewidgets/demobrowser/searchlineedit.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

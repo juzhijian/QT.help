@@ -1,0 +1,607 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- gettingstartedqt.qdoc -->
+  <title>Getting Started Programming with Qt Widgets | Qt 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.7</a></td><td >Getting Started Programming with Qt Widgets</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#creating-the-notepad-project">Creating the Notepad Project</a></li>
+<li class="level1"><a href="#main-source-file">Main Source File</a></li>
+<li class="level1"><a href="#designing-a-ui">Designing a UI</a></li>
+<li class="level2"><a href="#using-qt-designer">Using Qt Designer</a></li>
+<li class="level2"><a href="#notepad-header-file">Notepad Header File</a></li>
+<li class="level2"><a href="#notepad-source-file">Notepad Source File</a></li>
+<li class="level2"><a href="#project-file">Project File</a></li>
+<li class="level1"><a href="#adding-user-interaction">Adding User Interaction</a></li>
+<li class="level2"><a href="#adding-push-buttons">Adding Push Buttons</a></li>
+<li class="level2"><a href="#adding-menu-items">Adding Menu Items</a></li>
+<li class="level2"><a href="#opening-files">Opening Files</a></li>
+<li class="level2"><a href="#saving-files">Saving Files</a></li>
+<li class="level1"><a href="#building-and-running-notepad">Building and Running Notepad</a></li>
+<li class="level2"><a href="#building-and-running-from-the-command-line">Building and Running from the Command Line</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Getting Started Programming with Qt Widgets</h1>
+<span class="subtitle"></span>
+<!-- $$$gettingstartedqt.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>In this topic, we teach basic Qt knowledge by implementing a simple Notepad application using C++ and the <a href="../qtwidgets/qtwidgets-index.html">Qt Widgets</a> module. We use the Qt Creator IDE and Qt Designer to generate some code, but you could also write all the code yourself.</p>
+<p>After reading this topic, you are ready to refer to our overviews and API documentation, to find the information you need for the application you are developing.</p>
+<p>In this topic, we first use Qt Creator to create a project with the necessary files. Then we use Qt Designer to modify the user interface files to show a text edit and a push button in a window on the desktop. This represents a simple Qt application that has a GUI. Finally, we add user interaction to the application by creating actions for opening and saving files.</p>
+<p class="centerAlign"><img src="images/gs1.png" alt="&quot;Notepad application&quot;" /></p><p>You can find the final Notepad source files in the qtdoc repository in the snippets/widgets-tutorial/notepad directory. You can either fetch the Qt 5 sources from Qt Project or install them as part of Qt 5.</p>
+<a name="creating-the-notepad-project"></a>
+<h2 id="creating-the-notepad-project">Creating the Notepad Project</h2>
+<p>Setting up a new project in Qt Creator is aided by a wizard that guides you step-by-step through the project creation process. The wizard prompts you to enter the settings needed for that particular type of project and creates the project for you.</p>
+<p class="centerAlign"><img src="images/gs-project1.png" alt="&quot;Qt Creator New File or Project dialog&quot;" /></p><p>To create the Notepad project, select <b>File</b> &gt; <b>New File or Project</b> &gt; <b>Applications</b> &gt; <b>Qt Widgets Application</b> &gt; <b>Choose</b>, and follow the instructions of the wizard. In the <b>Class Information</b> dialog, type <b>Notepad</b> as the class name and select <b>QMainWindow</b> as the base class.</p>
+<p class="centerAlign"><img src="images/gs-project2.png" alt="&quot;Class Information Dialog&quot;" /></p><p>The <b>Qt Widgets Application</b> wizard creates a project that contains a main source file and a set of files that specify a user interface (Notepad widget):</p>
+<ul>
+<li>notepad.pro - the project file.</li>
+<li>main.cpp - the main source file for the application.</li>
+<li>notepad.cpp - the source file of the notepad class of the Notepad widget.</li>
+<li>notepad.h - the header file of the notepad class for the Notepad widget.</li>
+<li>notepad.ui - the UI form for the Notepad widget.</li>
+</ul>
+<p>The .cpp, .h, and .ui files come with the necessary boiler plate code for you to be able to build and run the project. The .pro file is complete. We will take a closer look at the file contents in the following sections.</p>
+<p><b>Learn More</b></p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >About</th><th >Here</th></tr></thead>
+<tr valign="top" class="odd"><td >Using Qt Creator</td><td ><a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a></td></tr>
+<tr valign="top" class="even"><td >Creating other kind of applications with Qt Creator</td><td ><a href="http://doc.qt.io/qtcreator/creator-tutorials.html">Qt Creator Tutorials</a></td></tr>
+</table></div>
+<a name="main-source-file"></a>
+<h2 id="main-source-file">Main Source File</h2>
+<p>The wizard generates the following code in the main.cpp file:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &quot;notepad.h&quot;</span>
+  <span class="preprocessor">#include &lt;QApplication&gt;</span>
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> a(argc<span class="operator">,</span> argv);
+      Notepad w;
+      w<span class="operator">.</span>show();
+
+      <span class="keyword">return</span> a<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>Let us go through the code line by line. The following lines include the header files for the Notepad widget and <a href="../qtwidgets/qapplication.html">QApplication</a>. All Qt classes have a header file named after them.</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &quot;notepad.h&quot;</span>
+  <span class="preprocessor">#include &lt;QApplication&gt;</span>
+
+</pre>
+<p>The following line defines the main function that is the entry point for all C and C++ based applications:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+
+</pre>
+<p>The following line creates a <a href="../qtwidgets/qapplication.html">QApplication</a> object. This object manages application-wide resources and is necessary to run any Qt program that uses Qt Widgets. It constructs an application object with <code>argc</code> command line arguments run in <code>argv</code>. (For GUI applications that do not use Qt Widgets, you can use <a href="../qtgui/qguiapplication.html">QGuiApplication</a> instead.)</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> a(argc<span class="operator">,</span> argv);
+
+</pre>
+<p>The following line creates the Notepad object. This is the object for which the wizard created the class and the UI file. The user interface contains visual elements that are called <code>widgets</code> in Qt. Examples of widgets are text edits, scroll bars, labels, and radio buttons. A widget can also be a container for other widgets; a dialog or a main application window, for example.</p>
+<pre class="cpp">
+
+      Notepad w;
+
+</pre>
+<p>The following line shows the Notepad widget on the screen in its own window. Since widgets also function as containers (for instance a <a href="../qtwidgets/qmainwindow.html">QMainWindow</a>, which has toolbars, menus, a status bar, and a few other widgets), it is possible to show a single widget in its own window. Widgets are not visible by default; the function <a href="../qtwidgets/qwidget.html#show">show()</a> makes the widget visible.</p>
+<pre class="cpp">
+
+      w<span class="operator">.</span>show();
+
+</pre>
+<p>The following line makes the <a href="../qtwidgets/qapplication.html">QApplication</a> enter its event loop. When a Qt application is running, events are generated and sent to the widgets of the application. Examples of events are mouse presses and key strokes.</p>
+<pre class="cpp">
+
+      <span class="keyword">return</span> a<span class="operator">.</span>exec();
+
+</pre>
+<p><b>Learn More</b></p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >About</th><th >Here</th></tr></thead>
+<tr valign="top" class="odd"><td >Widgets and Window Geometry</td><td ><a href="../qtwidgets/application-windows.html">Window and Dialog Widgets</a></td></tr>
+<tr valign="top" class="even"><td >Events and event handling</td><td ><a href="../qtcore/eventsandfilters.html">The Event System</a></td></tr>
+</table></div>
+<a name="designing-a-ui"></a>
+<h2 id="designing-a-ui">Designing a UI</h2>
+<p>The wizard generates a user interface definition in XML format, notepad.ui. When you open the notepad.ui file in Qt Creator, it automatically opens in the integrated Qt Designer.</p>
+<p>When you build the application, Qt Creator launches the Qt <a href="uic.html">User Interface Compiler (uic)</a> that reads the .ui file and creates a corresponding C++ header file, ui_notepad.h.</p>
+<a name="using-qt-designer"></a>
+<h3 >Using Qt Designer</h3>
+<p>The wizard creates an application that uses a <a href="../qtwidgets/qmainwindow.html">QMainWindow</a>. It has its own layout to which you can add a menu bar, dock widgets, tool bars, and a status bar. The center area can be occupied by any kind of widget. The wizard places the Notepad widget there.</p>
+<p>Let us use Qt Designer to add a <a href="../qtwidgets/qtextedit.html">QTextEdit</a> object and a <a href="../qtwidgets/qpushbutton.html">QPushButton</a> object to the main window. When you type text in the text edit widget, it receives key pressed events and responds by drawing the text typed. The button will exit the Notepad application when pushed (that is, clicked with the mouse).</p>
+<p>To add widgets in Qt Designer:</p>
+<ol class="1" type="1"><li>In the Qt Creator <b>Editor</b> mode, double-click the notepad.ui file in the <b>Projects</b> view to launch the file in the integrated Qt Designer.</li>
+<li>Drag and drop the following widgets to the form:<ul>
+<li>Text Edit (<a href="../qtwidgets/qtextedit.html">QTextEdit</a>)</li>
+<li>Push Button (<a href="../qtwidgets/qpushbutton.html">QPushButton</a>)</li>
+</ul>
+</li>
+<li>Double-click the <b>Push Button</b> widget and enter the text <b>Quit</b>.</li>
+<li>In the <b>Properties</b> pane, change the value of <b>objectName</b> to <b>quitButton</b>.</li>
+<li>Press <b>Ctrl+A</b> (or <b>Cmd+A</b>) to select the widgets and click <b>Lay out Vertically</b> (or press <b>Ctrl+L</b>) to apply a vertical layout (<a href="../qtwidgets/qvboxlayout.html">QVBoxLayout</a>).</li>
+<li>Press <b>Ctrl+S</b> (or <b>Cmd+S</b>) to save your changes.</li>
+</ol>
+<p>The UI now looks as follows in Qt Designer:</p>
+<p class="centerAlign"><img src="images/gs2.png" alt="" /></p><p>You can view the generated XML file in the code editor:</p>
+<pre class="qml">
+
+  &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+  &lt;ui version=&quot;4.0&quot;&gt;
+   &lt;class&gt;Notepad&lt;/class&gt;
+   &lt;widget class=&quot;QMainWindow&quot; name=&quot;Notepad&quot;&gt;
+    &lt;property name=&quot;geometry&quot;&gt;
+     &lt;rect&gt;
+      &lt;x&gt;0&lt;/x&gt;
+      &lt;y&gt;0&lt;/y&gt;
+      &lt;width&gt;400&lt;/width&gt;
+      &lt;height&gt;300&lt;/height&gt;
+     &lt;/rect&gt;
+    &lt;/property&gt;
+    &lt;property name=&quot;windowTitle&quot;&gt;
+     &lt;string&gt;Notepad&lt;/string&gt;
+    &lt;/property&gt;
+    &lt;widget class=&quot;QWidget&quot; name=&quot;centralWidget&quot;&gt;
+     &lt;widget class=&quot;QWidget&quot; name=&quot;&quot;&gt;
+      &lt;property name=&quot;geometry&quot;&gt;
+       &lt;rect&gt;
+        &lt;x&gt;70&lt;/x&gt;
+        &lt;y&gt;0&lt;/y&gt;
+        &lt;width&gt;268&lt;/width&gt;
+        &lt;height&gt;235&lt;/height&gt;
+       &lt;/rect&gt;
+      &lt;/property&gt;
+      &lt;layout class=&quot;QVBoxLayout&quot; name=&quot;verticalLayout&quot;&gt;
+       &lt;item&gt;
+        &lt;widget class=&quot;QTextEdit&quot; name=&quot;textEdit&quot;/&gt;
+       &lt;/item&gt;
+       &lt;item&gt;
+        &lt;widget class=&quot;QPushButton&quot; name=&quot;quitButton&quot;&gt;
+         &lt;property name=&quot;text&quot;&gt;
+          &lt;string&gt;Quit&lt;/string&gt;
+         &lt;/property&gt;
+        &lt;/widget&gt;
+       &lt;/item&gt;
+      &lt;/layout&gt;
+     &lt;/widget&gt;
+    &lt;/widget&gt;
+    &lt;widget class=&quot;QMenuBar&quot; name=&quot;menuBar&quot;&gt;
+      ...
+
+</pre>
+<p>The following line contains the XML declaration, which specifies the XML version and character encoding used in the document:</p>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span><span class="operator">?</span>xml version<span class="operator">=</span><span class="string">&quot;1.0&quot;</span> encoding<span class="operator">=</span><span class="string">&quot;UTF-8&quot;</span><span class="operator">?</span><span class="operator">&gt;</span>
+
+</pre>
+<p>The rest of the file specifies an <code>ui</code> element that defines a Notepad widget:</p>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span>ui version<span class="operator">=</span><span class="string">&quot;4.0&quot;</span><span class="operator">&gt;</span>
+
+</pre>
+<p>The following snippet creates a <a href="../qtwidgets/qvboxlayout.html">QVBoxLayout</a> widget that contains a <a href="../qtwidgets/qtextedit.html">QTextEdit</a> and <a href="../qtwidgets/qpushbutton.html">QPushButton</a> widget. As mentioned, widgets can contain other widgets. It is possible to set the bounds (the location and size) of child widgets directly, but it is usually easier to use a layout. A layout manages the bounds of a widget's children. <a href="../qtwidgets/qvboxlayout.html">QVBoxLayout</a>, for instance, places the children in a vertical row.</p>
+<pre class="cpp">
+
+  <span class="operator">&lt;</span>layout <span class="keyword">class</span><span class="operator">=</span><span class="string">&quot;QVBoxLayout&quot;</span> name<span class="operator">=</span><span class="string">&quot;verticalLayout&quot;</span><span class="operator">&gt;</span>
+   <span class="operator">&lt;</span>item<span class="operator">&gt;</span>
+    <span class="operator">&lt;</span>widget <span class="keyword">class</span><span class="operator">=</span><span class="string">&quot;QTextEdit&quot;</span> name<span class="operator">=</span><span class="string">&quot;textEdit&quot;</span><span class="operator">/</span><span class="operator">&gt;</span>
+   <span class="operator">&lt;</span><span class="operator">/</span>item<span class="operator">&gt;</span>
+   <span class="operator">&lt;</span>item<span class="operator">&gt;</span>
+    <span class="operator">&lt;</span>widget <span class="keyword">class</span><span class="operator">=</span><span class="string">&quot;QPushButton&quot;</span> name<span class="operator">=</span><span class="string">&quot;quitButton&quot;</span><span class="operator">&gt;</span>
+     <span class="operator">&lt;</span>property name<span class="operator">=</span><span class="string">&quot;text&quot;</span><span class="operator">&gt;</span>
+      <span class="operator">&lt;</span>string<span class="operator">&gt;</span>Quit<span class="operator">&lt;</span><span class="operator">/</span>string<span class="operator">&gt;</span>
+     <span class="operator">&lt;</span><span class="operator">/</span>property<span class="operator">&gt;</span>
+    <span class="operator">&lt;</span><span class="operator">/</span>widget<span class="operator">&gt;</span>
+   <span class="operator">&lt;</span><span class="operator">/</span>item<span class="operator">&gt;</span>
+  <span class="operator">&lt;</span><span class="operator">/</span>layout<span class="operator">&gt;</span>
+
+</pre>
+<p>The UI file is used together with the header and source file of the Notepad class. We will look at the rest of the UI file in the later sections.</p>
+<a name="notepad-header-file"></a>
+<h3 >Notepad Header File</h3>
+<p>The wizard generated a header file for the Notepad class that has the necessary #includes, a constructor, a destructor, and the Ui object. The file looks as follows:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QMainWindow&gt;</span>
+
+  <span class="keyword">namespace</span> Ui {
+  <span class="keyword">class</span> Notepad;
+  }
+
+  <span class="keyword">class</span> Notepad : <span class="keyword">public</span> <span class="type"><a href="../qtwidgets/qmainwindow.html">QMainWindow</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> Notepad(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+      <span class="operator">~</span>Notepad();
+
+  <span class="keyword">private</span>:
+      Ui<span class="operator">::</span>Notepad <span class="operator">*</span>ui;
+  };
+
+</pre>
+<p>The following line includes <a href="../qtwidgets/qmainwindow.html">QMainWindow</a> that provides a main application window:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QMainWindow&gt;</span>
+
+</pre>
+<p>The following lines declare the Notepad class in the Ui namespace, which is the standard namespace for the UI classes generated from .ui files by the <code>uic</code> tool:</p>
+<pre class="cpp">
+
+  <span class="keyword">namespace</span> Ui {
+  <span class="keyword">class</span> Notepad;
+  }
+
+</pre>
+<p>The class declaration contains the <code>Q_OBJECT</code> macro. It must come first in the class definition, and declares our class as a <a href="../qtcore/qobject.html">QObject</a>. Naturally, it must also inherit from <a href="../qtcore/qobject.html">QObject</a>. A <a href="../qtcore/qobject.html">QObject</a> adds several abilities to a normal C++ class. Notably, the class name and slot names can be queried at run-time. It is also possible to query a slot's parameter types and invoke it.</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> Notepad : <span class="keyword">public</span> <span class="type"><a href="../qtwidgets/qmainwindow.html">QMainWindow</a></span>
+  {
+      Q_OBJECT
+
+</pre>
+<p>The following lines declare a constructor that has a default argument called <code>parent</code>. The value 0 indicates that the widget has no parent (it is a top-level widget).</p>
+<pre class="cpp">
+
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> Notepad(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+
+</pre>
+<p>The following line declares a virtual destructor to free the resources that were acquired by the object during its life-cycle. According to the C++ naming convention, destructors have the same name as the class they are associated with, prefixed with a tilde (~). In <a href="../qtcore/qobject.html">QObject</a>, destructors are virtual to ensure that the destructors of derived classes are invoked properly when an object is deleted through a pointer-to-base-class.</p>
+<pre class="cpp">
+
+      <span class="operator">~</span>Notepad();
+
+</pre>
+<p>The following lines declare a member variable which is a pointer to the Notepad UI class. A member variable is associated with a specific class, and accessible for all its methods.</p>
+<pre class="cpp">
+
+  <span class="keyword">private</span>:
+      Ui<span class="operator">::</span>Notepad <span class="operator">*</span>ui;
+
+</pre>
+<a name="notepad-source-file"></a>
+<h3 >Notepad Source File</h3>
+<p>The source file that the wizard generated for the Notepad class looks as follows:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &quot;notepad.h&quot;</span>
+  <span class="preprocessor">#include &quot;ui_notepad.h&quot;</span>
+
+  Notepad<span class="operator">::</span>Notepad(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent) :
+      <span class="type"><a href="../qtwidgets/qmainwindow.html">QMainWindow</a></span>(parent)<span class="operator">,</span>
+      ui(<span class="keyword">new</span> Ui<span class="operator">::</span>Notepad)
+  {
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>setupUi(<span class="keyword">this</span>);
+  }
+
+  Notepad<span class="operator">::</span><span class="operator">~</span>Notepad()
+  {
+      <span class="keyword">delete</span> ui;
+  }
+
+</pre>
+<p>The following lines include the Notepad class header file that was generated by the wizard and the UI header file that was generated by the <code>uic</code> tool:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &quot;notepad.h&quot;</span>
+  <span class="preprocessor">#include &quot;ui_notepad.h&quot;</span>
+
+</pre>
+<p>The following line defines the <code>Notepad</code> constructor:</p>
+<pre class="cpp">
+
+  Notepad<span class="operator">::</span>Notepad(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent) :
+
+</pre>
+<p>The following line calls the <a href="../qtwidgets/qmainwindow.html">QMainWindow</a> constructor, which is the base class for the Notepad class:</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtwidgets/qmainwindow.html">QMainWindow</a></span>(parent)<span class="operator">,</span>
+
+</pre>
+<p>The following line creates the UI class instance and assigns it to the <code>ui</code> member:</p>
+<pre class="cpp">
+
+      ui(<span class="keyword">new</span> Ui<span class="operator">::</span>Notepad)
+
+</pre>
+<p>The following line sets up the UI:</p>
+<pre class="cpp">
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>setupUi(<span class="keyword">this</span>);
+
+</pre>
+<p>In the destructor, we delete the <code>ui</code>:</p>
+<pre class="cpp">
+
+  Notepad<span class="operator">::</span><span class="operator">~</span>Notepad()
+  {
+      <span class="keyword">delete</span> ui;
+  }
+
+</pre>
+<a name="project-file"></a>
+<h3 >Project File</h3>
+<p>The wizard generates the following project file, <code>notepad.pro</code>, for us:</p>
+<pre class="cpp">
+
+  QT       += core gui
+
+  greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+  TARGET = Notepad
+  TEMPLATE = app
+
+  SOURCES += main.cpp\
+          notepad.cpp
+
+  HEADERS  += notepad.h
+
+  FORMS    += notepad.ui
+
+</pre>
+<p>The project file specifies the application name and the <code>qmake</code> template to use for generating the project, as well as the source, header, and UI files included in the project.</p>
+<p>You could also use <code>qmake</code>'s <code>-project</code> option to generate the .pro file. Although, in that case, you have to remember to add the line <code>QT += widgets</code> to the generated file in order to link against the Qt Widgets Module.</p>
+<p><b>Learn More</b></p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >About</th><th >Here</th></tr></thead>
+<tr valign="top" class="odd"><td >Using Qt Designer</td><td ><a href="../qtdesigner/qtdesigner-manual.html">Qt Designer Manual</a></td></tr>
+<tr valign="top" class="even"><td >Layouts</td><td ><a href="../qtwidgets/layout.html">Layout Management</a>, <a href="../qtwidgets/graphicsview.html#widgets-and-layouts">Widgets and Layouts</a>, <a href="examples-layouts.html">Layout Examples</a></td></tr>
+<tr valign="top" class="odd"><td >The widgets that come with Qt</td><td ><a href="../qtwidgets/gallery.html">Qt Widget Gallery</a></td></tr>
+<tr valign="top" class="even"><td >Main windows and main window classes</td><td ><a href="../qtwidgets/mainwindow.html">Application Main Window</a>, <a href="../qtwidgets/examples-mainwindow.html">Main Window Examples</a></td></tr>
+<tr valign="top" class="odd"><td ><a href="../qtwebkit/qtwebkit-bridge.html#qobjects">QObjects</a> and the Qt Object model (This is essential to understand Qt)</td><td ><a href="../qtcore/object.html">Object Model</a></td></tr>
+<tr valign="top" class="even"><td >qmake and the Qt build system</td><td ><a href="../qmake/qmake-manual.html">qmake Manual</a></td></tr>
+</table></div>
+<a name="adding-user-interaction"></a>
+<h2 id="adding-user-interaction">Adding User Interaction</h2>
+<p>We now have a user interface, but it does not really do anything useful, as it only contains a text edit and a push button, as well as some standard functions for quitting, minimizing and maximizing the application. To make the application useful, we will add user interaction to it. First, we will add functionality to the push button. Second, we will add functions for loading a file to the text edit and for saving the contents of the text edit as a file.</p>
+<a name="adding-push-buttons"></a>
+<h3 >Adding Push Buttons</h3>
+<p>Most desktop operating systems have standard ways of enabling users to quit applications. However, in this example we use this basic function to illustrate how you can add user interaction to applications. To do this, we add a slot that we connect to the <b>Quit button</b>.</p>
+<p>To exit the application when the <b>Quit</b> button is pushed, you use the Qt signals and slots mechanism. A signal is emitted when a particular event occurs and a slot is a function that is called in response to a particular signal. Qt widgets have predefined signals and slots that you can use directly from Qt Designer.</p>
+<p>To use Qt Designer to add a slot for the quit function, right-click the <b>Quit</b> button to open a context-menu and then select <b>Go to slot</b> &gt; <b>clicked()</b>.</p>
+<p>A private slot, <code>on_quitButton_clicked()</code>, is added to the Notepad widget class header file, notepad.h and a private function, <code>Notepad::on_quitButton_clicked()</code>, is added to the Notepad widget class source file, notepad.cpp. We just need to write the code to execute the quit function in the source file.</p>
+<p>Let us look at the modified code in the header file, notepad.h:</p>
+<pre class="cpp">
+
+  <span class="keyword">namespace</span> Ui {
+  <span class="keyword">class</span> Notepad;
+  }
+
+  <span class="keyword">class</span> Notepad : <span class="keyword">public</span> <span class="type"><a href="../qtwidgets/qmainwindow.html">QMainWindow</a></span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> Notepad(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent <span class="operator">=</span> <span class="number">0</span>);
+      <span class="operator">~</span>Notepad();
+
+  <span class="keyword">private</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> on_quitButton_clicked();
+
+  <span class="keyword">private</span>:
+      Ui<span class="operator">::</span>Notepad <span class="operator">*</span>ui;
+  };
+
+</pre>
+<p>The following code uses Qt's signals and slots mechanism to make the application exit when the <b>Quit button</b> is pushed. Qt Designer uses <a href="../qtcore/qmetaobject.html">QMetaObject</a> <a href="../qtdesigner/designer-using-a-ui-file.html">auto-connection facilities</a> to connect the button's clicked() signal to a slot in the Notepad class. The <code>uic</code> tool automatically generates code in the dialog's <code>setupUi()</code> function to do this, so Qt Designer only needs to declare and implement a slot with a name that follows a standard convention.</p>
+<pre class="cpp">
+
+  <span class="keyword">private</span> <span class="keyword">slots</span>:
+      <span class="type">void</span> on_quitButton_clicked();
+
+</pre>
+<p>The corresponding code in the source file, notepad.cpp, looks as follows:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> Notepad<span class="operator">::</span>on_quitButton_clicked()
+  {
+
+  }
+
+</pre>
+<p>The code defines the private function that is executed when <a href="../qtwidgets/qpushbutton.html">QPushButton</a> emits the <a href="../qtwidgets/qabstractbutton.html#clicked">clicked()</a> signal.</p>
+<p>We now complement the code to have the <a href="../qtcore/qcoreapplication.html#quit">quit()</a> slot of <a href="../qtwidgets/qapplication.html">QApplication</a> exit Notepad:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> Notepad<span class="operator">::</span>on_quitButton_clicked()
+  {
+      qApp<span class="operator">-</span><span class="operator">&gt;</span>quit();
+  }
+
+</pre>
+<p><b>Learn More</b></p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >About</th><th >Here</th></tr></thead>
+<tr valign="top" class="odd"><td >Signals and slots</td><td ><a href="../qtcore/signalsandslots.html">Signals &amp; Slots</a></td></tr>
+</table></div>
+<a name="adding-menu-items"></a>
+<h3 >Adding Menu Items</h3>
+<p>Often, in a main window, the same slot should be invoked by several widgets. Examples are menu items and buttons on a tool bar. To make this easier, Qt provides <a href="../qtwidgets/qaction.html">QAction</a>, which can be given to several widgets, and be connected to a slot. For instance, both <a href="../qtwidgets/qmenu.html">QMenu</a> and <a href="../qtwidgets/qtoolbar.html">QToolBar</a> can create menu items and tool buttons from the same <a href="../qtwidgets/qaction.html">QAction</a>.</p>
+<p>To learn how to use actions with signals and slots, we add menu items to open and save a document and connect them to slots.</p>
+<p>As before, we use Qt Designer to add the widgets to the user interface. The wizard creates an application with a <a href="../qtwidgets/qmenu.html">QMenu</a> widget, with the text <b>Type Here</b> as a placeholder for menu and menu item names. Double-click the text to enter names for the <b>File</b> menu and <b>Open</b> and <b>Save</b> menu items. Qt Designer automatically generates the appropriate actions.</p>
+<p class="centerAlign"><img src="images/gs3.png" alt="" /></p><p>To connect the actions to slots, right-click an action and select <b>Go to slot</b> &gt; <b>triggered()</b>.</p>
+<p><a href="../qtwidgets/qaction.html">QAction</a> instances are created with the text that should appear on the widgets that we add them to (in our case, menu items). If we also wanted to add the actions to a tool bar, we could have specified <a href="../qtgui/qicon.html">icons</a> for them.</p>
+<p>The modified code in notepad.ui now looks as follows:</p>
+<pre class="qml">
+
+    &lt;widget class=&quot;QMenuBar&quot; name=&quot;menuBar&quot;&gt;
+     &lt;property name=&quot;geometry&quot;&gt;
+      &lt;rect&gt;
+       &lt;x&gt;0&lt;/x&gt;
+       &lt;y&gt;0&lt;/y&gt;
+       &lt;width&gt;400&lt;/width&gt;
+       &lt;height&gt;22&lt;/height&gt;
+      &lt;/rect&gt;
+     &lt;/property&gt;
+     &lt;widget class=&quot;QMenu&quot; name=&quot;menuFile&quot;&gt;
+      &lt;property name=&quot;title&quot;&gt;
+       &lt;string&gt;File&lt;/string&gt;
+      &lt;/property&gt;
+      &lt;addaction name=&quot;actionOpen&quot;/&gt;
+      &lt;addaction name=&quot;actionSave&quot;/&gt;
+     &lt;/widget&gt;
+     &lt;addaction name=&quot;menuFile&quot;/&gt;
+    &lt;/widget&gt;
+    &lt;widget class=&quot;QToolBar&quot; name=&quot;mainToolBar&quot;&gt;
+     &lt;attribute name=&quot;toolBarArea&quot;&gt;
+      &lt;enum&gt;TopToolBarArea&lt;/enum&gt;
+     &lt;/attribute&gt;
+     &lt;attribute name=&quot;toolBarBreak&quot;&gt;
+      &lt;bool&gt;false&lt;/bool&gt;
+     &lt;/attribute&gt;
+    &lt;/widget&gt;
+    &lt;widget class=&quot;QStatusBar&quot; name=&quot;statusBar&quot;/&gt;
+    &lt;action name=&quot;actionOpen&quot;&gt;
+     &lt;property name=&quot;text&quot;&gt;
+      &lt;string&gt;Open&lt;/string&gt;
+     &lt;/property&gt;
+    &lt;/action&gt;
+    &lt;action name=&quot;actionSave&quot;&gt;
+     &lt;property name=&quot;text&quot;&gt;
+      &lt;string&gt;Save&lt;/string&gt;
+     &lt;/property&gt;
+    &lt;/action&gt;
+   &lt;/widget&gt;
+
+</pre>
+<p>Qt Designer adds the private slots <code>on_actionOpen_triggered()</code> and <code>on_actionSave_triggered()</code> to notepad.h and the private functions <code>Notepad::on_actionOpen_triggered()</code> and <code>Notepad::on_actionSave_triggered()</code> to notepad.cpp.</p>
+<p>In the following sections, we complement the code to load and save files. When a menu item is clicked, the item triggers the action, and the respective slot is invoked.</p>
+<a name="opening-files"></a>
+<h3 >Opening Files</h3>
+<p>In this section, we implement the functionality of the <code>on_actionOpen_triggered()</code> slot. The first step is asking the user for the name of the file to open. Qt comes with <a href="../qtwidgets/qfiledialog.html">QFileDialog</a>, which is a dialog from which the user can select a file. The appearance of the dialog depends on the desktop platform that you run the application on. The following image shows the dialog on OS X:</p>
+<p class="centerAlign"><img src="images/gs4.png" alt="" /></p><p>We complement the code generated by Qt Designer in notepad.cpp, as follows:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> Notepad<span class="operator">::</span>on_actionOpen_triggered()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getOpenFileName(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Open File&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>()<span class="operator">,</span>
+              tr(<span class="string">&quot;Text Files (*.txt);;C++ Files (*.cpp *.h)&quot;</span>));
+
+      <span class="keyword">if</span> (<span class="operator">!</span>fileName<span class="operator">.</span>isEmpty()) {
+          <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+          <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly)) {
+              <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>critical(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Error&quot;</span>)<span class="operator">,</span> tr(<span class="string">&quot;Could not open file&quot;</span>));
+              <span class="keyword">return</span>;
+          }
+          <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span> in(<span class="operator">&amp;</span>file);
+          ui<span class="operator">-</span><span class="operator">&gt;</span>textEdit<span class="operator">-</span><span class="operator">&gt;</span>setText(in<span class="operator">.</span>readAll());
+          file<span class="operator">.</span>close();
+      }
+  }
+
+</pre>
+<p>The static <a href="../qtwidgets/qfiledialog.html#getOpenFileName">getOpenFileName()</a> function displays a modal file dialog. It returns the file path of the file selected, or an empty string if the user canceled the dialog.</p>
+<p>If we have a file name, we try to open the file with <a href="../qtcore/qiodevice.html#open">open()</a>, which returns true if the file could be opened. We will not go into error handling here, but you can follow the links from the learn more section. If the file could not be opened, we use <a href="../qtwidgets/qmessagebox.html">QMessageBox</a> to display a dialog with an error message (see the <a href="../qtwidgets/qmessagebox.html">QMessageBox</a> class description for further details).</p>
+<p>Actually reading in the data is trivial using the <a href="../qtcore/qtextstream.html">QTextStream</a> class, which wraps the <a href="../qtcore/qfile.html">QFile</a> object. The <a href="../qtcore/qtextstream.html#readAll">readAll()</a> function returns the contents of the file as a <a href="../qtcore/qstring.html">QString</a>. The contents can then be displayed in the text edit. We then <a href="../qtcore/qiodevice.html#close">close()</a> the file to return the file descriptor back to the operating system.</p>
+<p>We now use the function <a href="../qtcore/qobject.html#tr">tr()</a> around our user visible strings. This function is necessary when you want to provide your application in more than one language (for example, English and Chinese). We will not go into details here, but you can follow the <code>Qt Linguist</code> link from the learn more table.</p>
+<p>To use <a href="../qtwidgets/qfiledialog.html">QFileDialog</a>, <a href="../qtcore/qfile.html">QFile</a>, <a href="../qtwidgets/qmessagebox.html">QMessageBox</a>, and <a href="../qtcore/qtextstream.html">QTextStream</a>, add the following includes to notepad.cpp:</p>
+<pre class="cpp">
+
+  <span class="preprocessor">#include &lt;QFileDialog&gt;</span>
+  <span class="preprocessor">#include &lt;QFile&gt;</span>
+  <span class="preprocessor">#include &lt;QMessageBox&gt;</span>
+  <span class="preprocessor">#include &lt;QTextStream&gt;</span>
+
+</pre>
+<a name="saving-files"></a>
+<h3 >Saving Files</h3>
+<p>Now, let us move on to the <code>on_actionSave_triggered()</code> slot, which also uses <a href="../qtwidgets/qfiledialog.html">QFileDialog</a> to create a dialog in which the user can save a file with the specified name in the specified location.</p>
+<p class="centerAlign"><img src="images/gs5.png" alt="" /></p><p>We complement the code generated by Qt Designer in notepad.cpp, as follows:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> Notepad<span class="operator">::</span>on_actionSave_triggered()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getSaveFileName(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Save File&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>()<span class="operator">,</span>
+              tr(<span class="string">&quot;Text Files (*.txt);;C++ Files (*.cpp *.h)&quot;</span>));
+
+      <span class="keyword">if</span> (<span class="operator">!</span>fileName<span class="operator">.</span>isEmpty()) {
+          <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+          <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>WriteOnly)) {
+              <span class="comment">// error message</span>
+          } <span class="keyword">else</span> {
+              <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span> stream(<span class="operator">&amp;</span>file);
+              stream <span class="operator">&lt;</span><span class="operator">&lt;</span> ui<span class="operator">-</span><span class="operator">&gt;</span>textEdit<span class="operator">-</span><span class="operator">&gt;</span>toPlainText();
+              stream<span class="operator">.</span>flush();
+              file<span class="operator">.</span>close();
+          }
+      }
+  }
+
+</pre>
+<p>When we write the contents of the text edit to the file, we use the <a href="../qtcore/qtextstream.html">QTextStream</a> class again. <a href="../qtcore/qtextstream.html">QTextStream</a> can also write <a href="../qtcore/qstring.html">QString</a>s to the file with the &lt;&lt; operator.</p>
+<p><b>Learn More</b></p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >About</th><th >Here</th></tr></thead>
+<tr valign="top" class="odd"><td >MDI applications</td><td ><a href="../qtwidgets/qmdiarea.html">QMdiArea</a>, <a href="../qtwidgets/qtwidgets-mainwindows-mdi-example.html">MDI Example</a></td></tr>
+<tr valign="top" class="even"><td >Files and I/O devices</td><td ><a href="../qtcore/qfile.html">QFile</a>, <a href="../qtcore/qiodevice.html">QIODevice</a></td></tr>
+<tr valign="top" class="odd"><td >tr() and internationalization</td><td ><a href="../qtlinguist/qtlinguist-index.html">Qt Linguist Manual</a>, <a href="i18n-source-translation.html">Writing Source Code for Translation</a>, <a href="internationalization.html">Internationalization with Qt</a></td></tr>
+</table></div>
+<a name="building-and-running-notepad"></a>
+<h2 id="building-and-running-notepad">Building and Running Notepad</h2>
+<p>Now that you have all the necessary files, select <b>Build</b> &gt; <b>Build Project Notepad</b> to build and run the application. Qt Creator uses <code>qmake</code> and <code>make</code> to create an executable in the directory specified in the build settings of the project and runs it.</p>
+<a name="building-and-running-from-the-command-line"></a>
+<h3 >Building and Running from the Command Line</h3>
+<p>To build the application from the command line, switch to the directory in which you have the <code>.cpp</code> file of the application and add the project file (suffixed .pro) described earlier. The following shell commands then build the application:</p>
+<pre class="cpp">
+
+  qmake
+  make (<span class="keyword">or</span> nmake on Windows)
+
+</pre>
+<p>The commands create an executable in the project directory. The <code>qmake</code> tool reads the project file and produces a <code>Makefile</code> with instructions on how to build the application. The <code>make</code> tool (or the <code>nmake</code> tool) then reads the <code>Makefile</code> and produces the executable binary.</p>
+</div>
+<!-- @@@gettingstartedqt.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

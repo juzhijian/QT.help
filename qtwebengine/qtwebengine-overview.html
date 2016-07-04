@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtwebengine-overview.qdoc -->
+  <title>Qt WebEngine Overview | Qt WebEngine 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwebengine-index.html">Qt WebEngine</a></td><td >Qt WebEngine Overview</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#qt-webengine-architecture">Qt WebEngine Architecture</a></li>
+<li class="level2"><a href="#qt-webengine-widgets">Qt WebEngine Widgets</a></li>
+<li class="level2"><a href="#qt-webengine">Qt WebEngine</a></li>
+<li class="level2"><a href="#qt-webengine-core">Qt WebEngine Core</a></li>
+<li class="level2"><a href="#qt-webengine-process">Qt WebEngine Process</a></li>
+<li class="level1"><a href="#embedding-web-content-into-widget-based-applications">Embedding Web Content into Widget Based Applications</a></li>
+<li class="level1"><a href="#embedding-web-content-into-qt-quick-applications">Embedding Web Content into Qt Quick Applications</a></li>
+<li class="level1"><a href="#managing-certificates">Managing Certificates</a></li>
+<li class="level1"><a href="#proxy-support">Proxy Support</a></li>
+<li class="level1"><a href="#using-webengine-core">Using WebEngine Core</a></li>
+<li class="level1"><a href="#deploying-qt-webengine-applications">Deploying Qt WebEngine Applications</a></li>
+<li class="level1"><a href="#license-information">License Information</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt WebEngine Overview</h1>
+<span class="subtitle"></span>
+<!-- $$$qtwebengine-overview.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Qt WebEngine module provides a web browser engine that makes it easy to embed content from the World Wide Web into your Qt application on platforms that do not have a native web engine. The web engine is not intended to function as a <i>Web Runtime</i>; to display web content in a QML application by using APIs native to the platform, use the <a href="../qtwebview/qtwebview-index.html">Qt WebView</a> module, instead.</p>
+<p>Qt WebEngine provides C++ classes and QML types for rendering HTML, XHTML, and SVG documents, styled using Cascading Style Sheets (CSS) and scripted with JavaScript. HTML documents can be made fully editable by the user through the use of the <code>contenteditable</code> attribute on HTML elements.</p>
+<p>Qt WebEngine supercedes the <a href="http://doc.qt.io/archives/qt-5.3/qtwebkit-index.html">Qt WebKit</a> module, which is based on the WebKit project, but has not been actively synchronized with the upstream WebKit code since Qt 5.2 and has been deprecated in Qt 5.5&#x2e; For tips on how to change a Qt WebKit widgets application to use Qt WebEngine widgets, see <a href="qtwebenginewidgets-qtwebkitportingguide.html">Porting from Qt WebKit to Qt WebEngine</a>. For new applications, we recommend using Qt Quick and the <a href="qml-qtwebengine-webengineview.html">WebEngineView</a> QML type.</p>
+<p>For more information about the requirements for building Qt WebEngine from source on the supported platforms and for other platform-specific information, see <a href="qtwebengine-platform-notes.html">Qt WebEngine Platform Notes</a>.</p>
+<p>The <a href="../qtwebchannel/qtwebchannel-index.html">Qt WebChannel</a> module can be used to create a bi-directional communication channel between <a href="../qtcore/qobject.html">QObject</a> objects on the C++ side and JavaScript on the QML side.</p>
+<a name="qt-webengine-architecture"></a>
+<h2 id="qt-webengine-architecture">Qt WebEngine Architecture</h2>
+<p class="centerAlign"><img src="images/qtwebengine-architecture.png" alt="" /></p><p>The functionality in Qt WebEngine is divided into the following modules:</p>
+<ul>
+<li><a href="qtwebenginewidgets-index.html">Qt WebEngine Widgets</a> for creating widget-based web applications</li>
+<li><a href="qtwebengine-index.html">Qt WebEngine</a> for creating Qt Quick based web applications</li>
+<li><a href="qtwebenginecore-index.html">Qt WebEngine Core</a> for interacting with Chromium</li>
+</ul>
+<p>Page rendering and JavaScript execution are separated from the GUI process into the Qt WebEngine Process. It is a library that must be shipped with the application if the Qt libraries are bundled into the application.</p>
+<a name="qt-webengine-widgets"></a>
+<h3 >Qt WebEngine Widgets</h3>
+<p class="centerAlign"><img src="images/qtwebenginewidgets-model.png" alt="" /></p><p>A <i>web engine view</i> is the main widget component of the Qt WebEngine module. It can be used in various applications to load web content. Within a view, a <i>web engine page</i> holds a main frame that is responsible for web content, the <i>history</i> of navigated links, and <i>actions</i>. The view and page are quite similar, as they provide a set of common functions.</p>
+<p>All pages belong to a <i>web engine profile</i> that contains shared <i>settings</i>, <i>scripts</i>, and <i>cookies</i>. Profiles can be used to isolate pages from each other. A typical use case is a dedicated profile for a <i>private browsing</i> mode, where no information is permanently saved.</p>
+<a name="qt-webengine"></a>
+<h3 >Qt WebEngine</h3>
+<p class="centerAlign"><img src="images/qtwebengine-model.png" alt="" /></p><p>The Qt WebEngine QML implementation contains the same elements as the C++ implementation, except that there is no separately accessible web engine page. The supported page functionality is integrated into the web engine view.</p>
+<a name="qt-webengine-core"></a>
+<h3 >Qt WebEngine Core</h3>
+<p>The Qt WebEngine core is based on the <a href="http://www.chromium.org">Chromium Project</a>. Chromium provides its own network and painting engines and is developed tightly together with its dependent modules, and therefore Qt WebEngine provides better and more reliable support for the latest HTML5 specification than Qt WebKit. However, Qt WebEngine is thus heavier than Qt WebKit and does not provide direct access to the network stack and the HTML document through C++ APIs.</p>
+<p>Please note that Qt WebEngine is based on Chromium, but does not contain or use any services or add-ons that might be part of the Chrome browser that is built and delivered by Google. You can find more detailed information about the differences between Chromium and Chrome in this <a href="https://chromium.googlesource.com/chromium/src/+/master/docs/chromium_browser_vs_google_chrome.md">overview</a> that is part of the documentation in the <a href="http://www.chromium.org">Chromium Project</a> upstream source tree.</p>
+<p>This version of Qt WebEngine is based on Chromium snapshot version 45.0&#x2e;2554.101, with additional security fixes from the 46, 47 and 48 branches of the <a href="http://www.chromium.org">Chromium Project</a>.</p>
+<a name="qt-webengine-process"></a>
+<h3 >Qt WebEngine Process</h3>
+<p>The Qt WebEngine Process renders web pages and executes JavaScript.</p>
+<p>Chromium is tightly integrated to the <a href="../qtquick/qtquick-visualcanvas-scenegraph.html">Qt Quick scene graph</a>, which is based on OpenGL ES 2.0 or OpenGL 2.0 for its rendering. This provides you with one-pass compositing of web content and all the Qt Quick UI. The integration to Chromium is transparent to developers, who just work with Qt and JavaScript.</p>
+<p>The document object model (DOM) of a page is constructed when the document is ready, typically when the page is completely loaded. Therefore, executing scripts as soon as a document is created is not suitable for DOM operations, where one has to wait until the DOM is ready.</p>
+<p>In addition, an injected script shares the same <i>world</i> as the other scripts executed on the page, which might lead to conflicts. To avoid this, the <a href="qwebenginescript.html">QWebEngineScript</a> class and the <a href="qml-qtwebengine-webenginescript.html">WebEngineScript</a> QML type provide implementations of the Chromium API for <i>Content Script Extensions</i>. They specify the script to run, the injection point, and the world where the script is run. This enables accessing the DOM to manipulate it within a world.</p>
+<p><b>Note: </b>Chromium extensions, such as <code>@include</code>, <code>@match</code>, and <code>@exclude</code>, are not supported.</p><p>Because the render process is separated from the GUI process, they should ideally share an OpenGL context to enable one process to access the resources uploaded by the other, such as images or textures. However, some inter-process communication is needed for safety and reliability, because it enables restarting a crashed process.</p>
+<a name="embedding-web-content-into-widget-based-applications"></a>
+<h2 id="embedding-web-content-into-widget-based-applications">Embedding Web Content into Widget Based Applications</h2>
+<p>Use the <a href="qwebengineview.html">QWebEngineView</a> class to display web pages in the simplest way. Because it is a widget, you can embed <a href="qwebengineview.html">QWebEngineView</a> into your forms and use its convenience functions to download and display web sites.</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qwebengineview.html">QWebEngineView</a></span> <span class="operator">*</span>view <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qwebengineview.html">QWebEngineView</a></span>(parent);
+  view<span class="operator">-</span><span class="operator">&gt;</span>load(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="string">&quot;http://www.qt.io/&quot;</span>));
+  view<span class="operator">-</span><span class="operator">&gt;</span>show();
+
+</pre>
+<p>An instance of <a href="qwebengineview.html">QWebEngineView</a> has one <a href="qwebenginepage.html">QWebEnginePage</a>. <a href="qwebenginepage.html">QWebEnginePage</a> can have a <a href="qwebenginehistory.html">QWebEngineHistory</a> that provides access to the page's navigation history and several <a href="../qtwidgets/qaction.html">QAction</a> objects that apply actions on the web page. In addition, a <a href="qwebenginepage.html">QWebEnginePage</a> has the ability to run JavaScript code in the context of the page's main frame and to enable customization of handlers for specific events like showing custom authentication dialogs.</p>
+<p>Each <a href="qwebenginepage.html">QWebEnginePage</a> belongs to a <a href="qwebengineprofile.html">QWebEngineProfile</a> that can have a <a href="qwebenginesettings.html">QWebEngineSettings</a> for specifying page settings, a <a href="qwebenginescriptcollection.html">QWebEngineScriptCollection</a> for running scripts on the page, and a <a href="qwebenginecookiestore.html">QWebEngineCookieStore</a> for accessing the HTTP cookies of Chromium. A <a href="qwebenginepage.html">QWebEnginePage</a> can also directly point to a script collection.</p>
+<p>For a widget based application, the web engine is automatically initialized, unless it is placed in a plugin. In that case, it must be initialized in the application main source file by using <a href="qtwebengine.html#initialize">QtWebEngine::initialize</a>, as illustrated by the following code snippet:</p>
+<pre class="cpp">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span>argv)
+  {
+      <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      <span class="type">QtWebEngine</span><span class="operator">::</span>initialize();
+
+      <span class="type"><a href="../qtwidgets/qmainwindow.html">QMainWindow</a></span> window;
+      window<span class="operator">.</span>show();
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<a name="embedding-web-content-into-qt-quick-applications"></a>
+<h2 id="embedding-web-content-into-qt-quick-applications">Embedding Web Content into Qt Quick Applications</h2>
+<p>The <a href="qml-qtwebengine-webengineview.html">WebEngineView</a> QML type allows Qt Quick applications to render regions of dynamic web content. A <i><a href="qml-qtwebengine-webengineview.html">WebEngineView</a></i> type may share the screen with other QML types or encompass the full screen as specified within the Qt Quick application.</p>
+<p>To make sure that OpenGL context can be shared between the GUI and render processes, the web engine must be initialized by using <a href="qtwebengine.html#initialize">QtWebEngine::initialize</a> in the application main source file, as illustrated by the following code snippet:</p>
+<pre class="qml">
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span> app(argc<span class="operator">,</span> argv);
+      <span class="type">QtWebEngine</span><span class="operator">::</span>initialize();
+
+      <span class="type"><a href="../qtqml/qqmlapplicationengine.html">QQmlApplicationEngine</a></span> engine;
+      engine<span class="operator">.</span>load(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/main.qml&quot;</span>)));
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<p>An application can load pages into the <a href="qml-qtwebengine-webengineview.html">WebEngineView</a>, using either an URL or HTML string, and navigate within session history. By default, links to different pages load within the same <a href="qml-qtwebengine-webengineview.html">WebEngineView</a> object, but web sites may request them to be opened as a new tab, window, or dialog.</p>
+<p>The following sample QML application loads a web page using the <a href="qml-qtwebengine-webengineview.html#url-prop">url</a> property:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+  import QtQuick.Window 2.0
+  import QtWebEngine 1.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-window-window.html">Window</a></span> {
+      <span class="name">width</span>: <span class="number">1024</span>
+      <span class="name">height</span>: <span class="number">750</span>
+      <span class="name">visible</span>: <span class="number">true</span>
+      <span class="type"><a href="qml-qtwebengine-webengineview.html">WebEngineView</a></span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">url</span>: <span class="string">&quot;http://www.qt.io&quot;</span>
+      }
+  }
+
+</pre>
+<a name="managing-certificates"></a>
+<h2 id="managing-certificates">Managing Certificates</h2>
+<p>Qt WebEngine uses its own network stack, and therefore <a href="../qtnetwork/qsslconfiguration.html">QSslConfiguration</a> is not used to open SSL connections. Instead, Qt WebEngine uses the root CA certificates from the operating system to validate the peer's certificate.</p>
+<p>The <a href="qml-qtwebengine-webenginecertificateerror.html#error-prop">WebEngineCertificateError::error</a> and <a href="qwebenginecertificateerror.html#Error-enum">QWebEngineCertificateError::Error</a> enumerations provide information about the types of certificate errors that might occur. The errors can be handled by using the <a href="qml-qtwebengine-webengineview.html#certificateError-signal">WebEngineView::certificateError</a> QML method or by reimplementing the <a href="qwebenginepage.html#certificateError">QWebEnginePage::certificateError</a> function.</p>
+<a name="proxy-support"></a>
+<h2 id="proxy-support">Proxy Support</h2>
+<p>If <a href="../qtnetwork/qnetworkproxy.html#applicationProxy">QNetworkProxy::applicationProxy</a> is set, it will also be used for Qt WebEngine. Otherwise, Qt WebEngine automatically picks up the proxy configuration from OS X and Windows. On Linux, it acknowledges settings from KDE and Gnome.</p>
+<p>If a proxy requires authentication, <a href="qwebenginepage.html#proxyAuthenticationRequired">QWebEnginePage::proxyAuthenticationRequired</a> is emitted. For Qt Quick, a dialog is shown.</p>
+<a name="using-webengine-core"></a>
+<h2 id="using-webengine-core">Using WebEngine Core</h2>
+<p>Qt WebEngine Core provides an API shared by Qt WebEngine and Qt WebEngine Widgets for handling URL requests issued for the networking stack of Chromium and for accessing its HTTP cookies.</p>
+<p>Implementing the <a href="qwebengineurlrequestinterceptor.html">QWebEngineUrlRequestInterceptor</a> interface and installing the interceptor on a profile enables intercepting, blocking, and modifying URL requests (<a href="qwebengineurlrequestinfo.html">QWebEngineUrlRequestInfo</a>) before they reach the networking stack of Chromium.</p>
+<p>A <a href="qwebengineurlschemehandler.html">QWebEngineUrlSchemeHandler</a> can be registered for a profile to add support for custom URL schemes. Requests for the scheme are then issued to <a href="qwebengineurlschemehandler.html#requestStarted">QWebEngineUrlSchemeHandler::requestStarted</a>() as <a href="qwebengineurlrequestjob.html">QWebEngineUrlRequestJob</a> objects.</p>
+<p>The <a href="qwebenginecookiestore.html">QWebEngineCookieStore</a> class provides functions for accessing HTTP cookies of Chromium. The functions can be used to synchronize cookies with <a href="../qtnetwork/qnetworkaccessmanager.html">QNetworkAccessManager</a>, as well as to set, delete, and intercept cookies during navigation.</p>
+<a name="deploying-qt-webengine-applications"></a>
+<h2 id="deploying-qt-webengine-applications">Deploying Qt WebEngine Applications</h2>
+<p>Qt WebEngine takes advantage of the multi process model that the Chromium project offers. The multi process model requires the QtWebEngineProcess executable to be deployed alongside your application. To do this, we recommend the use of Qt's cross-platform deployment tools.</p>
+<p>Alternatively, if you are carrying out manual deployment, you will find the QtWebEngineProcess executable in the libexec directory of your Qt installation. On Windows, QtWebEngineProcess.exe is located in the bin directory of your Qt application.</p>
+<p>For more information on deploying Qt applications, please see <a href="../qtdoc/deployment.html">Deploying Qt Applications</a>.</p>
+<a name="license-information"></a>
+<h2 id="license-information">License Information</h2>
+<p>Qt WebEngine module is a snapshot of the integration of Chromium into Qt.</p>
+<p>Qt Commercial Edition licensees that wish to distribute applications that use the Qt WebEngine module need to be aware of their obligations under the GNU Library General Public License (LGPLv2).</p>
+<p>Developers using the Open Source Edition can choose to redistribute the module under the GNU LGPLv3 or GPLv2 and up.</p>
+<div class="LegaleseLeft"><p>Chromium is licensed under the following license:</p>
+<p>Copyright (c) 2013 The Chromium Authors. All rights reserved.</p>
+<p>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</p>
+<p>* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. * Neither the name of Google Inc. nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.</p>
+<p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+</div></div>
+<!-- @@@qtwebengine-overview.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

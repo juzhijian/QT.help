@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>window.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-statemachine-rogue-example.html">Rogue Example</a></td><td >window.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">window.cpp Example File</h1>
+<span class="subtitle">statemachine/rogue/window.cpp</span>
+<!-- $$$statemachine/rogue/window.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the documentation of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+
+  <span class="preprocessor">#include &quot;window.h&quot;</span>
+  <span class="preprocessor">#include &quot;movementtransition.h&quot;</span>
+
+  Window<span class="operator">::</span>Window()
+  {
+      pX <span class="operator">=</span> <span class="number">5</span>;
+      pY <span class="operator">=</span> <span class="number">5</span>;
+
+      <span class="type"><a href="../qtgui/qfontdatabase.html">QFontDatabase</a></span> database;
+      <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> font;
+      <span class="keyword">if</span> (database<span class="operator">.</span>families()<span class="operator">.</span>contains(<span class="string">&quot;Monospace&quot;</span>)) {
+          font <span class="operator">=</span> <span class="type"><a href="../qtgui/qfont.html">QFont</a></span>(<span class="string">&quot;Monospace&quot;</span>);
+      }
+      <span class="keyword">else</span> {
+          foreach (<span class="type"><a href="../qtcore/qstring.html">QString</a></span> family<span class="operator">,</span> database<span class="operator">.</span>families()) {
+              <span class="keyword">if</span> (database<span class="operator">.</span>isFixedPitch(family)) {
+                  font <span class="operator">=</span> <span class="type"><a href="../qtgui/qfont.html">QFont</a></span>(family);
+                  <span class="keyword">break</span>;
+              }
+          }
+      }
+      font<span class="operator">.</span>setPointSize(<span class="number">12</span>);
+      setFont(font);
+
+      setupMap();
+      buildMachine();
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>setStatus(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>status)
+  {
+      myStatus <span class="operator">=</span> status;
+      repaint();
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> Window<span class="operator">::</span>status() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> myStatus;
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>paintEvent(<span class="type"><a href="../qtgui/qpaintevent.html">QPaintEvent</a></span> <span class="operator">*</span> <span class="comment">/* event */</span>)
+  {
+      <span class="type"><a href="../qtgui/qfontmetrics.html">QFontMetrics</a></span> metrics(font());
+      <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter(<span class="keyword">this</span>);
+      <span class="type">int</span> fontHeight <span class="operator">=</span> metrics<span class="operator">.</span>height();
+      <span class="type">int</span> fontWidth <span class="operator">=</span> metrics<span class="operator">.</span>width(<span class="char">'X'</span>);
+      <span class="type">int</span> yPos <span class="operator">=</span> fontHeight;
+      <span class="type">int</span> xPos;
+
+      painter<span class="operator">.</span>fillRect(rect()<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black);
+      painter<span class="operator">.</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white);
+
+      painter<span class="operator">.</span>drawText(<span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(<span class="number">0</span><span class="operator">,</span> yPos)<span class="operator">,</span> status());
+
+      <span class="keyword">for</span> (<span class="type">int</span> y <span class="operator">=</span> <span class="number">0</span>; y <span class="operator">&lt;</span> HEIGHT; <span class="operator">+</span><span class="operator">+</span>y) {
+          yPos <span class="operator">+</span><span class="operator">=</span> fontHeight;
+          xPos <span class="operator">=</span> <span class="number">0</span>;
+
+          <span class="keyword">for</span> (<span class="type">int</span> x <span class="operator">=</span> <span class="number">0</span>; x <span class="operator">&lt;</span> WIDTH; <span class="operator">+</span><span class="operator">+</span>x) {
+              <span class="keyword">if</span> (y <span class="operator">=</span><span class="operator">=</span> pY <span class="operator">&amp;</span><span class="operator">&amp;</span> x <span class="operator">=</span><span class="operator">=</span> pX) {
+                  xPos <span class="operator">+</span><span class="operator">=</span> fontWidth;
+                  <span class="keyword">continue</span>;
+              }
+
+              painter<span class="operator">.</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white);
+
+              <span class="type">double</span> x1 <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type">double</span><span class="operator">&gt;</span>(pX);
+              <span class="type">double</span> y1 <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type">double</span><span class="operator">&gt;</span>(pY);
+              <span class="type">double</span> x2 <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type">double</span><span class="operator">&gt;</span>(x);
+              <span class="type">double</span> y2 <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type">double</span><span class="operator">&gt;</span>(y);
+
+              <span class="keyword">if</span> (x2<span class="operator">&lt;</span>x1) {
+                  x2<span class="operator">+</span><span class="operator">=</span><span class="number">0.5</span>;
+              } <span class="keyword">else</span> <span class="keyword">if</span> (x2<span class="operator">&gt;</span>x1) {
+                   x2<span class="operator">-</span><span class="operator">=</span><span class="number">0.5</span>;
+              }
+
+              <span class="keyword">if</span> (y2<span class="operator">&lt;</span>y1) {
+                   y2<span class="operator">+</span><span class="operator">=</span><span class="number">0.5</span>;
+              } <span class="keyword">else</span> <span class="keyword">if</span> (y2<span class="operator">&gt;</span>y1) {
+                   y2<span class="operator">-</span><span class="operator">=</span><span class="number">0.5</span>;
+              }
+
+              <span class="type">double</span> dx <span class="operator">=</span> x2 <span class="operator">-</span> x1;
+              <span class="type">double</span> dy <span class="operator">=</span> y2 <span class="operator">-</span> y1;
+
+              <span class="type">double</span> length <span class="operator">=</span> <a href="../qtcore/qtmath.html#qSqrt">qSqrt</a>(dx<span class="operator">*</span>dx<span class="operator">+</span>dy<span class="operator">*</span>dy);
+
+              dx <span class="operator">/</span><span class="operator">=</span> length;
+              dy <span class="operator">/</span><span class="operator">=</span> length;
+
+              <span class="type">double</span> xi <span class="operator">=</span> x1;
+              <span class="type">double</span> yi <span class="operator">=</span> y1;
+
+              <span class="keyword">while</span> (length <span class="operator">&gt;</span> <span class="number">0</span>) {
+                  <span class="type">int</span> cx <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span>(xi<span class="operator">+</span><span class="number">0.5</span>);
+                  <span class="type">int</span> cy <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span>(yi<span class="operator">+</span><span class="number">0.5</span>);
+
+                  <span class="keyword">if</span> (x2 <span class="operator">=</span><span class="operator">=</span> cx <span class="operator">&amp;</span><span class="operator">&amp;</span> y2 <span class="operator">=</span><span class="operator">=</span> cy)
+                      <span class="keyword">break</span>;
+
+                  <span class="keyword">if</span> (<span class="operator">!</span>(x1<span class="operator">=</span><span class="operator">=</span>cx <span class="operator">&amp;</span><span class="operator">&amp;</span> y1<span class="operator">=</span><span class="operator">=</span>cy)
+                      <span class="operator">&amp;</span><span class="operator">&amp;</span> (map<span class="operator">[</span>cx<span class="operator">]</span><span class="operator">[</span>cy<span class="operator">]</span> <span class="operator">=</span><span class="operator">=</span> <span class="char">'#'</span> <span class="operator">|</span><span class="operator">|</span> (length<span class="operator">-</span><span class="number">10</span>) <span class="operator">&gt;</span> <span class="number">0</span>)) {
+                      painter<span class="operator">.</span>setPen(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="number">60</span><span class="operator">,</span><span class="number">60</span><span class="operator">,</span><span class="number">60</span>));
+                      <span class="keyword">break</span>;
+                  }
+
+                  xi <span class="operator">+</span><span class="operator">=</span> dx;
+                  yi <span class="operator">+</span><span class="operator">=</span> dy;
+                  <span class="operator">-</span><span class="operator">-</span>length;
+              }
+
+              painter<span class="operator">.</span>drawText(<span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(xPos<span class="operator">,</span> yPos)<span class="operator">,</span> map<span class="operator">[</span>x<span class="operator">]</span><span class="operator">[</span>y<span class="operator">]</span>);
+              xPos <span class="operator">+</span><span class="operator">=</span> fontWidth;
+          }
+      }
+      painter<span class="operator">.</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white);
+      painter<span class="operator">.</span>drawText(<span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(pX <span class="operator">*</span> fontWidth<span class="operator">,</span> (pY <span class="operator">+</span> <span class="number">2</span>) <span class="operator">*</span> fontHeight)<span class="operator">,</span> <span class="type"><a href="../qtcore/qchar.html">QChar</a></span>(<span class="char">'@'</span>));
+  }
+
+  <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> Window<span class="operator">::</span>sizeHint() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtgui/qfontmetrics.html">QFontMetrics</a></span> metrics(font());
+
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(metrics<span class="operator">.</span>width(<span class="char">'X'</span>) <span class="operator">*</span> WIDTH<span class="operator">,</span> metrics<span class="operator">.</span>height() <span class="operator">*</span> (HEIGHT <span class="operator">+</span> <span class="number">1</span>));
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>buildMachine()
+  {
+      machine <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstatemachine.html">QStateMachine</a></span>;
+
+      <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>inputState <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span>(machine);
+      inputState<span class="operator">-</span><span class="operator">&gt;</span>assignProperty(<span class="keyword">this</span><span class="operator">,</span> <span class="string">&quot;status&quot;</span><span class="operator">,</span> <span class="string">&quot;Move the rogue with 2, 4, 6, and 8&quot;</span>);
+
+      MovementTransition <span class="operator">*</span>transition <span class="operator">=</span> <span class="keyword">new</span> MovementTransition(<span class="keyword">this</span>);
+      inputState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(transition);
+
+      <span class="type"><a href="../qtcore/qstate.html">QState</a></span> <span class="operator">*</span>quitState <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qstate.html">QState</a></span>(machine);
+      quitState<span class="operator">-</span><span class="operator">&gt;</span>assignProperty(<span class="keyword">this</span><span class="operator">,</span> <span class="string">&quot;status&quot;</span><span class="operator">,</span> <span class="string">&quot;Really quit(y/n)?&quot;</span>);
+
+      <span class="type"><a href="qkeyeventtransition.html">QKeyEventTransition</a></span> <span class="operator">*</span>yesTransition <span class="operator">=</span> <span class="keyword">new</span>
+          <span class="type"><a href="qkeyeventtransition.html">QKeyEventTransition</a></span>(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Y);
+      yesTransition<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(<span class="keyword">new</span> <span class="type"><a href="../qtcore/qfinalstate.html">QFinalState</a></span>(machine));
+      quitState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(yesTransition);
+
+      <span class="type"><a href="qkeyeventtransition.html">QKeyEventTransition</a></span> <span class="operator">*</span>noTransition <span class="operator">=</span>
+          <span class="keyword">new</span> <span class="type"><a href="qkeyeventtransition.html">QKeyEventTransition</a></span>(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_N);
+      noTransition<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(inputState);
+      quitState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(noTransition);
+
+      <span class="type"><a href="qkeyeventtransition.html">QKeyEventTransition</a></span> <span class="operator">*</span>quitTransition <span class="operator">=</span>
+          <span class="keyword">new</span> <span class="type"><a href="qkeyeventtransition.html">QKeyEventTransition</a></span>(<span class="keyword">this</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>KeyPress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Key_Q);
+      quitTransition<span class="operator">-</span><span class="operator">&gt;</span>setTargetState(quitState);
+      inputState<span class="operator">-</span><span class="operator">&gt;</span>addTransition(quitTransition);
+
+      machine<span class="operator">-</span><span class="operator">&gt;</span>setInitialState(inputState);
+
+      connect(machine<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> qApp<span class="operator">,</span> SLOT(quit()));
+
+      machine<span class="operator">-</span><span class="operator">&gt;</span>start();
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>movePlayer(Direction direction)
+  {
+      <span class="keyword">switch</span> (direction) {
+          <span class="keyword">case</span> Left:
+              <span class="keyword">if</span> (map<span class="operator">[</span>pX <span class="operator">-</span> <span class="number">1</span><span class="operator">]</span><span class="operator">[</span>pY<span class="operator">]</span> <span class="operator">!</span><span class="operator">=</span> <span class="char">'#'</span>)
+                  <span class="operator">-</span><span class="operator">-</span>pX;
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> Right:
+              <span class="keyword">if</span> (map<span class="operator">[</span>pX <span class="operator">+</span> <span class="number">1</span><span class="operator">]</span><span class="operator">[</span>pY<span class="operator">]</span> <span class="operator">!</span><span class="operator">=</span> <span class="char">'#'</span>)
+                  <span class="operator">+</span><span class="operator">+</span>pX;
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> Up:
+              <span class="keyword">if</span> (map<span class="operator">[</span>pX<span class="operator">]</span><span class="operator">[</span>pY <span class="operator">-</span> <span class="number">1</span><span class="operator">]</span> <span class="operator">!</span><span class="operator">=</span> <span class="char">'#'</span>)
+                  <span class="operator">-</span><span class="operator">-</span>pY;
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> Down:
+              <span class="keyword">if</span> (map<span class="operator">[</span>pX<span class="operator">]</span><span class="operator">[</span>pY <span class="operator">+</span> <span class="number">1</span><span class="operator">]</span> <span class="operator">!</span><span class="operator">=</span> <span class="char">'#'</span>)
+                  <span class="operator">+</span><span class="operator">+</span>pY;
+              <span class="keyword">break</span>;
+      }
+      repaint();
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>setupMap()
+  {
+      qsrand(<span class="type"><a href="../qtcore/qtime.html">QTime</a></span>(<span class="number">0</span><span class="operator">,</span><span class="number">0</span><span class="operator">,</span><span class="number">0</span>)<span class="operator">.</span>secsTo(<span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime()));
+
+      <span class="keyword">for</span> (<span class="type">int</span> x <span class="operator">=</span> <span class="number">0</span>; x <span class="operator">&lt;</span> WIDTH; <span class="operator">+</span><span class="operator">+</span>x)
+          <span class="keyword">for</span> (<span class="type">int</span> y <span class="operator">=</span> <span class="number">0</span>; y <span class="operator">&lt;</span> HEIGHT; <span class="operator">+</span><span class="operator">+</span>y) {
+          <span class="keyword">if</span> (x <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> x <span class="operator">=</span><span class="operator">=</span> WIDTH <span class="operator">-</span> <span class="number">1</span> <span class="operator">|</span><span class="operator">|</span> y <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> y <span class="operator">=</span><span class="operator">=</span> HEIGHT <span class="operator">-</span> <span class="number">1</span> <span class="operator">|</span><span class="operator">|</span> qrand() <span class="operator">%</span> <span class="number">40</span> <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+              map<span class="operator">[</span>x<span class="operator">]</span><span class="operator">[</span>y<span class="operator">]</span> <span class="operator">=</span> <span class="char">'#'</span>;
+          <span class="keyword">else</span>
+              map<span class="operator">[</span>x<span class="operator">]</span><span class="operator">[</span>y<span class="operator">]</span> <span class="operator">=</span> <span class="char">'.'</span>;
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@statemachine/rogue/window.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>topographicseries.cpp Example File | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td ><a href="qtdatavisualization-texturesurface-example.html">Textured Surface Example</a></td><td >topographicseries.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">topographicseries.cpp Example File</h1>
+<span class="subtitle">texturesurface/topographicseries.cpp</span>
+<!-- $$$texturesurface/topographicseries.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Data Visualization module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;topographicseries.h&quot;</span>
+
+  <span class="keyword">using</span> <span class="keyword">namespace</span> <span class="type"><a href="qtdatavisualization-qmlmodule.html">QtDataVisualization</a></span>;
+
+  <span class="comment">// Value used to encode height data as RGB value on PNG file</span>
+  <span class="keyword">const</span> <span class="type">float</span> packingFactor <span class="operator">=</span> <span class="number">11983.0f</span>;
+
+  TopographicSeries<span class="operator">::</span>TopographicSeries()
+  {
+      setDrawMode(QSurface3DSeries<span class="operator">::</span>DrawSurface);
+      setFlatShadingEnabled(<span class="keyword">true</span>);
+      setBaseColor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white);
+  }
+
+  TopographicSeries<span class="operator">::</span><span class="operator">~</span>TopographicSeries()
+  {
+  }
+
+  <span class="type">void</span> TopographicSeries<span class="operator">::</span>setTopographyFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> file<span class="operator">,</span> <span class="type">float</span> width<span class="operator">,</span> <span class="type">float</span> height)
+  {
+      <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> heightMapImage(file);
+      <span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span> <span class="operator">*</span>bits <span class="operator">=</span> heightMapImage<span class="operator">.</span>bits();
+      <span class="type">int</span> imageHeight <span class="operator">=</span> heightMapImage<span class="operator">.</span>height();
+      <span class="type">int</span> imageWidth <span class="operator">=</span> heightMapImage<span class="operator">.</span>width();
+      <span class="type">int</span> widthBits <span class="operator">=</span> imageWidth <span class="operator">*</span> <span class="number">4</span>;
+      <span class="type">float</span> stepX <span class="operator">=</span> width <span class="operator">/</span> <span class="type">float</span>(imageWidth);
+      <span class="type">float</span> stepZ <span class="operator">=</span> height <span class="operator">/</span> <span class="type">float</span>(imageHeight);
+
+      <span class="type">QSurfaceDataArray</span> <span class="operator">*</span>dataArray <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QSurfaceDataArray</span>;
+      dataArray<span class="operator">-</span><span class="operator">&gt;</span>reserve(imageHeight);
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> imageHeight; i<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="type">int</span> p <span class="operator">=</span> i <span class="operator">*</span> widthBits;
+          <span class="type">float</span> z <span class="operator">=</span> height <span class="operator">-</span> <span class="type">float</span>(i) <span class="operator">*</span> stepZ;
+          <span class="type">QSurfaceDataRow</span> <span class="operator">*</span>newRow <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QSurfaceDataRow</span>(imageWidth);
+          <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> imageWidth; j<span class="operator">+</span><span class="operator">+</span>) {
+              <span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span> aa <span class="operator">=</span> bits<span class="operator">[</span>p <span class="operator">+</span> <span class="number">0</span><span class="operator">]</span>;
+              <span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span> rr <span class="operator">=</span> bits<span class="operator">[</span>p <span class="operator">+</span> <span class="number">1</span><span class="operator">]</span>;
+              <span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span> gg <span class="operator">=</span> bits<span class="operator">[</span>p <span class="operator">+</span> <span class="number">2</span><span class="operator">]</span>;
+              <span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> color <span class="operator">=</span> <span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span>((gg <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">16</span>) <span class="operator">+</span> (rr <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">8</span>) <span class="operator">+</span> aa);
+              <span class="type">float</span> y <span class="operator">=</span> <span class="type">float</span>(color) <span class="operator">/</span> packingFactor;
+              (<span class="operator">*</span>newRow)<span class="operator">[</span>j<span class="operator">]</span><span class="operator">.</span>setPosition(QVector3D(<span class="type">float</span>(j) <span class="operator">*</span> stepX<span class="operator">,</span> y<span class="operator">,</span> z));
+              p <span class="operator">=</span> p <span class="operator">+</span> <span class="number">4</span>;
+          }
+          <span class="operator">*</span>dataArray <span class="operator">&lt;</span><span class="operator">&lt;</span> newRow;
+      }
+
+      dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>resetArray(dataArray);
+
+      m_sampleCountX <span class="operator">=</span> <span class="type">float</span>(imageWidth);
+      m_sampleCountZ <span class="operator">=</span> <span class="type">float</span>(imageHeight);
+  }
+
+</pre>
+</div>
+<!-- @@@texturesurface/topographicseries.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

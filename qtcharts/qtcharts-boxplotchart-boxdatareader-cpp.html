@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>boxdatareader.cpp Example File | Qt Charts 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcharts-index.html">Qt Charts</a></td><td ><a href="qtcharts-boxplotchart-example.html">Box and Whiskers Example</a></td><td >boxdatareader.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">boxdatareader.cpp Example File</h1>
+<span class="subtitle">boxplotchart/boxdatareader.cpp</span>
+<!-- $$$boxplotchart/boxdatareader.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Charts module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;boxdatareader.h&quot;</span>
+
+  BoxDataReader<span class="operator">::</span>BoxDataReader(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span> <span class="operator">*</span>device) :
+      <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span>(device)
+  {
+  }
+
+  <span class="type">void</span> BoxDataReader<span class="operator">::</span>readFile(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span> <span class="operator">*</span>device)
+  {
+      <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span><span class="operator">::</span>setDevice(device);
+  }
+
+  <span class="type"><a href="qboxset.html">QBoxSet</a></span> <span class="operator">*</span>BoxDataReader<span class="operator">::</span>readBox()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> line <span class="operator">=</span> readLine();
+      <span class="keyword">if</span> (line<span class="operator">.</span>startsWith(<span class="string">&quot;#&quot;</span>))
+          <span class="keyword">return</span> <span class="number">0</span>;
+
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> strList <span class="operator">=</span> line<span class="operator">.</span>split(<span class="string">&quot; &quot;</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>SkipEmptyParts);
+
+      sortedList<span class="operator">.</span>clear();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">1</span>; i <span class="operator">&lt;</span> strList<span class="operator">.</span>count(); i<span class="operator">+</span><span class="operator">+</span>)
+          sortedList<span class="operator">.</span>append(strList<span class="operator">.</span>at(i)<span class="operator">.</span>toDouble());
+
+      <a href="../qtcore/qtalgorithms-obsolete.html#qSort-2">qSort</a>(sortedList<span class="operator">.</span>begin()<span class="operator">,</span> sortedList<span class="operator">.</span>end());
+
+      <span class="type">int</span> count <span class="operator">=</span> sortedList<span class="operator">.</span>count();
+
+      <span class="type"><a href="qboxset.html">QBoxSet</a></span> <span class="operator">*</span>box <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qboxset.html">QBoxSet</a></span>(strList<span class="operator">.</span>first());
+      box<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="type"><a href="qboxset.html">QBoxSet</a></span><span class="operator">::</span>LowerExtreme<span class="operator">,</span> sortedList<span class="operator">.</span>first());
+      box<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="type"><a href="qboxset.html">QBoxSet</a></span><span class="operator">::</span>UpperExtreme<span class="operator">,</span> sortedList<span class="operator">.</span>last());
+      box<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="type"><a href="qboxset.html">QBoxSet</a></span><span class="operator">::</span>Median<span class="operator">,</span> findMedian(<span class="number">0</span><span class="operator">,</span> count));
+      box<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="type"><a href="qboxset.html">QBoxSet</a></span><span class="operator">::</span>LowerQuartile<span class="operator">,</span> findMedian(<span class="number">0</span><span class="operator">,</span> count <span class="operator">/</span> <span class="number">2</span>));
+      box<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="type"><a href="qboxset.html">QBoxSet</a></span><span class="operator">::</span>UpperQuartile<span class="operator">,</span> findMedian(count <span class="operator">/</span> <span class="number">2</span> <span class="operator">+</span> (count <span class="operator">%</span> <span class="number">2</span>)<span class="operator">,</span> count));
+
+      <span class="keyword">return</span> box;
+  }
+
+  <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> BoxDataReader<span class="operator">::</span>findMedian(<span class="type">int</span> begin<span class="operator">,</span> <span class="type">int</span> end)
+  {
+      <span class="type">int</span> count <span class="operator">=</span> end <span class="operator">-</span> begin;
+      <span class="keyword">if</span> (count <span class="operator">%</span> <span class="number">2</span>) {
+          <span class="keyword">return</span> sortedList<span class="operator">.</span>at(count <span class="operator">/</span> <span class="number">2</span> <span class="operator">+</span> begin);
+      } <span class="keyword">else</span> {
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> right <span class="operator">=</span> sortedList<span class="operator">.</span>at(count <span class="operator">/</span> <span class="number">2</span> <span class="operator">+</span> begin);
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> left <span class="operator">=</span> sortedList<span class="operator">.</span>at(count <span class="operator">/</span> <span class="number">2</span> <span class="operator">-</span> <span class="number">1</span> <span class="operator">+</span> begin);
+          <span class="keyword">return</span> (right <span class="operator">+</span> left) <span class="operator">/</span> <span class="number">2.0</span>;
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@boxplotchart/boxdatareader.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

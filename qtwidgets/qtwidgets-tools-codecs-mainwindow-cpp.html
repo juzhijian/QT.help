@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mainwindow.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-tools-codecs-example.html">Text Codecs Example</a></td><td >mainwindow.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mainwindow.cpp Example File</h1>
+<span class="subtitle">tools/codecs/mainwindow.cpp</span>
+<!-- $$$tools/codecs/mainwindow.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+
+  <span class="preprocessor">#include &quot;mainwindow.h&quot;</span>
+  <span class="preprocessor">#include &quot;previewform.h&quot;</span>
+
+  MainWindow<span class="operator">::</span>MainWindow()
+  {
+      textEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtextedit.html">QTextEdit</a></span>;
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>setLineWrapMode(<span class="type"><a href="qtextedit.html">QTextEdit</a></span><span class="operator">::</span>NoWrap);
+      setCentralWidget(textEdit);
+
+      findCodecs();
+
+      previewForm <span class="operator">=</span> <span class="keyword">new</span> PreviewForm(<span class="keyword">this</span>);
+      previewForm<span class="operator">-</span><span class="operator">&gt;</span>setCodecList(codecs);
+
+      createActions();
+      createMenus();
+
+      setWindowTitle(tr(<span class="string">&quot;Codecs&quot;</span>));
+      resize(<span class="number">500</span><span class="operator">,</span> <span class="number">400</span>);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>open()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getOpenFileName(<span class="keyword">this</span>);
+      <span class="keyword">if</span> (<span class="operator">!</span>fileName<span class="operator">.</span>isEmpty()) {
+          <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+          <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>ReadOnly)) {
+              <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Codecs&quot;</span>)<span class="operator">,</span>
+                                   tr(<span class="string">&quot;Cannot read file %1:\n%2&quot;</span>)
+                                   <span class="operator">.</span>arg(fileName)
+                                   <span class="operator">.</span>arg(file<span class="operator">.</span>errorString()));
+              <span class="keyword">return</span>;
+          }
+
+          <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> data <span class="operator">=</span> file<span class="operator">.</span>readAll();
+
+          previewForm<span class="operator">-</span><span class="operator">&gt;</span>setEncodedData(data);
+          <span class="keyword">if</span> (previewForm<span class="operator">-</span><span class="operator">&gt;</span>exec())
+              textEdit<span class="operator">-</span><span class="operator">&gt;</span>setPlainText(previewForm<span class="operator">-</span><span class="operator">&gt;</span>decodedString());
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>save()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getSaveFileName(<span class="keyword">this</span>);
+      <span class="keyword">if</span> (<span class="operator">!</span>fileName<span class="operator">.</span>isEmpty()) {
+          <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+          <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>WriteOnly <span class="operator">|</span> <span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>Text)) {
+              <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Codecs&quot;</span>)<span class="operator">,</span>
+                                   tr(<span class="string">&quot;Cannot write file %1:\n%2&quot;</span>)
+                                   <span class="operator">.</span>arg(fileName)
+                                   <span class="operator">.</span>arg(file<span class="operator">.</span>errorString()));
+              <span class="keyword">return</span>;
+          }
+
+          <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(sender());
+          <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> codecName <span class="operator">=</span> action<span class="operator">-</span><span class="operator">&gt;</span>data()<span class="operator">.</span>toByteArray();
+
+          <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span> out(<span class="operator">&amp;</span>file);
+          out<span class="operator">.</span>setCodec(codecName<span class="operator">.</span>constData());
+          out <span class="operator">&lt;</span><span class="operator">&lt;</span> textEdit<span class="operator">-</span><span class="operator">&gt;</span>toPlainText();
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>about()
+  {
+      <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>about(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;About Codecs&quot;</span>)<span class="operator">,</span>
+              tr(<span class="string">&quot;The &lt;b&gt;Codecs&lt;/b&gt; example demonstrates how to read and write &quot;</span>
+                 <span class="string">&quot;files using various encodings.&quot;</span>));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>aboutToShowSaveAsMenu()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> currentText <span class="operator">=</span> textEdit<span class="operator">-</span><span class="operator">&gt;</span>toPlainText();
+
+      foreach (<span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action<span class="operator">,</span> saveAsActs) {
+          <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> codecName <span class="operator">=</span> action<span class="operator">-</span><span class="operator">&gt;</span>data()<span class="operator">.</span>toByteArray();
+          <span class="type"><a href="../qtcore/qtextcodec.html">QTextCodec</a></span> <span class="operator">*</span>codec <span class="operator">=</span> <span class="type"><a href="../qtcore/qtextcodec.html">QTextCodec</a></span><span class="operator">::</span>codecForName(codecName);
+          action<span class="operator">-</span><span class="operator">&gt;</span>setVisible(codec <span class="operator">&amp;</span><span class="operator">&amp;</span> codec<span class="operator">-</span><span class="operator">&gt;</span>canEncode(currentText));
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>findCodecs()
+  {
+      <span class="type"><a href="../qtcore/qmap.html">QMap</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">,</span> <span class="type"><a href="../qtcore/qtextcodec.html">QTextCodec</a></span> <span class="operator">*</span><span class="operator">&gt;</span> codecMap;
+      <span class="type"><a href="../qtcore/qregexp.html">QRegExp</a></span> iso8859RegExp(<span class="string">&quot;ISO[- ]8859-([0-9]+).*&quot;</span>);
+
+      foreach (<span class="type">int</span> mib<span class="operator">,</span> <span class="type"><a href="../qtcore/qtextcodec.html">QTextCodec</a></span><span class="operator">::</span>availableMibs()) {
+          <span class="type"><a href="../qtcore/qtextcodec.html">QTextCodec</a></span> <span class="operator">*</span>codec <span class="operator">=</span> <span class="type"><a href="../qtcore/qtextcodec.html">QTextCodec</a></span><span class="operator">::</span>codecForMib(mib);
+
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> sortKey <span class="operator">=</span> codec<span class="operator">-</span><span class="operator">&gt;</span>name()<span class="operator">.</span>toUpper();
+          <span class="type">int</span> rank;
+
+          <span class="keyword">if</span> (sortKey<span class="operator">.</span>startsWith(<span class="string">&quot;UTF-8&quot;</span>)) {
+              rank <span class="operator">=</span> <span class="number">1</span>;
+          } <span class="keyword">else</span> <span class="keyword">if</span> (sortKey<span class="operator">.</span>startsWith(<span class="string">&quot;UTF-16&quot;</span>)) {
+              rank <span class="operator">=</span> <span class="number">2</span>;
+          } <span class="keyword">else</span> <span class="keyword">if</span> (iso8859RegExp<span class="operator">.</span>exactMatch(sortKey)) {
+              <span class="keyword">if</span> (iso8859RegExp<span class="operator">.</span>cap(<span class="number">1</span>)<span class="operator">.</span>size() <span class="operator">=</span><span class="operator">=</span> <span class="number">1</span>)
+                  rank <span class="operator">=</span> <span class="number">3</span>;
+              <span class="keyword">else</span>
+                  rank <span class="operator">=</span> <span class="number">4</span>;
+          } <span class="keyword">else</span> {
+              rank <span class="operator">=</span> <span class="number">5</span>;
+          }
+          sortKey<span class="operator">.</span>prepend(<span class="type"><a href="../qtcore/qchar.html">QChar</a></span>(<span class="char">'0'</span> <span class="operator">+</span> rank));
+
+          codecMap<span class="operator">.</span>insert(sortKey<span class="operator">,</span> codec);
+      }
+      codecs <span class="operator">=</span> codecMap<span class="operator">.</span>values();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>createActions()
+  {
+      openAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;&amp;Open...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      openAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Open);
+      connect(openAct<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(open()));
+
+      foreach (<span class="type"><a href="../qtcore/qtextcodec.html">QTextCodec</a></span> <span class="operator">*</span>codec<span class="operator">,</span> codecs) {
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> text <span class="operator">=</span> tr(<span class="string">&quot;%1...&quot;</span>)<span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(codec<span class="operator">-</span><span class="operator">&gt;</span>name()));
+
+          <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(text<span class="operator">,</span> <span class="keyword">this</span>);
+          action<span class="operator">-</span><span class="operator">&gt;</span>setData(codec<span class="operator">-</span><span class="operator">&gt;</span>name());
+          connect(action<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(save()));
+          saveAsActs<span class="operator">.</span>append(action);
+      }
+
+      exitAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;E&amp;xit&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      exitAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Quit);
+      connect(exitAct<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(close()));
+
+      aboutAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;&amp;About&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(aboutAct<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(about()));
+
+      aboutQtAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(tr(<span class="string">&quot;About &amp;Qt&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(aboutQtAct<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> qApp<span class="operator">,</span> SLOT(aboutQt()));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>createMenus()
+  {
+      saveAsMenu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmenu.html">QMenu</a></span>(tr(<span class="string">&quot;&amp;Save As&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      foreach (<span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action<span class="operator">,</span> saveAsActs)
+          saveAsMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(action);
+      connect(saveAsMenu<span class="operator">,</span> SIGNAL(aboutToShow())<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(aboutToShowSaveAsMenu()));
+
+      fileMenu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmenu.html">QMenu</a></span>(tr(<span class="string">&quot;&amp;File&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(openAct);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addMenu(saveAsMenu);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(exitAct);
+
+      helpMenu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmenu.html">QMenu</a></span>(tr(<span class="string">&quot;&amp;Help&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(aboutAct);
+      helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(aboutQtAct);
+
+      menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(fileMenu);
+      menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(helpMenu);
+  }
+
+</pre>
+</div>
+<!-- @@@tools/codecs/mainwindow.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

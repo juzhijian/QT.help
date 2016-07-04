@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>remoteselector.cpp Example File | Qt Bluetooth 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtbluetooth-index.html">Qt Bluetooth</a></td><td ><a href="qtbluetooth-btfiletransfer-example.html">Bluetooth File Transfer Example</a></td><td >remoteselector.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">remoteselector.cpp Example File</h1>
+<span class="subtitle">btfiletransfer/remoteselector.cpp</span>
+<!-- $$$btfiletransfer/remoteselector.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the QtBluetooth module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;remoteselector.h&quot;</span>
+  <span class="preprocessor">#include &quot;ui_remoteselector.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;qbluetoothdeviceinfo.h&gt;</span>
+  <span class="preprocessor">#include &lt;qbluetoothaddress.h&gt;</span>
+  <span class="preprocessor">#include &lt;qbluetoothtransferrequest.h&gt;</span>
+  <span class="preprocessor">#include &lt;qbluetoothtransferreply.h&gt;</span>
+  <span class="preprocessor">#include &lt;qbluetoothlocaldevice.h&gt;</span>
+
+  <span class="preprocessor">#include &lt;QMovie&gt;</span>
+  <span class="preprocessor">#include &lt;QMessageBox&gt;</span>
+  <span class="preprocessor">#include &lt;QFileDialog&gt;</span>
+  <span class="preprocessor">#include &lt;QCheckBox&gt;</span>
+
+  <span class="preprocessor">#include &quot;progress.h&quot;</span>
+  <span class="preprocessor">#include &quot;pindisplay.h&quot;</span>
+
+  QT_USE_NAMESPACE
+
+  RemoteSelector<span class="operator">::</span>RemoteSelector(<span class="type">QWidget</span> <span class="operator">*</span>parent)
+  :   <span class="type">QDialog</span>(parent)<span class="operator">,</span> ui(<span class="keyword">new</span> Ui<span class="operator">::</span>RemoteSelector)<span class="operator">,</span>
+      m_localDevice(<span class="keyword">new</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span>)<span class="operator">,</span> m_pindisplay(<span class="number">0</span>)<span class="operator">,</span>
+      m_pairingError(<span class="keyword">false</span>)
+  {
+      ui<span class="operator">-</span><span class="operator">&gt;</span>setupUi(<span class="keyword">this</span>);
+
+      <span class="comment">//Using default Bluetooth adapter</span>
+      <span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span> adapterAddress <span class="operator">=</span> m_localDevice<span class="operator">-</span><span class="operator">&gt;</span>address();
+
+      <span class="comment">/*
+       * In case of multiple Bluetooth adapters it is possible to
+       * set which adapter will be used by providing MAC Address.
+       * Example code:
+       *
+       * QBluetoothAddress adapterAddress(&quot;XX:XX:XX:XX:XX:XX&quot;);
+       * m_discoveryAgent = new QBluetoothServiceDiscoveryAgent(adapterAddress);
+       */</span>
+
+      m_discoveryAgent <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qbluetoothservicediscoveryagent.html">QBluetoothServiceDiscoveryAgent</a></span>(adapterAddress);
+
+      connect(m_discoveryAgent<span class="operator">,</span> SIGNAL(serviceDiscovered(<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(serviceDiscovered(<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span>)));
+      connect(m_discoveryAgent<span class="operator">,</span> SIGNAL(finished())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(discoveryFinished()));
+      connect(m_discoveryAgent<span class="operator">,</span> SIGNAL(canceled())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(discoveryFinished()));
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>setColumnWidth(<span class="number">3</span><span class="operator">,</span> <span class="number">75</span>);
+      ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>setColumnWidth(<span class="number">4</span><span class="operator">,</span> <span class="number">100</span>);
+
+      connect(m_localDevice<span class="operator">,</span> SIGNAL(pairingDisplayPinCode(<span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span><span class="operator">,</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(displayPin(<span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span><span class="operator">,</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span>)));
+      connect(m_localDevice<span class="operator">,</span> SIGNAL(pairingDisplayConfirmation(<span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span><span class="operator">,</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(displayConfirmation(<span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span><span class="operator">,</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span>)));
+      connect(m_localDevice<span class="operator">,</span> SIGNAL(pairingFinished(<span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span><span class="operator">,</span><span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Pairing))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(pairingFinished(<span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span><span class="operator">,</span><span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Pairing)));
+      connect(m_localDevice<span class="operator">,</span> SIGNAL(error(<span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Error))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(pairingError(<span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Error)));
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>busyWidget<span class="operator">-</span><span class="operator">&gt;</span>setMovie(<span class="keyword">new</span> <span class="type">QMovie</span>(<span class="string">&quot;:/icons/busy.gif&quot;</span>));
+      ui<span class="operator">-</span><span class="operator">&gt;</span>busyWidget<span class="operator">-</span><span class="operator">&gt;</span>movie()<span class="operator">-</span><span class="operator">&gt;</span>start();
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>pairingBusy<span class="operator">-</span><span class="operator">&gt;</span>setMovie(<span class="keyword">new</span> <span class="type">QMovie</span>(<span class="string">&quot;:/icons/pairing.gif&quot;</span>));
+      ui<span class="operator">-</span><span class="operator">&gt;</span>pairingBusy<span class="operator">-</span><span class="operator">&gt;</span>hide();
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>clearContents();
+      ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>setRowCount(<span class="number">0</span>);
+  }
+
+  RemoteSelector<span class="operator">::</span><span class="operator">~</span>RemoteSelector()
+  {
+      <span class="keyword">delete</span> ui;
+      <span class="keyword">delete</span> m_discoveryAgent;
+      <span class="keyword">delete</span> m_localDevice;
+  }
+
+  <span class="type">void</span> RemoteSelector<span class="operator">::</span>startDiscovery(<span class="keyword">const</span> <span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span> <span class="operator">&amp;</span>uuid)
+  {
+      ui<span class="operator">-</span><span class="operator">&gt;</span>stopButton<span class="operator">-</span><span class="operator">&gt;</span>setDisabled(<span class="keyword">false</span>);
+      <span class="keyword">if</span> (m_discoveryAgent<span class="operator">-</span><span class="operator">&gt;</span>isActive())
+          m_discoveryAgent<span class="operator">-</span><span class="operator">&gt;</span>stop();
+
+      m_discoveryAgent<span class="operator">-</span><span class="operator">&gt;</span>setUuidFilter(uuid);
+      m_discoveryAgent<span class="operator">-</span><span class="operator">&gt;</span>start();
+
+      <span class="keyword">if</span> (<span class="operator">!</span>m_discoveryAgent<span class="operator">-</span><span class="operator">&gt;</span>isActive() <span class="operator">|</span><span class="operator">|</span>
+              m_discoveryAgent<span class="operator">-</span><span class="operator">&gt;</span>error() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="qbluetoothservicediscoveryagent.html">QBluetoothServiceDiscoveryAgent</a></span><span class="operator">::</span>NoError) {
+          ui<span class="operator">-</span><span class="operator">&gt;</span>status<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Cannot find remote services.&quot;</span>));
+      } <span class="keyword">else</span> {
+          ui<span class="operator">-</span><span class="operator">&gt;</span>status<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Scanning...&quot;</span>));
+          ui<span class="operator">-</span><span class="operator">&gt;</span>busyWidget<span class="operator">-</span><span class="operator">&gt;</span>show();
+          ui<span class="operator">-</span><span class="operator">&gt;</span>busyWidget<span class="operator">-</span><span class="operator">&gt;</span>movie()<span class="operator">-</span><span class="operator">&gt;</span>start();
+      }
+  }
+
+  <span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span> RemoteSelector<span class="operator">::</span>service() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_service;
+  }
+
+  <span class="type">void</span> RemoteSelector<span class="operator">::</span>serviceDiscovered(<span class="keyword">const</span> <span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span> <span class="operator">&amp;</span>serviceInfo)
+  {
+  <span class="preprocessor">#if 0</span>
+      <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Discovered service on&quot;</span>
+               <span class="operator">&lt;</span><span class="operator">&lt;</span> serviceInfo<span class="operator">.</span>device()<span class="operator">.</span>name() <span class="operator">&lt;</span><span class="operator">&lt;</span> serviceInfo<span class="operator">.</span>device()<span class="operator">.</span>address()<span class="operator">.</span>toString();
+      <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;\tService name:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> serviceInfo<span class="operator">.</span>serviceName();
+      <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;\tDescription:&quot;</span>
+               <span class="operator">&lt;</span><span class="operator">&lt;</span> serviceInfo<span class="operator">.</span>attribute(<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>ServiceDescription)<span class="operator">.</span>toString();
+      <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;\tProvider:&quot;</span>
+               <span class="operator">&lt;</span><span class="operator">&lt;</span> serviceInfo<span class="operator">.</span>attribute(<span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">::</span>ServiceProvider)<span class="operator">.</span>toString();
+      <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;\tL2CAP protocol service multiplexer:&quot;</span>
+               <span class="operator">&lt;</span><span class="operator">&lt;</span> serviceInfo<span class="operator">.</span>protocolServiceMultiplexer();
+      <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;\tRFCOMM server channel:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> serviceInfo<span class="operator">.</span>serverChannel();
+  <span class="preprocessor">#endif</span>
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> remoteName;
+      <span class="keyword">if</span> (serviceInfo<span class="operator">.</span>device()<span class="operator">.</span>name()<span class="operator">.</span>isEmpty())
+          remoteName <span class="operator">=</span> serviceInfo<span class="operator">.</span>device()<span class="operator">.</span>address()<span class="operator">.</span>toString();
+      <span class="keyword">else</span>
+          remoteName <span class="operator">=</span> serviceInfo<span class="operator">.</span>device()<span class="operator">.</span>name();
+
+  <span class="comment">//    QListWidgetItem *item =</span>
+  <span class="comment">//        new QListWidgetItem(QString::fromLatin1(&quot;%1\t%2\t%3&quot;).arg(serviceInfo.device().address().toString(),</span>
+  <span class="comment">//                                                             serviceInfo.device().name(), serviceInfo.serviceName()));</span>
+
+      <span class="type"><a href="../qtcore/qmutablemapiterator.html">QMutableMapIterator</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">&gt;</span> i(m_discoveredServices);
+      <span class="keyword">while</span> (i<span class="operator">.</span>hasNext()){
+          i<span class="operator">.</span>next();
+          <span class="keyword">if</span> (serviceInfo<span class="operator">.</span>device()<span class="operator">.</span>address() <span class="operator">=</span><span class="operator">=</span> i<span class="operator">.</span>value()<span class="operator">.</span>device()<span class="operator">.</span>address()){
+              i<span class="operator">.</span>setValue(serviceInfo);
+              <span class="keyword">return</span>;
+          }
+      }
+
+      <span class="type">int</span> row <span class="operator">=</span> ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>rowCount();
+      ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>insertRow(row);
+      <span class="type">QTableWidgetItem</span> <span class="operator">*</span>item <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QTableWidgetItem</span>(serviceInfo<span class="operator">.</span>device()<span class="operator">.</span>address()<span class="operator">.</span>toString());
+      ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>setItem(row<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> item);
+      item <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QTableWidgetItem</span>(serviceInfo<span class="operator">.</span>device()<span class="operator">.</span>name());
+      ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>setItem(row<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> item);
+      item <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QTableWidgetItem</span>(serviceInfo<span class="operator">.</span>serviceName());
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>setItem(row<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> item);
+
+      <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Pairing p;
+
+      p <span class="operator">=</span> m_localDevice<span class="operator">-</span><span class="operator">&gt;</span>pairingStatus(serviceInfo<span class="operator">.</span>device()<span class="operator">.</span>address());
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">true</span>);
+
+      item <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QTableWidgetItem</span>();
+      <span class="keyword">if</span> ((p<span class="operator">&amp;</span><span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Paired) <span class="operator">|</span><span class="operator">|</span> (p<span class="operator">&amp;</span><span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>AuthorizedPaired))
+          item<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked);
+      <span class="keyword">else</span>
+          item<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Unchecked);
+      ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>setItem(row<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> item);
+
+      item <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QTableWidgetItem</span>();
+      <span class="keyword">if</span> (p<span class="operator">&amp;</span><span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>AuthorizedPaired)
+          item<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked);
+      <span class="keyword">else</span>
+          item<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Unchecked);
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>setItem(row<span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> item);
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">false</span>);
+
+      m_discoveredServices<span class="operator">.</span>insert(row<span class="operator">,</span> serviceInfo);
+  }
+
+  <span class="type">void</span> RemoteSelector<span class="operator">::</span>discoveryFinished()
+  {
+      ui<span class="operator">-</span><span class="operator">&gt;</span>status<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;Select the device to send to.&quot;</span>));
+      ui<span class="operator">-</span><span class="operator">&gt;</span>stopButton<span class="operator">-</span><span class="operator">&gt;</span>setDisabled(<span class="keyword">true</span>);
+      ui<span class="operator">-</span><span class="operator">&gt;</span>busyWidget<span class="operator">-</span><span class="operator">&gt;</span>movie()<span class="operator">-</span><span class="operator">&gt;</span>stop();
+      ui<span class="operator">-</span><span class="operator">&gt;</span>busyWidget<span class="operator">-</span><span class="operator">&gt;</span>hide();
+  }
+
+  <span class="type">void</span> RemoteSelector<span class="operator">::</span>startDiscovery()
+  {
+      startDiscovery(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span>(<span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>ObexObjectPush));
+  }
+
+  <span class="type">void</span> RemoteSelector<span class="operator">::</span>on_refreshPB_clicked()
+  {
+      startDiscovery();
+      ui<span class="operator">-</span><span class="operator">&gt;</span>stopButton<span class="operator">-</span><span class="operator">&gt;</span>setDisabled(<span class="keyword">false</span>);
+  }
+
+  <span class="type">void</span> RemoteSelector<span class="operator">::</span>on_fileSelectPB_clicked()
+  {
+      ui<span class="operator">-</span><span class="operator">&gt;</span>fileName<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type">QFileDialog</span><span class="operator">::</span>getOpenFileName());
+      <span class="keyword">if</span> (m_service<span class="operator">.</span>isValid())
+          ui<span class="operator">-</span><span class="operator">&gt;</span>sendButton<span class="operator">-</span><span class="operator">&gt;</span>setDisabled(<span class="keyword">false</span>);
+  }
+
+  <span class="type">void</span> RemoteSelector<span class="operator">::</span>on_sendButton_clicked()
+  {
+      <span class="type"><a href="qbluetoothtransfermanager.html">QBluetoothTransferManager</a></span> mgr;
+      <span class="type"><a href="qbluetoothtransferrequest.html">QBluetoothTransferRequest</a></span> req(m_service<span class="operator">.</span>device()<span class="operator">.</span>address());
+
+      m_file <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qfile.html">QFile</a></span>(ui<span class="operator">-</span><span class="operator">&gt;</span>fileName<span class="operator">-</span><span class="operator">&gt;</span>text());
+
+      Progress <span class="operator">*</span>p <span class="operator">=</span> <span class="keyword">new</span> Progress;
+      p<span class="operator">-</span><span class="operator">&gt;</span>setStatus(<span class="string">&quot;Sending to: &quot;</span> <span class="operator">+</span> m_service<span class="operator">.</span>device()<span class="operator">.</span>name()<span class="operator">,</span> <span class="string">&quot;Waiting for start&quot;</span>);
+      p<span class="operator">-</span><span class="operator">&gt;</span>show();
+
+      <span class="type"><a href="qbluetoothtransferreply.html">QBluetoothTransferReply</a></span> <span class="operator">*</span>reply <span class="operator">=</span> mgr<span class="operator">.</span>put(req<span class="operator">,</span> m_file);
+      <span class="comment">//mgr is default parent</span>
+      <span class="comment">//ensure that mgr doesn't take reply down when leaving scope</span>
+      reply<span class="operator">-</span><span class="operator">&gt;</span>setParent(<span class="keyword">this</span>);
+      <span class="keyword">if</span> (reply<span class="operator">-</span><span class="operator">&gt;</span>error()){
+          <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Failed to send file&quot;</span>;
+          p<span class="operator">-</span><span class="operator">&gt;</span>finished(reply);
+          reply<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+          <span class="keyword">return</span>;
+      }
+
+      connect(reply<span class="operator">,</span> SIGNAL(transferProgress(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span><span class="operator">,</span><span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span>))<span class="operator">,</span> p<span class="operator">,</span> SLOT(uploadProgress(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span><span class="operator">,</span><span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span>)));
+      connect(reply<span class="operator">,</span> SIGNAL(finished(<span class="type"><a href="qbluetoothtransferreply.html">QBluetoothTransferReply</a></span><span class="operator">*</span>))<span class="operator">,</span> p<span class="operator">,</span> SLOT(finished(<span class="type"><a href="qbluetoothtransferreply.html">QBluetoothTransferReply</a></span><span class="operator">*</span>)));
+      connect(p<span class="operator">,</span> SIGNAL(rejected())<span class="operator">,</span> reply<span class="operator">,</span> SLOT(abort()));
+  }
+
+  <span class="type">void</span> RemoteSelector<span class="operator">::</span>on_stopButton_clicked()
+  {
+      m_discoveryAgent<span class="operator">-</span><span class="operator">&gt;</span>stop();
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> RemoteSelector<span class="operator">::</span>addressToName(<span class="keyword">const</span> <span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span> <span class="operator">&amp;</span>address)
+  {
+      <span class="type"><a href="../qtcore/qmapiterator.html">QMapIterator</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span><span class="operator">&gt;</span> i(m_discoveredServices);
+      <span class="keyword">while</span> (i<span class="operator">.</span>hasNext()){
+          i<span class="operator">.</span>next();
+          <span class="keyword">if</span> (i<span class="operator">.</span>value()<span class="operator">.</span>device()<span class="operator">.</span>address() <span class="operator">=</span><span class="operator">=</span> address)
+              <span class="keyword">return</span> i<span class="operator">.</span>value()<span class="operator">.</span>device()<span class="operator">.</span>name();
+      }
+      <span class="keyword">return</span> address<span class="operator">.</span>toString();
+  }
+
+  <span class="type">void</span> RemoteSelector<span class="operator">::</span>displayPin(<span class="keyword">const</span> <span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span> <span class="operator">&amp;</span>address<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> pin)
+  {
+      <span class="keyword">if</span> (m_pindisplay)
+          m_pindisplay<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+      m_pindisplay <span class="operator">=</span> <span class="keyword">new</span> pinDisplay(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;Enter pairing pin on: %1&quot;</span>)<span class="operator">.</span>arg(addressToName(address))<span class="operator">,</span> pin<span class="operator">,</span> <span class="keyword">this</span>);
+      m_pindisplay<span class="operator">-</span><span class="operator">&gt;</span>show();
+  }
+
+  <span class="type">void</span> RemoteSelector<span class="operator">::</span>displayConfirmation(<span class="keyword">const</span> <span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span> <span class="operator">&amp;</span>address<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> pin)
+  {
+      Q_UNUSED(address);
+
+      <span class="keyword">if</span> (m_pindisplay)
+          m_pindisplay<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+      m_pindisplay <span class="operator">=</span> <span class="keyword">new</span> pinDisplay(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;Confirm this pin is the same&quot;</span>)<span class="operator">,</span> pin<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(m_pindisplay<span class="operator">,</span> SIGNAL(accepted())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(displayConfAccepted()));
+      connect(m_pindisplay<span class="operator">,</span> SIGNAL(rejected())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(displayConfReject()));
+      m_pindisplay<span class="operator">-</span><span class="operator">&gt;</span>setOkCancel();
+      m_pindisplay<span class="operator">-</span><span class="operator">&gt;</span>show();
+  }
+
+  <span class="type">void</span> RemoteSelector<span class="operator">::</span>displayConfAccepted()
+  {
+      m_localDevice<span class="operator">-</span><span class="operator">&gt;</span>pairingConfirmation(<span class="keyword">true</span>);
+  }
+  <span class="type">void</span> RemoteSelector<span class="operator">::</span>displayConfReject()
+  {
+      m_localDevice<span class="operator">-</span><span class="operator">&gt;</span>pairingConfirmation(<span class="keyword">false</span>);
+  }
+
+  <span class="type">void</span> RemoteSelector<span class="operator">::</span>pairingFinished(<span class="keyword">const</span> <span class="type"><a href="qbluetoothaddress.html">QBluetoothAddress</a></span> <span class="operator">&amp;</span>address<span class="operator">,</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Pairing status)
+  {
+      <span class="type"><a href="qbluetoothserviceinfo.html">QBluetoothServiceInfo</a></span> service;
+      <span class="type">int</span> row <span class="operator">=</span> <span class="number">0</span>;
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>pairingBusy<span class="operator">-</span><span class="operator">&gt;</span>hide();
+      ui<span class="operator">-</span><span class="operator">&gt;</span>pairingBusy<span class="operator">-</span><span class="operator">&gt;</span>movie()<span class="operator">-</span><span class="operator">&gt;</span>stop();
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">true</span>);
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_discoveredServices<span class="operator">.</span>count(); i<span class="operator">+</span><span class="operator">+</span>){
+          <span class="keyword">if</span> (m_discoveredServices<span class="operator">.</span>value(i)<span class="operator">.</span>device()<span class="operator">.</span>address() <span class="operator">=</span><span class="operator">=</span> address){
+              service <span class="operator">=</span> m_discoveredServices<span class="operator">.</span>value(i);
+              row <span class="operator">=</span> i;
+              <span class="keyword">break</span>;
+          }
+      }
+
+      <span class="keyword">if</span> (m_pindisplay)
+          <span class="keyword">delete</span> m_pindisplay;
+
+      <span class="type">QMessageBox</span> msgBox;
+      <span class="keyword">if</span> (m_pairingError) {
+          msgBox<span class="operator">.</span>setText(<span class="string">&quot;Pairing failed with &quot;</span> <span class="operator">+</span> address<span class="operator">.</span>toString());
+      } <span class="keyword">else</span> <span class="keyword">if</span> (status <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Paired
+                 <span class="operator">|</span><span class="operator">|</span> status <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>AuthorizedPaired) {
+          msgBox<span class="operator">.</span>setText(<span class="string">&quot;Paired successfully with &quot;</span> <span class="operator">+</span> address<span class="operator">.</span>toString());
+      } <span class="keyword">else</span> {
+          msgBox<span class="operator">.</span>setText(<span class="string">&quot;Pairing released with &quot;</span> <span class="operator">+</span> address<span class="operator">.</span>toString());
+      }
+
+      <span class="keyword">if</span> (service<span class="operator">.</span>isValid()){
+          <span class="keyword">if</span> (status <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>AuthorizedPaired){
+              ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>item(row<span class="operator">,</span> <span class="number">3</span>)<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked);
+              ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>item(row<span class="operator">,</span> <span class="number">4</span>)<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked);
+          }
+          <span class="keyword">else</span> <span class="keyword">if</span> (status <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Paired){
+              ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>item(row<span class="operator">,</span> <span class="number">3</span>)<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked);
+              ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>item(row<span class="operator">,</span> <span class="number">4</span>)<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Unchecked);
+          }
+          <span class="keyword">else</span> {
+              ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>item(row<span class="operator">,</span> <span class="number">3</span>)<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Unchecked);
+              ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>item(row<span class="operator">,</span> <span class="number">4</span>)<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Unchecked);
+          }
+      }
+
+      m_pairingError <span class="operator">=</span> <span class="keyword">false</span>;
+      msgBox<span class="operator">.</span>exec();
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">false</span>);
+  }
+
+  <span class="type">void</span> RemoteSelector<span class="operator">::</span>pairingError(<span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Error error)
+  {
+      <span class="keyword">if</span> (error <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>PairingError)
+          <span class="keyword">return</span>;
+
+      m_pairingError <span class="operator">=</span> <span class="keyword">true</span>;
+      pairingFinished(m_service<span class="operator">.</span>device()<span class="operator">.</span>address()<span class="operator">,</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Unpaired);
+  }
+
+  <span class="type">void</span> RemoteSelector<span class="operator">::</span>on_remoteDevices_cellClicked(<span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> column)
+  {
+      Q_UNUSED(column);
+
+      m_service <span class="operator">=</span> m_discoveredServices<span class="operator">.</span>value(row);
+      <span class="keyword">if</span> (<span class="operator">!</span>ui<span class="operator">-</span><span class="operator">&gt;</span>fileName<span class="operator">-</span><span class="operator">&gt;</span>text()<span class="operator">.</span>isEmpty()) {
+          ui<span class="operator">-</span><span class="operator">&gt;</span>sendButton<span class="operator">-</span><span class="operator">&gt;</span>setDisabled(<span class="keyword">false</span>);
+      }
+  }
+
+  <span class="type">void</span> RemoteSelector<span class="operator">::</span>on_remoteDevices_itemChanged(<span class="type">QTableWidgetItem</span><span class="operator">*</span> item)
+  {
+      <span class="type">int</span> row <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>row();
+      <span class="type">int</span> column <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>column();
+      m_service <span class="operator">=</span> m_discoveredServices<span class="operator">.</span>value(row);
+
+      <span class="keyword">if</span> (column <span class="operator">&lt;</span> <span class="number">3</span>)
+          <span class="keyword">return</span>;
+
+      <span class="keyword">if</span> (item<span class="operator">-</span><span class="operator">&gt;</span>checkState() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Unchecked <span class="operator">&amp;</span><span class="operator">&amp;</span> column <span class="operator">=</span><span class="operator">=</span> <span class="number">3</span>){
+          m_localDevice<span class="operator">-</span><span class="operator">&gt;</span>requestPairing(m_service<span class="operator">.</span>device()<span class="operator">.</span>address()<span class="operator">,</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Unpaired);
+          <span class="keyword">return</span>; <span class="comment">// don't continue and start movie</span>
+      }
+      <span class="keyword">else</span> <span class="keyword">if</span> ((item<span class="operator">-</span><span class="operator">&gt;</span>checkState() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked <span class="operator">&amp;</span><span class="operator">&amp;</span> column <span class="operator">=</span><span class="operator">=</span> <span class="number">3</span>) <span class="operator">|</span><span class="operator">|</span>
+              (item<span class="operator">-</span><span class="operator">&gt;</span>checkState() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Unchecked <span class="operator">&amp;</span><span class="operator">&amp;</span> column <span class="operator">=</span><span class="operator">=</span> <span class="number">4</span>)){
+          m_localDevice<span class="operator">-</span><span class="operator">&gt;</span>requestPairing(m_service<span class="operator">.</span>device()<span class="operator">.</span>address()<span class="operator">,</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>Paired);
+          ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">true</span>);
+          ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>item(row<span class="operator">,</span> column)<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>PartiallyChecked);
+          ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">false</span>);
+      }
+      <span class="keyword">else</span> <span class="keyword">if</span> (item<span class="operator">-</span><span class="operator">&gt;</span>checkState() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked <span class="operator">&amp;</span><span class="operator">&amp;</span> column <span class="operator">=</span><span class="operator">=</span> <span class="number">4</span>){
+          m_localDevice<span class="operator">-</span><span class="operator">&gt;</span>requestPairing(m_service<span class="operator">.</span>device()<span class="operator">.</span>address()<span class="operator">,</span> <span class="type"><a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a></span><span class="operator">::</span>AuthorizedPaired);
+          ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">true</span>);
+          ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>item(row<span class="operator">,</span> column)<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>PartiallyChecked);
+          ui<span class="operator">-</span><span class="operator">&gt;</span>remoteDevices<span class="operator">-</span><span class="operator">&gt;</span>blockSignals(<span class="keyword">false</span>);
+      }
+      ui<span class="operator">-</span><span class="operator">&gt;</span>pairingBusy<span class="operator">-</span><span class="operator">&gt;</span>show();
+      ui<span class="operator">-</span><span class="operator">&gt;</span>pairingBusy<span class="operator">-</span><span class="operator">&gt;</span>movie()<span class="operator">-</span><span class="operator">&gt;</span>start();
+  }
+
+</pre>
+</div>
+<!-- @@@btfiletransfer/remoteselector.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

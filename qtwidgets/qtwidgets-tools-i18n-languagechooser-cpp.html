@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>languagechooser.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-tools-i18n-example.html">I18N Example</a></td><td >languagechooser.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">languagechooser.cpp Example File</h1>
+<span class="subtitle">tools/i18n/languagechooser.cpp</span>
+<!-- $$$tools/i18n/languagechooser.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+
+  <span class="preprocessor">#include &quot;languagechooser.h&quot;</span>
+  <span class="preprocessor">#include &quot;mainwindow.h&quot;</span>
+
+  <span class="preprocessor">#ifdef Q_DEAD_CODE_FROM_QT4_MAC</span>
+  <span class="keyword">extern</span> <span class="type">void</span> qt_mac_set_menubar_merge(bool merge);
+
+  <span class="preprocessor">#endif</span>
+
+  LanguageChooser<span class="operator">::</span>LanguageChooser(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">&amp;</span> defaultLang<span class="operator">,</span> <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qdialog.html">QDialog</a></span>(parent<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WindowStaysOnTopHint)
+  {
+      groupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(<span class="string">&quot;Languages&quot;</span>);
+
+      <span class="type"><a href="qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>groupBoxLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> qmFiles <span class="operator">=</span> findQmFiles();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> qmFiles<span class="operator">.</span>size(); <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>checkBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(languageName(qmFiles<span class="operator">[</span>i<span class="operator">]</span>));
+          qmFileForCheckBoxMap<span class="operator">.</span>insert(checkBox<span class="operator">,</span> qmFiles<span class="operator">[</span>i<span class="operator">]</span>);
+          connect(checkBox<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(checkBoxToggled()));
+          <span class="keyword">if</span> (languageMatch(defaultLang<span class="operator">,</span> qmFiles<span class="operator">[</span>i<span class="operator">]</span>))
+                  checkBox<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Checked);
+          groupBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(checkBox<span class="operator">,</span> i <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> i <span class="operator">%</span> <span class="number">2</span>);
+      }
+      groupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(groupBoxLayout);
+
+      buttonBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span>;
+
+      showAllButton <span class="operator">=</span> buttonBox<span class="operator">-</span><span class="operator">&gt;</span>addButton(<span class="string">&quot;Show All&quot;</span><span class="operator">,</span>
+                                           <span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>ActionRole);
+      hideAllButton <span class="operator">=</span> buttonBox<span class="operator">-</span><span class="operator">&gt;</span>addButton(<span class="string">&quot;Hide All&quot;</span><span class="operator">,</span>
+                                           <span class="type"><a href="qdialogbuttonbox.html">QDialogButtonBox</a></span><span class="operator">::</span>ActionRole);
+
+      connect(showAllButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(showAll()));
+      connect(hideAllButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(hideAll()));
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>mainLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(groupBox);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(buttonBox);
+      setLayout(mainLayout);
+
+  <span class="preprocessor">#ifdef Q_DEAD_CODE_FROM_QT4_MAC</span>
+      qt_mac_set_menubar_merge(<span class="keyword">false</span>);
+  <span class="preprocessor">#endif</span>
+
+      setWindowTitle(<span class="string">&quot;I18N&quot;</span>);
+  }
+
+  bool LanguageChooser<span class="operator">::</span>languageMatch(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">&amp;</span> lang<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">&amp;</span> qmFile)
+  {
+      <span class="comment">//qmFile: i18n_xx.qm</span>
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> prefix <span class="operator">=</span> <span class="string">&quot;i18n_&quot;</span>;
+      <span class="keyword">const</span> <span class="type">int</span> langTokenLength <span class="operator">=</span> <span class="number">2</span>; <span class="comment">/*FIXME: is checking two chars enough?*/</span>
+      <span class="keyword">return</span> qmFile<span class="operator">.</span>midRef(qmFile<span class="operator">.</span>indexOf(prefix) <span class="operator">+</span> prefix<span class="operator">.</span>length()<span class="operator">,</span> langTokenLength) <span class="operator">=</span><span class="operator">=</span> lang<span class="operator">.</span>leftRef(langTokenLength);
+  }
+
+  bool LanguageChooser<span class="operator">::</span>eventFilter(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>object<span class="operator">,</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (event<span class="operator">-</span><span class="operator">&gt;</span>type() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qevent.html">QEvent</a></span><span class="operator">::</span>Close) {
+          MainWindow <span class="operator">*</span>window <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span>MainWindow <span class="operator">*</span><span class="operator">&gt;</span>(object);
+          <span class="keyword">if</span> (window) {
+              <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>checkBox <span class="operator">=</span> mainWindowForCheckBoxMap<span class="operator">.</span>key(window);
+              <span class="keyword">if</span> (checkBox)
+                  checkBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+          }
+      }
+      <span class="keyword">return</span> <span class="type"><a href="qwidget.html">QWidget</a></span><span class="operator">::</span>eventFilter(object<span class="operator">,</span> event);
+  }
+
+  <span class="type">void</span> LanguageChooser<span class="operator">::</span>closeEvent(<span class="type"><a href="../qtgui/qcloseevent.html">QCloseEvent</a></span> <span class="operator">*</span> <span class="comment">/* event */</span>)
+  {
+      qApp<span class="operator">-</span><span class="operator">&gt;</span>quit();
+  }
+
+  <span class="type">void</span> LanguageChooser<span class="operator">::</span>checkBoxToggled()
+  {
+      <span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>checkBox <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(sender());
+      MainWindow <span class="operator">*</span>window <span class="operator">=</span> mainWindowForCheckBoxMap<span class="operator">[</span>checkBox<span class="operator">]</span>;
+      <span class="keyword">if</span> (<span class="operator">!</span>window) {
+          <span class="type"><a href="../qtcore/qtranslator.html">QTranslator</a></span> translator;
+          translator<span class="operator">.</span>load(qmFileForCheckBoxMap<span class="operator">[</span>checkBox<span class="operator">]</span>);
+          qApp<span class="operator">-</span><span class="operator">&gt;</span>installTranslator(<span class="operator">&amp;</span>translator);
+
+          window <span class="operator">=</span> <span class="keyword">new</span> MainWindow;
+          window<span class="operator">-</span><span class="operator">&gt;</span>setPalette(colorForLanguage(checkBox<span class="operator">-</span><span class="operator">&gt;</span>text()));
+
+          window<span class="operator">-</span><span class="operator">&gt;</span>installEventFilter(<span class="keyword">this</span>);
+          mainWindowForCheckBoxMap<span class="operator">.</span>insert(checkBox<span class="operator">,</span> window);
+      }
+      window<span class="operator">-</span><span class="operator">&gt;</span>setVisible(checkBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked());
+  }
+
+  <span class="type">void</span> LanguageChooser<span class="operator">::</span>showAll()
+  {
+      foreach (<span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>checkBox<span class="operator">,</span> qmFileForCheckBoxMap<span class="operator">.</span>keys())
+          checkBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+  }
+
+  <span class="type">void</span> LanguageChooser<span class="operator">::</span>hideAll()
+  {
+      foreach (<span class="type"><a href="qcheckbox.html">QCheckBox</a></span> <span class="operator">*</span>checkBox<span class="operator">,</span> qmFileForCheckBoxMap<span class="operator">.</span>keys())
+          checkBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+  }
+
+  <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> LanguageChooser<span class="operator">::</span>findQmFiles()
+  {
+      <span class="type"><a href="../qtcore/qdir.html">QDir</a></span> dir(<span class="string">&quot;:/translations&quot;</span>);
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> fileNames <span class="operator">=</span> dir<span class="operator">.</span>entryList(<span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span>(<span class="string">&quot;*.qm&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>Files<span class="operator">,</span>
+                                            <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>Name);
+      <span class="type"><a href="../qtcore/qstringlist.html#QMutableStringListIterator-typedef">QMutableStringListIterator</a></span> i(fileNames);
+      <span class="keyword">while</span> (i<span class="operator">.</span>hasNext()) {
+          i<span class="operator">.</span>next();
+          i<span class="operator">.</span>setValue(dir<span class="operator">.</span>filePath(i<span class="operator">.</span>value()));
+      }
+      <span class="keyword">return</span> fileNames;
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> LanguageChooser<span class="operator">::</span>languageName(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>qmFile)
+  {
+      <span class="type"><a href="../qtcore/qtranslator.html">QTranslator</a></span> translator;
+      translator<span class="operator">.</span>load(qmFile);
+
+      <span class="keyword">return</span> translator<span class="operator">.</span>translate(<span class="string">&quot;MainWindow&quot;</span><span class="operator">,</span> <span class="string">&quot;English&quot;</span>);
+  }
+
+  <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> LanguageChooser<span class="operator">::</span>colorForLanguage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>language)
+  {
+      <span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> hashValue <span class="operator">=</span> <a href="qsizepolicy.html#qHash">qHash</a>(language);
+      <span class="type">int</span> red <span class="operator">=</span> <span class="number">156</span> <span class="operator">+</span> (hashValue <span class="operator">&amp;</span> <span class="number">0x3F</span>);
+      <span class="type">int</span> green <span class="operator">=</span> <span class="number">156</span> <span class="operator">+</span> ((hashValue <span class="operator">&gt;</span><span class="operator">&gt;</span> <span class="number">6</span>) <span class="operator">&amp;</span> <span class="number">0x3F</span>);
+      <span class="type">int</span> blue <span class="operator">=</span> <span class="number">156</span> <span class="operator">+</span> ((hashValue <span class="operator">&gt;</span><span class="operator">&gt;</span> <span class="number">12</span>) <span class="operator">&amp;</span> <span class="number">0x3F</span>);
+      <span class="keyword">return</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(red<span class="operator">,</span> green<span class="operator">,</span> blue);
+  }
+
+</pre>
+</div>
+<!-- @@@tools/i18n/languagechooser.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

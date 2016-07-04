@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>featurepermissionbar.cpp Example File | Qt WebEngine 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwebengine-index.html">Qt WebEngine</a></td><td ><a href="qtwebengine-webenginewidgets-demobrowser-example.html">WebEngine Demo Browser Example</a></td><td >featurepermissionbar.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">featurepermissionbar.cpp Example File</h1>
+<span class="subtitle">webenginewidgets/demobrowser/featurepermissionbar.cpp</span>
+<!-- $$$webenginewidgets/demobrowser/featurepermissionbar.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;featurepermissionbar.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QLabel&gt;</span>
+  <span class="preprocessor">#include &lt;QPushButton&gt;</span>
+  <span class="preprocessor">#include &lt;QHBoxLayout&gt;</span>
+  <span class="preprocessor">#include &lt;QUrl&gt;</span>
+  <span class="preprocessor">#include &lt;QPropertyAnimation&gt;</span>
+
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">int</span> defaultHeight <span class="operator">=</span> <span class="number">30</span>;
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> textForPermissionType(<span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>Feature type)
+  {
+      <span class="keyword">switch</span> (type) {
+      <span class="keyword">case</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>Notifications:
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>tr(<span class="string">&quot;use desktop notifications&quot;</span>);
+      <span class="keyword">case</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>Geolocation:
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>tr(<span class="string">&quot;use your position&quot;</span>);
+      <span class="keyword">case</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>MediaAudioCapture:
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>tr(<span class="string">&quot;use your microphone&quot;</span>);
+      <span class="keyword">case</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>MediaVideoCapture:
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>tr(<span class="string">&quot;use your camera&quot;</span>);
+      <span class="keyword">case</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>MediaAudioVideoCapture:
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>tr(<span class="string">&quot;use your camera and microphone&quot;</span>);
+      <span class="keyword">case</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>MouseLock:
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>tr(<span class="string">&quot;lock your mouse&quot;</span>);
+      <span class="keyword">default</span>:
+          Q_UNREACHABLE();
+      }
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+  }
+
+  FeaturePermissionBar<span class="operator">::</span>FeaturePermissionBar(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>view)
+      : <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>(view)
+      <span class="operator">,</span> m_messageLabel(<span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlabel.html">QLabel</a></span>(<span class="keyword">this</span>))
+  {
+      setAutoFillBackground(<span class="keyword">true</span>);
+      <span class="type"><a href="../qtwidgets/qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>l <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qhboxlayout.html">QHBoxLayout</a></span>;
+      setLayout(l);
+      l<span class="operator">-</span><span class="operator">&gt;</span>setContentsMargins(defaultHeight<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      l<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_messageLabel);
+      l<span class="operator">-</span><span class="operator">&gt;</span>addStretch();
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>allowButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;Allow&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>denyButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;Deny&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span> <span class="operator">*</span>discardButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span>(<span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;:closetab.png&quot;</span>))<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>()<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(allowButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>FeaturePermissionBar<span class="operator">::</span>permissionGranted);
+      connect(denyButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>FeaturePermissionBar<span class="operator">::</span>permissionDenied);
+      connect(discardButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>FeaturePermissionBar<span class="operator">::</span>permissionUnknown);
+      connect(allowButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>deleteLater);
+      connect(denyButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>deleteLater);
+      connect(discardButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qpushbutton.html">QPushButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>deleteLater);
+      l<span class="operator">-</span><span class="operator">&gt;</span>addWidget(denyButton);
+      l<span class="operator">-</span><span class="operator">&gt;</span>addWidget(allowButton);
+      l<span class="operator">-</span><span class="operator">&gt;</span>addWidget(discardButton);
+      setGeometry(<span class="number">0</span><span class="operator">,</span> <span class="operator">-</span>defaultHeight<span class="operator">,</span> view<span class="operator">-</span><span class="operator">&gt;</span>width()<span class="operator">,</span> defaultHeight);
+  }
+
+  <span class="type">void</span> FeaturePermissionBar<span class="operator">::</span>requestPermission(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>securityOrigin<span class="operator">,</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>Feature feature)
+  {
+      m_securityOrigin <span class="operator">=</span> securityOrigin;
+      m_feature <span class="operator">=</span> feature;
+      m_messageLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;%1 wants to %2.&quot;</span>)<span class="operator">.</span>arg(securityOrigin<span class="operator">.</span>host())<span class="operator">.</span>arg(textForPermissionType(feature)));
+      show();
+      <span class="comment">// Ease in</span>
+      <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span> <span class="operator">*</span>animation <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span>(<span class="keyword">this</span>);
+      animation<span class="operator">-</span><span class="operator">&gt;</span>setTargetObject(<span class="keyword">this</span>);
+      animation<span class="operator">-</span><span class="operator">&gt;</span>setPropertyName(<span class="type">QByteArrayLiteral</span>(<span class="string">&quot;pos&quot;</span>));
+      animation<span class="operator">-</span><span class="operator">&gt;</span>setDuration(<span class="number">300</span>);
+      animation<span class="operator">-</span><span class="operator">&gt;</span>setStartValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(pos()));
+      animation<span class="operator">-</span><span class="operator">&gt;</span>setEndValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(<span class="number">0</span><span class="operator">,</span><span class="number">0</span>)));
+      animation<span class="operator">-</span><span class="operator">&gt;</span>setEasingCurve(<span class="type"><a href="../qtcore/qeasingcurve.html">QEasingCurve</a></span><span class="operator">::</span>InOutQuad);
+      animation<span class="operator">-</span><span class="operator">&gt;</span>start(<span class="type"><a href="../qtcore/qpropertyanimation.html">QPropertyAnimation</a></span><span class="operator">::</span>DeleteWhenStopped);
+  }
+
+  <span class="type">void</span> FeaturePermissionBar<span class="operator">::</span>permissionDenied()
+  {
+      <span class="keyword">emit</span> featurePermissionProvided(m_securityOrigin<span class="operator">,</span> m_feature<span class="operator">,</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>PermissionDeniedByUser);
+  }
+
+  <span class="type">void</span> FeaturePermissionBar<span class="operator">::</span>permissionGranted()
+  {
+      <span class="keyword">emit</span> featurePermissionProvided(m_securityOrigin<span class="operator">,</span> m_feature<span class="operator">,</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>PermissionGrantedByUser);
+  }
+
+  <span class="type">void</span> FeaturePermissionBar<span class="operator">::</span>permissionUnknown()
+  {
+      <span class="keyword">emit</span> featurePermissionProvided(m_securityOrigin<span class="operator">,</span> m_feature<span class="operator">,</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>PermissionUnknown);
+  }
+
+</pre>
+</div>
+<!-- @@@webenginewidgets/demobrowser/featurepermissionbar.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>main.cpp Example File | Qt GUI 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtgui-index.html">Qt GUI</a></td><td ><a href="qtgui-openglwindow-example.html">OpenGL Window Example</a></td><td >main.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">main.cpp Example File</h1>
+<span class="subtitle">openglwindow/main.cpp</span>
+<!-- $$$openglwindow/main.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the documentation of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;openglwindow.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtGui/QGuiApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QMatrix4x4&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QOpenGLShaderProgram&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QScreen&gt;</span>
+
+  <span class="preprocessor">#include &lt;QtCore/qmath.h&gt;</span>
+
+  <span class="keyword">class</span> TriangleWindow : <span class="keyword">public</span> OpenGLWindow
+  {
+  <span class="keyword">public</span>:
+      TriangleWindow();
+
+      <span class="type">void</span> initialize() Q_DECL_OVERRIDE;
+      <span class="type">void</span> render() Q_DECL_OVERRIDE;
+
+  <span class="keyword">private</span>:
+      GLuint m_posAttr;
+      GLuint m_colAttr;
+      GLuint m_matrixUniform;
+
+      <span class="type"><a href="qopenglshaderprogram.html">QOpenGLShaderProgram</a></span> <span class="operator">*</span>m_program;
+      <span class="type">int</span> m_frame;
+  };
+
+  TriangleWindow<span class="operator">::</span>TriangleWindow()
+      : m_program(<span class="number">0</span>)
+      <span class="operator">,</span> m_frame(<span class="number">0</span>)
+  {
+  }
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span>argv)
+  {
+      <span class="type"><a href="qguiapplication.html">QGuiApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      <span class="type"><a href="qsurfaceformat.html">QSurfaceFormat</a></span> format;
+      format<span class="operator">.</span>setSamples(<span class="number">16</span>);
+
+      TriangleWindow window;
+      window<span class="operator">.</span>setFormat(format);
+      window<span class="operator">.</span>resize(<span class="number">640</span><span class="operator">,</span> <span class="number">480</span>);
+      window<span class="operator">.</span>show();
+
+      window<span class="operator">.</span>setAnimating(<span class="keyword">true</span>);
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>vertexShaderSource <span class="operator">=</span>
+      <span class="string">&quot;attribute highp vec4 posAttr;\n&quot;</span>
+      <span class="string">&quot;attribute lowp vec4 colAttr;\n&quot;</span>
+      <span class="string">&quot;varying lowp vec4 col;\n&quot;</span>
+      <span class="string">&quot;uniform highp mat4 matrix;\n&quot;</span>
+      <span class="string">&quot;void main() {\n&quot;</span>
+      <span class="string">&quot;   col = colAttr;\n&quot;</span>
+      <span class="string">&quot;   gl_Position = matrix * posAttr;\n&quot;</span>
+      <span class="string">&quot;}\n&quot;</span>;
+
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>fragmentShaderSource <span class="operator">=</span>
+      <span class="string">&quot;varying lowp vec4 col;\n&quot;</span>
+      <span class="string">&quot;void main() {\n&quot;</span>
+      <span class="string">&quot;   gl_FragColor = col;\n&quot;</span>
+      <span class="string">&quot;}\n&quot;</span>;
+
+  <span class="type">void</span> TriangleWindow<span class="operator">::</span>initialize()
+  {
+      m_program <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qopenglshaderprogram.html">QOpenGLShaderProgram</a></span>(<span class="keyword">this</span>);
+      m_program<span class="operator">-</span><span class="operator">&gt;</span>addShaderFromSourceCode(<span class="type"><a href="qopenglshader.html">QOpenGLShader</a></span><span class="operator">::</span>Vertex<span class="operator">,</span> vertexShaderSource);
+      m_program<span class="operator">-</span><span class="operator">&gt;</span>addShaderFromSourceCode(<span class="type"><a href="qopenglshader.html">QOpenGLShader</a></span><span class="operator">::</span>Fragment<span class="operator">,</span> fragmentShaderSource);
+      m_program<span class="operator">-</span><span class="operator">&gt;</span>link();
+      m_posAttr <span class="operator">=</span> m_program<span class="operator">-</span><span class="operator">&gt;</span>attributeLocation(<span class="string">&quot;posAttr&quot;</span>);
+      m_colAttr <span class="operator">=</span> m_program<span class="operator">-</span><span class="operator">&gt;</span>attributeLocation(<span class="string">&quot;colAttr&quot;</span>);
+      m_matrixUniform <span class="operator">=</span> m_program<span class="operator">-</span><span class="operator">&gt;</span>uniformLocation(<span class="string">&quot;matrix&quot;</span>);
+  }
+
+  <span class="type">void</span> TriangleWindow<span class="operator">::</span>render()
+  {
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> retinaScale <span class="operator">=</span> devicePixelRatio();
+      glViewport(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> width() <span class="operator">*</span> retinaScale<span class="operator">,</span> height() <span class="operator">*</span> retinaScale);
+
+      glClear(GL_COLOR_BUFFER_BIT);
+
+      m_program<span class="operator">-</span><span class="operator">&gt;</span>bind();
+
+      QMatrix4x4 matrix;
+      matrix<span class="operator">.</span>perspective(<span class="number">60.0f</span><span class="operator">,</span> <span class="number">4.0f</span><span class="operator">/</span><span class="number">3.0f</span><span class="operator">,</span> <span class="number">0.1f</span><span class="operator">,</span> <span class="number">100.0f</span>);
+      matrix<span class="operator">.</span>translate(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="operator">-</span><span class="number">2</span>);
+      matrix<span class="operator">.</span>rotate(<span class="number">100.0f</span> <span class="operator">*</span> m_frame <span class="operator">/</span> screen()<span class="operator">-</span><span class="operator">&gt;</span>refreshRate()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+
+      m_program<span class="operator">-</span><span class="operator">&gt;</span>setUniformValue(m_matrixUniform<span class="operator">,</span> matrix);
+
+      GLfloat vertices<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> {
+          <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.707f</span><span class="operator">,</span>
+          <span class="operator">-</span><span class="number">0.5f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">0.5f</span><span class="operator">,</span>
+          <span class="number">0.5f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">0.5f</span>
+      };
+
+      GLfloat colors<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> {
+          <span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span>
+          <span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span>
+          <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span>
+      };
+
+      glVertexAttribPointer(m_posAttr<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> GL_FLOAT<span class="operator">,</span> GL_FALSE<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> vertices);
+      glVertexAttribPointer(m_colAttr<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> GL_FLOAT<span class="operator">,</span> GL_FALSE<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> colors);
+
+      glEnableVertexAttribArray(<span class="number">0</span>);
+      glEnableVertexAttribArray(<span class="number">1</span>);
+
+      glDrawArrays(GL_TRIANGLES<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">3</span>);
+
+      glDisableVertexAttribArray(<span class="number">1</span>);
+      glDisableVertexAttribArray(<span class="number">0</span>);
+
+      m_program<span class="operator">-</span><span class="operator">&gt;</span>release();
+
+      <span class="operator">+</span><span class="operator">+</span>m_frame;
+  }
+
+</pre>
+</div>
+<!-- @@@openglwindow/main.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmlaxisformatter.qdoc -->
+  <title>Qt Quick 2 Axis Formatter Example | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td >Qt Quick 2 Axis Formatter Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#custom-axis-formatter">Custom axis formatter</a></li>
+<li class="level1"><a href="#qml">QML</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Quick 2 Axis Formatter Example</h1>
+<span class="subtitle"></span>
+<!-- $$$qmlaxisformatter-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Qt Quick axis formatter example shows how to use predefined axis formatters and how to create a custom one.</p>
+<p class="centerAlign"><img src="images/qmlaxisformatter-example.png" alt="" /></p><p>The interesting thing about this example is axis formatters, so we'll concentrate on that and skip explaining the basic functionality - for more detailed QML example documentation, see <a href="qtdatavisualization-qmlscatter-example.html">Qt Quick 2 Scatter Example</a>.</p>
+<a name="custom-axis-formatter"></a>
+<h2 id="custom-axis-formatter">Custom axis formatter</h2>
+<p>Customizing axis formatters requires subclassing the <a href="qvalue3daxisformatter.html">QValue3DAxisFormatter</a>, which cannot be done in QML code alone. In this example we want an axis that interprets the float values as a timestamp and shows the date in the axis labels. To achieve this, we introduce a new class called <code>CustomFormatter</code>, which subclasses the <a href="qvalue3daxisformatter.html">QValue3DAxisFormatter</a>:</p>
+<pre class="cpp">
+
+  <span class="keyword">class</span> CustomFormatter : <span class="keyword">public</span> QValue3DAxisFormatter
+  {
+  ...
+
+</pre>
+<p>Since float values of a <a href="qscatter3dseries.html">QScatter3DSeries</a> cannot be directly cast into <a href="../qtcore/qdatetime.html">QDateTime</a> values due to difference in data width, we need some sort of mapping between the two. We chose to do the mapping by specifying an origin date for the formatter and interpreting the float values from the <a href="qscatter3dseries.html">QScatter3DSeries</a> as date offsets to that origin value. The origin date is given as a property:</p>
+<pre class="cpp">
+
+  Q_PROPERTY(<span class="type"><a href="../qtcore/qdate.html">QDate</a></span> originDate READ originDate WRITE setOriginDate NOTIFY originDateChanged)
+
+</pre>
+<p>The mapping from value to <a href="../qtcore/qdatetime.html">QDateTime</a> is done using <code>valueToDateTime()</code> method:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> CustomFormatter<span class="operator">::</span>valueToDateTime(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> value) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span>(m_originDate)<span class="operator">.</span>addMSecs(<span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span>(oneDayMs <span class="operator">*</span> value));
+  }
+
+</pre>
+<p>To function as an axis formatter, our <code>CustomFormatter</code> needs to reimplement some virtual methods:</p>
+<pre class="cpp">
+
+  <span class="keyword">virtual</span> QValue3DAxisFormatter <span class="operator">*</span>createNewInstance() <span class="keyword">const</span>;
+  <span class="keyword">virtual</span> <span class="type">void</span> populateCopy(QValue3DAxisFormatter <span class="operator">&amp;</span>copy) <span class="keyword">const</span>;
+  <span class="keyword">virtual</span> <span class="type">void</span> recalculate();
+  <span class="keyword">virtual</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> stringForValue(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> value<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>format) <span class="keyword">const</span>;
+
+</pre>
+<p>The first two are simple, we just create a new instance of <code>CustomFormatter</code> and copy the necessary data over to it. These two methods are used to create and update a cache of formatter for rendering purposes. It is important to remember to call the superclass implementation of <code>populateCopy()</code>:</p>
+<pre class="cpp">
+
+  QValue3DAxisFormatter <span class="operator">*</span>CustomFormatter<span class="operator">::</span>createNewInstance() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="keyword">new</span> CustomFormatter();
+  }
+
+  <span class="type">void</span> CustomFormatter<span class="operator">::</span>populateCopy(QValue3DAxisFormatter <span class="operator">&amp;</span>copy) <span class="keyword">const</span>
+  {
+      QValue3DAxisFormatter<span class="operator">::</span>populateCopy(copy);
+
+      CustomFormatter <span class="operator">*</span>customFormatter <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>CustomFormatter <span class="operator">*</span><span class="operator">&gt;</span>(<span class="operator">&amp;</span>copy);
+      customFormatter<span class="operator">-</span><span class="operator">&gt;</span>m_originDate <span class="operator">=</span> m_originDate;
+      customFormatter<span class="operator">-</span><span class="operator">&gt;</span>m_selectionFormat <span class="operator">=</span> m_selectionFormat;
+  }
+
+</pre>
+<p>Bulk of the work done by <code>CustomFormatter</code> is done in the <code>recalculate()</code> method, where our formatter calculates the grid, subgrid, and label positions, as well as formats the label strings. In our custom formatter we ignore the segment count of the axis and draw a grid line always at midnight. Subsegment count and label positioning is handled normally:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> CustomFormatter<span class="operator">::</span>recalculate()
+  {
+      <span class="comment">// We want our axis to always have gridlines at date breaks</span>
+
+      <span class="comment">// Convert range into QDateTimes</span>
+      <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> minTime <span class="operator">=</span> valueToDateTime(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>(axis()<span class="operator">-</span><span class="operator">&gt;</span>min()));
+      <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> maxTime <span class="operator">=</span> valueToDateTime(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>(axis()<span class="operator">-</span><span class="operator">&gt;</span>max()));
+
+      <span class="comment">// Find out the grid counts</span>
+      <span class="type"><a href="../qtcore/qtime.html">QTime</a></span> midnight(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> minFullDate(minTime<span class="operator">.</span>date()<span class="operator">,</span> midnight);
+      <span class="type">int</span> gridCount <span class="operator">=</span> <span class="number">0</span>;
+      <span class="keyword">if</span> (minFullDate <span class="operator">!</span><span class="operator">=</span> minTime)
+          minFullDate <span class="operator">=</span> minFullDate<span class="operator">.</span>addDays(<span class="number">1</span>);
+      <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> maxFullDate(maxTime<span class="operator">.</span>date()<span class="operator">,</span> midnight);
+
+      gridCount <span class="operator">+</span><span class="operator">=</span> minFullDate<span class="operator">.</span>daysTo(maxFullDate) <span class="operator">+</span> <span class="number">1</span>;
+      <span class="type">int</span> subGridCount <span class="operator">=</span> axis()<span class="operator">-</span><span class="operator">&gt;</span>subSegmentCount() <span class="operator">-</span> <span class="number">1</span>;
+
+      <span class="comment">// Reserve space for position arrays and label strings</span>
+      gridPositions()<span class="operator">.</span>resize(gridCount);
+      subGridPositions()<span class="operator">.</span>resize((gridCount <span class="operator">+</span> <span class="number">1</span>) <span class="operator">*</span> subGridCount);
+      labelPositions()<span class="operator">.</span>resize(gridCount);
+      labelStrings()<span class="operator">.</span>reserve(gridCount);
+
+      <span class="comment">// Calculate positions and format labels</span>
+      <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> startMs <span class="operator">=</span> minTime<span class="operator">.</span>toMSecsSinceEpoch();
+      <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> endMs <span class="operator">=</span> maxTime<span class="operator">.</span>toMSecsSinceEpoch();
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> dateNormalizer <span class="operator">=</span> endMs <span class="operator">-</span> startMs;
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> firstLineOffset <span class="operator">=</span> (minFullDate<span class="operator">.</span>toMSecsSinceEpoch() <span class="operator">-</span> startMs) <span class="operator">/</span> dateNormalizer;
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> segmentStep <span class="operator">=</span> oneDayMs <span class="operator">/</span> dateNormalizer;
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> subSegmentStep <span class="operator">=</span> <span class="number">0</span>;
+      <span class="keyword">if</span> (subGridCount <span class="operator">&gt;</span> <span class="number">0</span>)
+          subSegmentStep <span class="operator">=</span> segmentStep <span class="operator">/</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>(subGridCount <span class="operator">+</span> <span class="number">1</span>);
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> gridCount; i<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> gridValue <span class="operator">=</span> firstLineOffset <span class="operator">+</span> (segmentStep <span class="operator">*</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>(i));
+          gridPositions()<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <span class="type">float</span>(gridValue);
+          labelPositions()<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> <span class="type">float</span>(gridValue);
+          labelStrings() <span class="operator">&lt;</span><span class="operator">&lt;</span> minFullDate<span class="operator">.</span>addDays(i)<span class="operator">.</span>toString(axis()<span class="operator">-</span><span class="operator">&gt;</span>labelFormat());
+      }
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span><span class="operator">=</span> gridCount; i<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="keyword">if</span> (subGridPositions()<span class="operator">.</span>size()) {
+              <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> subGridCount; j<span class="operator">+</span><span class="operator">+</span>) {
+                  <span class="type">float</span> position;
+                  <span class="keyword">if</span> (i)
+                      position <span class="operator">=</span>  gridPositions()<span class="operator">.</span>at(i <span class="operator">-</span> <span class="number">1</span>) <span class="operator">+</span> subSegmentStep <span class="operator">*</span> (j <span class="operator">+</span> <span class="number">1</span>);
+                  <span class="keyword">else</span>
+                      position <span class="operator">=</span>  gridPositions()<span class="operator">.</span>at(<span class="number">0</span>) <span class="operator">-</span> segmentStep <span class="operator">+</span> subSegmentStep <span class="operator">*</span> (j <span class="operator">+</span> <span class="number">1</span>);
+                  <span class="keyword">if</span> (position <span class="operator">&gt;</span> <span class="number">1.0f</span> <span class="operator">|</span><span class="operator">|</span> position <span class="operator">&lt;</span> <span class="number">0.0f</span>)
+                      position <span class="operator">=</span> gridPositions()<span class="operator">.</span>at(<span class="number">0</span>);
+                  subGridPositions()<span class="operator">[</span>i <span class="operator">*</span> subGridCount <span class="operator">+</span> j<span class="operator">]</span> <span class="operator">=</span> position;
+              }
+          }
+      }
+  }
+
+</pre>
+<p>The axis labels are formatted to show only the date, but for selection label we want little more resolution for the timestamp, so we specify another property for our custom formatter to allow user to customize it:</p>
+<pre class="cpp">
+
+  Q_PROPERTY(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> selectionFormat READ selectionFormat WRITE setSelectionFormat NOTIFY selectionFormatChanged)
+
+</pre>
+<p>This selection format property is used in the reimplemented <code>stringToValue</code> method, where we ignore the submitted format and substitute the custom selection format for it:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> CustomFormatter<span class="operator">::</span>stringForValue(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> value<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>format) <span class="keyword">const</span>
+  {
+      Q_UNUSED(format)
+
+      <span class="keyword">return</span> valueToDateTime(value)<span class="operator">.</span>toString(m_selectionFormat);
+  }
+
+</pre>
+<p>To expose our new custom formatter to the QML, we must declare and register it:</p>
+<pre class="cpp">
+
+  Q_DECLARE_METATYPE(CustomFormatter <span class="operator">*</span>)
+  ...
+  qmlRegisterType<span class="operator">&lt;</span>CustomFormatter<span class="operator">&gt;</span>(<span class="string">&quot;CustomFormatter&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;CustomFormatter&quot;</span>);
+
+</pre>
+<a name="qml"></a>
+<h2 id="qml">QML</h2>
+<p>In the QML codes, we define a different axis for each dimension:</p>
+<pre class="qml">
+
+  <span class="name">axisZ</span>: <span class="name">valueAxis</span>
+  <span class="name">axisY</span>: <span class="name">logAxis</span>
+  <span class="name">axisX</span>: <span class="name">dateAxis</span>
+
+</pre>
+<p>Z-axis is just a regular <a href="qml-qtdatavisualization-valueaxis3d.html">ValueAxis3D</a>:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtdatavisualization-valueaxis3d.html">ValueAxis3D</a></span> {
+      <span class="name">id</span>: <span class="name">valueAxis</span>
+      <span class="name">segmentCount</span>: <span class="number">5</span>
+      <span class="name">subSegmentCount</span>: <span class="number">2</span>
+      <span class="name">labelFormat</span>: <span class="string">&quot;%.2f&quot;</span>
+      <span class="name">min</span>: <span class="number">0</span>
+      <span class="name">max</span>: <span class="number">10</span>
+  }
+
+</pre>
+<p>For the Y-axis we define a logarithmic axis. <a href="qml-qtdatavisualization-valueaxis3d.html">ValueAxis3D</a> can be made to show logarithmic scale by specifying <a href="qml-qtdatavisualization-logvalueaxis3dformatter.html">LogValueAxis3DFormatter</a> for <code>formatter</code> property of the axis:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtdatavisualization-valueaxis3d.html">ValueAxis3D</a></span> {
+      <span class="name">id</span>: <span class="name">logAxis</span>
+      <span class="name">formatter</span>: <span class="name">LogValueAxis3DFormatter</span> {
+          <span class="name">id</span>: <span class="name">logAxisFormatter</span>
+          <span class="name">base</span>: <span class="number">10</span>
+          <span class="name">autoSubGrid</span>: <span class="number">true</span>
+          <span class="name">showEdgeLabels</span>: <span class="number">true</span>
+      }
+      <span class="name">labelFormat</span>: <span class="string">&quot;%.2f&quot;</span>
+  }
+
+</pre>
+<p>And finally, for the X-axis we use our new <code>CustomFormatter</code>:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtdatavisualization-valueaxis3d.html">ValueAxis3D</a></span> {
+      <span class="name">id</span>: <span class="name">dateAxis</span>
+      <span class="name">formatter</span>: <span class="name">CustomFormatter</span> {
+          <span class="name">originDate</span>:  <span class="string">&quot;2014-01-01&quot;</span>
+          <span class="name">selectionFormat</span>: <span class="string">&quot;yyyy-MM-dd HH:mm:ss&quot;</span>
+      }
+      <span class="name">subSegmentCount</span>: <span class="number">2</span>
+      <span class="name">labelFormat</span>: <span class="string">&quot;yyyy-MM-dd&quot;</span>
+      <span class="name">min</span>: <span class="number">0</span>
+      <span class="name">max</span>: <span class="number">14</span>
+  }
+
+</pre>
+<p>Rest of the application consists of fairly self-explanatory logic for modifying the axes and showing the graph.</p>
+<p>Files:</p>
+<ul>
+<li><a href="qtdatavisualization-qmlaxisformatter-customformatter-cpp.html">qmlaxisformatter/customformatter.cpp</a></li>
+<li><a href="qtdatavisualization-qmlaxisformatter-customformatter-h.html">qmlaxisformatter/customformatter.h</a></li>
+<li><a href="qtdatavisualization-qmlaxisformatter-qml-qmlaxisformatter-data-qml.html">qmlaxisformatter/qml/qmlaxisformatter/Data.qml</a></li>
+<li><a href="qtdatavisualization-qmlaxisformatter-qml-qmlaxisformatter-newbutton-qml.html">qmlaxisformatter/qml/qmlaxisformatter/NewButton.qml</a></li>
+<li><a href="qtdatavisualization-qmlaxisformatter-qml-qmlaxisformatter-main-qml.html">qmlaxisformatter/qml/qmlaxisformatter/main.qml</a></li>
+<li><a href="qtdatavisualization-qmlaxisformatter-main-cpp.html">qmlaxisformatter/main.cpp</a></li>
+<li><a href="qtdatavisualization-qmlaxisformatter-qmlaxisformatter-pro.html">qmlaxisformatter/qmlaxisformatter.pro</a></li>
+<li><a href="qtdatavisualization-qmlaxisformatter-qmlaxisformatter-qrc.html">qmlaxisformatter/qmlaxisformatter.qrc</a></li>
+</ul>
+</div>
+<!-- @@@qmlaxisformatter -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

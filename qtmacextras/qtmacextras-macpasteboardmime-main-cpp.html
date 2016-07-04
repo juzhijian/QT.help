@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>main.cpp Example File | Qt Mac Extras 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtmacextras-index.html">Qt Mac Extras</a></td><td ><a href="qtmacextras-macpasteboardmime-example.html">Mac Pasteboard MIME Converter</a></td><td >main.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">main.cpp Example File</h1>
+<span class="subtitle">macpasteboardmime/main.cpp</span>
+<!-- $$$macpasteboardmime/main.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the QtMacExtras module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QDebug&gt;</span>
+  <span class="preprocessor">#include &lt;QDragEnterEvent&gt;</span>
+  <span class="preprocessor">#include &lt;QDropEvent&gt;</span>
+  <span class="preprocessor">#include &lt;QWidget&gt;</span>
+
+  <span class="preprocessor">#include &lt;qmacpasteboardmime.h&gt;</span>
+
+  <span class="keyword">class</span> VCardMime : <span class="keyword">public</span> <span class="type"><a href="qmacpasteboardmime.html">QMacPasteboardMime</a></span>
+  {
+  <span class="keyword">public</span>:
+      VCardMime() : <span class="type"><a href="qmacpasteboardmime.html">QMacPasteboardMime</a></span>(MIME_ALL)
+      { }
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> convertorName()
+      {
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;VCardMime&quot;</span>);
+      }
+
+      bool canConvert(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>mime<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> flav)
+      {
+          <span class="keyword">return</span> mimeFor(flav) <span class="operator">=</span><span class="operator">=</span> mime;
+      }
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> mimeFor(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> flav)
+      {
+          <span class="keyword">if</span> (flav <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;public.vcard&quot;</span>))
+              <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;application/x-mycompany-VCard&quot;</span>);
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+      }
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> flavorFor(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>mime)
+      {
+          <span class="keyword">if</span> (mime <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;application/x-mycompany-VCard&quot;</span>))
+              <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;public.vcard&quot;</span>);
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+      }
+
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> convertToMime(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>mime<span class="operator">,</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> data<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> flav)
+      {
+          Q_UNUSED(mime);
+          Q_UNUSED(flav);
+
+          <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> all;
+          foreach (<span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> i<span class="operator">,</span> data) {
+              all <span class="operator">+</span><span class="operator">=</span> i;
+          }
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(all);
+      }
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> convertFromMime(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>mime<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> data<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> flav)
+      {
+          Q_UNUSED(mime);
+          Q_UNUSED(data);
+          Q_UNUSED(flav);
+          <span class="comment">// Todo: implement!</span>
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span>();
+      }
+
+  };
+
+  <span class="keyword">class</span> TestWidget : <span class="keyword">public</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>
+  {
+  <span class="keyword">public</span>:
+      TestWidget() : <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>(<span class="number">0</span>)
+      {
+          vcardMime <span class="operator">=</span> <span class="keyword">new</span> VCardMime();
+          setAcceptDrops(<span class="keyword">true</span>);
+      }
+
+      <span class="operator">~</span>TestWidget()
+      {
+          <span class="keyword">delete</span> vcardMime;
+      }
+
+      <span class="type">void</span> dragEnterEvent(<span class="type"><a href="../qtgui/qdragenterevent.html">QDragEnterEvent</a></span> <span class="operator">*</span>e)
+      {
+          e<span class="operator">-</span><span class="operator">&gt;</span>accept();
+
+      }
+
+      <span class="keyword">virtual</span> <span class="type">void</span> dropEvent(<span class="type"><a href="../qtgui/qdropevent.html">QDropEvent</a></span> <span class="operator">*</span>e)
+      {
+          e<span class="operator">-</span><span class="operator">&gt;</span>accept();
+          contentsDropEvent(e);
+      }
+
+      <span class="type">void</span> contentsDropEvent(<span class="type"><a href="../qtgui/qdropevent.html">QDropEvent</a></span><span class="operator">*</span> e)
+      {
+          <span class="keyword">if</span> ( e<span class="operator">-</span><span class="operator">&gt;</span>mimeData()<span class="operator">-</span><span class="operator">&gt;</span>hasFormat( <span class="string">&quot;application/x-mycompany-VCard&quot;</span> ) )
+          {
+              <span class="type"><a href="../qtcore/qstring.html">QString</a></span> s <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>( e<span class="operator">-</span><span class="operator">&gt;</span>mimeData()<span class="operator">-</span><span class="operator">&gt;</span>data( <span class="string">&quot;application/x-mycompany-VCard&quot;</span> ) );
+
+              <span class="comment">// s now contains text of vcard</span>
+              <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;got vcard&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> s<span class="operator">.</span>count();
+
+              e<span class="operator">-</span><span class="operator">&gt;</span>acceptProposedAction();
+          }
+      }
+  <span class="keyword">private</span>:
+      VCardMime <span class="operator">*</span>vcardMime;
+  };
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span>argv)
+  {
+      <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      <a href="qmacpasteboardmime.html#qRegisterDraggedTypes">qRegisterDraggedTypes</a>(<span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> QLatin1String(<span class="string">&quot;public.vcard&quot;</span>));
+
+      TestWidget wid1;
+      wid1<span class="operator">.</span>show();
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+</div>
+<!-- @@@macpasteboardmime/main.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

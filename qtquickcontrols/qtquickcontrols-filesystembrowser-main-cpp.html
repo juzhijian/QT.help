@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>main.cpp Example File | Qt Quick Controls 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtquickcontrols-index.html">Qt Quick Controls</a></td><td ><a href="qtquickcontrols-filesystembrowser-example.html">Qt Quick Controls - File System Browser Example</a></td><td >main.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">main.cpp Example File</h1>
+<span class="subtitle">filesystembrowser/main.cpp</span>
+<!-- $$$filesystembrowser/main.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QQmlApplicationEngine&gt;</span>
+  <span class="preprocessor">#include &lt;QtQml&gt;</span>
+  <span class="preprocessor">#include &lt;QFileSystemModel&gt;</span>
+  <span class="preprocessor">#include &lt;QDateTime&gt;</span>
+  <span class="preprocessor">#include &lt;QDesktopServices&gt;</span>
+  <span class="preprocessor">#include &lt;QUrl&gt;</span>
+
+  <span class="keyword">static</span> <span class="keyword">inline</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> permissionString(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span> <span class="operator">&amp;</span>fi)
+  {
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>Permissions permissions <span class="operator">=</span> fi<span class="operator">.</span>permissions();
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> result <span class="operator">=</span> QLatin1String(<span class="string">&quot;----------&quot;</span>);
+      <span class="keyword">if</span> (fi<span class="operator">.</span>isSymLink())
+          result<span class="operator">[</span><span class="number">0</span><span class="operator">]</span> <span class="operator">=</span> QLatin1Char(<span class="char">'l'</span>);
+      <span class="keyword">else</span> <span class="keyword">if</span> (fi<span class="operator">.</span>isDir())
+          result<span class="operator">[</span><span class="number">0</span><span class="operator">]</span> <span class="operator">=</span> QLatin1Char(<span class="char">'d'</span>);
+      <span class="keyword">if</span> (permissions <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qfiledevice.html">QFileDevice</a></span><span class="operator">::</span>ReadUser)
+          result<span class="operator">[</span><span class="number">1</span><span class="operator">]</span> <span class="operator">=</span> QLatin1Char(<span class="char">'r'</span>);
+      <span class="keyword">if</span> (permissions <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qfiledevice.html">QFileDevice</a></span><span class="operator">::</span>WriteUser)
+          result<span class="operator">[</span><span class="number">2</span><span class="operator">]</span> <span class="operator">=</span> QLatin1Char(<span class="char">'w'</span>);
+      <span class="keyword">if</span> (permissions <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qfiledevice.html">QFileDevice</a></span><span class="operator">::</span>ExeUser)
+          result<span class="operator">[</span><span class="number">3</span><span class="operator">]</span> <span class="operator">=</span> QLatin1Char(<span class="char">'x'</span>);
+      <span class="keyword">if</span> (permissions <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qfiledevice.html">QFileDevice</a></span><span class="operator">::</span>ReadGroup)
+          result<span class="operator">[</span><span class="number">4</span><span class="operator">]</span> <span class="operator">=</span> QLatin1Char(<span class="char">'r'</span>);
+      <span class="keyword">if</span> (permissions <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qfiledevice.html">QFileDevice</a></span><span class="operator">::</span>WriteGroup)
+          result<span class="operator">[</span><span class="number">5</span><span class="operator">]</span> <span class="operator">=</span> QLatin1Char(<span class="char">'w'</span>);
+      <span class="keyword">if</span> (permissions <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qfiledevice.html">QFileDevice</a></span><span class="operator">::</span>ExeGroup)
+          result<span class="operator">[</span><span class="number">6</span><span class="operator">]</span> <span class="operator">=</span> QLatin1Char(<span class="char">'x'</span>);
+      <span class="keyword">if</span> (permissions <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qfiledevice.html">QFileDevice</a></span><span class="operator">::</span>ReadOther)
+          result<span class="operator">[</span><span class="number">7</span><span class="operator">]</span> <span class="operator">=</span> QLatin1Char(<span class="char">'r'</span>);
+      <span class="keyword">if</span> (permissions <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qfiledevice.html">QFileDevice</a></span><span class="operator">::</span>WriteOther)
+          result<span class="operator">[</span><span class="number">8</span><span class="operator">]</span> <span class="operator">=</span> QLatin1Char(<span class="char">'w'</span>);
+      <span class="keyword">if</span> (permissions <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qfiledevice.html">QFileDevice</a></span><span class="operator">::</span>ExeOther)
+          result<span class="operator">[</span><span class="number">9</span><span class="operator">]</span> <span class="operator">=</span> QLatin1Char(<span class="char">'x'</span>);
+      <span class="keyword">return</span> result;
+  }
+
+  <span class="keyword">static</span> <span class="keyword">inline</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> sizeString(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span> <span class="operator">&amp;</span>fi)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>fi<span class="operator">.</span>isFile())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#qint64-typedef">qint64</a></span> size <span class="operator">=</span> fi<span class="operator">.</span>size();
+      <span class="keyword">if</span> (size <span class="operator">&gt;</span> <span class="number">1024</span> <span class="operator">*</span> <span class="number">1024</span> <span class="operator">*</span> <span class="number">10</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(size <span class="operator">/</span> (<span class="number">1024</span> <span class="operator">*</span> <span class="number">1024</span>)) <span class="operator">+</span> QLatin1Char(<span class="char">'M'</span>);
+      <span class="keyword">if</span> (size <span class="operator">&gt;</span> <span class="number">1024</span> <span class="operator">*</span> <span class="number">10</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(size <span class="operator">/</span> <span class="number">1024</span>) <span class="operator">+</span> QLatin1Char(<span class="char">'K'</span>);
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(size);
+  }
+
+  <span class="keyword">class</span> DisplayFileSystemModel : <span class="keyword">public</span> <span class="type"><a href="../qtwidgets/qfilesystemmodel.html">QFileSystemModel</a></span> {
+      Q_OBJECT
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> DisplayFileSystemModel(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent <span class="operator">=</span> Q_NULLPTR)
+          : <span class="type"><a href="../qtwidgets/qfilesystemmodel.html">QFileSystemModel</a></span>(parent) {}
+
+      <span class="keyword">enum</span> Roles  {
+          SizeRole <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole <span class="operator">+</span> <span class="number">4</span><span class="operator">,</span>
+          DisplayableFilePermissionsRole <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole <span class="operator">+</span> <span class="number">5</span><span class="operator">,</span>
+          LastModifiedRole <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole <span class="operator">+</span> <span class="number">6</span><span class="operator">,</span>
+          UrlStringRole <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>UserRole <span class="operator">+</span> <span class="number">7</span>
+      };
+      Q_ENUM(Roles)
+
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole) <span class="keyword">const</span> Q_DECL_OVERRIDE
+      {
+          <span class="keyword">if</span> (index<span class="operator">.</span>isValid() <span class="operator">&amp;</span><span class="operator">&amp;</span> role <span class="operator">&gt;</span><span class="operator">=</span> SizeRole) {
+              <span class="keyword">switch</span> (role) {
+              <span class="keyword">case</span> SizeRole:
+                  <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(sizeString(fileInfo(index)));
+              <span class="keyword">case</span> DisplayableFilePermissionsRole:
+                  <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(permissionString(fileInfo(index)));
+              <span class="keyword">case</span> LastModifiedRole:
+                  <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(fileInfo(index)<span class="operator">.</span>lastModified()<span class="operator">.</span>toString(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>SystemLocaleShortDate));
+              <span class="keyword">case</span> UrlStringRole:
+                  <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>fromLocalFile(filePath(index))<span class="operator">.</span>toString());
+              <span class="keyword">default</span>:
+                  <span class="keyword">break</span>;
+              }
+          }
+          <span class="keyword">return</span> <span class="type"><a href="../qtwidgets/qfilesystemmodel.html">QFileSystemModel</a></span><span class="operator">::</span>data(index<span class="operator">,</span> role);
+      }
+
+      <span class="type"><a href="../qtcore/qhash.html">QHash</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span><span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> roleNames() <span class="keyword">const</span> Q_DECL_OVERRIDE
+      {
+           <span class="type"><a href="../qtcore/qhash.html">QHash</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span><span class="operator">&gt;</span> result <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qfilesystemmodel.html">QFileSystemModel</a></span><span class="operator">::</span>roleNames();
+           result<span class="operator">.</span>insert(SizeRole<span class="operator">,</span> <span class="type">QByteArrayLiteral</span>(<span class="string">&quot;size&quot;</span>));
+           result<span class="operator">.</span>insert(DisplayableFilePermissionsRole<span class="operator">,</span> <span class="type">QByteArrayLiteral</span>(<span class="string">&quot;displayableFilePermissions&quot;</span>));
+           result<span class="operator">.</span>insert(LastModifiedRole<span class="operator">,</span> <span class="type">QByteArrayLiteral</span>(<span class="string">&quot;lastModified&quot;</span>));
+           <span class="keyword">return</span> result;
+      }
+  };
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      <span class="type"><a href="../qtqml/qqmlapplicationengine.html">QQmlApplicationEngine</a></span> engine;
+      qmlRegisterUncreatableType<span class="operator">&lt;</span>DisplayFileSystemModel<span class="operator">&gt;</span>(<span class="string">&quot;io.qt.examples.quick.controls.filesystembrowser&quot;</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span>
+                                                         <span class="string">&quot;FileSystemModel&quot;</span><span class="operator">,</span> <span class="string">&quot;Cannot create a FileSystemModel instance.&quot;</span>);
+      <span class="type"><a href="../qtwidgets/qfilesystemmodel.html">QFileSystemModel</a></span> <span class="operator">*</span>fsm <span class="operator">=</span> <span class="keyword">new</span> DisplayFileSystemModel(<span class="operator">&amp;</span>engine);
+      fsm<span class="operator">-</span><span class="operator">&gt;</span>setRootPath(<span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>homePath());
+      fsm<span class="operator">-</span><span class="operator">&gt;</span>setResolveSymlinks(<span class="keyword">true</span>);
+      engine<span class="operator">.</span>rootContext()<span class="operator">-</span><span class="operator">&gt;</span>setContextProperty(<span class="string">&quot;fileSystemModel&quot;</span><span class="operator">,</span> fsm);
+      engine<span class="operator">.</span>rootContext()<span class="operator">-</span><span class="operator">&gt;</span>setContextProperty(<span class="string">&quot;rootPathIndex&quot;</span><span class="operator">,</span> fsm<span class="operator">-</span><span class="operator">&gt;</span>index(fsm<span class="operator">-</span><span class="operator">&gt;</span>rootPath()));
+      engine<span class="operator">.</span>load(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:///main.qml&quot;</span>)));
+      <span class="keyword">if</span> (engine<span class="operator">.</span>rootObjects()<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span> <span class="operator">-</span><span class="number">1</span>;
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+  <span class="preprocessor">#include &quot;main.moc&quot;</span>
+
+</pre>
+</div>
+<!-- @@@filesystembrowser/main.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

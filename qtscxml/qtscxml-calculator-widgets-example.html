@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- calculator.qdoc -->
+  <title>Qt SCXML Calculator Example | Qt SCXML 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtscxml-index.html">Qt SCXML</a></td><td >Qt SCXML Calculator Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+<li class="level1"><a href="#compiling-the-state-machine">Compiling the State Machine</a></li>
+<li class="level1"><a href="#instantiating-the-state-machine">Instantiating the State Machine</a></li>
+<li class="level1"><a href="#connecting-to-active-properties">Connecting to Active Properties</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt SCXML Calculator Example</h1>
+<span class="subtitle"></span>
+<!-- $$$calculator-widgets-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/calculator.png" alt="" /></p><p><i>Calculator</i> uses Qt SCXML to implement the <a href="http://www.w3.org/TR/scxml/#N11630">Calculator Example</a> presented in the SCXML Specification.</p>
+<p>The state machine is specified in the <i>statemachine.scxml</i> file and compiled into the <code>CalculatorStateMachine</code> class. The user interface is created using Qt Widgets.</p>
+<a name="running-the-example"></a>
+<h2 id="running-the-example">Running the Example</h2>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<a name="compiling-the-state-machine"></a>
+<h2 id="compiling-the-state-machine">Compiling the State Machine</h2>
+<p>We link against the Qt SCXML module by adding the following line to the <i>.pro</i> file:</p>
+<pre class="qml">
+
+  QT += widgets scxml
+
+</pre>
+<p>We then specify the state machine to compile:</p>
+<pre class="qml">
+
+  STATECHARTS = ../calculator-common/statemachine.scxml
+
+</pre>
+<p>We also tell qmake to run <code>qscxmlc</code>, which generates <i>statemachine.h</i> and <i>statemachine.cpp</i>, and adds them to the <code>HEADERS</code> and <code>SOURCES</code> variables for compilation:</p>
+<pre class="qml">
+
+  load(qscxmlc)
+
+</pre>
+<a name="instantiating-the-state-machine"></a>
+<h2 id="instantiating-the-state-machine">Instantiating the State Machine</h2>
+<p>We instantiate the generated <code>CalculatorStateMachine</code> class in the <i>calculator-widgets.cpp</i> file, as follows:</p>
+<pre class="qml">
+
+  <span class="preprocessor">#include &quot;statemachine.h&quot;</span>
+  <span class="preprocessor">#include &quot;mainwindow.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QApplication&gt;</span>
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span>argv)
+  {
+      <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span> app(argc<span class="operator">,</span> argv);
+
+      CalculatorStateMachine machine;
+      MainWindow mainWindow(<span class="operator">&amp;</span>machine);
+
+      machine<span class="operator">.</span>start();
+      mainWindow<span class="operator">.</span>show();
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+<a name="connecting-to-active-properties"></a>
+<h2 id="connecting-to-active-properties">Connecting to Active Properties</h2>
+<p>After instantiating the state machine, we can connect to the active properties of the states, as follows:</p>
+<pre class="qml">
+
+      connect(ui<span class="operator">-</span><span class="operator">&gt;</span>digit0<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qabstractbutton.html">QAbstractButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="operator">[</span><span class="keyword">this</span><span class="operator">]</span> {
+          m_machine<span class="operator">-</span><span class="operator">&gt;</span>submitEvent(<span class="string">&quot;DIGIT.0&quot;</span>);
+      });
+      connect(ui<span class="operator">-</span><span class="operator">&gt;</span>digit1<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qabstractbutton.html">QAbstractButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="operator">[</span><span class="keyword">this</span><span class="operator">]</span> {
+          m_machine<span class="operator">-</span><span class="operator">&gt;</span>submitEvent(<span class="string">&quot;DIGIT.1&quot;</span>);
+      });
+      connect(ui<span class="operator">-</span><span class="operator">&gt;</span>digit2<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qabstractbutton.html">QAbstractButton</a></span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="operator">[</span><span class="keyword">this</span><span class="operator">]</span> {
+          m_machine<span class="operator">-</span><span class="operator">&gt;</span>submitEvent(<span class="string">&quot;DIGIT.2&quot;</span>);
+      });
+
+</pre>
+<p>To be notified when a state machine sends out an event, we connect to the corresponding signal:</p>
+<pre class="qml">
+
+      connect(m_machine<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qscxmlstatemachine.html">QScxmlStateMachine</a></span><span class="operator">::</span>eventOccurred<span class="operator">,</span> <span class="operator">[</span><span class="keyword">this</span><span class="operator">]</span>(<span class="keyword">const</span> <span class="type"><a href="qscxmlevent.html">QScxmlEvent</a></span> <span class="operator">&amp;</span>event) {
+          <span class="keyword">if</span> (event<span class="operator">.</span>name() <span class="operator">=</span><span class="operator">=</span> QLatin1String(<span class="string">&quot;updateDisplay&quot;</span>)) {
+              <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> display <span class="operator">=</span> event<span class="operator">.</span>data()<span class="operator">.</span>toMap()<span class="operator">.</span>value(<span class="string">&quot;display&quot;</span>)<span class="operator">.</span>toString();
+              ui<span class="operator">-</span><span class="operator">&gt;</span>display<span class="operator">-</span><span class="operator">&gt;</span>setText(display);
+          }
+      });
+
+</pre>
+<p>Files:</p>
+<ul>
+<li><a href="qtscxml-calculator-widgets-calculator-widgets-cpp.html">calculator-widgets/calculator-widgets.cpp</a></li>
+<li><a href="qtscxml-calculator-widgets-mainwindow-cpp.html">calculator-widgets/mainwindow.cpp</a></li>
+<li><a href="qtscxml-calculator-widgets-mainwindow-h.html">calculator-widgets/mainwindow.h</a></li>
+<li><a href="qtscxml-calculator-widgets-mainwindow-ui.html">calculator-widgets/mainwindow.ui</a></li>
+<li><a href="qtscxml-calculator-widgets-calculator-widgets-pro.html">calculator-widgets/calculator-widgets.pro</a></li>
+</ul>
+</div>
+<!-- @@@calculator-widgets -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

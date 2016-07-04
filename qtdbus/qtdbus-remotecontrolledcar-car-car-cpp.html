@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>car.cpp Example File | Qt D-Bus</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdbus-index.html">Qt D-Bus</a></td><td ><a href="qtdbus-remotecontrolledcar-example.html">D-Bus Remote Controlled Car Example</a></td><td >car.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">car.cpp Example File</h1>
+<span class="subtitle">remotecontrolledcar/car/car.cpp</span>
+<!-- $$$remotecontrolledcar/car/car.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;car.h&quot;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QtWidgets&gt;</span>
+  <span class="preprocessor">#include &lt;math.h&gt;</span>
+
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">double</span> Pi <span class="operator">=</span> <span class="number">3.14159265358979323846264338327950288419717</span>;
+
+  <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> Car<span class="operator">::</span>boundingRect() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span>(<span class="operator">-</span><span class="number">35</span><span class="operator">,</span> <span class="operator">-</span><span class="number">81</span><span class="operator">,</span> <span class="number">70</span><span class="operator">,</span> <span class="number">115</span>);
+  }
+
+  Car<span class="operator">::</span>Car() : color(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>green)<span class="operator">,</span> wheelsAngle(<span class="number">0</span>)<span class="operator">,</span> speed(<span class="number">0</span>)
+  {
+      startTimer(<span class="number">1000</span> <span class="operator">/</span> <span class="number">33</span>);
+      setFlag(<span class="type">QGraphicsItem</span><span class="operator">::</span>ItemIsMovable<span class="operator">,</span> <span class="keyword">true</span>);
+      setFlag(<span class="type">QGraphicsItem</span><span class="operator">::</span>ItemIsFocusable<span class="operator">,</span> <span class="keyword">true</span>);
+  }
+
+  <span class="type">void</span> Car<span class="operator">::</span>accelerate()
+  {
+      <span class="keyword">if</span> (speed <span class="operator">&lt;</span> <span class="number">10</span>)
+          <span class="operator">+</span><span class="operator">+</span>speed;
+  }
+
+  <span class="type">void</span> Car<span class="operator">::</span>decelerate()
+  {
+      <span class="keyword">if</span> (speed <span class="operator">&gt;</span> <span class="operator">-</span><span class="number">10</span>)
+          <span class="operator">-</span><span class="operator">-</span>speed;
+  }
+
+  <span class="type">void</span> Car<span class="operator">::</span>turnLeft()
+  {
+      <span class="keyword">if</span> (wheelsAngle <span class="operator">&gt;</span> <span class="operator">-</span><span class="number">30</span>)
+          wheelsAngle <span class="operator">-</span><span class="operator">=</span> <span class="number">5</span>;
+  }
+
+  <span class="type">void</span> Car<span class="operator">::</span>turnRight()
+  {
+      <span class="keyword">if</span> (wheelsAngle <span class="operator">&lt;</span> <span class="number">30</span>)
+         wheelsAngle <span class="operator">+</span><span class="operator">=</span> <span class="number">5</span>;
+  }
+
+  <span class="type">void</span> Car<span class="operator">::</span>paint(<span class="type">QPainter</span> <span class="operator">*</span>painter<span class="operator">,</span> <span class="keyword">const</span> <span class="type">QStyleOptionGraphicsItem</span> <span class="operator">*</span>option<span class="operator">,</span> <span class="type">QWidget</span> <span class="operator">*</span>widget)
+  {
+      Q_UNUSED(option);
+      Q_UNUSED(widget);
+
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>gray);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawRect(<span class="operator">-</span><span class="number">20</span><span class="operator">,</span> <span class="operator">-</span><span class="number">58</span><span class="operator">,</span> <span class="number">40</span><span class="operator">,</span> <span class="number">2</span>); <span class="comment">// front axel</span>
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawRect(<span class="operator">-</span><span class="number">20</span><span class="operator">,</span> <span class="number">7</span><span class="operator">,</span> <span class="number">40</span><span class="operator">,</span> <span class="number">2</span>); <span class="comment">// rear axel</span>
+
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(color);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawRect(<span class="operator">-</span><span class="number">25</span><span class="operator">,</span> <span class="operator">-</span><span class="number">79</span><span class="operator">,</span> <span class="number">50</span><span class="operator">,</span> <span class="number">10</span>); <span class="comment">// front wing</span>
+
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawEllipse(<span class="operator">-</span><span class="number">25</span><span class="operator">,</span> <span class="operator">-</span><span class="number">48</span><span class="operator">,</span> <span class="number">50</span><span class="operator">,</span> <span class="number">20</span>); <span class="comment">// side pods</span>
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawRect(<span class="operator">-</span><span class="number">25</span><span class="operator">,</span> <span class="operator">-</span><span class="number">38</span><span class="operator">,</span> <span class="number">50</span><span class="operator">,</span> <span class="number">35</span>); <span class="comment">// side pods</span>
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawRect(<span class="operator">-</span><span class="number">5</span><span class="operator">,</span> <span class="number">9</span><span class="operator">,</span> <span class="number">10</span><span class="operator">,</span> <span class="number">10</span>); <span class="comment">// back pod</span>
+
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawEllipse(<span class="operator">-</span><span class="number">10</span><span class="operator">,</span> <span class="operator">-</span><span class="number">81</span><span class="operator">,</span> <span class="number">20</span><span class="operator">,</span> <span class="number">100</span>); <span class="comment">// main body</span>
+
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawRect(<span class="operator">-</span><span class="number">17</span><span class="operator">,</span> <span class="number">19</span><span class="operator">,</span> <span class="number">34</span><span class="operator">,</span> <span class="number">15</span>); <span class="comment">// rear wing</span>
+
+      painter<span class="operator">-</span><span class="operator">&gt;</span>setBrush(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawPie(<span class="operator">-</span><span class="number">5</span><span class="operator">,</span> <span class="operator">-</span><span class="number">51</span><span class="operator">,</span> <span class="number">10</span><span class="operator">,</span> <span class="number">15</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">180</span> <span class="operator">*</span> <span class="number">16</span>);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawRect(<span class="operator">-</span><span class="number">5</span><span class="operator">,</span> <span class="operator">-</span><span class="number">44</span><span class="operator">,</span> <span class="number">10</span><span class="operator">,</span> <span class="number">10</span>); <span class="comment">// cocpit</span>
+
+      painter<span class="operator">-</span><span class="operator">&gt;</span>save();
+      painter<span class="operator">-</span><span class="operator">&gt;</span>translate(<span class="operator">-</span><span class="number">20</span><span class="operator">,</span> <span class="operator">-</span><span class="number">58</span>);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>rotate(wheelsAngle);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawRect(<span class="operator">-</span><span class="number">10</span><span class="operator">,</span> <span class="operator">-</span><span class="number">7</span><span class="operator">,</span> <span class="number">10</span><span class="operator">,</span> <span class="number">15</span>); <span class="comment">// front left</span>
+      painter<span class="operator">-</span><span class="operator">&gt;</span>restore();
+
+      painter<span class="operator">-</span><span class="operator">&gt;</span>save();
+      painter<span class="operator">-</span><span class="operator">&gt;</span>translate(<span class="number">20</span><span class="operator">,</span> <span class="operator">-</span><span class="number">58</span>);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>rotate(wheelsAngle);
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawRect(<span class="number">0</span><span class="operator">,</span> <span class="operator">-</span><span class="number">7</span><span class="operator">,</span> <span class="number">10</span><span class="operator">,</span> <span class="number">15</span>); <span class="comment">// front left</span>
+      painter<span class="operator">-</span><span class="operator">&gt;</span>restore();
+
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawRect(<span class="operator">-</span><span class="number">30</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">12</span><span class="operator">,</span> <span class="number">17</span>); <span class="comment">// rear left</span>
+      painter<span class="operator">-</span><span class="operator">&gt;</span>drawRect(<span class="number">19</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">12</span><span class="operator">,</span> <span class="number">17</span>);  <span class="comment">// rear right</span>
+  }
+
+  <span class="type">void</span> Car<span class="operator">::</span>timerEvent(<span class="type"><a href="../qtcore/qtimerevent.html">QTimerEvent</a></span> <span class="operator">*</span>event)
+  {
+      Q_UNUSED(event);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> axelDistance <span class="operator">=</span> <span class="number">54</span>;
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> wheelsAngleRads <span class="operator">=</span> (wheelsAngle <span class="operator">*</span> Pi) <span class="operator">/</span> <span class="number">180</span>;
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> turnDistance <span class="operator">=</span> <span class="operator">::</span>cos(wheelsAngleRads) <span class="operator">*</span> axelDistance <span class="operator">*</span> <span class="number">2</span>;
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> turnRateRads <span class="operator">=</span> wheelsAngleRads <span class="operator">/</span> turnDistance;  <span class="comment">// rough estimate</span>
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> turnRate <span class="operator">=</span> (turnRateRads <span class="operator">*</span> <span class="number">180</span>) <span class="operator">/</span> Pi;
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> rotation <span class="operator">=</span> speed <span class="operator">*</span> turnRate;
+
+      setTransform(<span class="type">QTransform</span>()<span class="operator">.</span>rotate(rotation)<span class="operator">,</span> <span class="keyword">true</span>);
+      setTransform(<span class="type">QTransform</span><span class="operator">::</span>fromTranslate(<span class="number">0</span><span class="operator">,</span> <span class="operator">-</span>speed)<span class="operator">,</span> <span class="keyword">true</span>);
+      update();
+  }
+
+</pre>
+</div>
+<!-- @@@remotecontrolledcar/car/car.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>widget.cpp Example File | Qt Charts 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcharts-index.html">Qt Charts</a></td><td ><a href="qtcharts-nesteddonuts-example.html">Nested Donuts Example</a></td><td >widget.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">widget.cpp Example File</h1>
+<span class="subtitle">nesteddonuts/widget.cpp</span>
+<!-- $$$nesteddonuts/widget.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Charts module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+  <span class="preprocessor">#include &quot;widget.h&quot;</span>
+  <span class="preprocessor">#include &lt;QtCharts/QChartView&gt;</span>
+  <span class="preprocessor">#include &lt;QtCharts/QChart&gt;</span>
+  <span class="preprocessor">#include &lt;QtCharts/QLegend&gt;</span>
+  <span class="preprocessor">#include &lt;QtCharts/QPieSeries&gt;</span>
+  <span class="preprocessor">#include &lt;QtCharts/QPieSlice&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QTime&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QGridLayout&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QTimer&gt;</span>
+
+  QT_CHARTS_USE_NAMESPACE
+
+  Widget<span class="operator">::</span>Widget(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>(parent)
+  {
+      setMinimumSize(<span class="number">800</span><span class="operator">,</span> <span class="number">600</span>);
+      qsrand(<span class="type"><a href="../qtcore/qtime.html">QTime</a></span>(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>)<span class="operator">.</span>secsTo(<span class="type"><a href="../qtcore/qtime.html">QTime</a></span><span class="operator">::</span>currentTime()));
+
+      <span class="type"><a href="qchartview.html">QChartView</a></span> <span class="operator">*</span>chartView <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qchartview.html">QChartView</a></span>;
+      chartView<span class="operator">-</span><span class="operator">&gt;</span>setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing);
+      <span class="type"><a href="qchart.html">QChart</a></span> <span class="operator">*</span>chart <span class="operator">=</span> chartView<span class="operator">-</span><span class="operator">&gt;</span>chart();
+      chart<span class="operator">-</span><span class="operator">&gt;</span>legend()<span class="operator">-</span><span class="operator">&gt;</span>setVisible(<span class="keyword">false</span>);
+      chart<span class="operator">-</span><span class="operator">&gt;</span>setTitle(<span class="string">&quot;Nested donuts demo&quot;</span>);
+      chart<span class="operator">-</span><span class="operator">&gt;</span>setAnimationOptions(<span class="type"><a href="qchart.html">QChart</a></span><span class="operator">::</span>AllAnimations);
+
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> minSize <span class="operator">=</span> <span class="number">0.1</span>;
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> maxSize <span class="operator">=</span> <span class="number">0.9</span>;
+      <span class="type">int</span> donutCount <span class="operator">=</span> <span class="number">5</span>;
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> donutCount; i<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="type"><a href="qpieseries.html">QPieSeries</a></span> <span class="operator">*</span>donut <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpieseries.html">QPieSeries</a></span>;
+          <span class="type">int</span> sliceCount <span class="operator">=</span>  <span class="number">3</span> <span class="operator">+</span> qrand() <span class="operator">%</span> <span class="number">3</span>;
+          <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> sliceCount; j<span class="operator">+</span><span class="operator">+</span>) {
+              <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> value <span class="operator">=</span> <span class="number">100</span> <span class="operator">+</span> qrand() <span class="operator">%</span> <span class="number">100</span>;
+              <span class="type"><a href="qpieslice.html">QPieSlice</a></span> <span class="operator">*</span>slice <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpieslice.html">QPieSlice</a></span>(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;%1&quot;</span>)<span class="operator">.</span>arg(value)<span class="operator">,</span> value);
+              slice<span class="operator">-</span><span class="operator">&gt;</span>setLabelVisible(<span class="keyword">true</span>);
+              slice<span class="operator">-</span><span class="operator">&gt;</span>setLabelColor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white);
+              slice<span class="operator">-</span><span class="operator">&gt;</span>setLabelPosition(<span class="type"><a href="qpieslice.html">QPieSlice</a></span><span class="operator">::</span>LabelInsideTangential);
+              connect(slice<span class="operator">,</span> SIGNAL(hovered(bool))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(explodeSlice(bool)));
+              donut<span class="operator">-</span><span class="operator">&gt;</span>append(slice);
+              donut<span class="operator">-</span><span class="operator">&gt;</span>setHoleSize(minSize <span class="operator">+</span> i <span class="operator">*</span> (maxSize <span class="operator">-</span> minSize) <span class="operator">/</span> donutCount);
+              donut<span class="operator">-</span><span class="operator">&gt;</span>setPieSize(minSize <span class="operator">+</span> (i <span class="operator">+</span> <span class="number">1</span>) <span class="operator">*</span> (maxSize <span class="operator">-</span> minSize) <span class="operator">/</span> donutCount);
+          }
+          m_donuts<span class="operator">.</span>append(donut);
+          chartView<span class="operator">-</span><span class="operator">&gt;</span>chart()<span class="operator">-</span><span class="operator">&gt;</span>addSeries(donut);
+      }
+
+      <span class="comment">// create main layout</span>
+      <span class="type"><a href="../qtwidgets/qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>mainLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qgridlayout.html">QGridLayout</a></span>;
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(chartView<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+      setLayout(mainLayout);
+
+      updateTimer <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span>(<span class="keyword">this</span>);
+      connect(updateTimer<span class="operator">,</span> SIGNAL(timeout())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateRotation()));
+      updateTimer<span class="operator">-</span><span class="operator">&gt;</span>start(<span class="number">1250</span>);
+  }
+
+  Widget<span class="operator">::</span><span class="operator">~</span>Widget()
+  {
+
+  }
+
+  <span class="type">void</span> Widget<span class="operator">::</span>updateRotation()
+  {
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_donuts<span class="operator">.</span>count(); i<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="type"><a href="qpieseries.html">QPieSeries</a></span> <span class="operator">*</span>donut <span class="operator">=</span> m_donuts<span class="operator">.</span>at(i);
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> phaseShift <span class="operator">=</span>  <span class="operator">-</span><span class="number">50</span> <span class="operator">+</span> qrand() <span class="operator">%</span> <span class="number">100</span>;
+          donut<span class="operator">-</span><span class="operator">&gt;</span>setPieStartAngle(donut<span class="operator">-</span><span class="operator">&gt;</span>pieStartAngle() <span class="operator">+</span> phaseShift);
+          donut<span class="operator">-</span><span class="operator">&gt;</span>setPieEndAngle(donut<span class="operator">-</span><span class="operator">&gt;</span>pieEndAngle() <span class="operator">+</span> phaseShift);
+      }
+  }
+
+  <span class="type">void</span> Widget<span class="operator">::</span>explodeSlice(bool exploded)
+  {
+      <span class="type"><a href="qpieslice.html">QPieSlice</a></span> <span class="operator">*</span>slice <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type"><a href="qpieslice.html">QPieSlice</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(sender());
+      <span class="keyword">if</span> (exploded) {
+          updateTimer<span class="operator">-</span><span class="operator">&gt;</span>stop();
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> sliceStartAngle <span class="operator">=</span> slice<span class="operator">-</span><span class="operator">&gt;</span>startAngle();
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> sliceEndAngle <span class="operator">=</span> slice<span class="operator">-</span><span class="operator">&gt;</span>startAngle() <span class="operator">+</span> slice<span class="operator">-</span><span class="operator">&gt;</span>angleSpan();
+
+          <span class="type"><a href="qpieseries.html">QPieSeries</a></span> <span class="operator">*</span>donut <span class="operator">=</span> slice<span class="operator">-</span><span class="operator">&gt;</span>series();
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> seriesIndex <span class="operator">=</span> m_donuts<span class="operator">.</span>indexOf(donut);
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> seriesIndex <span class="operator">+</span> <span class="number">1</span>; i <span class="operator">&lt;</span> m_donuts<span class="operator">.</span>count(); i<span class="operator">+</span><span class="operator">+</span>) {
+              m_donuts<span class="operator">.</span>at(i)<span class="operator">-</span><span class="operator">&gt;</span>setPieStartAngle(sliceEndAngle);
+              m_donuts<span class="operator">.</span>at(i)<span class="operator">-</span><span class="operator">&gt;</span>setPieEndAngle(<span class="number">360</span> <span class="operator">+</span> sliceStartAngle);
+          }
+      } <span class="keyword">else</span> {
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_donuts<span class="operator">.</span>count(); i<span class="operator">+</span><span class="operator">+</span>) {
+              m_donuts<span class="operator">.</span>at(i)<span class="operator">-</span><span class="operator">&gt;</span>setPieStartAngle(<span class="number">0</span>);
+              m_donuts<span class="operator">.</span>at(i)<span class="operator">-</span><span class="operator">&gt;</span>setPieEndAngle(<span class="number">360</span>);
+          }
+          updateTimer<span class="operator">-</span><span class="operator">&gt;</span>start();
+      }
+      slice<span class="operator">-</span><span class="operator">&gt;</span>setExploded(exploded);
+  }
+
+</pre>
+</div>
+<!-- @@@nesteddonuts/widget.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

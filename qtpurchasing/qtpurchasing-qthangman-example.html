@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qthangman.qdoc -->
+  <title>Qt Purchasing Examples - QtHangman | Qt Purchasing 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtpurchasing-index.html">Qt Purchasing</a></td><td >Qt Purchasing Examples - QtHangman</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Purchasing Examples - QtHangman</h1>
+<span class="subtitle"></span>
+<!-- $$$qthangman-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/qthangman-example.png" alt="" /></p><p>QtHangman is a complete mobile application that demonstrates how it is possible to offer in-app products inside a Qt application in a cross-platform manner. In order to test the in-app purchase functionality in the example, you must first register the application and its products in the external store. For an introduction on how to do this, see the guides for <a href="qtpurchasing-googleplay.html">Google Play</a> and <a href="qtpurchasing-appstore.html">App Store</a> respectively.</p>
+<p>In-app purchasing can be added to a Qt Mobile application by first adding a Store object. In QtHangman the Store object is created by the MainView component that is loaded on application startup.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtpurchasing-store.html">Store</a></span> {
+      <span class="name">id</span>: <span class="name">iapStore</span>
+  }
+
+</pre>
+<p>QtHangman defines a component for displaying a store for purchasing in-app products made available. These products must be first registered with the store object we created above in MainView. There are two products available, the first being a consumable type.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtpurchasing-product.html">Product</a></span> {
+      <span class="name">id</span>: <span class="name">product100Vowels</span>
+      <span class="name">store</span>: <span class="name">iapStore</span>
+      <span class="name">type</span>: <span class="name">Product</span>.<span class="name">Consumable</span>
+      <span class="name">identifier</span>: <span class="string">&quot;org.qtproject.qthangman.100vowels&quot;</span>
+
+      <span class="name">onPurchaseSucceeded</span>: {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">identifier</span> <span class="operator">+</span> <span class="string">&quot; purchase successful&quot;</span>);
+          <span class="name">applicationData</span>.<span class="name">vowelsAvailable</span> <span class="operator">+=</span> <span class="number">100</span>;
+          <span class="name">transaction</span>.<span class="name">finalize</span>();
+          <span class="name">pageStack</span>.<span class="name">pop</span>();
+      }
+
+      <span class="name">onPurchaseFailed</span>: {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">identifier</span> <span class="operator">+</span> <span class="string">&quot; purchase failed&quot;</span>);
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;reason: &quot;</span>
+                      <span class="operator">+</span> <span class="name">transaction</span>.<span class="name">failureReason</span> <span class="operator">===</span> <span class="name">Transaction</span>.<span class="name">CanceledByUser</span> ? <span class="string">&quot;Canceled&quot;</span> : <span class="name">transaction</span>.<span class="name">errorString</span>);
+          <span class="name">transaction</span>.<span class="name">finalize</span>();
+      }
+  }
+
+</pre>
+<p>This consumable product provides 100 additional vowels to be used when guessing words in the game. When it is successfully purchased we update the state of the application to include 100 additional vowels. Then we call finalize on the transaction object to confirm to the platform store that the consumable product has been provided.</p>
+<p>The second product is a non-consumable type that will unlock vowels permanently in the future. In addition to updating the application state on purchase, we must make sure to provide a way to restore this purchase on other devices used by the end user. In this case we create a signal handler for onPurchaseRestored.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtpurchasing-product.html">Product</a></span> {
+      <span class="name">id</span>: <span class="name">productUnlockVowels</span>
+      <span class="name">type</span>: <span class="name">Product</span>.<span class="name">Unlockable</span>
+      <span class="name">store</span>: <span class="name">iapStore</span>
+      <span class="name">identifier</span>: <span class="string">&quot;org.qtproject.qthangman.unlockvowels&quot;</span>
+
+      <span class="name">onPurchaseSucceeded</span>: {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">identifier</span> <span class="operator">+</span> <span class="string">&quot; purchase successful&quot;</span>);
+          <span class="name">applicationData</span>.<span class="name">vowelsUnlocked</span> <span class="operator">=</span> <span class="number">true</span>;
+          <span class="name">transaction</span>.<span class="name">finalize</span>();
+          <span class="name">pageStack</span>.<span class="name">pop</span>();
+      }
+
+      <span class="name">onPurchaseFailed</span>: {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">identifier</span> <span class="operator">+</span> <span class="string">&quot; purchase failed&quot;</span>);
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;reason: &quot;</span>
+                      <span class="operator">+</span> <span class="name">transaction</span>.<span class="name">failureReason</span> <span class="operator">===</span> <span class="name">Transaction</span>.<span class="name">CanceledByUser</span> ? <span class="string">&quot;Canceled&quot;</span> : <span class="name">transaction</span>.<span class="name">errorString</span>);
+          <span class="name">transaction</span>.<span class="name">finalize</span>();
+      }
+
+      <span class="name">onPurchaseRestored</span>: {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">identifier</span> <span class="operator">+</span> <span class="string">&quot;purchase restored&quot;</span>);
+          <span class="name">applicationData</span>.<span class="name">vowelsUnlocked</span> <span class="operator">=</span> <span class="number">true</span>;
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;timestamp: &quot;</span> <span class="operator">+</span> <span class="name">transaction</span>.<span class="name">timestamp</span>);
+          <span class="name">transaction</span>.<span class="name">finalize</span>();
+          <span class="name">pageStack</span>.<span class="name">pop</span>();
+      }
+  }
+
+</pre>
+<p class="centerAlign"><img src="images/qthangman-store-example.png" alt="" /></p><p>In additon to registering the products, we also provide an interface to actually purchase the registered product. QtHangman defines a custom component called StoreItem to display and handle the purchasing interaction.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtpurchasing-product.html">Product</a></span> {
+      <span class="name">id</span>: <span class="name">productUnlockVowels</span>
+      <span class="name">type</span>: <span class="name">Product</span>.<span class="name">Unlockable</span>
+      <span class="name">store</span>: <span class="name">iapStore</span>
+      <span class="name">identifier</span>: <span class="string">&quot;org.qtproject.qthangman.unlockvowels&quot;</span>
+
+      <span class="name">onPurchaseSucceeded</span>: {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">identifier</span> <span class="operator">+</span> <span class="string">&quot; purchase successful&quot;</span>);
+          <span class="name">applicationData</span>.<span class="name">vowelsUnlocked</span> <span class="operator">=</span> <span class="number">true</span>;
+          <span class="name">transaction</span>.<span class="name">finalize</span>();
+          <span class="name">pageStack</span>.<span class="name">pop</span>();
+      }
+
+      <span class="name">onPurchaseFailed</span>: {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">identifier</span> <span class="operator">+</span> <span class="string">&quot; purchase failed&quot;</span>);
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;reason: &quot;</span>
+                      <span class="operator">+</span> <span class="name">transaction</span>.<span class="name">failureReason</span> <span class="operator">===</span> <span class="name">Transaction</span>.<span class="name">CanceledByUser</span> ? <span class="string">&quot;Canceled&quot;</span> : <span class="name">transaction</span>.<span class="name">errorString</span>);
+          <span class="name">transaction</span>.<span class="name">finalize</span>();
+      }
+
+      <span class="name">onPurchaseRestored</span>: {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">identifier</span> <span class="operator">+</span> <span class="string">&quot;purchase restored&quot;</span>);
+          <span class="name">applicationData</span>.<span class="name">vowelsUnlocked</span> <span class="operator">=</span> <span class="number">true</span>;
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;timestamp: &quot;</span> <span class="operator">+</span> <span class="name">transaction</span>.<span class="name">timestamp</span>);
+          <span class="name">transaction</span>.<span class="name">finalize</span>();
+          <span class="name">pageStack</span>.<span class="name">pop</span>();
+      }
+  }
+
+</pre>
+<p>The StoreItem component will display the product data that is queried from the platform's store, and will call the purchase() method on the product when it is clicked by the user.</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+      <span class="name">id</span>: <span class="name">titleText</span>
+      <span class="name">text</span>: <span class="name">product</span>.<span class="name">title</span>
+      <span class="name">font</span>.bold: <span class="number">true</span>
+      <span class="name">anchors</span>.right: <span class="name">priceText</span>.<span class="name">left</span>
+      <span class="name">anchors</span>.rightMargin: <span class="name">topLevel</span>.<span class="name">globalMargin</span>
+      <span class="name">anchors</span>.top: <span class="name">parent</span>.<span class="name">top</span>
+      <span class="name">anchors</span>.topMargin: <span class="name">topLevel</span>.<span class="name">globalMargin</span>
+      <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+      <span class="name">anchors</span>.leftMargin: <span class="name">topLevel</span>.<span class="name">globalMargin</span>
+  }
+
+  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+      <span class="name">id</span>: <span class="name">descriptionText</span>
+      <span class="name">text</span>: <span class="name">product</span>.<span class="name">description</span>
+      <span class="name">anchors</span>.right: <span class="name">priceText</span>.<span class="name">left</span>
+      <span class="name">anchors</span>.rightMargin: <span class="name">topLevel</span>.<span class="name">globalMargin</span>
+      <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+      <span class="name">anchors</span>.leftMargin: <span class="name">topLevel</span>.<span class="name">globalMargin</span>
+      <span class="name">anchors</span>.top: <span class="name">titleText</span>.<span class="name">bottom</span>
+      <span class="name">anchors</span>.topMargin: <span class="name">topLevel</span>.<span class="name">globalMargin</span> <span class="operator">/</span> <span class="number">2</span>
+      <span class="name">wrapMode</span>: <span class="name">Text</span>.<span class="name">WordWrap</span>
+  }
+
+  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+      <span class="name">id</span>: <span class="name">priceText</span>
+      <span class="name">text</span>: <span class="name">product</span>.<span class="name">price</span>
+      <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+      <span class="name">anchors</span>.rightMargin: <span class="name">topLevel</span>.<span class="name">globalMargin</span>
+      <span class="name">anchors</span>.verticalCenter: <span class="name">parent</span>.<span class="name">verticalCenter</span>
+  }
+
+  <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+      <span class="name">onClicked</span>: {
+          <span class="name">pendingRect</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">true</span>;
+          <span class="name">spinBox</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">true</span>;
+          <span class="name">statusText</span>.<span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Purchasing...&quot;</span>;
+          <span class="name">storeItem</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;PURCHASING&quot;</span>;
+          <span class="name">product</span>.<span class="name">purchase</span>();
+      }
+      <span class="name">onPressed</span>: {
+          <span class="name">storeItem</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;PRESSED&quot;</span>;
+      }
+      <span class="name">onReleased</span>: {
+          <span class="name">storeItem</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;NORMAL&quot;</span>;
+      }
+  }
+
+</pre>
+<p>Files:</p>
+<ul>
+<li><a href="qtpurchasing-qthangman-hangmangame-cpp.html">qthangman/hangmangame.cpp</a></li>
+<li><a href="qtpurchasing-qthangman-hangmangame-h.html">qthangman/hangmangame.h</a></li>
+<li><a href="qtpurchasing-qthangman-qml-qthangman-gameview-qml.html">qthangman/qml/qthangman/GameView.qml</a></li>
+<li><a href="qtpurchasing-qthangman-qml-qthangman-guesswordview-qml.html">qthangman/qml/qthangman/GuessWordView.qml</a></li>
+<li><a href="qtpurchasing-qthangman-qml-qthangman-hangman-qml.html">qthangman/qml/qthangman/Hangman.qml</a></li>
+<li><a href="qtpurchasing-qthangman-qml-qthangman-howtoview-qml.html">qthangman/qml/qthangman/HowToView.qml</a></li>
+<li><a href="qtpurchasing-qthangman-qml-qthangman-key-qml.html">qthangman/qml/qthangman/Key.qml</a></li>
+<li><a href="qtpurchasing-qthangman-qml-qthangman-letter-qml.html">qthangman/qml/qthangman/Letter.qml</a></li>
+<li><a href="qtpurchasing-qthangman-qml-qthangman-letterselector-qml.html">qthangman/qml/qthangman/LetterSelector.qml</a></li>
+<li><a href="qtpurchasing-qthangman-qml-qthangman-mainview-qml.html">qthangman/qml/qthangman/MainView.qml</a></li>
+<li><a href="qtpurchasing-qthangman-qml-qthangman-pageheader-qml.html">qthangman/qml/qthangman/PageHeader.qml</a></li>
+<li><a href="qtpurchasing-qthangman-qml-qthangman-scoreitem-qml.html">qthangman/qml/qthangman/ScoreItem.qml</a></li>
+<li><a href="qtpurchasing-qthangman-qml-qthangman-simplebutton-qml.html">qthangman/qml/qthangman/SimpleButton.qml</a></li>
+<li><a href="qtpurchasing-qthangman-qml-qthangman-splashscreen-qml.html">qthangman/qml/qthangman/SplashScreen.qml</a></li>
+<li><a href="qtpurchasing-qthangman-qml-qthangman-storeitem-qml.html">qthangman/qml/qthangman/StoreItem.qml</a></li>
+<li><a href="qtpurchasing-qthangman-qml-qthangman-storeview-qml.html">qthangman/qml/qthangman/StoreView.qml</a></li>
+<li><a href="qtpurchasing-qthangman-qml-qthangman-word-qml.html">qthangman/qml/qthangman/Word.qml</a></li>
+<li><a href="qtpurchasing-qthangman-qml-qthangman-main-qml.html">qthangman/qml/qthangman/main.qml</a></li>
+<li><a href="qtpurchasing-qthangman-main-cpp.html">qthangman/main.cpp</a></li>
+<li><a href="qtpurchasing-qthangman-qthangman-pro.html">qthangman/qthangman.pro</a></li>
+<li><a href="qtpurchasing-qthangman-resources-qrc.html">qthangman/resources.qrc</a></li>
+</ul>
+</div>
+<!-- @@@qthangman -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

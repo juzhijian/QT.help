@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>webview.cpp Example File | Qt WebEngine 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwebengine-index.html">Qt WebEngine</a></td><td ><a href="qtwebengine-webenginewidgets-demobrowser-example.html">WebEngine Demo Browser Example</a></td><td >webview.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">webview.cpp Example File</h1>
+<span class="subtitle">webenginewidgets/demobrowser/webview.cpp</span>
+<!-- $$$webenginewidgets/demobrowser/webview.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;browserapplication.h&quot;</span>
+  <span class="preprocessor">#include &quot;browsermainwindow.h&quot;</span>
+  <span class="preprocessor">#include &quot;cookiejar.h&quot;</span>
+  <span class="preprocessor">#include &quot;downloadmanager.h&quot;</span>
+  <span class="preprocessor">#include &quot;featurepermissionbar.h&quot;</span>
+  <span class="preprocessor">#include &quot;ui_passworddialog.h&quot;</span>
+  <span class="preprocessor">#include &quot;ui_proxy.h&quot;</span>
+  <span class="preprocessor">#include &quot;tabwidget.h&quot;</span>
+  <span class="preprocessor">#include &quot;webview.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtGui/QClipboard&gt;</span>
+  <span class="preprocessor">#include &lt;QtNetwork/QAuthenticator&gt;</span>
+  <span class="preprocessor">#include &lt;QtNetwork/QNetworkReply&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QMenu&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QMessageBox&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QMouseEvent&gt;</span>
+
+  <span class="preprocessor">#include &lt;QWebEngineContextMenuData&gt;</span>
+
+  <span class="preprocessor">#ifndef QT_NO_UITOOLS</span>
+  <span class="preprocessor">#include &lt;QtUiTools/QUiLoader&gt;</span>
+  <span class="preprocessor">#endif  //QT_NO_UITOOLS</span>
+
+  <span class="preprocessor">#include &lt;QtCore/QDebug&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QBuffer&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QTimer&gt;</span>
+
+  WebPage<span class="operator">::</span>WebPage(<span class="type"><a href="qwebengineprofile.html">QWebEngineProfile</a></span> <span class="operator">*</span>profile<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span>(profile<span class="operator">,</span> parent)
+      <span class="operator">,</span> m_keyboardModifiers(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoModifier)
+      <span class="operator">,</span> m_pressedButtons(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoButton)
+  {
+  <span class="preprocessor">#if defined(QWEBENGINEPAGE_SETNETWORKACCESSMANAGER)</span>
+      setNetworkAccessManager(BrowserApplication<span class="operator">::</span>networkAccessManager());
+  <span class="preprocessor">#endif</span>
+  <span class="preprocessor">#if defined(QWEBENGINEPAGE_UNSUPPORTEDCONTENT)</span>
+      connect(<span class="keyword">this</span><span class="operator">,</span> SIGNAL(unsupportedContent(<span class="type"><a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a></span><span class="operator">*</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(handleUnsupportedContent(<span class="type"><a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a></span><span class="operator">*</span>)));
+  <span class="preprocessor">#endif</span>
+      connect(<span class="keyword">this</span><span class="operator">,</span> SIGNAL(authenticationRequired(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span><span class="operator">,</span> <span class="type"><a href="../qtnetwork/qauthenticator.html">QAuthenticator</a></span><span class="operator">*</span>))<span class="operator">,</span>
+              SLOT(authenticationRequired(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span><span class="operator">,</span> <span class="type"><a href="../qtnetwork/qauthenticator.html">QAuthenticator</a></span><span class="operator">*</span>)));
+      connect(<span class="keyword">this</span><span class="operator">,</span> SIGNAL(proxyAuthenticationRequired(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span><span class="operator">,</span> <span class="type"><a href="../qtnetwork/qauthenticator.html">QAuthenticator</a></span> <span class="operator">*</span><span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>))<span class="operator">,</span>
+              SLOT(proxyAuthenticationRequired(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span><span class="operator">,</span> <span class="type"><a href="../qtnetwork/qauthenticator.html">QAuthenticator</a></span> <span class="operator">*</span><span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>)));
+  }
+
+  BrowserMainWindow <span class="operator">*</span>WebPage<span class="operator">::</span>mainWindow()
+  {
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>w <span class="operator">=</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>parent();
+      <span class="keyword">while</span> (w) {
+          <span class="keyword">if</span> (BrowserMainWindow <span class="operator">*</span>mw <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span>BrowserMainWindow<span class="operator">*</span><span class="operator">&gt;</span>(w))
+              <span class="keyword">return</span> mw;
+          w <span class="operator">=</span> w<span class="operator">-</span><span class="operator">&gt;</span>parent();
+      }
+      <span class="keyword">return</span> BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>mainWindow();
+  }
+
+  bool WebPage<span class="operator">::</span>certificateError(<span class="keyword">const</span> <span class="type"><a href="qwebenginecertificateerror.html">QWebEngineCertificateError</a></span> <span class="operator">&amp;</span>error)
+  {
+      <span class="keyword">if</span> (error<span class="operator">.</span>isOverridable()) {
+          <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span> msgBox;
+          msgBox<span class="operator">.</span>setIcon(<span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Warning);
+          msgBox<span class="operator">.</span>setText(error<span class="operator">.</span>errorDescription());
+          msgBox<span class="operator">.</span>setInformativeText(tr(<span class="string">&quot;If you wish so, you may continue with an unverified certificate. &quot;</span>
+                                       <span class="string">&quot;Accepting an unverified certificate means &quot;</span>
+                                       <span class="string">&quot;you may not be connected with the host you tried to connect to.\n&quot;</span>
+                                       <span class="string">&quot;Do you wish to override the security check and continue?&quot;</span>));
+          msgBox<span class="operator">.</span>setStandardButtons(<span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Yes <span class="operator">|</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>No);
+          msgBox<span class="operator">.</span>setDefaultButton(<span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>No);
+          <span class="keyword">return</span> msgBox<span class="operator">.</span>exec() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Yes;
+      }
+      <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>critical(view()<span class="operator">,</span> tr(<span class="string">&quot;Certificate Error&quot;</span>)<span class="operator">,</span> error<span class="operator">.</span>errorDescription()<span class="operator">,</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Ok<span class="operator">,</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>NoButton);
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+  }
+
+  <span class="keyword">class</span> PopupWindow : <span class="keyword">public</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> {
+      Q_OBJECT
+  <span class="keyword">public</span>:
+      PopupWindow(<span class="type"><a href="qwebengineprofile.html">QWebEngineProfile</a></span> <span class="operator">*</span>profile)
+          : m_addressBar(<span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span>(<span class="keyword">this</span>))
+          <span class="operator">,</span> m_view(<span class="keyword">new</span> WebView(<span class="keyword">this</span>))
+      {
+          m_view<span class="operator">-</span><span class="operator">&gt;</span>setPage(<span class="keyword">new</span> WebPage(profile<span class="operator">,</span> m_view));
+          <span class="type"><a href="../qtwidgets/qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qvboxlayout.html">QVBoxLayout</a></span>;
+          layout<span class="operator">-</span><span class="operator">&gt;</span>setMargin(<span class="number">0</span>);
+          setLayout(layout);
+          layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_addressBar);
+          layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_view);
+          m_view<span class="operator">-</span><span class="operator">&gt;</span>setFocus();
+
+          connect(m_view<span class="operator">,</span> <span class="operator">&amp;</span>WebView<span class="operator">::</span>titleChanged<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span><span class="operator">::</span>setWindowTitle);
+          connect(m_view<span class="operator">,</span> <span class="operator">&amp;</span>WebView<span class="operator">::</span>urlChanged<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>PopupWindow<span class="operator">::</span>setUrl);
+          connect(page()<span class="operator">,</span> <span class="operator">&amp;</span>WebPage<span class="operator">::</span>geometryChangeRequested<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>PopupWindow<span class="operator">::</span>adjustGeometry);
+          connect(page()<span class="operator">,</span> <span class="operator">&amp;</span>WebPage<span class="operator">::</span>windowCloseRequested<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span><span class="operator">::</span>close);
+      }
+
+      <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">*</span> page() <span class="keyword">const</span> { <span class="keyword">return</span> m_view<span class="operator">-</span><span class="operator">&gt;</span>page(); }
+
+  <span class="keyword">private</span> Q_SLOTS:
+      <span class="type">void</span> setUrl(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>url)
+      {
+          m_addressBar<span class="operator">-</span><span class="operator">&gt;</span>setText(url<span class="operator">.</span>toString());
+      }
+
+      <span class="type">void</span> adjustGeometry(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> <span class="operator">&amp;</span>newGeometry)
+      {
+          <span class="keyword">const</span> <span class="type">int</span> x1 <span class="operator">=</span> frameGeometry()<span class="operator">.</span>left() <span class="operator">-</span> geometry()<span class="operator">.</span>left();
+          <span class="keyword">const</span> <span class="type">int</span> y1 <span class="operator">=</span> frameGeometry()<span class="operator">.</span>top() <span class="operator">-</span> geometry()<span class="operator">.</span>top();
+          <span class="keyword">const</span> <span class="type">int</span> x2 <span class="operator">=</span> frameGeometry()<span class="operator">.</span>right() <span class="operator">-</span> geometry()<span class="operator">.</span>right();
+          <span class="keyword">const</span> <span class="type">int</span> y2 <span class="operator">=</span> frameGeometry()<span class="operator">.</span>bottom() <span class="operator">-</span> geometry()<span class="operator">.</span>bottom();
+
+          setGeometry(newGeometry<span class="operator">.</span>adjusted(x1<span class="operator">,</span> y1 <span class="operator">-</span> m_addressBar<span class="operator">-</span><span class="operator">&gt;</span>height()<span class="operator">,</span> x2<span class="operator">,</span> y2));
+      }
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="../qtwidgets/qlineedit.html">QLineEdit</a></span> <span class="operator">*</span>m_addressBar;
+      WebView <span class="operator">*</span>m_view;
+
+  };
+
+  <span class="preprocessor">#include &quot;webview.moc&quot;</span>
+
+  <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span> <span class="operator">*</span>WebPage<span class="operator">::</span>createWindow(<span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>WebWindowType type)
+  {
+      <span class="keyword">if</span> (type <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>WebBrowserTab) {
+          <span class="keyword">return</span> mainWindow()<span class="operator">-</span><span class="operator">&gt;</span>tabWidget()<span class="operator">-</span><span class="operator">&gt;</span>newTab()<span class="operator">-</span><span class="operator">&gt;</span>page();
+      } <span class="keyword">else</span> <span class="keyword">if</span> (type <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>WebBrowserBackgroundTab) {
+          <span class="keyword">return</span> mainWindow()<span class="operator">-</span><span class="operator">&gt;</span>tabWidget()<span class="operator">-</span><span class="operator">&gt;</span>newTab(<span class="keyword">false</span>)<span class="operator">-</span><span class="operator">&gt;</span>page();
+      } <span class="keyword">else</span> <span class="keyword">if</span> (type <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>WebBrowserWindow) {
+          BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>newMainWindow();
+          BrowserMainWindow <span class="operator">*</span>mainWindow <span class="operator">=</span> BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>mainWindow();
+          <span class="keyword">return</span> mainWindow<span class="operator">-</span><span class="operator">&gt;</span>currentTab()<span class="operator">-</span><span class="operator">&gt;</span>page();
+      } <span class="keyword">else</span> {
+          PopupWindow <span class="operator">*</span>popup <span class="operator">=</span> <span class="keyword">new</span> PopupWindow(profile());
+          popup<span class="operator">-</span><span class="operator">&gt;</span>setAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WA_DeleteOnClose);
+          popup<span class="operator">-</span><span class="operator">&gt;</span>show();
+          <span class="keyword">return</span> popup<span class="operator">-</span><span class="operator">&gt;</span>page();
+      }
+  }
+
+  <span class="preprocessor">#if !defined(QT_NO_UITOOLS)</span>
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>WebPage<span class="operator">::</span>createPlugin(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>classId<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>url<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> <span class="operator">&amp;</span>paramNames<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> <span class="operator">&amp;</span>paramValues)
+  {
+      Q_UNUSED(url);
+      Q_UNUSED(paramNames);
+      Q_UNUSED(paramValues);
+      <span class="type">QUiLoader</span> loader;
+      <span class="keyword">return</span> loader<span class="operator">.</span>createWidget(classId<span class="operator">,</span> view());
+  }
+  <span class="preprocessor">#endif // !defined(QT_NO_UITOOLS)</span>
+
+  <span class="preprocessor">#if defined(QWEBENGINEPAGE_UNSUPPORTEDCONTENT)</span>
+  <span class="type">void</span> WebPage<span class="operator">::</span>handleUnsupportedContent(<span class="type"><a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a></span> <span class="operator">*</span>reply)
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> errorString <span class="operator">=</span> reply<span class="operator">-</span><span class="operator">&gt;</span>errorString();
+
+      <span class="keyword">if</span> (m_loadingUrl <span class="operator">!</span><span class="operator">=</span> reply<span class="operator">-</span><span class="operator">&gt;</span>url()) {
+          <span class="comment">// sub resource of this page</span>
+          <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Resource&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> reply<span class="operator">-</span><span class="operator">&gt;</span>url()<span class="operator">.</span>toEncoded() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;has unknown Content-Type, will be ignored.&quot;</span>;
+          reply<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+          <span class="keyword">return</span>;
+      }
+
+      <span class="keyword">if</span> (reply<span class="operator">-</span><span class="operator">&gt;</span>error() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtnetwork/qnetworkreply.html">QNetworkReply</a></span><span class="operator">::</span>NoError <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>reply<span class="operator">-</span><span class="operator">&gt;</span>header(<span class="type"><a href="../qtnetwork/qnetworkrequest.html">QNetworkRequest</a></span><span class="operator">::</span>ContentTypeHeader)<span class="operator">.</span>isValid()) {
+          errorString <span class="operator">=</span> <span class="string">&quot;Unknown Content-Type&quot;</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(QLatin1String(<span class="string">&quot;:/notfound.html&quot;</span>));
+      bool isOpened <span class="operator">=</span> file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly);
+      Q_ASSERT(isOpened);
+      Q_UNUSED(isOpened)
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> title <span class="operator">=</span> tr(<span class="string">&quot;Error loading page: %1&quot;</span>)<span class="operator">.</span>arg(reply<span class="operator">-</span><span class="operator">&gt;</span>url()<span class="operator">.</span>toString());
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> html <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(QLatin1String(file<span class="operator">.</span>readAll()))
+                          <span class="operator">.</span>arg(title)
+                          <span class="operator">.</span>arg(errorString)
+                          <span class="operator">.</span>arg(reply<span class="operator">-</span><span class="operator">&gt;</span>url()<span class="operator">.</span>toString());
+
+      <span class="type"><a href="../qtcore/qbuffer.html">QBuffer</a></span> imageBuffer;
+      imageBuffer<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qbuffer.html">QBuffer</a></span><span class="operator">::</span>ReadWrite);
+      <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> icon <span class="operator">=</span> view()<span class="operator">-</span><span class="operator">&gt;</span>style()<span class="operator">-</span><span class="operator">&gt;</span>standardIcon(<span class="type"><a href="../qtwidgets/qstyle.html">QStyle</a></span><span class="operator">::</span>SP_MessageBoxWarning<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> view());
+      <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> pixmap <span class="operator">=</span> icon<span class="operator">.</span>pixmap(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">32</span><span class="operator">,</span><span class="number">32</span>));
+      <span class="keyword">if</span> (pixmap<span class="operator">.</span>save(<span class="operator">&amp;</span>imageBuffer<span class="operator">,</span> <span class="string">&quot;PNG&quot;</span>)) {
+          html<span class="operator">.</span>replace(QLatin1String(<span class="string">&quot;IMAGE_BINARY_DATA_HERE&quot;</span>)<span class="operator">,</span>
+                       <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(QLatin1String(imageBuffer<span class="operator">.</span>buffer()<span class="operator">.</span>toBase64())));
+      }
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type">QWebEngineFrame</span><span class="operator">*</span><span class="operator">&gt;</span> frames;
+      frames<span class="operator">.</span>append(mainFrame());
+      <span class="keyword">while</span> (<span class="operator">!</span>frames<span class="operator">.</span>isEmpty()) {
+          <span class="type">QWebEngineFrame</span> <span class="operator">*</span>frame <span class="operator">=</span> frames<span class="operator">.</span>takeFirst();
+          <span class="keyword">if</span> (frame<span class="operator">-</span><span class="operator">&gt;</span>url() <span class="operator">=</span><span class="operator">=</span> reply<span class="operator">-</span><span class="operator">&gt;</span>url()) {
+              frame<span class="operator">-</span><span class="operator">&gt;</span>setHtml(html<span class="operator">,</span> reply<span class="operator">-</span><span class="operator">&gt;</span>url());
+              <span class="keyword">return</span>;
+          }
+          <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type">QWebEngineFrame</span> <span class="operator">*</span><span class="operator">&gt;</span> children <span class="operator">=</span> frame<span class="operator">-</span><span class="operator">&gt;</span>childFrames();
+          foreach (<span class="type">QWebEngineFrame</span> <span class="operator">*</span>frame<span class="operator">,</span> children)
+              frames<span class="operator">.</span>append(frame);
+      }
+      <span class="keyword">if</span> (m_loadingUrl <span class="operator">=</span><span class="operator">=</span> reply<span class="operator">-</span><span class="operator">&gt;</span>url()) {
+          mainFrame()<span class="operator">-</span><span class="operator">&gt;</span>setHtml(html<span class="operator">,</span> reply<span class="operator">-</span><span class="operator">&gt;</span>url());
+      }
+  }
+  <span class="preprocessor">#endif</span>
+
+  <span class="type">void</span> WebPage<span class="operator">::</span>authenticationRequired(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>requestUrl<span class="operator">,</span> <span class="type"><a href="../qtnetwork/qauthenticator.html">QAuthenticator</a></span> <span class="operator">*</span>auth)
+  {
+      BrowserMainWindow <span class="operator">*</span>mainWindow <span class="operator">=</span> BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>mainWindow();
+
+      <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span> dialog(mainWindow);
+      dialog<span class="operator">.</span>setWindowFlags(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Sheet);
+
+      Ui<span class="operator">::</span>PasswordDialog passwordDialog;
+      passwordDialog<span class="operator">.</span>setupUi(<span class="operator">&amp;</span>dialog);
+
+      passwordDialog<span class="operator">.</span>iconLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>());
+      passwordDialog<span class="operator">.</span>iconLabel<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(mainWindow<span class="operator">-</span><span class="operator">&gt;</span>style()<span class="operator">-</span><span class="operator">&gt;</span>standardIcon(<span class="type"><a href="../qtwidgets/qstyle.html">QStyle</a></span><span class="operator">::</span>SP_MessageBoxQuestion<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> mainWindow)<span class="operator">.</span>pixmap(<span class="number">32</span><span class="operator">,</span> <span class="number">32</span>));
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> introMessage <span class="operator">=</span> tr(<span class="string">&quot;&lt;qt&gt;Enter username and password for \&quot;%1\&quot; at %2&lt;/qt&gt;&quot;</span>);
+      introMessage <span class="operator">=</span> introMessage<span class="operator">.</span>arg(auth<span class="operator">-</span><span class="operator">&gt;</span>realm())<span class="operator">.</span>arg(requestUrl<span class="operator">.</span>toString()<span class="operator">.</span>toHtmlEscaped());
+      passwordDialog<span class="operator">.</span>introLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(introMessage);
+      passwordDialog<span class="operator">.</span>introLabel<span class="operator">-</span><span class="operator">&gt;</span>setWordWrap(<span class="keyword">true</span>);
+
+      <span class="keyword">if</span> (dialog<span class="operator">.</span>exec() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted) {
+          auth<span class="operator">-</span><span class="operator">&gt;</span>setUser(passwordDialog<span class="operator">.</span>userNameLineEdit<span class="operator">-</span><span class="operator">&gt;</span>text());
+          auth<span class="operator">-</span><span class="operator">&gt;</span>setPassword(passwordDialog<span class="operator">.</span>passwordLineEdit<span class="operator">-</span><span class="operator">&gt;</span>text());
+      } <span class="keyword">else</span> {
+          <span class="comment">// Set authenticator null if dialog is cancelled</span>
+          <span class="operator">*</span>auth <span class="operator">=</span> <span class="type"><a href="../qtnetwork/qauthenticator.html">QAuthenticator</a></span>();
+      }
+  }
+
+  <span class="type">void</span> WebPage<span class="operator">::</span>proxyAuthenticationRequired(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>requestUrl<span class="operator">,</span> <span class="type"><a href="../qtnetwork/qauthenticator.html">QAuthenticator</a></span> <span class="operator">*</span>auth<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>proxyHost)
+  {
+      Q_UNUSED(requestUrl);
+      BrowserMainWindow <span class="operator">*</span>mainWindow <span class="operator">=</span> BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>mainWindow();
+
+      <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span> dialog(mainWindow);
+      dialog<span class="operator">.</span>setWindowFlags(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Sheet);
+
+      Ui<span class="operator">::</span>ProxyDialog proxyDialog;
+      proxyDialog<span class="operator">.</span>setupUi(<span class="operator">&amp;</span>dialog);
+
+      proxyDialog<span class="operator">.</span>iconLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>());
+      proxyDialog<span class="operator">.</span>iconLabel<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(mainWindow<span class="operator">-</span><span class="operator">&gt;</span>style()<span class="operator">-</span><span class="operator">&gt;</span>standardIcon(<span class="type"><a href="../qtwidgets/qstyle.html">QStyle</a></span><span class="operator">::</span>SP_MessageBoxQuestion<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> mainWindow)<span class="operator">.</span>pixmap(<span class="number">32</span><span class="operator">,</span> <span class="number">32</span>));
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> introMessage <span class="operator">=</span> tr(<span class="string">&quot;&lt;qt&gt;Connect to proxy \&quot;%1\&quot; using:&lt;/qt&gt;&quot;</span>);
+      introMessage <span class="operator">=</span> introMessage<span class="operator">.</span>arg(proxyHost<span class="operator">.</span>toHtmlEscaped());
+      proxyDialog<span class="operator">.</span>introLabel<span class="operator">-</span><span class="operator">&gt;</span>setText(introMessage);
+      proxyDialog<span class="operator">.</span>introLabel<span class="operator">-</span><span class="operator">&gt;</span>setWordWrap(<span class="keyword">true</span>);
+
+      <span class="keyword">if</span> (dialog<span class="operator">.</span>exec() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted) {
+          auth<span class="operator">-</span><span class="operator">&gt;</span>setUser(proxyDialog<span class="operator">.</span>userNameLineEdit<span class="operator">-</span><span class="operator">&gt;</span>text());
+          auth<span class="operator">-</span><span class="operator">&gt;</span>setPassword(proxyDialog<span class="operator">.</span>passwordLineEdit<span class="operator">-</span><span class="operator">&gt;</span>text());
+      } <span class="keyword">else</span> {
+          <span class="comment">// Set authenticator null if dialog is cancelled</span>
+          <span class="operator">*</span>auth <span class="operator">=</span> <span class="type"><a href="../qtnetwork/qauthenticator.html">QAuthenticator</a></span>();
+      }
+  }
+
+  WebView<span class="operator">::</span>WebView(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span><span class="operator">*</span> parent)
+      : <span class="type"><a href="qwebengineview.html">QWebEngineView</a></span>(parent)
+      <span class="operator">,</span> m_progress(<span class="number">0</span>)
+      <span class="operator">,</span> m_page(<span class="number">0</span>)
+  {
+      connect(<span class="keyword">this</span><span class="operator">,</span> SIGNAL(loadProgress(<span class="type">int</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(setProgress(<span class="type">int</span>)));
+      connect(<span class="keyword">this</span><span class="operator">,</span> SIGNAL(loadFinished(bool))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(loadFinished(bool)));
+      connect(<span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qwebengineview.html">QWebEngineView</a></span><span class="operator">::</span>renderProcessTerminated<span class="operator">,</span>
+              <span class="operator">[</span><span class="operator">=</span><span class="operator">]</span>(<span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>RenderProcessTerminationStatus termStatus<span class="operator">,</span> <span class="type">int</span> statusCode) {
+          <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>status <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+          <span class="keyword">switch</span> (termStatus) {
+          <span class="keyword">case</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>NormalTerminationStatus:
+              status <span class="operator">=</span> <span class="string">&quot;(normal exit)&quot;</span>;
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>AbnormalTerminationStatus:
+              status <span class="operator">=</span> <span class="string">&quot;(abnormal exit)&quot;</span>;
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>CrashedTerminationStatus:
+              status <span class="operator">=</span> <span class="string">&quot;(crashed)&quot;</span>;
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>KilledTerminationStatus:
+              status <span class="operator">=</span> <span class="string">&quot;(killed)&quot;</span>;
+              <span class="keyword">break</span>;
+          }
+
+          <a href="../qtcore/qtglobal.html#qInfo">qInfo</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Render process exited with code&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> statusCode <span class="operator">&lt;</span><span class="operator">&lt;</span> status;
+          <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span><span class="operator">::</span>singleShot(<span class="number">0</span><span class="operator">,</span> <span class="operator">[</span><span class="keyword">this</span><span class="operator">]</span> { reload(); });
+      });
+  }
+
+  <span class="type">void</span> WebView<span class="operator">::</span>setPage(WebPage <span class="operator">*</span>_page)
+  {
+      <span class="keyword">if</span> (m_page)
+          m_page<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+      m_page <span class="operator">=</span> _page;
+      <span class="type"><a href="qwebengineview.html">QWebEngineView</a></span><span class="operator">::</span>setPage(_page);
+  <span class="preprocessor">#if defined(QWEBENGINEPAGE_STATUSBARMESSAGE)</span>
+      connect(page()<span class="operator">,</span> SIGNAL(statusBarMessage(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span>
+              SLOT(setStatusBarText(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>)));
+  <span class="preprocessor">#endif</span>
+      disconnect(page()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>iconChanged<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>WebView<span class="operator">::</span>iconChanged);
+      connect(page()<span class="operator">,</span> SIGNAL(iconChanged(<span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(onIconChanged(<span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>)));
+      connect(page()<span class="operator">,</span> <span class="operator">&amp;</span>WebPage<span class="operator">::</span>featurePermissionRequested<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>WebView<span class="operator">::</span>onFeaturePermissionRequested);
+  <span class="preprocessor">#if defined(QWEBENGINEPAGE_UNSUPPORTEDCONTENT)</span>
+      page()<span class="operator">-</span><span class="operator">&gt;</span>setForwardUnsupportedContent(<span class="keyword">true</span>);
+  <span class="preprocessor">#endif</span>
+  }
+
+  <span class="type">void</span> WebView<span class="operator">::</span>contextMenuEvent(<span class="type"><a href="../qtgui/qcontextmenuevent.html">QContextMenuEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>menu;
+      <span class="keyword">if</span> (page()<span class="operator">-</span><span class="operator">&gt;</span>contextMenuData()<span class="operator">.</span>linkUrl()<span class="operator">.</span>isValid()) {
+          menu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span>(<span class="keyword">this</span>);
+          menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(page()<span class="operator">-</span><span class="operator">&gt;</span>action(<span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>OpenLinkInThisWindow));
+          menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(page()<span class="operator">-</span><span class="operator">&gt;</span>action(<span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>OpenLinkInNewWindow));
+          menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(page()<span class="operator">-</span><span class="operator">&gt;</span>action(<span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>OpenLinkInNewBackgroundTab));
+          menu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+          menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(page()<span class="operator">-</span><span class="operator">&gt;</span>action(<span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>DownloadLinkToDisk));
+          menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(page()<span class="operator">-</span><span class="operator">&gt;</span>action(<span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>CopyLinkToClipboard));
+      } <span class="keyword">else</span> {
+          menu <span class="operator">=</span> page()<span class="operator">-</span><span class="operator">&gt;</span>createStandardContextMenu();
+      }
+      <span class="keyword">if</span> (page()<span class="operator">-</span><span class="operator">&gt;</span>contextMenuData()<span class="operator">.</span>selectedText()<span class="operator">.</span>isEmpty())
+          menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(page()<span class="operator">-</span><span class="operator">&gt;</span>action(<span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>SavePage));
+      connect(menu<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span><span class="operator">::</span>aboutToHide<span class="operator">,</span> menu<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>deleteLater);
+      menu<span class="operator">-</span><span class="operator">&gt;</span>popup(event<span class="operator">-</span><span class="operator">&gt;</span>globalPos());
+  }
+
+  <span class="type">void</span> WebView<span class="operator">::</span>wheelEvent(<span class="type"><a href="../qtgui/qwheelevent.html">QWheelEvent</a></span> <span class="operator">*</span>event)
+  {
+  <span class="preprocessor">#if defined(QWEBENGINEPAGE_SETTEXTSIZEMULTIPLIER)</span>
+      <span class="keyword">if</span> (<span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span><span class="operator">::</span>keyboardModifiers() <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ControlModifier) {
+          <span class="type">int</span> numDegrees <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>delta() <span class="operator">/</span> <span class="number">8</span>;
+          <span class="type">int</span> numSteps <span class="operator">=</span> numDegrees <span class="operator">/</span> <span class="number">15</span>;
+          setTextSizeMultiplier(textSizeMultiplier() <span class="operator">+</span> numSteps <span class="operator">*</span> <span class="number">0.1</span>);
+          event<span class="operator">-</span><span class="operator">&gt;</span>accept();
+          <span class="keyword">return</span>;
+      }
+  <span class="preprocessor">#endif</span>
+      <span class="type"><a href="qwebengineview.html">QWebEngineView</a></span><span class="operator">::</span>wheelEvent(event);
+  }
+
+  <span class="type">void</span> WebView<span class="operator">::</span>openLinkInNewTab()
+  {
+      pageAction(<span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>OpenLinkInNewTab)<span class="operator">-</span><span class="operator">&gt;</span>trigger();
+  }
+
+  <span class="type">void</span> WebView<span class="operator">::</span>onFeaturePermissionRequested(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>securityOrigin<span class="operator">,</span> <span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>Feature feature)
+  {
+      FeaturePermissionBar <span class="operator">*</span>permissionBar <span class="operator">=</span> <span class="keyword">new</span> FeaturePermissionBar(<span class="keyword">this</span>);
+      connect(permissionBar<span class="operator">,</span> <span class="operator">&amp;</span>FeaturePermissionBar<span class="operator">::</span>featurePermissionProvided<span class="operator">,</span> page()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>setFeaturePermission);
+
+      <span class="comment">// Discard the bar on new loads (if we navigate away or reload).</span>
+      connect(page()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qwebenginepage.html">QWebEnginePage</a></span><span class="operator">::</span>loadStarted<span class="operator">,</span> permissionBar<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>deleteLater);
+
+      permissionBar<span class="operator">-</span><span class="operator">&gt;</span>requestPermission(securityOrigin<span class="operator">,</span> feature);
+  }
+
+  <span class="type">void</span> WebView<span class="operator">::</span>setProgress(<span class="type">int</span> progress)
+  {
+      m_progress <span class="operator">=</span> progress;
+  }
+
+  <span class="type">void</span> WebView<span class="operator">::</span>loadFinished(bool success)
+  {
+      <span class="keyword">if</span> (success <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="number">100</span> <span class="operator">!</span><span class="operator">=</span> m_progress) {
+          <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Received finished signal while progress is still:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> progress()
+                     <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Url:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> url();
+      }
+      m_progress <span class="operator">=</span> <span class="number">0</span>;
+  }
+
+  <span class="type">void</span> WebView<span class="operator">::</span>loadUrl(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>url)
+  {
+      m_initialUrl <span class="operator">=</span> url;
+      load(url);
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> WebView<span class="operator">::</span>lastStatusBarText() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_statusBarText;
+  }
+
+  <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> WebView<span class="operator">::</span>url() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> url <span class="operator">=</span> <span class="type"><a href="qwebengineview.html">QWebEngineView</a></span><span class="operator">::</span>url();
+      <span class="keyword">if</span> (<span class="operator">!</span>url<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span> url;
+
+      <span class="keyword">return</span> m_initialUrl;
+  }
+
+  <span class="type">void</span> WebView<span class="operator">::</span>onIconChanged(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> <span class="operator">&amp;</span>icon)
+  {
+      <span class="keyword">if</span> (icon<span class="operator">.</span>isNull())
+          <span class="keyword">emit</span> iconChanged(BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>defaultIcon());
+      <span class="keyword">else</span>
+          <span class="keyword">emit</span> iconChanged(icon);
+  }
+
+  <span class="type">void</span> WebView<span class="operator">::</span>mousePressEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      m_page<span class="operator">-</span><span class="operator">&gt;</span>m_pressedButtons <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>buttons();
+      m_page<span class="operator">-</span><span class="operator">&gt;</span>m_keyboardModifiers <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>modifiers();
+      <span class="type"><a href="qwebengineview.html">QWebEngineView</a></span><span class="operator">::</span>mousePressEvent(event);
+  }
+
+  <span class="type">void</span> WebView<span class="operator">::</span>mouseReleaseEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="type"><a href="qwebengineview.html">QWebEngineView</a></span><span class="operator">::</span>mouseReleaseEvent(event);
+      <span class="keyword">if</span> (<span class="operator">!</span>event<span class="operator">-</span><span class="operator">&gt;</span>isAccepted() <span class="operator">&amp;</span><span class="operator">&amp;</span> (m_page<span class="operator">-</span><span class="operator">&gt;</span>m_pressedButtons <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>MidButton)) {
+          <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> url(<span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span><span class="operator">::</span>clipboard()<span class="operator">-</span><span class="operator">&gt;</span>text(<span class="type"><a href="../qtgui/qclipboard.html">QClipboard</a></span><span class="operator">::</span>Selection));
+          <span class="keyword">if</span> (<span class="operator">!</span>url<span class="operator">.</span>isEmpty() <span class="operator">&amp;</span><span class="operator">&amp;</span> url<span class="operator">.</span>isValid() <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>url<span class="operator">.</span>scheme()<span class="operator">.</span>isEmpty()) {
+              setUrl(url);
+          }
+      }
+  }
+
+  <span class="type">void</span> WebView<span class="operator">::</span>setStatusBarText(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>string)
+  {
+      m_statusBarText <span class="operator">=</span> string;
+  }
+
+</pre>
+</div>
+<!-- @@@webenginewidgets/demobrowser/webview.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

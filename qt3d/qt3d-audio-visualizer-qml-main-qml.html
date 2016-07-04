@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>main.qml Example File | Qt 3D 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-audio-visualizer-qml-example.html">Qt 3D: Audio Visualizer Example</a></td><td >main.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">main.qml Example File</h1>
+<span class="subtitle">audio-visualizer-qml/main.qml</span>
+<!-- $$$audio-visualizer-qml/main.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt3D module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:LGPL3$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see http://www.qt.io/terms-conditions. For further
+  ** information use the contact form at http://www.qt.io/contact-us.
+  **
+  ** GNU Lesser General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU Lesser
+  ** General Public License version 3 as published by the Free Software
+  ** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+  ** packaging of this file. Please review the following information to
+  ** ensure the GNU Lesser General Public License version 3 requirements
+  ** will be met: https://www.gnu.org/licenses/lgpl.html.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 2.0 or later as published by the Free
+  ** Software Foundation and appearing in the file LICENSE.GPL included in
+  ** the packaging of this file. Please review the following information to
+  ** ensure the GNU General Public License version 2.0 requirements will be
+  ** met: http://www.gnu.org/licenses/gpl-2.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.0
+  import QtQuick.Scene3D 2.0
+  import QtQuick.Layouts 1.2
+  import QtMultimedia 5.0
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">mainview</span>
+      <span class="name">width</span>: <span class="number">1215</span>
+      <span class="name">height</span>: <span class="number">720</span>
+      <span class="name">visible</span>: <span class="number">true</span>
+      property <span class="type">bool</span> <span class="name">isHoverEnabled</span>: <span class="number">false</span>
+
+      property <span class="type">variant</span> <span class="name">magnitudeArray</span>: <span class="number">null</span>
+      property <span class="type">int</span> <span class="name">millisecondsPerBar</span>: <span class="number">68</span>
+      property <span class="type">string</span> <span class="name">magnitudeDataSourceFile</span>: <span class="string">&quot;qrc:/music/visualization.raw&quot;</span>
+      property <span class="type">int</span> <span class="name">mediaLatencyOffset</span>: <span class="number">68</span>
+
+      <span class="name">state</span>: <span class="string">&quot;stopped&quot;</span>
+      <span class="name">states</span>: [
+          <span class="type"><a href="../qtqml/qml-qtqml-statemachine-state.html">State</a></span> {
+              <span class="name">name</span>: <span class="string">&quot;playing&quot;</span>
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> {
+                  <span class="name">target</span>: <span class="name">playButtonImage</span>
+                  <span class="name">source</span>: {
+                      <span class="keyword">if</span> (<span class="name">playButtonMouseArea</span>.<span class="name">containsMouse</span>)
+                          <span class="string">&quot;qrc:/images/pausehoverpressed.png&quot;</span>
+                      <span class="keyword">else</span>
+                          <span class="string">&quot;qrc:/images/pausenormal.png&quot;</span>
+                  }
+              }
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> {
+                  <span class="name">target</span>: <span class="name">stopButtonImage</span>
+                  <span class="name">source</span>: <span class="string">&quot;qrc:/images/stopnormal.png&quot;</span>
+              }
+          },
+          <span class="type"><a href="../qtqml/qml-qtqml-statemachine-state.html">State</a></span> {
+              <span class="name">name</span>: <span class="string">&quot;paused&quot;</span>
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> {
+                  <span class="name">target</span>: <span class="name">playButtonImage</span>
+                  <span class="name">source</span>: {
+                      <span class="keyword">if</span> (<span class="name">playButtonMouseArea</span>.<span class="name">containsMouse</span>)
+                          <span class="string">&quot;qrc:/images/playhoverpressed.png&quot;</span>
+                      <span class="keyword">else</span>
+                          <span class="string">&quot;qrc:/images/playnormal.png&quot;</span>
+                  }
+              }
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> {
+                  <span class="name">target</span>: <span class="name">stopButtonImage</span>
+                  <span class="name">source</span>: <span class="string">&quot;qrc:/images/stopnormal.png&quot;</span>
+              }
+          },
+          <span class="type"><a href="../qtqml/qml-qtqml-statemachine-state.html">State</a></span> {
+              <span class="name">name</span>: <span class="string">&quot;stopped&quot;</span>
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> {
+                  <span class="name">target</span>: <span class="name">playButtonImage</span>
+                  <span class="name">source</span>: <span class="string">&quot;qrc:/images/playnormal.png&quot;</span>
+              }
+              <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> {
+                  <span class="name">target</span>: <span class="name">stopButtonImage</span>
+                  <span class="name">source</span>: <span class="string">&quot;qrc:/images/stopdisabled.png&quot;</span>
+              }
+          }
+      ]
+
+      <span class="name">Component</span>.onCompleted: <span class="name">isHoverEnabled</span> <span class="operator">=</span> <span class="name">touchSettings</span>.<span class="name">isHoverEnabled</span>()
+
+      <span class="type">MediaPlayer</span> {
+          <span class="name">id</span>: <span class="name">mediaPlayer</span>
+          <span class="name">autoPlay</span>: <span class="number">true</span>
+          <span class="name">volume</span>: <span class="number">0.5</span>
+          <span class="name">source</span>: <span class="string">&quot;qrc:/music/tiltshifted_lost_neon_sun.mp3&quot;</span>
+
+          <span class="name">onStatusChanged</span>: {
+              <span class="keyword">if</span> (<span class="name">status</span> <span class="operator">==</span> <span class="name">MediaPlayer</span>.<span class="name">EndOfMedia</span>) <span class="comment">//{</span>
+                  <span class="name">state</span> <span class="operator">=</span> <span class="string">&quot;stopped&quot;</span>
+          }
+
+          <span class="name">onError</span>: <span class="name">console</span>.<span class="name">error</span>(<span class="string">&quot;error with audio &quot;</span> <span class="operator">+</span> <span class="name">mediaPlayer</span>.<span class="name">error</span>)
+
+          <span class="name">onDurationChanged</span>: {
+              <span class="comment">// Load the pre-calculated magnitude data for the visualizer</span>
+              var <span class="name">request</span> = new <span class="name">XMLHttpRequest</span>()
+              <span class="name">request</span>.<span class="name">responseType</span> <span class="operator">=</span> <span class="string">'arraybuffer'</span>
+              <span class="name">request</span>.<span class="name">onreadystatechange</span> <span class="operator">=</span> <span class="keyword">function</span>() {
+                      <span class="keyword">if</span> (<span class="name">request</span>.<span class="name">readyState</span> <span class="operator">===</span> <span class="name">XMLHttpRequest</span>.<span class="name">DONE</span>) {
+                          <span class="keyword">if</span> (<span class="name">request</span>.<span class="name">status</span> <span class="operator">==</span> <span class="number">200</span> <span class="operator">||</span> <span class="name">request</span>.<span class="name">status</span> <span class="operator">==</span> <span class="number">0</span>) {
+                              var <span class="name">arrayBuffer</span> = <span class="name">request</span>.<span class="name">response</span>
+                              <span class="keyword">if</span> (<span class="name">arrayBuffer</span>) {
+                                  <span class="name">magnitudeArray</span> <span class="operator">=</span> new <span class="name">Uint16Array</span>(<span class="name">arrayBuffer</span>)
+                                  <span class="name">visualizer</span>.<span class="name">startVisualization</span>()
+                                }
+                          } <span class="keyword">else</span> {
+                              <span class="name">console</span>.<span class="name">warn</span>(<span class="string">&quot;Couldn't load magnitude data for bars.&quot;</span>)
+                          }
+                          <span class="name">request</span> <span class="operator">=</span> <span class="number">null</span>
+                      }
+                  };
+
+              <span class="name">request</span>.<span class="name">open</span>(<span class="string">'GET'</span>, <span class="name">magnitudeDataSourceFile</span>, <span class="number">true</span>)
+              <span class="name">request</span>.<span class="name">send</span>(<span class="number">null</span>)
+          }
+
+          <span class="keyword">function</span> <span class="name">getNextAudioLevel</span>(<span class="name">offsetMs</span>) {
+              <span class="keyword">if</span> (<span class="name">magnitudeArray</span> <span class="operator">===</span> <span class="number">null</span>)
+                  <span class="keyword">return</span> <span class="number">0.0</span>;
+
+              <span class="comment">// Calculate the integer index position in to the magnitude array</span>
+              var <span class="name">index</span> = ((<span class="name">mediaPlayer</span>.<span class="name">position</span> <span class="operator">+</span> <span class="name">offsetMs</span>) <span class="operator">/</span>
+                           <span class="name">mainview</span>.<span class="name">millisecondsPerBar</span>) <span class="operator">|</span> <span class="number">0</span>;
+
+              <span class="keyword">if</span> (<span class="name">index</span> <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">||</span> <span class="name">index</span> <span class="operator">&gt;=</span> <span class="name">magnitudeArray</span>.<span class="name">length</span>)
+                  <span class="keyword">return</span> <span class="number">0.0</span>;
+
+              <span class="keyword">return</span> (<span class="name">magnitudeArray</span>[<span class="name">index</span>] <span class="operator">/</span> <span class="number">63274.0</span>);
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+          <span class="name">id</span>: <span class="name">coverImage</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">source</span>: <span class="string">&quot;qrc:/images/albumcover.png&quot;</span>
+      }
+
+      <span class="type">Scene3D</span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+
+          <span class="type">Visualizer</span> {
+              <span class="name">id</span>: <span class="name">visualizer</span>
+              <span class="name">animationState</span>: <span class="name">mainview</span>.<span class="name">state</span>
+              <span class="name">numberOfBars</span>: <span class="number">120</span>
+              <span class="name">barRotationTimeMs</span>: <span class="number">8160</span> <span class="comment">// 68 ms per bar</span>
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">blackBottomRect</span>
+          <span class="name">color</span>: <span class="string">&quot;black&quot;</span>
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+          <span class="name">height</span>: <span class="number">0.14</span> <span class="operator">*</span> <span class="name">mainview</span>.<span class="name">height</span>
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+      }
+
+      <span class="comment">// Duration of played content</span>
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+          <span class="name">text</span>: <span class="name">formatDuration</span>(<span class="name">mediaPlayer</span>.<span class="name">position</span>)
+          <span class="name">color</span>: <span class="string">&quot;#80C342&quot;</span>
+          <span class="name">x</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">6</span>
+          <span class="name">y</span>: <span class="name">mainview</span>.<span class="name">height</span> <span class="operator">-</span> <span class="name">mainview</span>.<span class="name">height</span> <span class="operator">/</span> <span class="number">8</span>
+          <span class="name">font</span>.pixelSize: <span class="number">12</span>
+      }
+
+      <span class="comment">// Duration of the content left</span>
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+          <span class="name">text</span>: <span class="string">&quot;-&quot;</span> <span class="operator">+</span> <span class="name">formatDuration</span>(<span class="name">mediaPlayer</span>.<span class="name">duration</span> <span class="operator">-</span> <span class="name">mediaPlayer</span>.<span class="name">position</span>)
+          <span class="name">color</span>: <span class="string">&quot;#80C342&quot;</span>
+          <span class="name">x</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">-</span> <span class="name">parent</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">6</span>
+          <span class="name">y</span>: <span class="name">mainview</span>.<span class="name">height</span> <span class="operator">-</span> <span class="name">mainview</span>.<span class="name">height</span> <span class="operator">/</span> <span class="number">8</span>
+          <span class="name">font</span>.pixelSize: <span class="number">12</span>
+      }
+
+      <span class="keyword">function</span> <span class="name">formatDuration</span>(<span class="name">milliseconds</span>) {
+          var <span class="name">minutes</span> = <span class="name">Math</span>.<span class="name">floor</span>(<span class="name">milliseconds</span> <span class="operator">/</span> <span class="number">60000</span>)
+          <span class="name">milliseconds</span> <span class="operator">-=</span> <span class="name">minutes</span> <span class="operator">*</span> <span class="number">60000</span>
+          var <span class="name">seconds</span> = <span class="name">milliseconds</span> <span class="operator">/</span> <span class="number">1000</span>
+          <span class="name">seconds</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">round</span>(<span class="name">seconds</span>)
+          <span class="keyword">if</span> (<span class="name">seconds</span> <span class="operator">&lt;</span> <span class="number">10</span>)
+              <span class="keyword">return</span> <span class="name">minutes</span> <span class="operator">+</span> <span class="string">&quot;:0&quot;</span> <span class="operator">+</span> <span class="name">seconds</span>
+          <span class="keyword">else</span>
+              <span class="keyword">return</span> <span class="name">minutes</span> <span class="operator">+</span> <span class="string">&quot;:&quot;</span> <span class="operator">+</span> <span class="name">seconds</span>
+      }
+
+      property <span class="type">int</span> <span class="name">buttonHorizontalMargin</span>: <span class="number">10</span>
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">playButton</span>
+          <span class="name">height</span>: <span class="number">54</span>
+          <span class="name">width</span>: <span class="number">54</span>
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.bottomMargin: <span class="name">width</span>
+          <span class="name">x</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">2</span> <span class="operator">-</span> <span class="name">width</span> <span class="operator">-</span> <span class="name">buttonHorizontalMargin</span>
+          <span class="name">color</span>: <span class="string">&quot;transparent&quot;</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+              <span class="name">id</span>: <span class="name">playButtonImage</span>
+              <span class="name">source</span>: <span class="string">&quot;qrc:/images/pausenormal.png&quot;</span>
+          }
+
+          <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+              <span class="name">id</span>: <span class="name">playButtonMouseArea</span>
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">hoverEnabled</span>: <span class="name">isHoverEnabled</span>
+              <span class="name">onClicked</span>: {
+                  <span class="keyword">if</span> (<span class="name">mainview</span>.<span class="name">state</span> <span class="operator">==</span> <span class="string">'paused'</span> <span class="operator">||</span> <span class="name">mainview</span>.<span class="name">state</span> <span class="operator">==</span> <span class="string">'stopped'</span>)
+                      <span class="name">mainview</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">'playing'</span>
+                  <span class="keyword">else</span>
+                      <span class="name">mainview</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">'paused'</span>
+              }
+              <span class="name">onEntered</span>: {
+                  <span class="keyword">if</span> (<span class="name">mainview</span>.<span class="name">state</span> <span class="operator">==</span> <span class="string">'playing'</span>)
+                      <span class="name">playButtonImage</span>.<span class="name">source</span> <span class="operator">=</span> <span class="string">&quot;qrc:/images/pausehoverpressed.png&quot;</span>
+                  <span class="keyword">else</span>
+                      <span class="name">playButtonImage</span>.<span class="name">source</span> <span class="operator">=</span> <span class="string">&quot;qrc:/images/playhoverpressed.png&quot;</span>
+              }
+              <span class="name">onExited</span>: {
+                  <span class="keyword">if</span> (<span class="name">mainview</span>.<span class="name">state</span> <span class="operator">==</span> <span class="string">'playing'</span>)
+                      <span class="name">playButtonImage</span>.<span class="name">source</span> <span class="operator">=</span> <span class="string">&quot;qrc:/images/pausenormal.png&quot;</span>
+                  <span class="keyword">else</span>
+                      <span class="name">playButtonImage</span>.<span class="name">source</span> <span class="operator">=</span> <span class="string">&quot;qrc:/images/playnormal.png&quot;</span>
+              }
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">stopButton</span>
+          <span class="name">height</span>: <span class="number">54</span>
+          <span class="name">width</span>: <span class="number">54</span>
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.bottomMargin: <span class="name">width</span>
+          <span class="name">x</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">2</span> <span class="operator">+</span> <span class="name">buttonHorizontalMargin</span>
+          <span class="name">color</span>: <span class="string">&quot;transparent&quot;</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+              <span class="name">id</span>: <span class="name">stopButtonImage</span>
+              <span class="name">source</span>: <span class="string">&quot;qrc:/images/stopnormal.png&quot;</span>
+          }
+
+          <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">hoverEnabled</span>: <span class="name">isHoverEnabled</span>
+              <span class="name">onClicked</span>: <span class="name">mainview</span>.<span class="name">state</span> <span class="operator">=</span> <span class="string">'stopped'</span>
+              <span class="name">onEntered</span>: {
+                  <span class="keyword">if</span> (<span class="name">mainview</span>.<span class="name">state</span> <span class="operator">!=</span> <span class="string">'stopped'</span>)
+                      <span class="name">stopButtonImage</span>.<span class="name">source</span> <span class="operator">=</span> <span class="string">&quot;qrc:/images/stophoverpressed.png&quot;</span>
+              }
+              <span class="name">onExited</span>: {
+                  <span class="keyword">if</span> (<span class="name">mainview</span>.<span class="name">state</span> <span class="operator">!=</span> <span class="string">'stopped'</span>)
+                      <span class="name">stopButtonImage</span>.<span class="name">source</span> <span class="operator">=</span> <span class="string">&quot;qrc:/images/stopnormal.png&quot;</span>
+              }
+          }
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@audio-visualizer-qml/main.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

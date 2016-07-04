@@ -1,0 +1,783 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>planets.js Example File | Qt Canvas 3D 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcanvas3d-index.html">Qt Canvas 3D</a></td><td ><a href="qtcanvas3d-threejs-planets-example.html">Planets Example</a></td><td >planets.js Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">planets.js Example File</h1>
+<span class="subtitle">threejs/planets/planets.js</span>
+<!-- $$$threejs/planets/planets.js-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="js">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the QtCanvas3D module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="name">Qt</span>.<span class="name">include</span>(<span class="string">&quot;three.js&quot;</span>)
+  <span class="name">Qt</span>.<span class="name">include</span>(<span class="string">&quot;threex.planets.js&quot;</span>)
+
+  var <span class="name">SUN</span> = <span class="number">0</span>;
+  var <span class="name">MERCURY</span> = <span class="number">1</span>;
+  var <span class="name">VENUS</span> = <span class="number">2</span>;
+  var <span class="name">EARTH</span> = <span class="number">3</span>;
+  var <span class="name">MARS</span> = <span class="number">4</span>;
+  var <span class="name">JUPITER</span> = <span class="number">5</span>;
+  var <span class="name">SATURN</span> = <span class="number">6</span>;
+  var <span class="name">URANUS</span> = <span class="number">7</span>;
+  var <span class="name">NEPTUNE</span> = <span class="number">8</span>;
+  var <span class="name">NUM_SELECTABLE_PLANETS</span> = <span class="number">9</span>;
+  var <span class="name">MOON</span> = <span class="number">9</span>;
+  var <span class="name">SOLAR_SYSTEM</span> = <span class="number">100</span>;
+
+  var <span class="name">camera</span>, <span class="name">scene</span>, <span class="name">renderer</span>;
+  var <span class="name">planetCanvas</span>, <span class="name">mouse</span>, <span class="name">raycaster</span>;
+
+  var <span class="name">daysPerFrame</span>;
+  var <span class="name">daysPerFrameScale</span>;
+  var <span class="name">planetScale</span>;
+  var <span class="name">cameraDistance</span>;
+
+  var <span class="name">objects</span> = []; <span class="comment">// Planet objects</span>
+  var <span class="name">hitObjects</span> = []; <span class="comment">// Planet hit detection objects</span>
+  var <span class="name">planets</span> = []; <span class="comment">// Planet data info</span>
+
+  var <span class="name">commonGeometry</span>;
+  var <span class="name">hitGeometry</span>;
+  var <span class="name">solarDistance</span> = <span class="number">2600000</span>;
+  var <span class="name">saturnOuterRadius</span> = <span class="number">120.700</span>;
+  var <span class="name">uranusOuterRadius</span> = <span class="number">40</span>;
+
+  var <span class="name">qmlView</span>;
+
+  var <span class="name">oldFocusedPlanetPosition</span>;
+  var <span class="name">oldCameraPosition</span>;
+  var <span class="name">defaultCameraPosition</span>;
+
+  var <span class="name">y</span> = <span class="number">2000</span>;
+  var <span class="name">m</span> = <span class="number">1</span>;
+  var <span class="name">D</span> = <span class="number">1</span>;
+  <span class="comment">// Time scale formula based on http://www.stjarnhimlen.se/comp/ppcomp.html</span>
+  var <span class="name">startD</span> = <span class="number">367</span> <span class="operator">*</span> <span class="name">y</span> <span class="operator">-</span> <span class="number">7</span> <span class="operator">*</span> (<span class="name">y</span> <span class="operator">+</span> (<span class="name">m</span> <span class="operator">+</span> <span class="number">9</span>) <span class="operator">/</span> <span class="number">12</span>) <span class="operator">/</span> <span class="number">4</span> <span class="operator">+</span> <span class="number">275</span> <span class="operator">*</span> <span class="name">m</span> <span class="operator">/</span> <span class="number">9</span> <span class="operator">+</span> <span class="name">D</span> <span class="operator">-</span> <span class="number">730530</span>;
+  var <span class="name">oldTimeD</span> = <span class="name">startD</span>;
+  var <span class="name">currTimeD</span> = <span class="name">startD</span>;
+
+  var <span class="name">auScale</span> = <span class="number">149597.870700</span>; <span class="comment">// AU in thousands of kilometers</span>
+
+  var <span class="name">focusedScaling</span> = <span class="number">false</span>;
+  var <span class="name">focusedMinimumScale</span> = <span class="number">20</span>;
+  var <span class="name">actualScale</span>;
+
+  <span class="keyword">function</span> <span class="name">initializeGL</span>(<span class="name">canvas</span>, eventSource, mainView) {
+
+      <span class="name">planetCanvas</span> <span class="operator">=</span> <span class="name">canvas</span>;
+      <span class="name">qmlView</span> <span class="operator">=</span> <span class="name">mainView</span>;
+
+      <span class="name">camera</span> <span class="operator">=</span> new <span class="name">THREE</span>.<span class="name">PerspectiveCamera</span>(<span class="number">45</span>, <span class="name">canvas</span>.<span class="name">width</span> <span class="operator">/</span> <span class="name">canvas</span>.<span class="name">height</span>, <span class="number">2500000</span>, <span class="number">20000000</span>);
+      <span class="name">defaultCameraPosition</span> <span class="operator">=</span> new <span class="name">THREE</span>.<span class="name">Vector3</span>(<span class="name">solarDistance</span>, <span class="name">solarDistance</span>, <span class="name">solarDistance</span>);
+      <span class="name">camera</span>.<span class="name">position</span>.<span class="name">set</span>(<span class="name">defaultCameraPosition</span>.<span class="name">x</span>, <span class="name">defaultCameraPosition</span>.<span class="name">y</span>, <span class="name">defaultCameraPosition</span>.<span class="name">z</span>);
+
+      <span class="name">scene</span> <span class="operator">=</span> new <span class="name">THREE</span>.<span class="name">Scene</span>();
+
+      var <span class="name">starSphere</span> = <span class="name">THREEx</span>.<span class="name">Planets</span>.<span class="name">createStarfield</span>(<span class="number">8500000</span>);
+      <span class="name">scene</span>.<span class="name">add</span>(<span class="name">starSphere</span>);
+
+      var <span class="name">light</span> = new <span class="name">THREE</span>.<span class="name">PointLight</span>(<span class="number">0x777777</span>, <span class="number">2</span>);
+      <span class="name">light</span>.<span class="name">position</span>.<span class="name">set</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);
+      <span class="name">scene</span>.<span class="name">add</span>(<span class="name">light</span>);
+
+      <span class="name">scene</span>.<span class="name">add</span>(new <span class="name">THREE</span>.<span class="name">AmbientLight</span>(<span class="number">0x111111</span>));
+
+      <span class="name">loadPlanetData</span>();
+      <span class="name">createPlanets</span>();
+      <span class="name">setScale</span>(<span class="number">1200</span>);
+
+      <span class="name">camera</span>.<span class="name">lookAt</span>(<span class="name">objects</span>[<span class="number">0</span>].<span class="name">position</span>); <span class="comment">// look at the Sun</span>
+
+      <span class="name">raycaster</span> <span class="operator">=</span> new <span class="name">THREE</span>.<span class="name">Raycaster</span>();
+      <span class="name">mouse</span> <span class="operator">=</span> new <span class="name">THREE</span>.<span class="name">Vector2</span>();
+
+      <span class="name">renderer</span> <span class="operator">=</span> new <span class="name">THREE</span>.<span class="name">Canvas3DRenderer</span>(
+                  { canvas: <span class="name">canvas</span>, antialias: <span class="number">true</span>, devicePixelRatio: <span class="name">canvas</span>.<span class="name">devicePixelRatio</span> });
+
+      <span class="name">renderer</span>.<span class="name">setPixelRatio</span>(<span class="name">canvas</span>.<span class="name">devicePixelRatio</span>);
+      <span class="name">renderer</span>.<span class="name">setSize</span>(<span class="name">canvas</span>.<span class="name">width</span>, <span class="name">canvas</span>.<span class="name">height</span>);
+      <span class="name">eventSource</span>.<span class="name">mouseDown</span>.<span class="name">connect</span>(<span class="name">onDocumentMouseDown</span>);
+  }
+
+  <span class="keyword">function</span> <span class="name">loadPlanetData</span>() {
+
+      <span class="comment">// Planet Data</span>
+      <span class="comment">// radius - planet radius in millions of meters</span>
+      <span class="comment">// tilt - planet axis angle</span>
+      <span class="comment">// N1 N2 - longitude of the ascending node</span>
+      <span class="comment">// i1 i2 - inclination to the ecliptic (plane of the Earth's orbit)</span>
+      <span class="comment">// w1 w2 - argument of perihelion</span>
+      <span class="comment">// a1 a2 - semi-major axis, or mean distance from Sun</span>
+      <span class="comment">// e1 e2 - eccentricity (0=circle, 0-1=ellipse, 1=parabola)</span>
+      <span class="comment">// M1 M2 - mean anomaly (0 at perihelion; increases uniformly with time)</span>
+      <span class="comment">// period - sidereal rotation period</span>
+      <span class="comment">// centerOfOrbit - the planet in the center of the orbit</span>
+      <span class="comment">// (orbital elements based on http://www.stjarnhimlen.se/comp/ppcomp.html)</span>
+
+      var <span class="name">sun</span> = { radius: <span class="number">694.439</span>, tilt: <span class="number">63.87</span>, period: <span class="number">25.05</span> };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">sun</span>);
+      var <span class="name">mercury</span> = {
+          radius: <span class="number">2.433722</span>, tilt: <span class="number">0.04</span>, N1: <span class="number">48.3313</span>, N2: <span class="number">0.0000324587</span>,
+          i1: <span class="number">7.0047</span>, i2: <span class="number">0.0000000500</span>, w1: <span class="number">29.1241</span>, w2: <span class="number">0.0000101444</span>,
+          a1: <span class="number">0.387098</span>, a2: <span class="number">0</span>, e1: <span class="number">0.205635</span>, e2: <span class="number">0.000000000559</span>,
+          M1: <span class="number">168.6562</span>, M2: <span class="number">4.0923344368</span>, period: <span class="number">58.646</span>,
+          centerOfOrbit: <span class="name">SUN</span>
+      };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">mercury</span>);
+      var <span class="name">venus</span> = {
+          radius: <span class="number">6.046079</span>, tilt: <span class="number">177.36</span>, N1: <span class="number">76.6799</span>, N2: <span class="number">0.0000246590</span>,
+          i1: <span class="number">3.3946</span>, i2: <span class="number">0.0000000275</span>, w1: <span class="number">54.8910</span>, w2: <span class="number">0.0000138374</span>,
+          a1: <span class="number">0.723330</span>, a2: <span class="number">0</span>, e1: <span class="number">0.006773</span>, e2: -<span class="number">0.000000001302</span>,
+          M1: <span class="number">48.0052</span>, M2: <span class="number">1.6021302244</span>, period: <span class="number">243.0185</span>,
+          centerOfOrbit: <span class="name">SUN</span>
+      };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">venus</span>);
+      var <span class="name">earth</span> = {
+          radius: <span class="number">6.371</span>, tilt: <span class="number">25.44</span>, N1: <span class="number">174.873</span>, N2: <span class="number">0</span>,
+          i1: <span class="number">0.00005</span>, i2: <span class="number">0</span>, w1: <span class="number">102.94719</span>, w2: <span class="number">0</span>,
+          a1: <span class="number">1</span>, a2: <span class="number">0</span>, e1: <span class="number">0.01671022</span>, e2: <span class="number">0</span>,
+          M1: <span class="number">357.529</span>, M2: <span class="number">0.985608</span>, period: <span class="number">0.997</span>,
+          centerOfOrbit: <span class="name">SUN</span>
+      };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">earth</span>);
+      var <span class="name">mars</span> = {
+          radius: <span class="number">3.389372</span>, tilt: <span class="number">25.19</span>, N1: <span class="number">49.5574</span>, N2: <span class="number">0.0000211081</span>,
+          i1: <span class="number">1.8497</span>, i2: -<span class="number">0.0000000178</span>, w1: <span class="number">286.5016</span>, w2: <span class="number">0.0000292961</span>,
+          a1: <span class="number">1.523688</span>, a2: <span class="number">0</span>, e1: <span class="number">0.093405</span>, e2: <span class="number">0.000000002516</span>,
+          M1: <span class="number">18.6021</span>, M2: <span class="number">0.5240207766</span>, period: <span class="number">1.025957</span>,
+          centerOfOrbit: <span class="name">SUN</span>
+      };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">mars</span>);
+      var <span class="name">jupiter</span> = {
+          radius: <span class="number">71.41254</span>, tilt: <span class="number">3.13</span>, N1: <span class="number">100.4542</span>, N2: <span class="number">0.0000276854</span>,
+          i1: <span class="number">1.3030</span>, i2: -<span class="number">0.0000001557</span>, w1: <span class="number">273.8777</span>, w2: <span class="number">0.0000164505</span>,
+          a1: <span class="number">5.20256</span>, a2: <span class="number">0</span>, e1: <span class="number">0.048498</span>, e2: <span class="number">0.000000004469</span>,
+          M1: <span class="number">19.8950</span>, M2: <span class="number">0.0830853001</span>, period: <span class="number">0.4135</span>,
+          centerOfOrbit: <span class="name">SUN</span>
+      };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">jupiter</span>);
+      var <span class="name">saturn</span> = {
+          radius: <span class="number">60.19958</span>, tilt: <span class="number">26.73</span>, N1: <span class="number">113.6634</span>, N2: <span class="number">0.0000238980</span>,
+          i1: <span class="number">2.4886</span>, i2: -<span class="number">0.0000001081</span>, w1: <span class="number">339.3939</span>, w2: <span class="number">0.0000297661</span>,
+          a1: <span class="number">9.55475</span>, a2: <span class="number">0</span>, e1: <span class="number">0.055546</span>, e2: -<span class="number">0.000000009499</span>,
+          M1: <span class="number">316.9670</span>, M2: <span class="number">0.0334442282</span>, period: <span class="number">0.4395</span>,
+          centerOfOrbit: <span class="name">SUN</span>
+      };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">saturn</span>);
+      var <span class="name">uranus</span> = {
+          radius: <span class="number">25.5286</span>, tilt: <span class="number">97.77</span>, N1: <span class="number">74.0005</span>, N2: <span class="number">0.000013978</span>,
+          i1: <span class="number">0.7733</span>, i2: <span class="number">0.000000019</span>, w1: <span class="number">96.6612</span>, w2: <span class="number">0.000030565</span>,
+          a1: <span class="number">19.18171</span>, a2: -<span class="number">0.0000000155</span>, e1: <span class="number">0.047318</span>, e2: <span class="number">0.00000000745</span>,
+          M1: <span class="number">142.5905</span>, M2: <span class="number">0.011725806</span>, period: <span class="number">0.71833</span>,
+          centerOfOrbit: <span class="name">SUN</span>
+      };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">uranus</span>);
+      var <span class="name">neptune</span> = {
+          radius: <span class="number">24.73859</span>, tilt: <span class="number">28.32</span>, N1: <span class="number">131.7806</span>, N2: <span class="number">0.000030173</span>,
+          i1: <span class="number">1.7700</span>, i2: -<span class="number">0.000000255</span>, w1: <span class="number">272.8461</span>, w2: <span class="number">0.000006027</span>,
+          a1: <span class="number">30.05826</span>, a2: <span class="number">0.00000003313</span>, e1: <span class="number">0.008606</span>, e2: <span class="number">0.00000000215</span>,
+          M1: <span class="number">260.2471</span>, M2: <span class="number">0.005995147</span>, period: <span class="number">0.6713</span>,
+          centerOfOrbit: <span class="name">SUN</span>
+      };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">neptune</span>);
+      var <span class="name">moon</span> = {
+          radius: <span class="number">1.5424</span>, tilt: <span class="number">28.32</span>, N1: <span class="number">125.1228</span>, N2: -<span class="number">0.0529538083</span>,
+          i1: <span class="number">5.1454</span>, i2: <span class="number">0</span>, w1: <span class="number">318.0634</span>, w2: <span class="number">0.1643573223</span>,
+          a1: <span class="number">0.273</span>, a2: <span class="number">0</span>, e1: <span class="number">0.054900</span>, e2: <span class="number">0</span>,
+          M1: <span class="number">115.3654</span>, M2: <span class="number">13.0649929509</span>, period: <span class="number">27.321582</span>,
+          centerOfOrbit: <span class="name">EARTH</span>
+      };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">moon</span>);
+
+  }
+
+  <span class="keyword">function</span> <span class="name">createPlanets</span>() {
+
+      <span class="name">objects</span> <span class="operator">=</span> [];
+
+      <span class="name">commonGeometry</span> <span class="operator">=</span> new <span class="name">THREE</span>.<span class="name">BufferGeometry</span>().<span class="name">fromGeometry</span>(new <span class="name">THREE</span>.<span class="name">SphereGeometry</span>(<span class="number">1</span>, <span class="number">64</span>, <span class="number">64</span>));
+      <span class="name">hitGeometry</span> <span class="operator">=</span> new <span class="name">THREE</span>.<span class="name">BufferGeometry</span>().<span class="name">fromGeometry</span>(new <span class="name">THREE</span>.<span class="name">SphereGeometry</span>(<span class="number">1</span>, <span class="number">8</span>, <span class="number">8</span>));
+
+      var <span class="name">ringSegments</span> = <span class="number">70</span>;
+      var <span class="name">mesh</span>, <span class="name">innerRadius</span>, <span class="name">outerRadius</span>, <span class="name">ring</span>;
+
+      <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">planets</span>.<span class="name">length</span>; i ++) {
+          <span class="keyword">switch</span> (<span class="name">i</span>) {
+          <span class="keyword">case</span> <span class="name">SUN</span>:
+              <span class="name">mesh</span> <span class="operator">=</span> <span class="name">createSun</span>(<span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>]);
+              <span class="name">mesh</span>.<span class="name">position</span>.<span class="name">set</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="name">MERCURY</span>:
+              <span class="name">mesh</span> <span class="operator">=</span> <span class="name">createPlanet</span>(<span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>], <span class="number">0.005</span>, <span class="string">'images/mercurymap.jpg'</span>,
+                                  <span class="string">'images/mercurybump.jpg'</span>);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="name">VENUS</span>:
+              <span class="name">mesh</span> <span class="operator">=</span> <span class="name">createPlanet</span>(<span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>], <span class="number">0.005</span>, <span class="string">'images/venusmap.jpg'</span>,
+                                  <span class="string">'images/venusbump.jpg'</span>);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="name">EARTH</span>:
+              <span class="name">mesh</span> <span class="operator">=</span> <span class="name">createPlanet</span>(<span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>], <span class="number">0.05</span>, <span class="string">'images/earthmap1k.jpg'</span>,
+                                  <span class="string">'images/earthbump1k.jpg'</span>, <span class="string">'images/earthspec1k.jpg'</span>);
+              <span class="name">createEarthCloud</span>(<span class="name">mesh</span>);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="name">MARS</span>:
+              <span class="name">mesh</span> <span class="operator">=</span> <span class="name">createPlanet</span>(<span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>], <span class="number">0.05</span>, <span class="string">'images/marsmap1k.jpg'</span>,
+                                  <span class="string">'images/marsbump1k.jpg'</span>);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="name">JUPITER</span>:
+              <span class="name">mesh</span> <span class="operator">=</span> <span class="name">createPlanet</span>(<span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>], <span class="number">0.02</span>, <span class="string">'images/jupitermap.jpg'</span>,
+                                  <span class="string">'images/jupitermap.jpg'</span>);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="name">SATURN</span>:
+              <span class="name">mesh</span> <span class="operator">=</span> <span class="name">createPlanet</span>(<span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>], <span class="number">0.05</span>, <span class="string">'images/saturnmap.jpg'</span>,
+                                  <span class="string">'images/saturnmap.jpg'</span>);
+              <span class="name">innerRadius</span> <span class="operator">=</span> (<span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>] <span class="operator">+</span> <span class="number">6.630</span>) <span class="operator">/</span> <span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>];
+              <span class="name">outerRadius</span> <span class="operator">=</span> (<span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>] <span class="operator">+</span> <span class="name">saturnOuterRadius</span>) <span class="operator">/</span> <span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>];
+              <span class="name">ring</span> <span class="operator">=</span> <span class="name">createRing</span>(<span class="name">innerRadius</span>, <span class="name">outerRadius</span>, <span class="name">ringSegments</span>,
+                                    <span class="string">'qrc:images/saturnringcolortrans.png'</span>);
+              <span class="name">ring</span>.<span class="name">receiveShadow</span> <span class="operator">=</span> <span class="number">true</span>;
+              <span class="name">ring</span>.<span class="name">castShadow</span> <span class="operator">=</span> <span class="number">true</span>;
+              <span class="name">mesh</span>.<span class="name">add</span>(<span class="name">ring</span>);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="name">URANUS</span>:
+              <span class="name">mesh</span> <span class="operator">=</span> <span class="name">createPlanet</span>(<span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>], <span class="number">0.05</span>, <span class="string">'images/uranusmap.jpg'</span>,
+                                  <span class="string">'images/uranusmap.jpg'</span>);
+              <span class="name">innerRadius</span> <span class="operator">=</span> (<span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>] <span class="operator">+</span> <span class="number">2</span>) <span class="operator">/</span> <span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>];
+              <span class="name">outerRadius</span> <span class="operator">=</span> (<span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>] <span class="operator">+</span> <span class="name">uranusOuterRadius</span>) <span class="operator">/</span> <span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>];
+              <span class="name">ring</span> <span class="operator">=</span> <span class="name">createRing</span>(<span class="name">innerRadius</span>, <span class="name">outerRadius</span>, <span class="name">ringSegments</span>,
+                                    <span class="string">'qrc:images/uranusringcolortrans.png'</span>);
+              <span class="name">ring</span>.<span class="name">receiveShadow</span> <span class="operator">=</span> <span class="number">true</span>;
+              <span class="name">ring</span>.<span class="name">castShadow</span> <span class="operator">=</span> <span class="number">true</span>;
+              <span class="name">mesh</span>.<span class="name">add</span>(<span class="name">ring</span>);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="name">NEPTUNE</span>:
+              <span class="name">mesh</span> <span class="operator">=</span> <span class="name">createPlanet</span>(<span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>], <span class="number">0.05</span>, <span class="string">'images/neptunemap.jpg'</span>,
+                                  <span class="string">'images/neptunemap.jpg'</span>);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="name">MOON</span>:
+              <span class="name">mesh</span> <span class="operator">=</span> <span class="name">createPlanet</span>(<span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>], <span class="number">0.05</span>, <span class="string">'images/moonmap1k.jpg'</span>,
+                                  <span class="string">'images/moonbump1k.jpg'</span>);
+              <span class="keyword">break</span>;
+          }
+
+          <span class="name">objects</span>.<span class="name">push</span>(<span class="name">mesh</span>);
+          <span class="name">scene</span>.<span class="name">add</span>(<span class="name">mesh</span>);
+
+          <span class="comment">// Create separate meshes for click detection</span>
+          var <span class="name">hitMesh</span> = new <span class="name">THREE</span>.<span class="name">Mesh</span>(<span class="name">hitGeometry</span>);
+          <span class="name">hitMesh</span>.<span class="name">visible</span> <span class="operator">=</span> <span class="number">false</span>;
+          <span class="name">hitObjects</span>.<span class="name">push</span>(<span class="name">hitMesh</span>);
+          <span class="name">scene</span>.<span class="name">add</span>(<span class="name">hitMesh</span>);
+      }
+
+  }
+
+  <span class="keyword">function</span> <span class="name">createSun</span>(<span class="name">radius</span>) {
+
+      var <span class="name">textureLoader</span> = new <span class="name">THREE</span>.<span class="name">TextureLoader</span>();
+      var <span class="name">texture</span> = <span class="name">textureLoader</span>.<span class="name">load</span>(<span class="string">'images/sunmap.jpg'</span>);
+      var <span class="name">material</span> = new <span class="name">THREE</span>.<span class="name">MeshBasicMaterial</span>({ map: <span class="name">texture</span> });
+      var <span class="name">mesh</span> = new <span class="name">THREE</span>.<span class="name">Mesh</span>(<span class="name">commonGeometry</span>, <span class="name">material</span>);
+      <span class="name">mesh</span>.<span class="name">scale</span>.<span class="name">set</span>(<span class="name">radius</span>, <span class="name">radius</span>, <span class="name">radius</span>);
+
+      <span class="name">mesh</span>.<span class="name">receiveShadow</span> <span class="operator">=</span> <span class="number">false</span>;
+      <span class="name">mesh</span>.<span class="name">castShadow</span> <span class="operator">=</span> <span class="number">false</span>;
+
+      <span class="keyword">return</span> <span class="name">mesh</span>;
+  }
+
+  <span class="keyword">function</span> <span class="name">createPlanet</span>(<span class="name">radius</span>, bumpMapScale, mapTexture, bumpTexture, specularTexture) {
+
+      var <span class="name">textureLoader</span> = new <span class="name">THREE</span>.<span class="name">TextureLoader</span>();
+      var <span class="name">material</span> = new <span class="name">THREE</span>.<span class="name">MeshPhongMaterial</span>({
+                                                     map: <span class="name">textureLoader</span>.<span class="name">load</span>(<span class="name">mapTexture</span>),
+                                                     bumpMap: <span class="name">textureLoader</span>.<span class="name">load</span>(<span class="name">bumpTexture</span>),
+                                                     bumpScale: <span class="name">bumpMapScale</span>
+                                                 });
+
+      <span class="keyword">if</span> (<span class="name">specularTexture</span>) {
+          <span class="name">material</span>.<span class="name">specularMap</span> <span class="operator">=</span> <span class="name">textureLoader</span>.<span class="name">load</span>(<span class="name">specularTexture</span>);
+          <span class="name">material</span>.<span class="name">specular</span> <span class="operator">=</span> new <span class="name">THREE</span>.<span class="name">Color</span>(<span class="string">'grey'</span>);
+          <span class="name">material</span>.<span class="name">shininess</span> <span class="operator">=</span> <span class="number">50.0</span>;
+      } <span class="keyword">else</span> {
+          <span class="name">material</span>.<span class="name">shininess</span> <span class="operator">=</span> <span class="number">1.0</span>;
+      }
+
+      var <span class="name">mesh</span> = new <span class="name">THREE</span>.<span class="name">Mesh</span>(<span class="name">commonGeometry</span>, <span class="name">material</span>);
+      <span class="name">mesh</span>.<span class="name">scale</span>.<span class="name">set</span>(<span class="name">radius</span>, <span class="name">radius</span>, <span class="name">radius</span>);
+
+      <span class="keyword">return</span> <span class="name">mesh</span>;
+
+  }
+
+  <span class="keyword">function</span> <span class="name">createEarthCloud</span>(<span class="name">earthMesh</span>) {
+
+      var <span class="name">textureLoader</span> = new <span class="name">THREE</span>.<span class="name">TextureLoader</span>();
+      var <span class="name">material</span> = new <span class="name">THREE</span>.<span class="name">MeshPhongMaterial</span>({
+                                                     map: <span class="name">textureLoader</span>.<span class="name">load</span>(<span class="string">'qrc:images/earthcloudmapcolortrans.png'</span>),
+                                                     side: <span class="name">THREE</span>.<span class="name">BackSide</span>,
+                                                     transparent: <span class="number">true</span>,
+                                                     opacity: <span class="number">0.8</span>
+                                                 });
+      var <span class="name">mesh</span> = new <span class="name">THREE</span>.<span class="name">Mesh</span>(<span class="name">commonGeometry</span>, <span class="name">material</span>);
+
+      var <span class="name">material2</span> = new <span class="name">THREE</span>.<span class="name">MeshPhongMaterial</span>({
+                                                     map: <span class="name">textureLoader</span>.<span class="name">load</span>(<span class="string">'qrc:images/earthcloudmapcolortrans.png'</span>),
+                                                     side: <span class="name">THREE</span>.<span class="name">FrontSide</span>,
+                                                     transparent: <span class="number">true</span>,
+                                                     opacity: <span class="number">0.8</span>
+                                                 });
+      var <span class="name">mesh2</span> = new <span class="name">THREE</span>.<span class="name">Mesh</span>(<span class="name">commonGeometry</span>, <span class="name">material2</span>);
+
+      <span class="name">mesh</span>.<span class="name">scale</span>.<span class="name">set</span>(<span class="number">1.02</span>, <span class="number">1.02</span>, <span class="number">1.02</span>);
+      <span class="name">earthMesh</span>.<span class="name">add</span>(<span class="name">mesh</span>);
+      <span class="name">mesh2</span>.<span class="name">scale</span>.<span class="name">set</span>(<span class="number">1.02</span>, <span class="number">1.02</span>, <span class="number">1.02</span>);
+      <span class="name">earthMesh</span>.<span class="name">add</span>(<span class="name">mesh2</span>);
+  }
+
+  <span class="keyword">function</span> <span class="name">createRing</span>(<span class="name">radius</span>, width, height, texture) {
+
+      var <span class="name">textureLoader</span> = new <span class="name">THREE</span>.<span class="name">TextureLoader</span>();
+      var <span class="name">geometry</span> = new <span class="name">THREE</span>.<span class="name">BufferGeometry</span>().<span class="name">fromGeometry</span>(
+                  new <span class="name">THREEx</span>.<span class="name">Planets</span>.<span class="name">_RingGeometry</span>(<span class="name">radius</span>, <span class="name">width</span>, <span class="name">height</span>));
+
+      var <span class="name">material</span> = new <span class="name">THREE</span>.<span class="name">MeshPhongMaterial</span>({
+                                                     map: <span class="name">textureLoader</span>.<span class="name">load</span>(<span class="name">texture</span>),
+                                                     side: <span class="name">THREE</span>.<span class="name">DoubleSide</span>,
+                                                     transparent: <span class="number">true</span>,
+                                                     opacity: <span class="number">0.8</span>
+                                                 });
+      <span class="name">material</span>.<span class="name">map</span>.<span class="name">minFilter</span> <span class="operator">=</span> <span class="name">THREE</span>.<span class="name">NearestFilter</span>;
+      var <span class="name">mesh</span> = new <span class="name">THREE</span>.<span class="name">Mesh</span>(<span class="name">geometry</span>, <span class="name">material</span>);
+      <span class="name">mesh</span>.<span class="name">lookAt</span>(new <span class="name">THREE</span>.<span class="name">Vector3</span>(<span class="number">0</span>, <span class="number">90</span>, <span class="number">0</span>));
+
+      <span class="keyword">return</span> <span class="name">mesh</span>;
+
+  }
+
+  <span class="keyword">function</span> <span class="name">createStarfield</span>(<span class="name">radius</span>) {
+
+      var <span class="name">textureLoader</span> = new <span class="name">THREE</span>.<span class="name">TextureLoader</span>();
+      var <span class="name">texture</span> = <span class="name">textureLoader</span>.<span class="name">load</span>(<span class="string">'images/galaxy_starfield.png'</span>)
+      var <span class="name">material</span> = new <span class="name">THREE</span>.<span class="name">MeshBasicMaterial</span>({
+                                                     map: <span class="name">texture</span>,
+                                                     side: <span class="name">THREE</span>.<span class="name">BackSide</span>
+                                                 })
+      var <span class="name">geometry</span> = new <span class="name">THREE</span>.<span class="name">BufferGeometry</span>().<span class="name">fromGeometry</span>(new <span class="name">THREE</span>.<span class="name">SphereGeometry</span>(<span class="name">radius</span>, <span class="number">32</span>, <span class="number">32</span>));
+      var <span class="name">mesh</span> = new <span class="name">THREE</span>.<span class="name">Mesh</span>(<span class="name">geometry</span>, <span class="name">material</span>)
+
+      <span class="keyword">return</span> <span class="name">mesh</span>
+
+  }
+
+  <span class="keyword">function</span> <span class="name">onResizeGL</span>(<span class="name">canvas</span>) {
+
+      <span class="keyword">if</span> (<span class="name">camera</span> <span class="operator">===</span> <span class="name">undefined</span>) <span class="keyword">return</span>;
+
+      <span class="name">camera</span>.<span class="name">aspect</span> <span class="operator">=</span> <span class="name">canvas</span>.<span class="name">width</span> <span class="operator">/</span> <span class="name">canvas</span>.<span class="name">height</span>;
+      <span class="name">camera</span>.<span class="name">updateProjectionMatrix</span>();
+      <span class="name">renderer</span>.<span class="name">setPixelRatio</span>(<span class="name">canvas</span>.<span class="name">devicePixelRatio</span>);
+      <span class="name">renderer</span>.<span class="name">setSize</span>(<span class="name">canvas</span>.<span class="name">width</span>, <span class="name">canvas</span>.<span class="name">height</span>);
+
+  }
+
+  <span class="keyword">function</span> <span class="name">onSpeedChanged</span>(<span class="name">value</span>) {
+
+      <span class="name">daysPerFrameScale</span> <span class="operator">=</span> <span class="name">value</span>;
+
+  }
+
+  <span class="keyword">function</span> <span class="name">setScale</span>(<span class="name">value</span>, focused) {
+
+      <span class="comment">// Save actual scale in focus mode</span>
+      <span class="keyword">if</span> (!<span class="name">focused</span>)
+          <span class="name">actualScale</span> <span class="operator">=</span> <span class="name">value</span>;
+
+      <span class="comment">// Limit minimum scaling in focus mode to avoid jitter caused by rounding errors</span>
+      <span class="keyword">if</span> (<span class="name">value</span> <span class="operator">&lt;=</span> <span class="name">focusedMinimumScale</span> <span class="operator">&amp;&amp;</span> (<span class="name">focusedScaling</span> <span class="operator">||</span> <span class="name">focused</span>)) {
+          <span class="name">planetScale</span> <span class="operator">=</span> <span class="name">focusedMinimumScale</span>;
+      } <span class="keyword">else</span> {
+          <span class="name">planetScale</span> <span class="operator">=</span> <span class="name">actualScale</span>;
+      }
+
+      <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">objects</span>.<span class="name">length</span>; i++) {
+          var <span class="name">object</span> = <span class="name">objects</span>[<span class="name">i</span>];
+          <span class="comment">// first reset scale</span>
+          var <span class="name">radius</span> = <span class="name">planets</span>[<span class="name">i</span>][<span class="string">&quot;radius&quot;</span>];
+          <span class="name">object</span>.<span class="name">scale</span>.<span class="name">set</span>(<span class="name">radius</span>, <span class="name">radius</span>, <span class="name">radius</span>);
+          <span class="keyword">if</span> (<span class="name">i</span> <span class="operator">===</span> <span class="name">SUN</span>) {
+              <span class="name">object</span>.<span class="name">scale</span>.<span class="name">multiplyScalar</span>(<span class="name">planetScale</span> <span class="operator">/</span> <span class="number">100</span>);
+          } <span class="keyword">else</span> {
+              <span class="name">object</span>.<span class="name">scale</span>.<span class="name">multiplyScalar</span>(<span class="name">planetScale</span>);
+          }
+          <span class="name">hitObjects</span>[<span class="name">i</span>].<span class="name">scale</span>.<span class="name">set</span>(<span class="name">object</span>.<span class="name">scale</span>.<span class="name">x</span>, <span class="name">object</span>.<span class="name">scale</span>.<span class="name">y</span>, <span class="name">object</span>.<span class="name">scale</span>.<span class="name">z</span>);
+      }
+
+  }
+
+  <span class="keyword">function</span> <span class="name">prepareFocusedPlanetAnimation</span>() {
+
+      <span class="name">oldCameraPosition</span> <span class="operator">=</span> <span class="name">camera</span>.<span class="name">position</span>.<span class="name">clone</span>();
+
+      var <span class="name">planet</span> = <span class="name">SUN</span>;
+      <span class="keyword">if</span> (<span class="name">qmlView</span>.<span class="name">oldPlanet</span> <span class="operator">!==</span> <span class="name">SOLAR_SYSTEM</span>)
+          <span class="name">planet</span> <span class="operator">=</span> <span class="name">qmlView</span>.<span class="name">oldPlanet</span>;
+      <span class="name">oldFocusedPlanetPosition</span> <span class="operator">=</span> <span class="name">objects</span>[<span class="name">planet</span>].<span class="name">position</span>.<span class="name">clone</span>();
+      <span class="name">qmlView</span>.<span class="name">oldPlanet</span> <span class="operator">=</span> <span class="name">qmlView</span>.<span class="name">focusedPlanet</span>;
+
+      <span class="keyword">if</span> (<span class="name">qmlView</span>.<span class="name">focusedPlanet</span> <span class="operator">!==</span> <span class="name">SOLAR_SYSTEM</span> <span class="operator">&amp;&amp;</span> <span class="name">actualScale</span> <span class="operator">&lt;=</span> <span class="name">focusedMinimumScale</span>) {
+          <span class="comment">// Limit minimum scaling in focus mode to avoid jitter caused by rounding errors</span>
+          <span class="name">planetScale</span> <span class="operator">=</span> <span class="name">focusedMinimumScale</span>;
+          <span class="name">setScale</span>(<span class="name">focusedMinimumScale</span>, <span class="number">true</span>);
+          <span class="name">focusedScaling</span> <span class="operator">=</span> <span class="number">true</span>;
+      } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">focusedScaling</span> <span class="operator">===</span> <span class="number">true</span>) {
+          <span class="comment">// Restore normal scaling</span>
+          <span class="name">focusedScaling</span> <span class="operator">=</span> <span class="number">false</span>;
+          <span class="name">setScale</span>(<span class="name">actualScale</span>);
+      }
+
+      <span class="name">calculateLookAtOffset</span>();
+      <span class="name">calculateCameraOffset</span>();
+
+  }
+
+  <span class="keyword">function</span> <span class="name">setCameraDistance</span>(<span class="name">distance</span>) {
+
+      <span class="name">cameraDistance</span> <span class="operator">=</span> <span class="name">distance</span>;
+
+  }
+
+  <span class="keyword">function</span> <span class="name">calculateLookAtOffset</span>() {
+
+      var <span class="name">offset</span> = <span class="name">oldFocusedPlanetPosition</span>.<span class="name">clone</span>();
+
+      var <span class="name">planet</span> = <span class="number">0</span>;
+      <span class="keyword">if</span> (<span class="name">qmlView</span>.<span class="name">focusedPlanet</span> <span class="operator">!==</span> <span class="name">SOLAR_SYSTEM</span>)
+          <span class="name">planet</span> <span class="operator">=</span> <span class="name">qmlView</span>.<span class="name">oldPlanet</span>;
+
+      var <span class="name">focusedPlanetPosition</span> = <span class="name">objects</span>[<span class="name">planet</span>].<span class="name">position</span>.<span class="name">clone</span>();
+      <span class="name">offset</span>.<span class="name">sub</span>(<span class="name">focusedPlanetPosition</span>);
+
+      <span class="name">qmlView</span>.<span class="name">xLookAtOffset</span> <span class="operator">=</span> <span class="name">offset</span>.<span class="name">x</span>;
+      <span class="name">qmlView</span>.<span class="name">yLookAtOffset</span> <span class="operator">=</span> <span class="name">offset</span>.<span class="name">y</span>;
+      <span class="name">qmlView</span>.<span class="name">zLookAtOffset</span> <span class="operator">=</span> <span class="name">offset</span>.<span class="name">z</span>;
+
+  }
+
+  <span class="keyword">function</span> <span class="name">calculateCameraOffset</span>() {
+
+      var <span class="name">offset</span> = <span class="name">oldCameraPosition</span>.<span class="name">clone</span>();
+
+      var <span class="name">planet</span> = <span class="number">0</span>;
+      <span class="keyword">if</span> (<span class="name">qmlView</span>.<span class="name">focusedPlanet</span> <span class="operator">!==</span> <span class="name">SOLAR_SYSTEM</span>)
+          <span class="name">planet</span> <span class="operator">=</span> <span class="name">qmlView</span>.<span class="name">focusedPlanet</span>;
+
+      var <span class="name">newCameraPosition</span> = <span class="name">getNewCameraPosition</span>(<span class="name">getOuterRadius</span>(<span class="name">planet</span>));
+
+      <span class="keyword">if</span> (<span class="name">qmlView</span>.<span class="name">focusedPlanet</span> <span class="operator">!==</span> <span class="name">SUN</span>)
+          <span class="name">offset</span>.<span class="name">sub</span>(<span class="name">newCameraPosition</span>);
+
+      <span class="keyword">if</span> (<span class="name">qmlView</span>.<span class="name">focusedPlanet</span> <span class="operator">===</span> <span class="name">SUN</span> <span class="operator">&amp;&amp;</span> <span class="name">qmlView</span>.<span class="name">oldPlanet</span> <span class="operator">===</span> <span class="name">SOLAR_SYSTEM</span>) {
+          <span class="name">qmlView</span>.<span class="name">xCameraOffset</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">abs</span>(<span class="name">offset</span>.<span class="name">x</span>);
+          <span class="name">qmlView</span>.<span class="name">yCameraOffset</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">abs</span>(<span class="name">offset</span>.<span class="name">y</span>);
+          <span class="name">qmlView</span>.<span class="name">zCameraOffset</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">abs</span>(<span class="name">offset</span>.<span class="name">z</span>);
+      } <span class="keyword">else</span> { <span class="comment">// from a planet to another</span>
+          <span class="name">qmlView</span>.<span class="name">xCameraOffset</span> <span class="operator">=</span> <span class="name">offset</span>.<span class="name">x</span>;
+          <span class="name">qmlView</span>.<span class="name">yCameraOffset</span> <span class="operator">=</span> <span class="name">offset</span>.<span class="name">y</span>;
+          <span class="name">qmlView</span>.<span class="name">zCameraOffset</span> <span class="operator">=</span> <span class="name">offset</span>.<span class="name">z</span>;
+      }
+
+  }
+
+  <span class="keyword">function</span> <span class="name">getNewCameraPosition</span>( <span class="name">radius</span> ) {
+
+      var <span class="name">position</span>;
+      <span class="keyword">if</span> (<span class="name">qmlView</span>.<span class="name">focusedPlanet</span> <span class="operator">===</span> <span class="name">SOLAR_SYSTEM</span>) {
+          <span class="name">position</span> <span class="operator">=</span> <span class="name">defaultCameraPosition</span>.<span class="name">clone</span>();
+          <span class="name">position</span>.<span class="name">multiplyScalar</span>(<span class="name">cameraDistance</span>);
+      } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">qmlView</span>.<span class="name">focusedPlanet</span> <span class="operator">===</span> <span class="name">SUN</span>) {
+          <span class="name">position</span> <span class="operator">=</span> new <span class="name">THREE</span>.<span class="name">Vector3</span>(<span class="name">radius</span> <span class="operator">*</span> <span class="name">planetScale</span> <span class="operator">*</span> <span class="number">2</span>,
+                                       <span class="name">radius</span> <span class="operator">*</span> <span class="name">planetScale</span> <span class="operator">*</span> <span class="number">2</span>,
+                                       <span class="name">radius</span> <span class="operator">*</span> <span class="name">planetScale</span> <span class="operator">*</span> <span class="number">2</span>);
+          <span class="name">position</span>.<span class="name">multiplyScalar</span>(<span class="name">cameraDistance</span>);
+
+      } <span class="keyword">else</span> {
+          var <span class="name">vec1</span> = <span class="name">objects</span>[<span class="name">qmlView</span>.<span class="name">focusedPlanet</span>].<span class="name">position</span>.<span class="name">clone</span>();
+          var <span class="name">vec2</span> = new <span class="name">THREE</span>.<span class="name">Vector3</span>(<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>);
+          <span class="name">vec1</span>.<span class="name">normalize</span>();
+          <span class="name">vec2</span>.<span class="name">cross</span>(<span class="name">vec1</span>);
+          <span class="name">vec2</span>.<span class="name">multiplyScalar</span>(<span class="name">radius</span> <span class="operator">*</span> <span class="name">planetScale</span> <span class="operator">*</span> <span class="name">cameraDistance</span> <span class="operator">*</span> <span class="number">4</span>);
+          <span class="name">vec2</span>.<span class="name">add</span>(<span class="name">objects</span>[<span class="name">qmlView</span>.<span class="name">focusedPlanet</span>].<span class="name">position</span>);
+          <span class="name">vec1</span>.<span class="name">set</span>(<span class="number">0</span>, <span class="name">radius</span> <span class="operator">*</span> <span class="name">planetScale</span>, <span class="number">0</span>);
+          <span class="name">vec2</span>.<span class="name">add</span>(<span class="name">vec1</span>);
+          <span class="name">position</span> <span class="operator">=</span> <span class="name">vec2</span>;
+      }
+      <span class="keyword">return</span> <span class="name">position</span>;
+  }
+
+  <span class="keyword">function</span> <span class="name">onDocumentMouseDown</span>(<span class="name">x</span>, y) {
+
+      <span class="comment">// Mouse selection for planets and Solar system, not for the Moon.</span>
+      <span class="comment">// Intersection tests are done against a set of cruder hit objects instead of</span>
+      <span class="comment">// actual planet meshes, as checking a lot of faces can be slow.</span>
+      <span class="name">mouse</span>.<span class="name">set</span>((<span class="name">x</span> <span class="operator">/</span> <span class="name">planetCanvas</span>.<span class="name">width</span>) <span class="operator">*</span> <span class="number">2</span> <span class="operator">-</span> <span class="number">1</span>, - (<span class="name">y</span> <span class="operator">/</span> <span class="name">planetCanvas</span>.<span class="name">height</span> ) <span class="operator">*</span> <span class="number">2</span> <span class="operator">+</span> <span class="number">1</span>);
+
+      <span class="name">raycaster</span>.<span class="name">setFromCamera</span>(<span class="name">mouse</span>, <span class="name">camera</span>);
+
+      var <span class="name">intersects</span> = [];
+      var <span class="name">i</span> = <span class="number">0</span>;
+      var <span class="name">objectCount</span> = <span class="name">hitObjects</span>.<span class="name">length</span> <span class="operator">-</span> <span class="number">1</span>; <span class="comment">// -1 excludes the moon, which is the last object</span>
+      <span class="keyword">while</span> (<span class="name">i</span> <span class="operator">&lt;</span> <span class="name">objectCount</span>) {
+          <span class="comment">// Update hitObject position</span>
+          var <span class="name">objectPos</span> = <span class="name">objects</span>[<span class="name">i</span>].<span class="name">position</span>;
+          var <span class="name">hitObject</span> = <span class="name">hitObjects</span>[<span class="name">i</span>];
+          <span class="name">hitObject</span>.<span class="name">position</span>.<span class="name">set</span>(<span class="name">objectPos</span>.<span class="name">x</span>, <span class="name">objectPos</span>.<span class="name">y</span>, <span class="name">objectPos</span>.<span class="name">z</span>);
+          <span class="name">hitObject</span>.<span class="name">updateMatrixWorld</span>();
+
+          <span class="name">hitObject</span>.<span class="name">raycast</span>( <span class="name">raycaster</span>, <span class="name">intersects</span> );
+
+          i++;
+      }
+      <span class="name">intersects</span>.<span class="name">sort</span>( <span class="name">raycaster</span>.<span class="name">ascSort</span> );
+
+      var <span class="name">selectedPlanet</span>;
+
+      <span class="keyword">if</span> (<span class="name">intersects</span>.<span class="name">length</span> <span class="operator">&gt;</span> <span class="number">0</span>) {
+          var <span class="name">intersect</span> = <span class="name">intersects</span>[<span class="number">0</span>];
+
+          <span class="name">i</span> <span class="operator">=</span> <span class="number">0</span>;
+          <span class="keyword">while</span> (<span class="name">i</span> <span class="operator">&lt;</span> <span class="name">objectCount</span>) {
+              <span class="keyword">if</span> (<span class="name">intersect</span>.<span class="name">object</span> <span class="operator">===</span> <span class="name">hitObjects</span>[<span class="name">i</span>]) {
+                  <span class="name">selectedPlanet</span> <span class="operator">=</span> <span class="name">i</span>;
+                  <span class="keyword">break</span>;
+              }
+              i++;
+          }
+          <span class="keyword">if</span> (<span class="name">selectedPlanet</span> <span class="operator">&lt;</span> <span class="name">NUM_SELECTABLE_PLANETS</span>) {
+              <span class="name">qmlView</span>.<span class="name">focusedPlanet</span> <span class="operator">=</span> <span class="name">selectedPlanet</span>;
+              <span class="comment">// Limit minimum scaling in focus mode to avoid jitter caused by rounding errors</span>
+              <span class="keyword">if</span> (<span class="name">actualScale</span> <span class="operator">&lt;=</span> <span class="name">focusedMinimumScale</span>) {
+                  <span class="name">planetScale</span> <span class="operator">=</span> <span class="name">focusedMinimumScale</span>;
+                  <span class="name">setScale</span>(<span class="name">focusedMinimumScale</span>, <span class="number">true</span>);
+              }
+              <span class="name">focusedScaling</span> <span class="operator">=</span> <span class="number">true</span>;
+          }
+      } <span class="keyword">else</span> {
+          <span class="name">qmlView</span>.<span class="name">focusedPlanet</span> <span class="operator">=</span> <span class="name">SOLAR_SYSTEM</span>;
+          <span class="comment">// Restore normal scaling</span>
+          <span class="keyword">if</span> (<span class="name">focusedScaling</span> <span class="operator">===</span> <span class="number">true</span>) {
+              <span class="name">focusedScaling</span> <span class="operator">=</span> <span class="number">false</span>;
+              <span class="name">setScale</span>(<span class="name">actualScale</span>);
+          }
+      }
+
+  }
+
+  <span class="keyword">function</span> <span class="name">paintGL</span>(<span class="name">canvas</span>) {
+
+      <span class="keyword">if</span> (<span class="name">qmlView</span>.<span class="name">focusedPlanet</span> <span class="operator">===</span> <span class="name">SOLAR_SYSTEM</span>)
+          <span class="name">daysPerFrame</span> <span class="operator">=</span> <span class="name">daysPerFrameScale</span> <span class="operator">*</span> <span class="number">10</span>;
+      <span class="keyword">else</span>
+          <span class="name">daysPerFrame</span> <span class="operator">=</span> <span class="name">daysPerFrameScale</span> <span class="operator">*</span> <span class="name">planets</span>[<span class="name">qmlView</span>.<span class="name">focusedPlanet</span>][<span class="string">&quot;period&quot;</span>] <span class="operator">/</span> <span class="number">100</span>;
+
+      <span class="comment">// Advance the time in days</span>
+      <span class="name">oldTimeD</span> <span class="operator">=</span> <span class="name">currTimeD</span>;
+      <span class="name">currTimeD</span> <span class="operator">=</span> <span class="name">currTimeD</span> <span class="operator">+</span> <span class="name">daysPerFrame</span>;
+      var <span class="name">deltaTimeD</span> = <span class="name">currTimeD</span> <span class="operator">-</span> <span class="name">oldTimeD</span>;
+
+      <span class="comment">// Position the planets orbiting the sun</span>
+      <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">1</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">objects</span>.<span class="name">length</span>; i ++) {
+          var <span class="name">object</span> = <span class="name">objects</span>[<span class="name">i</span>];
+          var <span class="name">planet</span> = <span class="name">planets</span>[<span class="name">i</span>];
+
+          <span class="comment">// Bumpmaps of mercury, venus, jupiter and moon need special handling</span>
+          <span class="keyword">if</span> (<span class="name">i</span> <span class="operator">==</span> <span class="name">MERCURY</span> <span class="operator">||</span> <span class="name">i</span> <span class="operator">==</span> <span class="name">VENUS</span> <span class="operator">||</span> <span class="name">i</span> <span class="operator">==</span> <span class="name">JUPITER</span> <span class="operator">||</span> <span class="name">i</span> <span class="operator">==</span> <span class="name">MOON</span>)
+              <span class="name">object</span>.<span class="name">material</span>.<span class="name">bumpScale</span> <span class="operator">=</span> <span class="number">0.03</span> <span class="operator">*</span> <span class="name">planetScale</span>;
+          <span class="keyword">else</span>
+              <span class="name">object</span>.<span class="name">material</span>.<span class="name">bumpScale</span> <span class="operator">=</span> <span class="number">0.3</span> <span class="operator">*</span> <span class="name">planetScale</span>;
+
+          <span class="comment">// Calculate the planet orbital elements from the current time in days</span>
+          var <span class="name">N</span> =  (<span class="name">planet</span>[<span class="string">&quot;N1&quot;</span>] <span class="operator">+</span> <span class="name">planet</span>[<span class="string">&quot;N2&quot;</span>] <span class="operator">*</span> <span class="name">currTimeD</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">PI</span> <span class="operator">/</span> <span class="number">180</span>;
+          var <span class="name">iPlanet</span> = (<span class="name">planet</span>[<span class="string">&quot;i1&quot;</span>] <span class="operator">+</span> <span class="name">planet</span>[<span class="string">&quot;i2&quot;</span>] <span class="operator">*</span> <span class="name">currTimeD</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">PI</span> <span class="operator">/</span> <span class="number">180</span>;
+          var <span class="name">w</span> =  (<span class="name">planet</span>[<span class="string">&quot;w1&quot;</span>] <span class="operator">+</span> <span class="name">planet</span>[<span class="string">&quot;w2&quot;</span>] <span class="operator">*</span> <span class="name">currTimeD</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">PI</span> <span class="operator">/</span> <span class="number">180</span>;
+          var <span class="name">a</span> = <span class="name">planet</span>[<span class="string">&quot;a1&quot;</span>] <span class="operator">+</span> <span class="name">planet</span>[<span class="string">&quot;a2&quot;</span>] <span class="operator">*</span> <span class="name">currTimeD</span>;
+          var <span class="name">e</span> = <span class="name">planet</span>[<span class="string">&quot;e1&quot;</span>] <span class="operator">+</span> <span class="name">planet</span>[<span class="string">&quot;e2&quot;</span>] <span class="operator">*</span> <span class="name">currTimeD</span>;
+          var <span class="name">M</span> = (<span class="name">planet</span>[<span class="string">&quot;M1&quot;</span>] <span class="operator">+</span> <span class="name">planet</span>[<span class="string">&quot;M2&quot;</span>] <span class="operator">*</span> <span class="name">currTimeD</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">PI</span> <span class="operator">/</span> <span class="number">180</span>;
+          var <span class="name">E</span> = <span class="name">M</span> <span class="operator">+</span> <span class="name">e</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">sin</span>(<span class="name">M</span>) <span class="operator">*</span> (<span class="number">1.0</span> <span class="operator">+</span> <span class="name">e</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">cos</span>(<span class="name">M</span>));
+
+          var <span class="name">xv</span> = <span class="name">a</span> <span class="operator">*</span> (<span class="name">Math</span>.<span class="name">cos</span>(<span class="name">E</span>) <span class="operator">-</span> <span class="name">e</span>);
+          var <span class="name">yv</span> = <span class="name">a</span> <span class="operator">*</span> (<span class="name">Math</span>.<span class="name">sqrt</span>(<span class="number">1.0</span> <span class="operator">-</span> <span class="name">e</span> <span class="operator">*</span> <span class="name">e</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">sin</span>(<span class="name">E</span>));
+          var <span class="name">v</span> = <span class="name">Math</span>.<span class="name">atan2</span>(<span class="name">yv</span>, <span class="name">xv</span>);
+
+          <span class="comment">// Calculate the distance (radius)</span>
+          var <span class="name">r</span> = <span class="name">Math</span>.<span class="name">sqrt</span>(<span class="name">xv</span> <span class="operator">*</span> <span class="name">xv</span> <span class="operator">+</span> <span class="name">yv</span> <span class="operator">*</span> <span class="name">yv</span>);
+
+          <span class="comment">// From http://www.davidcolarusso.com/astro/</span>
+          <span class="comment">// Modified to compensate for the right handed coordinate system of OpenGL</span>
+          var <span class="name">xh</span> = <span class="name">r</span> <span class="operator">*</span> (<span class="name">Math</span>.<span class="name">cos</span>(<span class="name">N</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">cos</span>(<span class="name">v</span> <span class="operator">+</span> <span class="name">w</span>)
+                        <span class="operator">-</span> <span class="name">Math</span>.<span class="name">sin</span>(<span class="name">N</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">sin</span>(<span class="name">v</span> <span class="operator">+</span> <span class="name">w</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">cos</span>(<span class="name">iPlanet</span>));
+          var <span class="name">zh</span> = -<span class="name">r</span> <span class="operator">*</span> (<span class="name">Math</span>.<span class="name">sin</span>(<span class="name">N</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">cos</span>(<span class="name">v</span> <span class="operator">+</span> <span class="name">w</span>)
+                         <span class="operator">+</span> <span class="name">Math</span>.<span class="name">cos</span>(<span class="name">N</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">sin</span>(<span class="name">v</span> <span class="operator">+</span> <span class="name">w</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">cos</span>(<span class="name">iPlanet</span>));
+          var <span class="name">yh</span> = <span class="name">r</span> <span class="operator">*</span> (<span class="name">Math</span>.<span class="name">sin</span>(<span class="name">w</span> <span class="operator">+</span> <span class="name">v</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">sin</span>(<span class="name">iPlanet</span>));
+
+          <span class="comment">// Apply the position offset from the center of orbit to the bodies</span>
+          var <span class="name">centerOfOrbit</span> = <span class="name">objects</span>[<span class="name">planet</span>[<span class="string">&quot;centerOfOrbit&quot;</span>]];
+          <span class="name">object</span>.<span class="name">position</span>.<span class="name">set</span>(<span class="name">centerOfOrbit</span>.<span class="name">position</span>.<span class="name">x</span> <span class="operator">+</span> <span class="name">xh</span> <span class="operator">*</span> <span class="name">auScale</span>,
+                              <span class="name">centerOfOrbit</span>.<span class="name">position</span>.<span class="name">y</span> <span class="operator">+</span> <span class="name">yh</span> <span class="operator">*</span> <span class="name">auScale</span>,
+                              <span class="name">centerOfOrbit</span>.<span class="name">position</span>.<span class="name">z</span> <span class="operator">+</span> <span class="name">zh</span> <span class="operator">*</span> <span class="name">auScale</span>);
+
+          <span class="comment">// Calculate and apply the appropriate axis tilt to the bodies</span>
+          <span class="comment">// and rotate them around the axis</span>
+          var <span class="name">radians</span> = <span class="name">planet</span>[<span class="string">&quot;tilt&quot;</span>] <span class="operator">*</span> <span class="name">Math</span>.<span class="name">PI</span> <span class="operator">/</span> <span class="number">180</span>; <span class="comment">// tilt in radians</span>
+          <span class="name">object</span>.<span class="name">rotation</span>.<span class="name">order</span> <span class="operator">=</span> <span class="string">'ZXY'</span>;
+          <span class="name">object</span>.<span class="name">rotation</span>.<span class="name">x</span> <span class="operator">=</span> <span class="number">0</span>;
+          <span class="name">object</span>.<span class="name">rotation</span>.<span class="name">y</span> <span class="operator">+=</span> (<span class="name">deltaTimeD</span> <span class="operator">/</span> <span class="name">planet</span>[<span class="string">&quot;period&quot;</span>]) <span class="operator">*</span> <span class="number">2</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">PI</span>;
+          <span class="name">object</span>.<span class="name">rotation</span>.<span class="name">z</span> <span class="operator">=</span> <span class="name">radians</span>;
+      }
+
+      <span class="comment">// rotate the Sun</span>
+      var <span class="name">sun</span> = <span class="name">objects</span>[<span class="name">SUN</span>];
+      <span class="name">sun</span>.<span class="name">rotation</span>.<span class="name">order</span> <span class="operator">=</span> <span class="string">'ZXY'</span>;
+      <span class="name">sun</span>.<span class="name">rotation</span>.<span class="name">x</span> <span class="operator">=</span> <span class="number">0</span>;
+      <span class="name">sun</span>.<span class="name">rotation</span>.<span class="name">y</span> <span class="operator">+=</span> (<span class="name">deltaTimeD</span> <span class="operator">/</span> <span class="name">planets</span>[<span class="name">SUN</span>][<span class="string">&quot;period&quot;</span>]) <span class="operator">*</span> <span class="number">2</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">PI</span>;
+      <span class="name">sun</span>.<span class="name">rotation</span>.<span class="name">z</span> <span class="operator">=</span> <span class="name">planets</span>[<span class="name">SUN</span>][<span class="string">&quot;tilt&quot;</span>] <span class="operator">*</span> <span class="name">Math</span>.<span class="name">PI</span> <span class="operator">/</span> <span class="number">180</span>; <span class="comment">// tilt in radians</span>
+
+      <span class="comment">// calculate the outer radius of the focused item</span>
+      var <span class="name">outerRadius</span> = <span class="name">getOuterRadius</span>(<span class="name">qmlView</span>.<span class="name">focusedPlanet</span>);
+
+      <span class="comment">// get the appropriate near plane position for the camera and animate it with QML animations</span>
+      <span class="name">qmlView</span>.<span class="name">cameraNear</span> <span class="operator">=</span> <span class="name">outerRadius</span>;
+
+      <span class="name">camera</span>.<span class="name">near</span> <span class="operator">=</span> <span class="name">qmlView</span>.<span class="name">cameraNear</span>;
+      <span class="name">camera</span>.<span class="name">updateProjectionMatrix</span>();
+
+      <span class="comment">// Calculate and set camera position</span>
+      var <span class="name">cameraPosition</span> = <span class="name">getNewCameraPosition</span>(<span class="name">outerRadius</span>);
+      var <span class="name">cameraOffset</span> = new <span class="name">THREE</span>.<span class="name">Vector3</span>(<span class="name">qmlView</span>.<span class="name">xCameraOffset</span>,
+                                           <span class="name">qmlView</span>.<span class="name">yCameraOffset</span>,
+                                           <span class="name">qmlView</span>.<span class="name">zCameraOffset</span>);
+      <span class="name">cameraPosition</span>.<span class="name">add</span>(<span class="name">cameraOffset</span>);
+      <span class="name">camera</span>.<span class="name">position</span>.<span class="name">set</span>(<span class="name">cameraPosition</span>.<span class="name">x</span>, <span class="name">cameraPosition</span>.<span class="name">y</span>, <span class="name">cameraPosition</span>.<span class="name">z</span>);
+
+      <span class="comment">// Calculate and set camera look-at point</span>
+      var <span class="name">lookAtPlanet</span> = <span class="name">SUN</span>;
+      <span class="keyword">if</span> (<span class="name">qmlView</span>.<span class="name">focusedPlanet</span> <span class="operator">!==</span> <span class="name">SOLAR_SYSTEM</span>)
+          <span class="name">lookAtPlanet</span> <span class="operator">=</span> <span class="name">qmlView</span>.<span class="name">focusedPlanet</span>;
+      var <span class="name">cameraLookAt</span> = <span class="name">objects</span>[<span class="name">lookAtPlanet</span>].<span class="name">position</span>.<span class="name">clone</span>();
+      var <span class="name">lookAtOffset</span> = new <span class="name">THREE</span>.<span class="name">Vector3</span>(<span class="name">qmlView</span>.<span class="name">xLookAtOffset</span>,
+                                           <span class="name">qmlView</span>.<span class="name">yLookAtOffset</span>,
+                                           <span class="name">qmlView</span>.<span class="name">zLookAtOffset</span>);
+      <span class="name">cameraLookAt</span>.<span class="name">add</span>(<span class="name">lookAtOffset</span>);
+      <span class="name">camera</span>.<span class="name">lookAt</span>(<span class="name">cameraLookAt</span>);
+
+      <span class="comment">// Render the scene</span>
+      <span class="name">renderer</span>.<span class="name">render</span>(<span class="name">scene</span>, <span class="name">camera</span>);
+
+  }
+
+  <span class="keyword">function</span> <span class="name">getOuterRadius</span>( <span class="name">planet</span> ) {
+
+      var <span class="name">outerRadius</span> = <span class="name">solarDistance</span>;
+      <span class="keyword">if</span> (<span class="name">planet</span> <span class="operator">!==</span> <span class="name">SOLAR_SYSTEM</span>) {
+          <span class="name">outerRadius</span> <span class="operator">=</span> <span class="name">planets</span>[<span class="name">planet</span>][<span class="string">&quot;radius&quot;</span>];
+          <span class="keyword">if</span> (<span class="name">planet</span> <span class="operator">===</span> <span class="name">SATURN</span>) {
+              <span class="name">outerRadius</span> <span class="operator">=</span>+ <span class="name">saturnOuterRadius</span>;
+          } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">planet</span> <span class="operator">===</span> <span class="name">URANUS</span>) {
+              <span class="name">outerRadius</span> <span class="operator">=</span>+ <span class="name">uranusOuterRadius</span>;
+          } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">planet</span> <span class="operator">===</span> <span class="name">SUN</span>) {
+              <span class="name">outerRadius</span> <span class="operator">=</span> <span class="name">planets</span>[<span class="name">planet</span>][<span class="string">&quot;radius&quot;</span>] <span class="operator">/</span> <span class="number">100</span>;
+          }
+      }
+
+      <span class="keyword">return</span> <span class="name">outerRadius</span>;
+  }
+
+</pre>
+</div>
+<!-- @@@threejs/planets/planets.js -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mainwindow.cpp Example File | Qt WebEngine 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwebengine-index.html">Qt WebEngine</a></td><td ><a href="qtwebengine-webenginewidgets-markdowneditor-example.html">WebEngine Markdown Editor Example</a></td><td >mainwindow.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mainwindow.cpp Example File</h1>
+<span class="subtitle">webenginewidgets/markdowneditor/mainwindow.cpp</span>
+<!-- $$$webenginewidgets/markdowneditor/mainwindow.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;mainwindow.h&quot;</span>
+  <span class="preprocessor">#include &quot;previewpage.h&quot;</span>
+  <span class="preprocessor">#include &quot;ui_mainwindow.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QFile&gt;</span>
+  <span class="preprocessor">#include &lt;QFileDialog&gt;</span>
+  <span class="preprocessor">#include &lt;QFontDatabase&gt;</span>
+  <span class="preprocessor">#include &lt;QMessageBox&gt;</span>
+  <span class="preprocessor">#include &lt;QTextStream&gt;</span>
+  <span class="preprocessor">#include &lt;QWebChannel&gt;</span>
+
+  MainWindow<span class="operator">::</span>MainWindow(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent) :
+      <span class="type"><a href="../qtwidgets/qmainwindow.html">QMainWindow</a></span>(parent)<span class="operator">,</span>
+      ui(<span class="keyword">new</span> Ui<span class="operator">::</span>MainWindow)
+  {
+      ui<span class="operator">-</span><span class="operator">&gt;</span>setupUi(<span class="keyword">this</span>);
+      ui<span class="operator">-</span><span class="operator">&gt;</span>editor<span class="operator">-</span><span class="operator">&gt;</span>setFont(<span class="type"><a href="../qtgui/qfontdatabase.html">QFontDatabase</a></span><span class="operator">::</span>systemFont(<span class="type"><a href="../qtgui/qfontdatabase.html">QFontDatabase</a></span><span class="operator">::</span>FixedFont));
+
+      PreviewPage <span class="operator">*</span>page <span class="operator">=</span> <span class="keyword">new</span> PreviewPage(<span class="keyword">this</span>);
+      ui<span class="operator">-</span><span class="operator">&gt;</span>preview<span class="operator">-</span><span class="operator">&gt;</span>setPage(page);
+
+      connect(ui<span class="operator">-</span><span class="operator">&gt;</span>editor<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qplaintextedit.html">QPlainTextEdit</a></span><span class="operator">::</span>textChanged<span class="operator">,</span>
+              <span class="operator">[</span><span class="keyword">this</span><span class="operator">]</span>() { m_content<span class="operator">.</span>setText(ui<span class="operator">-</span><span class="operator">&gt;</span>editor<span class="operator">-</span><span class="operator">&gt;</span>toPlainText()); });
+
+      <span class="type"><a href="../qtwebchannel/qwebchannel.html">QWebChannel</a></span> <span class="operator">*</span>channel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwebchannel/qwebchannel.html">QWebChannel</a></span>(<span class="keyword">this</span>);
+      channel<span class="operator">-</span><span class="operator">&gt;</span>registerObject(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;content&quot;</span>)<span class="operator">,</span> <span class="operator">&amp;</span>m_content);
+      page<span class="operator">-</span><span class="operator">&gt;</span>setWebChannel(channel);
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>preview<span class="operator">-</span><span class="operator">&gt;</span>setUrl(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="string">&quot;qrc:/index.html&quot;</span>));
+
+      connect(ui<span class="operator">-</span><span class="operator">&gt;</span>actionNew<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>onFileNew);
+      connect(ui<span class="operator">-</span><span class="operator">&gt;</span>actionOpen<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>onFileOpen);
+      connect(ui<span class="operator">-</span><span class="operator">&gt;</span>actionSave<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>onFileSave);
+      connect(ui<span class="operator">-</span><span class="operator">&gt;</span>actionSaveAs<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>onFileSaveAs);
+      connect(ui<span class="operator">-</span><span class="operator">&gt;</span>actionExit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>onExit);
+
+      connect(ui<span class="operator">-</span><span class="operator">&gt;</span>editor<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtgui/qtextdocument.html">QTextDocument</a></span><span class="operator">::</span>modificationChanged<span class="operator">,</span>
+              ui<span class="operator">-</span><span class="operator">&gt;</span>actionSave<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">::</span>setEnabled);
+
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> defaultTextFile(<span class="string">&quot;:/default.md&quot;</span>);
+      defaultTextFile<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly);
+      ui<span class="operator">-</span><span class="operator">&gt;</span>editor<span class="operator">-</span><span class="operator">&gt;</span>setPlainText(defaultTextFile<span class="operator">.</span>readAll());
+  }
+
+  MainWindow<span class="operator">::</span><span class="operator">~</span>MainWindow()
+  {
+      <span class="keyword">delete</span> ui;
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>openFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>path)
+  {
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> f(path);
+      <span class="keyword">if</span> (<span class="operator">!</span>f<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly)) {
+          <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span> windowTitle()<span class="operator">,</span>
+                               tr(<span class="string">&quot;Could not open file %1: %2&quot;</span>)<span class="operator">.</span>arg(
+                                   <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(path)<span class="operator">,</span> f<span class="operator">.</span>errorString()));
+          <span class="keyword">return</span>;
+      }
+      m_filePath <span class="operator">=</span> path;
+      ui<span class="operator">-</span><span class="operator">&gt;</span>editor<span class="operator">-</span><span class="operator">&gt;</span>setPlainText(f<span class="operator">.</span>readAll());
+  }
+
+  bool MainWindow<span class="operator">::</span>isModified() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> ui<span class="operator">-</span><span class="operator">&gt;</span>editor<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">-</span><span class="operator">&gt;</span>isModified();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>onFileNew()
+  {
+      <span class="keyword">if</span> (isModified()) {
+          <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>StandardButton button <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>question(<span class="keyword">this</span><span class="operator">,</span> windowTitle()<span class="operator">,</span>
+                               tr(<span class="string">&quot;You have unsaved changes. Do you want to create a new document anyway?&quot;</span>));
+          <span class="keyword">if</span> (button <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Yes)
+              <span class="keyword">return</span>;
+      }
+
+      m_filePath<span class="operator">.</span>clear();
+      ui<span class="operator">-</span><span class="operator">&gt;</span>editor<span class="operator">-</span><span class="operator">&gt;</span>setPlainText(tr(<span class="string">&quot;## New document&quot;</span>));
+      ui<span class="operator">-</span><span class="operator">&gt;</span>editor<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">-</span><span class="operator">&gt;</span>setModified(<span class="keyword">false</span>);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>onFileOpen()
+  {
+      <span class="keyword">if</span> (isModified()) {
+          <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>StandardButton button <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>question(<span class="keyword">this</span><span class="operator">,</span> windowTitle()<span class="operator">,</span>
+                               tr(<span class="string">&quot;You have unsaved changes. Do you want to open a new document anyway?&quot;</span>));
+          <span class="keyword">if</span> (button <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Yes)
+              <span class="keyword">return</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> path <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getOpenFileName(<span class="keyword">this</span><span class="operator">,</span>
+          tr(<span class="string">&quot;Open MarkDown File&quot;</span>)<span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span> tr(<span class="string">&quot;MarkDown File (*.md)&quot;</span>));
+      <span class="keyword">if</span> (path<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+
+      openFile(path);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>onFileSave()
+  {
+      <span class="keyword">if</span> (m_filePath<span class="operator">.</span>isEmpty()) {
+          onFileSaveAs();
+          <span class="keyword">return</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> f(m_filePath);
+      <span class="keyword">if</span> (<span class="operator">!</span>f<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>WriteOnly <span class="operator">|</span> <span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>Text))  {
+          <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span> windowTitle()<span class="operator">,</span>
+                               tr(<span class="string">&quot;Could not write to file %1: %2&quot;</span>)<span class="operator">.</span>arg(
+                                   <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(m_filePath)<span class="operator">,</span> f<span class="operator">.</span>errorString()));
+          <span class="keyword">return</span>;
+      }
+      <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span> str(<span class="operator">&amp;</span>f);
+      str <span class="operator">&lt;</span><span class="operator">&lt;</span> ui<span class="operator">-</span><span class="operator">&gt;</span>editor<span class="operator">-</span><span class="operator">&gt;</span>toPlainText();
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>editor<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">-</span><span class="operator">&gt;</span>setModified(<span class="keyword">false</span>);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>onFileSaveAs()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> path <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getSaveFileName(<span class="keyword">this</span><span class="operator">,</span>
+          tr(<span class="string">&quot;Save MarkDown File&quot;</span>)<span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span> tr(<span class="string">&quot;MarkDown File (*.md, *.markdown)&quot;</span>));
+      <span class="keyword">if</span> (path<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+      m_filePath <span class="operator">=</span> path;
+      onFileSave();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>onExit()
+  {
+      <span class="keyword">if</span> (isModified()) {
+          <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>StandardButton button <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>question(<span class="keyword">this</span><span class="operator">,</span> windowTitle()<span class="operator">,</span>
+                               tr(<span class="string">&quot;You have unsaved changes. Do you want to exit anyway?&quot;</span>));
+          <span class="keyword">if</span> (button <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Yes)
+              <span class="keyword">return</span>;
+      }
+      close();
+  }
+
+</pre>
+</div>
+<!-- @@@webenginewidgets/markdowneditor/mainwindow.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

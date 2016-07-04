@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>scatterdatamodifier.cpp Example File | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td ><a href="qtdatavisualization-rotations-example.html">Rotations Example</a></td><td >scatterdatamodifier.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">scatterdatamodifier.cpp Example File</h1>
+<span class="subtitle">rotations/scatterdatamodifier.cpp</span>
+<!-- $$$rotations/scatterdatamodifier.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Data Visualization module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;scatterdatamodifier.h&quot;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/qscatterdataproxy.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/qvalue3daxis.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/q3dscene.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/q3dcamera.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/qscatter3dseries.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/q3dtheme.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/QCustom3DItem&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/qmath.h&gt;</span>
+
+  <span class="keyword">using</span> <span class="keyword">namespace</span> <span class="type"><a href="qtdatavisualization-qmlmodule.html">QtDataVisualization</a></span>;
+
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">float</span> verticalRange <span class="operator">=</span> <span class="number">8.0f</span>;
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">float</span> horizontalRange <span class="operator">=</span> verticalRange;
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">float</span> ellipse_a <span class="operator">=</span> horizontalRange <span class="operator">/</span> <span class="number">3.0f</span>;
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">float</span> ellipse_b <span class="operator">=</span> verticalRange;
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">float</span> doublePi <span class="operator">=</span> <span class="type">float</span>(M_PI) <span class="operator">*</span> <span class="number">2.0f</span>;
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">float</span> radiansToDegrees <span class="operator">=</span> <span class="number">360.0f</span> <span class="operator">/</span> doublePi;
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">float</span> animationFrames <span class="operator">=</span> <span class="number">30.0f</span>;
+
+  ScatterDataModifier<span class="operator">::</span>ScatterDataModifier(<span class="type"><a href="q3dscatter.html">Q3DScatter</a></span> <span class="operator">*</span>scatter)
+      : m_graph(scatter)<span class="operator">,</span>
+        m_fieldLines(<span class="number">12</span>)<span class="operator">,</span>
+        m_arrowsPerLine(<span class="number">16</span>)<span class="operator">,</span>
+        m_magneticField(<span class="keyword">new</span> QScatter3DSeries)<span class="operator">,</span>
+        m_sun(<span class="keyword">new</span> QCustom3DItem)<span class="operator">,</span>
+        m_magneticFieldArray(<span class="number">0</span>)<span class="operator">,</span>
+        m_angleOffset(<span class="number">0.0f</span>)<span class="operator">,</span>
+        m_angleStep(doublePi <span class="operator">/</span> m_arrowsPerLine <span class="operator">/</span> animationFrames)
+  {
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setShadowQuality(QAbstract3DGraph<span class="operator">::</span>ShadowQualityNone);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">-</span><span class="operator">&gt;</span>setCameraPreset(<span class="type"><a href="q3dcamera.html">Q3DCamera</a></span><span class="operator">::</span>CameraPresetFront);
+
+      <span class="comment">// Magnetic field lines use custom narrow arrow</span>
+      m_magneticField<span class="operator">-</span><span class="operator">&gt;</span>setItemSize(<span class="number">0.2f</span>);
+      m_magneticField<span class="operator">-</span><span class="operator">&gt;</span>setMesh(QAbstract3DSeries<span class="operator">::</span>MeshUserDefined);
+      m_magneticField<span class="operator">-</span><span class="operator">&gt;</span>setUserDefinedMesh(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;:/mesh/narrowarrow.obj&quot;</span>));
+      <span class="type"><a href="../qtgui/qlineargradient.html">QLinearGradient</a></span> fieldGradient(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">16</span><span class="operator">,</span> <span class="number">1024</span>);
+      fieldGradient<span class="operator">.</span>setColorAt(<span class="number">0.0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black);
+      fieldGradient<span class="operator">.</span>setColorAt(<span class="number">1.0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white);
+      m_magneticField<span class="operator">-</span><span class="operator">&gt;</span>setBaseGradient(fieldGradient);
+      m_magneticField<span class="operator">-</span><span class="operator">&gt;</span>setColorStyle(<span class="type"><a href="q3dtheme.html">Q3DTheme</a></span><span class="operator">::</span>ColorStyleRangeGradient);
+
+      <span class="comment">// For 'sun' we use a custom large sphere</span>
+      m_sun<span class="operator">-</span><span class="operator">&gt;</span>setScaling(QVector3D(<span class="number">0.07f</span><span class="operator">,</span> <span class="number">0.07f</span><span class="operator">,</span> <span class="number">0.07f</span>));
+      m_sun<span class="operator">-</span><span class="operator">&gt;</span>setMeshFile(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;:/mesh/largesphere.obj&quot;</span>));
+      <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> sunColor <span class="operator">=</span> <span class="type"><a href="../qtgui/qimage.html">QImage</a></span>(<span class="number">2</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qimage.html">QImage</a></span><span class="operator">::</span>Format_RGB32);
+      sunColor<span class="operator">.</span>fill(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="number">0xff</span><span class="operator">,</span> <span class="number">0xbb</span><span class="operator">,</span> <span class="number">0x00</span>));
+      m_sun<span class="operator">-</span><span class="operator">&gt;</span>setTextureImage(sunColor);
+
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>addSeries(m_magneticField);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>addCustomItem(m_sun);
+
+      <span class="comment">// Configure the axes according to the data</span>
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span>horizontalRange<span class="operator">,</span> horizontalRange);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span>verticalRange<span class="operator">,</span> verticalRange);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="operator">-</span>horizontalRange<span class="operator">,</span> horizontalRange);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>setSegmentCount(<span class="type">int</span>(horizontalRange));
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>setSegmentCount(<span class="type">int</span>(horizontalRange));
+
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(<span class="operator">&amp;</span>m_rotationTimer<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span><span class="operator">::</span>timeout<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span>
+                       <span class="operator">&amp;</span>ScatterDataModifier<span class="operator">::</span>triggerRotation);
+
+      toggleRotation();
+      generateData();
+  }
+
+  ScatterDataModifier<span class="operator">::</span><span class="operator">~</span>ScatterDataModifier()
+  {
+      <span class="keyword">delete</span> m_graph;
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>generateData()
+  {
+      <span class="comment">// Reusing existing array is computationally cheaper than always generating new array, even if</span>
+      <span class="comment">// all data items change in the array, if the array size doesn't change.</span>
+      <span class="keyword">if</span> (<span class="operator">!</span>m_magneticFieldArray)
+          m_magneticFieldArray <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QScatterDataArray</span>;
+
+      <span class="type">int</span> arraySize <span class="operator">=</span> m_fieldLines <span class="operator">*</span> m_arrowsPerLine;
+      <span class="keyword">if</span> (arraySize <span class="operator">!</span><span class="operator">=</span> m_magneticFieldArray<span class="operator">-</span><span class="operator">&gt;</span>size())
+          m_magneticFieldArray<span class="operator">-</span><span class="operator">&gt;</span>resize(arraySize);
+
+      <span class="type"><a href="qscatterdataitem.html">QScatterDataItem</a></span> <span class="operator">*</span>ptrToDataArray <span class="operator">=</span> <span class="operator">&amp;</span>m_magneticFieldArray<span class="operator">-</span><span class="operator">&gt;</span>first();
+
+      <span class="keyword">for</span> (<span class="type">float</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_fieldLines; i<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="type">float</span> horizontalAngle <span class="operator">=</span> (doublePi <span class="operator">*</span> i) <span class="operator">/</span> m_fieldLines;
+          <span class="type">float</span> xCenter <span class="operator">=</span> ellipse_a <span class="operator">*</span> <a href="../qtcore/qtmath.html#qCos">qCos</a>(horizontalAngle);
+          <span class="type">float</span> zCenter <span class="operator">=</span> ellipse_a <span class="operator">*</span> <a href="../qtcore/qtmath.html#qSin">qSin</a>(horizontalAngle);
+
+          <span class="comment">// Rotate - arrow always tangential to origin</span>
+          <span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span> yRotation <span class="operator">=</span> <span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span><span class="operator">::</span>fromAxisAndAngle(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> horizontalAngle <span class="operator">*</span> radiansToDegrees);
+
+          <span class="keyword">for</span> (<span class="type">float</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> m_arrowsPerLine; j<span class="operator">+</span><span class="operator">+</span>) {
+              <span class="comment">// Calculate point on ellipse centered on origin and parallel to x-axis</span>
+              <span class="type">float</span> verticalAngle <span class="operator">=</span> ((doublePi <span class="operator">*</span> j) <span class="operator">/</span> m_arrowsPerLine) <span class="operator">+</span> m_angleOffset;
+              <span class="type">float</span> xUnrotated <span class="operator">=</span> ellipse_a <span class="operator">*</span> <a href="../qtcore/qtmath.html#qCos">qCos</a>(verticalAngle);
+              <span class="type">float</span> y <span class="operator">=</span> ellipse_b <span class="operator">*</span> <a href="../qtcore/qtmath.html#qSin">qSin</a>(verticalAngle);
+
+              <span class="comment">// Rotate the ellipse around y-axis</span>
+              <span class="type">float</span> xRotated <span class="operator">=</span> xUnrotated <span class="operator">*</span> <a href="../qtcore/qtmath.html#qCos">qCos</a>(horizontalAngle);
+              <span class="type">float</span> zRotated <span class="operator">=</span> xUnrotated <span class="operator">*</span> <a href="../qtcore/qtmath.html#qSin">qSin</a>(horizontalAngle);
+
+              <span class="comment">// Add offset</span>
+              <span class="type">float</span> x <span class="operator">=</span> xCenter <span class="operator">+</span> xRotated;
+              <span class="type">float</span> z <span class="operator">=</span> zCenter <span class="operator">+</span> zRotated;
+
+              <span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span> zRotation <span class="operator">=</span> <span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span><span class="operator">::</span>fromAxisAndAngle(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> verticalAngle <span class="operator">*</span> radiansToDegrees);
+              <span class="type"><a href="../qtgui/qquaternion.html">QQuaternion</a></span> totalRotation <span class="operator">=</span> yRotation <span class="operator">*</span> zRotation;
+
+              ptrToDataArray<span class="operator">-</span><span class="operator">&gt;</span>setPosition(QVector3D(x<span class="operator">,</span> y<span class="operator">,</span> z));
+              ptrToDataArray<span class="operator">-</span><span class="operator">&gt;</span>setRotation(totalRotation);
+              ptrToDataArray<span class="operator">+</span><span class="operator">+</span>;
+          }
+      }
+
+      <span class="keyword">if</span> (m_graph<span class="operator">-</span><span class="operator">&gt;</span>selectedSeries() <span class="operator">=</span><span class="operator">=</span> m_magneticField)
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>clearSelection();
+
+      m_magneticField<span class="operator">-</span><span class="operator">&gt;</span>dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>resetArray(m_magneticFieldArray);
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>setFieldLines(<span class="type">int</span> lines)
+  {
+      m_fieldLines <span class="operator">=</span> lines;
+      generateData();
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>setArrowsPerLine(<span class="type">int</span> arrows)
+  {
+      m_angleOffset <span class="operator">=</span> <span class="number">0.0f</span>;
+      m_angleStep <span class="operator">=</span> doublePi <span class="operator">/</span> m_arrowsPerLine <span class="operator">/</span> animationFrames;
+      m_arrowsPerLine <span class="operator">=</span> arrows;
+      generateData();
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>triggerRotation()
+  {
+      m_angleOffset <span class="operator">+</span><span class="operator">=</span> m_angleStep;
+      generateData();
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>toggleSun()
+  {
+      m_sun<span class="operator">-</span><span class="operator">&gt;</span>setVisible(<span class="operator">!</span>m_sun<span class="operator">-</span><span class="operator">&gt;</span>isVisible());
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>toggleRotation()
+  {
+      <span class="keyword">if</span> (m_rotationTimer<span class="operator">.</span>isActive())
+          m_rotationTimer<span class="operator">.</span>stop();
+      <span class="keyword">else</span>
+          m_rotationTimer<span class="operator">.</span>start(<span class="number">15</span>);
+  }
+
+</pre>
+</div>
+<!-- @@@rotations/scatterdatamodifier.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

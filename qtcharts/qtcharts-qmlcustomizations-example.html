@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- examples-qmlcustomizations.qdoc -->
+  <title>Qml Customizations | Qt Charts 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcharts-index.html">Qt Charts</a></td><td >Qml Customizations</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qml Customizations</h1>
+<span class="subtitle"></span>
+<!-- $$$qmlcustomizations-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/examples_qmlcustomizations.png" alt="" /></p><p>This example shows a wheel of fortune by customizing a pie series.</p>
+<p>First we create the <a href="qml-qtcharts-chartview.html">ChartView</a> and a couple of series.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtcharts-chartview.html">ChartView</a></span> {
+      <span class="name">id</span>: <span class="name">chartView</span>
+      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+      <span class="name">title</span>: <span class="string">&quot;Wheel of fortune&quot;</span>
+      <span class="name">legend</span>.visible: <span class="number">false</span>
+      <span class="name">antialiasing</span>: <span class="number">true</span>
+
+      <span class="type"><a href="qml-qtcharts-pieseries.html">PieSeries</a></span> {
+          <span class="name">id</span>: <span class="name">wheelOfFortune</span>
+          <span class="name">horizontalPosition</span>: <span class="number">0.3</span>
+      }
+
+      <span class="type"><a href="qml-qtcharts-splineseries.html">SplineSeries</a></span> {
+          <span class="name">id</span>: <span class="name">splineSeries</span>
+      }
+
+      <span class="type"><a href="qml-qtcharts-scatterseries.html">ScatterSeries</a></span> {
+          <span class="name">id</span>: <span class="name">scatterSeries</span>
+      }
+  }
+
+</pre>
+<p>The application data is generated in Component.onCompleted of the main rectangle:</p>
+<pre class="qml">
+
+  <span class="name">Component</span>.onCompleted: {
+      <span class="name">__intervalCoefficient</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">random</span>() <span class="operator">+</span> <span class="number">0.1</span>;
+
+      <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="number">20</span>; i++)
+          <span class="name">wheelOfFortune</span>.<span class="name">append</span>(<span class="string">&quot;&quot;</span>, <span class="number">1</span>);
+
+      var <span class="name">interval</span> = <span class="number">1</span>;
+      <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">j</span> = <span class="number">0</span>; <span class="name">interval</span> <span class="operator">&lt;</span> <span class="number">800</span>; j++) {
+          <span class="name">interval</span> <span class="operator">=</span> <span class="name">__intervalCoefficient</span> <span class="operator">*</span> <span class="name">j</span> <span class="operator">*</span> <span class="name">j</span>;
+          <span class="name">splineSeries</span>.<span class="name">append</span>(<span class="name">j</span>, <span class="name">interval</span>);
+      }
+      <span class="name">chartView</span>.<span class="name">axisX</span>(<span class="name">scatterSeries</span>).<span class="name">max</span> <span class="operator">=</span> <span class="name">j</span>;
+      <span class="name">chartView</span>.<span class="name">axisY</span>(<span class="name">scatterSeries</span>).<span class="name">max</span> <span class="operator">=</span> <span class="number">1000</span>;
+  }
+
+</pre>
+<p>The following customizations are done repeatedly with a timer. To highlight one of the pie slices at time we modify its exploded property:</p>
+<pre class="qml">
+
+  <span class="name">wheelOfFortune</span>.<span class="name">at</span>(<span class="name">index</span>).<span class="name">exploded</span> <span class="operator">=</span> <span class="number">false</span>;
+  __activeIndex++;
+  <span class="name">index</span> <span class="operator">=</span> <span class="name">__activeIndex</span> <span class="operator">%</span> <span class="name">wheelOfFortune</span>.<span class="name">count</span>;
+  <span class="name">wheelOfFortune</span>.<span class="name">at</span>(<span class="name">index</span>).<span class="name">exploded</span> <span class="operator">=</span> <span class="number">true</span>;
+
+</pre>
+<p>Then an animation using a scatter series with one data point:</p>
+<pre class="qml">
+
+  <span class="name">scatterSeries</span>.<span class="name">clear</span>();
+  <span class="name">scatterSeries</span>.<span class="name">append</span>(<span class="name">__activeIndex</span>, <span class="name">interval</span>);
+  <span class="name">scatterSeries</span>.<span class="name">color</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">tint</span>(<span class="name">scatterSeries</span>.<span class="name">color</span>, <span class="string">&quot;#05FF0000&quot;</span>);
+  <span class="name">scatterSeries</span>.<span class="name">markerSize</span> <span class="operator">+=</span> <span class="number">0.5</span>;
+
+</pre>
+<p>When the wheel of fortune has stopped, we make the active slice blink by modifying its colors.</p>
+<pre class="qml">
+
+  <span class="comment">// Switch the colors of the slice and the border</span>
+  <span class="name">wheelOfFortune</span>.<span class="name">at</span>(<span class="name">index</span>).<span class="name">borderWidth</span> <span class="operator">=</span> <span class="number">2</span>;
+  var <span class="name">borderColor</span> = <span class="name">wheelOfFortune</span>.<span class="name">at</span>(<span class="name">index</span>).<span class="name">borderColor</span>;
+  <span class="name">wheelOfFortune</span>.<span class="name">at</span>(<span class="name">index</span>).<span class="name">borderColor</span> <span class="operator">=</span> <span class="name">wheelOfFortune</span>.<span class="name">at</span>(<span class="name">index</span>).<span class="name">color</span>;
+  <span class="name">wheelOfFortune</span>.<span class="name">at</span>(<span class="name">index</span>).<span class="name">color</span> <span class="operator">=</span> <span class="name">borderColor</span>;
+
+</pre>
+<p>Files:</p>
+<ul>
+<li><a href="qtcharts-qmlcustomizations-qml-qmlcustomizations-main-qml.html">qmlcustomizations/qml/qmlcustomizations/main.qml</a></li>
+<li><a href="qtcharts-qmlcustomizations-main-cpp.html">qmlcustomizations/main.cpp</a></li>
+<li><a href="qtcharts-qmlcustomizations-qmlcustomizations-pro.html">qmlcustomizations/qmlcustomizations.pro</a></li>
+<li><a href="qtcharts-qmlcustomizations-resources-qrc.html">qmlcustomizations/resources.qrc</a></li>
+</ul>
+</div>
+<!-- @@@qmlcustomizations -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

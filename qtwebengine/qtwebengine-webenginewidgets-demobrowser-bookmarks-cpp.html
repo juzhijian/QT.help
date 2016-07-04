@@ -1,0 +1,1041 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>bookmarks.cpp Example File | Qt WebEngine 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwebengine-index.html">Qt WebEngine</a></td><td ><a href="qtwebengine-webenginewidgets-demobrowser-example.html">WebEngine Demo Browser Example</a></td><td >bookmarks.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">bookmarks.cpp Example File</h1>
+<span class="subtitle">webenginewidgets/demobrowser/bookmarks.cpp</span>
+<!-- $$$webenginewidgets/demobrowser/bookmarks.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;bookmarks.h&quot;</span>
+
+  <span class="preprocessor">#include &quot;autosaver.h&quot;</span>
+  <span class="preprocessor">#include &quot;browserapplication.h&quot;</span>
+  <span class="preprocessor">#include &quot;history.h&quot;</span>
+  <span class="preprocessor">#include &quot;xbel.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtCore/QBuffer&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QFile&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QMimeData&gt;</span>
+
+  <span class="preprocessor">#include &lt;QtGui/QDesktopServices&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QDragEnterEvent&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QIcon&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QFileDialog&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QHeaderView&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QMessageBox&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QToolButton&gt;</span>
+
+  <span class="preprocessor">#include &lt;QtCore/QDebug&gt;</span>
+
+  <span class="preprocessor">#define BOOKMARKBAR &quot;Bookmarks Bar&quot;</span>
+  <span class="preprocessor">#define BOOKMARKMENU &quot;Bookmarks Menu&quot;</span>
+
+  BookmarksManager<span class="operator">::</span>BookmarksManager(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>(parent)
+      <span class="operator">,</span> m_loaded(<span class="keyword">false</span>)
+      <span class="operator">,</span> m_saveTimer(<span class="keyword">new</span> AutoSaver(<span class="keyword">this</span>))
+      <span class="operator">,</span> m_bookmarkRootNode(<span class="number">0</span>)
+      <span class="operator">,</span> m_bookmarkModel(<span class="number">0</span>)
+  {
+      connect(<span class="keyword">this</span><span class="operator">,</span> SIGNAL(entryAdded(BookmarkNode<span class="operator">*</span>))<span class="operator">,</span>
+              m_saveTimer<span class="operator">,</span> SLOT(changeOccurred()));
+      connect(<span class="keyword">this</span><span class="operator">,</span> SIGNAL(entryRemoved(BookmarkNode<span class="operator">*</span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span>BookmarkNode<span class="operator">*</span>))<span class="operator">,</span>
+              m_saveTimer<span class="operator">,</span> SLOT(changeOccurred()));
+      connect(<span class="keyword">this</span><span class="operator">,</span> SIGNAL(entryChanged(BookmarkNode<span class="operator">*</span>))<span class="operator">,</span>
+              m_saveTimer<span class="operator">,</span> SLOT(changeOccurred()));
+  }
+
+  BookmarksManager<span class="operator">::</span><span class="operator">~</span>BookmarksManager()
+  {
+      m_saveTimer<span class="operator">-</span><span class="operator">&gt;</span>saveIfNeccessary();
+  }
+
+  <span class="type">void</span> BookmarksManager<span class="operator">::</span>changeExpanded()
+  {
+      m_saveTimer<span class="operator">-</span><span class="operator">&gt;</span>changeOccurred();
+  }
+
+  <span class="type">void</span> BookmarksManager<span class="operator">::</span>load()
+  {
+      <span class="keyword">if</span> (m_loaded)
+          <span class="keyword">return</span>;
+      m_loaded <span class="operator">=</span> <span class="keyword">true</span>;
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> dir <span class="operator">=</span> <span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>writableLocation(<span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>DataLocation);
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> bookmarkFile <span class="operator">=</span> dir <span class="operator">+</span> QLatin1String(<span class="string">&quot;/bookmarks.xbel&quot;</span>);
+      <span class="keyword">if</span> (<span class="operator">!</span><span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>exists(bookmarkFile))
+          bookmarkFile <span class="operator">=</span> QLatin1String(<span class="string">&quot;:defaultbookmarks.xbel&quot;</span>);
+
+      XbelReader reader;
+      m_bookmarkRootNode <span class="operator">=</span> reader<span class="operator">.</span>read(bookmarkFile);
+      <span class="keyword">if</span> (reader<span class="operator">.</span>error() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qxmlstreamreader.html">QXmlStreamReader</a></span><span class="operator">::</span>NoError) {
+          <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="number">0</span><span class="operator">,</span> QLatin1String(<span class="string">&quot;Loading Bookmark&quot;</span>)<span class="operator">,</span>
+              tr(<span class="string">&quot;Error when loading bookmarks on line %1, column %2:\n&quot;</span>
+                 <span class="string">&quot;%3&quot;</span>)<span class="operator">.</span>arg(reader<span class="operator">.</span>lineNumber())<span class="operator">.</span>arg(reader<span class="operator">.</span>columnNumber())<span class="operator">.</span>arg(reader<span class="operator">.</span>errorString()));
+      }
+
+      BookmarkNode <span class="operator">*</span>toolbar <span class="operator">=</span> <span class="number">0</span>;
+      BookmarkNode <span class="operator">*</span>menu <span class="operator">=</span> <span class="number">0</span>;
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>BookmarkNode<span class="operator">*</span><span class="operator">&gt;</span> others;
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> m_bookmarkRootNode<span class="operator">-</span><span class="operator">&gt;</span>children()<span class="operator">.</span>count() <span class="operator">-</span> <span class="number">1</span>; i <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span>; <span class="operator">-</span><span class="operator">-</span>i) {
+          BookmarkNode <span class="operator">*</span>node <span class="operator">=</span> m_bookmarkRootNode<span class="operator">-</span><span class="operator">&gt;</span>children()<span class="operator">.</span>at(i);
+          <span class="keyword">if</span> (node<span class="operator">-</span><span class="operator">&gt;</span>type() <span class="operator">=</span><span class="operator">=</span> BookmarkNode<span class="operator">::</span>Folder) {
+              <span class="comment">// Automatically convert</span>
+              <span class="keyword">if</span> (node<span class="operator">-</span><span class="operator">&gt;</span>title <span class="operator">=</span><span class="operator">=</span> tr(<span class="string">&quot;Toolbar Bookmarks&quot;</span>) <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>toolbar) {
+                  node<span class="operator">-</span><span class="operator">&gt;</span>title <span class="operator">=</span> tr(BOOKMARKBAR);
+              }
+              <span class="keyword">if</span> (node<span class="operator">-</span><span class="operator">&gt;</span>title <span class="operator">=</span><span class="operator">=</span> tr(BOOKMARKBAR) <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>toolbar) {
+                  toolbar <span class="operator">=</span> node;
+              }
+
+              <span class="comment">// Automatically convert</span>
+              <span class="keyword">if</span> (node<span class="operator">-</span><span class="operator">&gt;</span>title <span class="operator">=</span><span class="operator">=</span> tr(<span class="string">&quot;Menu&quot;</span>) <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>menu) {
+                  node<span class="operator">-</span><span class="operator">&gt;</span>title <span class="operator">=</span> tr(BOOKMARKMENU);
+              }
+              <span class="keyword">if</span> (node<span class="operator">-</span><span class="operator">&gt;</span>title <span class="operator">=</span><span class="operator">=</span> tr(BOOKMARKMENU) <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>menu) {
+                  menu <span class="operator">=</span> node;
+              }
+          } <span class="keyword">else</span> {
+              others<span class="operator">.</span>append(node);
+          }
+          m_bookmarkRootNode<span class="operator">-</span><span class="operator">&gt;</span>remove(node);
+      }
+      Q_ASSERT(m_bookmarkRootNode<span class="operator">-</span><span class="operator">&gt;</span>children()<span class="operator">.</span>count() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>);
+      <span class="keyword">if</span> (<span class="operator">!</span>toolbar) {
+          toolbar <span class="operator">=</span> <span class="keyword">new</span> BookmarkNode(BookmarkNode<span class="operator">::</span>Folder<span class="operator">,</span> m_bookmarkRootNode);
+          toolbar<span class="operator">-</span><span class="operator">&gt;</span>title <span class="operator">=</span> tr(BOOKMARKBAR);
+      } <span class="keyword">else</span> {
+          m_bookmarkRootNode<span class="operator">-</span><span class="operator">&gt;</span>add(toolbar);
+      }
+
+      <span class="keyword">if</span> (<span class="operator">!</span>menu) {
+          menu <span class="operator">=</span> <span class="keyword">new</span> BookmarkNode(BookmarkNode<span class="operator">::</span>Folder<span class="operator">,</span> m_bookmarkRootNode);
+          menu<span class="operator">-</span><span class="operator">&gt;</span>title <span class="operator">=</span> tr(BOOKMARKMENU);
+      } <span class="keyword">else</span> {
+          m_bookmarkRootNode<span class="operator">-</span><span class="operator">&gt;</span>add(menu);
+      }
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> others<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>i)
+          menu<span class="operator">-</span><span class="operator">&gt;</span>add(others<span class="operator">.</span>at(i));
+  }
+
+  <span class="type">void</span> BookmarksManager<span class="operator">::</span>save() <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          <span class="keyword">return</span>;
+
+      XbelWriter writer;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> dir <span class="operator">=</span> <span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>writableLocation(<span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>DataLocation);
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> bookmarkFile <span class="operator">=</span> dir <span class="operator">+</span> QLatin1String(<span class="string">&quot;/bookmarks.xbel&quot;</span>);
+      <span class="keyword">if</span> (<span class="operator">!</span>writer<span class="operator">.</span>write(bookmarkFile<span class="operator">,</span> m_bookmarkRootNode))
+          <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;BookmarkManager: error saving to&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> bookmarkFile;
+  }
+
+  <span class="type">void</span> BookmarksManager<span class="operator">::</span>addBookmark(BookmarkNode <span class="operator">*</span>parent<span class="operator">,</span> BookmarkNode <span class="operator">*</span>node<span class="operator">,</span> <span class="type">int</span> row)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          <span class="keyword">return</span>;
+      Q_ASSERT(parent);
+      InsertBookmarksCommand <span class="operator">*</span>command <span class="operator">=</span> <span class="keyword">new</span> InsertBookmarksCommand(<span class="keyword">this</span><span class="operator">,</span> parent<span class="operator">,</span> node<span class="operator">,</span> row);
+      m_commands<span class="operator">.</span>push(command);
+  }
+
+  <span class="type">void</span> BookmarksManager<span class="operator">::</span>removeBookmark(BookmarkNode <span class="operator">*</span>node)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          <span class="keyword">return</span>;
+
+      Q_ASSERT(node);
+      BookmarkNode <span class="operator">*</span>parent <span class="operator">=</span> node<span class="operator">-</span><span class="operator">&gt;</span>parent();
+      <span class="type">int</span> row <span class="operator">=</span> parent<span class="operator">-</span><span class="operator">&gt;</span>children()<span class="operator">.</span>indexOf(node);
+      RemoveBookmarksCommand <span class="operator">*</span>command <span class="operator">=</span> <span class="keyword">new</span> RemoveBookmarksCommand(<span class="keyword">this</span><span class="operator">,</span> parent<span class="operator">,</span> row);
+      m_commands<span class="operator">.</span>push(command);
+  }
+
+  <span class="type">void</span> BookmarksManager<span class="operator">::</span>setTitle(BookmarkNode <span class="operator">*</span>node<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>newTitle)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          <span class="keyword">return</span>;
+
+      Q_ASSERT(node);
+      ChangeBookmarkCommand <span class="operator">*</span>command <span class="operator">=</span> <span class="keyword">new</span> ChangeBookmarkCommand(<span class="keyword">this</span><span class="operator">,</span> node<span class="operator">,</span> newTitle<span class="operator">,</span> <span class="keyword">true</span>);
+      m_commands<span class="operator">.</span>push(command);
+  }
+
+  <span class="type">void</span> BookmarksManager<span class="operator">::</span>setUrl(BookmarkNode <span class="operator">*</span>node<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>newUrl)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          <span class="keyword">return</span>;
+
+      Q_ASSERT(node);
+      ChangeBookmarkCommand <span class="operator">*</span>command <span class="operator">=</span> <span class="keyword">new</span> ChangeBookmarkCommand(<span class="keyword">this</span><span class="operator">,</span> node<span class="operator">,</span> newUrl<span class="operator">,</span> <span class="keyword">false</span>);
+      m_commands<span class="operator">.</span>push(command);
+  }
+
+  BookmarkNode <span class="operator">*</span>BookmarksManager<span class="operator">::</span>bookmarks()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          load();
+      <span class="keyword">return</span> m_bookmarkRootNode;
+  }
+
+  BookmarkNode <span class="operator">*</span>BookmarksManager<span class="operator">::</span>menu()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          load();
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> m_bookmarkRootNode<span class="operator">-</span><span class="operator">&gt;</span>children()<span class="operator">.</span>count() <span class="operator">-</span> <span class="number">1</span>; i <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span>; <span class="operator">-</span><span class="operator">-</span>i) {
+          BookmarkNode <span class="operator">*</span>node <span class="operator">=</span> m_bookmarkRootNode<span class="operator">-</span><span class="operator">&gt;</span>children()<span class="operator">.</span>at(i);
+          <span class="keyword">if</span> (node<span class="operator">-</span><span class="operator">&gt;</span>title <span class="operator">=</span><span class="operator">=</span> tr(BOOKMARKMENU))
+              <span class="keyword">return</span> node;
+      }
+      Q_ASSERT(<span class="keyword">false</span>);
+      <span class="keyword">return</span> <span class="number">0</span>;
+  }
+
+  BookmarkNode <span class="operator">*</span>BookmarksManager<span class="operator">::</span>toolbar()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          load();
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> m_bookmarkRootNode<span class="operator">-</span><span class="operator">&gt;</span>children()<span class="operator">.</span>count() <span class="operator">-</span> <span class="number">1</span>; i <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span>; <span class="operator">-</span><span class="operator">-</span>i) {
+          BookmarkNode <span class="operator">*</span>node <span class="operator">=</span> m_bookmarkRootNode<span class="operator">-</span><span class="operator">&gt;</span>children()<span class="operator">.</span>at(i);
+          <span class="keyword">if</span> (node<span class="operator">-</span><span class="operator">&gt;</span>title <span class="operator">=</span><span class="operator">=</span> tr(BOOKMARKBAR))
+              <span class="keyword">return</span> node;
+      }
+      Q_ASSERT(<span class="keyword">false</span>);
+      <span class="keyword">return</span> <span class="number">0</span>;
+  }
+
+  BookmarksModel <span class="operator">*</span>BookmarksManager<span class="operator">::</span>bookmarksModel()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_bookmarkModel)
+          m_bookmarkModel <span class="operator">=</span> <span class="keyword">new</span> BookmarksModel(<span class="keyword">this</span><span class="operator">,</span> <span class="keyword">this</span>);
+      <span class="keyword">return</span> m_bookmarkModel;
+  }
+
+  <span class="type">void</span> BookmarksManager<span class="operator">::</span>importBookmarks()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getOpenFileName(<span class="number">0</span><span class="operator">,</span> tr(<span class="string">&quot;Open File&quot;</span>)<span class="operator">,</span>
+                                                       <span class="type"><a href="../qtcore/qstring.html">QString</a></span>()<span class="operator">,</span>
+                                                       tr(<span class="string">&quot;XBEL (*.xbel *.xml)&quot;</span>));
+      <span class="keyword">if</span> (fileName<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+
+      XbelReader reader;
+      BookmarkNode <span class="operator">*</span>importRootNode <span class="operator">=</span> reader<span class="operator">.</span>read(fileName);
+      <span class="keyword">if</span> (reader<span class="operator">.</span>error() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qxmlstreamreader.html">QXmlStreamReader</a></span><span class="operator">::</span>NoError) {
+          <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="number">0</span><span class="operator">,</span> QLatin1String(<span class="string">&quot;Loading Bookmark&quot;</span>)<span class="operator">,</span>
+              tr(<span class="string">&quot;Error when loading bookmarks on line %1, column %2:\n&quot;</span>
+                 <span class="string">&quot;%3&quot;</span>)<span class="operator">.</span>arg(reader<span class="operator">.</span>lineNumber())<span class="operator">.</span>arg(reader<span class="operator">.</span>columnNumber())<span class="operator">.</span>arg(reader<span class="operator">.</span>errorString()));
+      }
+
+      importRootNode<span class="operator">-</span><span class="operator">&gt;</span>setType(BookmarkNode<span class="operator">::</span>Folder);
+      importRootNode<span class="operator">-</span><span class="operator">&gt;</span>title <span class="operator">=</span> (tr(<span class="string">&quot;Imported %1&quot;</span>)<span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qdate.html">QDate</a></span><span class="operator">::</span>currentDate()<span class="operator">.</span>toString(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>SystemLocaleShortDate)));
+      addBookmark(menu()<span class="operator">,</span> importRootNode);
+  }
+
+  <span class="type">void</span> BookmarksManager<span class="operator">::</span>exportBookmarks()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getSaveFileName(<span class="number">0</span><span class="operator">,</span> tr(<span class="string">&quot;Save File&quot;</span>)<span class="operator">,</span>
+                                  tr(<span class="string">&quot;%1 Bookmarks.xbel&quot;</span>)<span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>applicationName())<span class="operator">,</span>
+                                  tr(<span class="string">&quot;XBEL (*.xbel *.xml)&quot;</span>));
+      <span class="keyword">if</span> (fileName<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+
+      XbelWriter writer;
+      <span class="keyword">if</span> (<span class="operator">!</span>writer<span class="operator">.</span>write(fileName<span class="operator">,</span> m_bookmarkRootNode))
+          <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>critical(<span class="number">0</span><span class="operator">,</span> tr(<span class="string">&quot;Export error&quot;</span>)<span class="operator">,</span> tr(<span class="string">&quot;error saving bookmarks&quot;</span>));
+  }
+
+  RemoveBookmarksCommand<span class="operator">::</span>RemoveBookmarksCommand(BookmarksManager <span class="operator">*</span>m_bookmarkManagaer<span class="operator">,</span> BookmarkNode <span class="operator">*</span>parent<span class="operator">,</span> <span class="type">int</span> row)
+      : <span class="type"><a href="../qtwidgets/qundocommand.html">QUndoCommand</a></span>(BookmarksManager<span class="operator">::</span>tr(<span class="string">&quot;Remove Bookmark&quot;</span>))
+      <span class="operator">,</span> m_row(row)
+      <span class="operator">,</span> m_bookmarkManagaer(m_bookmarkManagaer)
+      <span class="operator">,</span> m_node(parent<span class="operator">-</span><span class="operator">&gt;</span>children()<span class="operator">.</span>value(row))
+      <span class="operator">,</span> m_parent(parent)
+      <span class="operator">,</span> m_done(<span class="keyword">false</span>)
+  {
+  }
+
+  RemoveBookmarksCommand<span class="operator">::</span><span class="operator">~</span>RemoveBookmarksCommand()
+  {
+      <span class="keyword">if</span> (m_done <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>m_node<span class="operator">-</span><span class="operator">&gt;</span>parent()) {
+          <span class="keyword">delete</span> m_node;
+      }
+  }
+
+  <span class="type">void</span> RemoveBookmarksCommand<span class="operator">::</span>undo()
+  {
+      m_parent<span class="operator">-</span><span class="operator">&gt;</span>add(m_node<span class="operator">,</span> m_row);
+      <span class="keyword">emit</span> m_bookmarkManagaer<span class="operator">-</span><span class="operator">&gt;</span>entryAdded(m_node);
+      m_done <span class="operator">=</span> <span class="keyword">false</span>;
+  }
+
+  <span class="type">void</span> RemoveBookmarksCommand<span class="operator">::</span>redo()
+  {
+      m_parent<span class="operator">-</span><span class="operator">&gt;</span>remove(m_node);
+      <span class="keyword">emit</span> m_bookmarkManagaer<span class="operator">-</span><span class="operator">&gt;</span>entryRemoved(m_parent<span class="operator">,</span> m_row<span class="operator">,</span> m_node);
+      m_done <span class="operator">=</span> <span class="keyword">true</span>;
+  }
+
+  InsertBookmarksCommand<span class="operator">::</span>InsertBookmarksCommand(BookmarksManager <span class="operator">*</span>m_bookmarkManagaer<span class="operator">,</span>
+                  BookmarkNode <span class="operator">*</span>parent<span class="operator">,</span> BookmarkNode <span class="operator">*</span>node<span class="operator">,</span> <span class="type">int</span> row)
+      : RemoveBookmarksCommand(m_bookmarkManagaer<span class="operator">,</span> parent<span class="operator">,</span> row)
+  {
+      setText(BookmarksManager<span class="operator">::</span>tr(<span class="string">&quot;Insert Bookmark&quot;</span>));
+      m_node <span class="operator">=</span> node;
+  }
+
+  ChangeBookmarkCommand<span class="operator">::</span>ChangeBookmarkCommand(BookmarksManager <span class="operator">*</span>m_bookmarkManagaer<span class="operator">,</span> BookmarkNode <span class="operator">*</span>node<span class="operator">,</span>
+                          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>newValue<span class="operator">,</span> bool title)
+      : <span class="type"><a href="../qtwidgets/qundocommand.html">QUndoCommand</a></span>()
+      <span class="operator">,</span> m_bookmarkManagaer(m_bookmarkManagaer)
+      <span class="operator">,</span> m_title(title)
+      <span class="operator">,</span> m_newValue(newValue)
+      <span class="operator">,</span> m_node(node)
+  {
+      <span class="keyword">if</span> (m_title) {
+          m_oldValue <span class="operator">=</span> m_node<span class="operator">-</span><span class="operator">&gt;</span>title;
+          setText(BookmarksManager<span class="operator">::</span>tr(<span class="string">&quot;Name Change&quot;</span>));
+      } <span class="keyword">else</span> {
+          m_oldValue <span class="operator">=</span> m_node<span class="operator">-</span><span class="operator">&gt;</span>url;
+          setText(BookmarksManager<span class="operator">::</span>tr(<span class="string">&quot;Address Change&quot;</span>));
+      }
+  }
+
+  <span class="type">void</span> ChangeBookmarkCommand<span class="operator">::</span>undo()
+  {
+      <span class="keyword">if</span> (m_title)
+          m_node<span class="operator">-</span><span class="operator">&gt;</span>title <span class="operator">=</span> m_oldValue;
+      <span class="keyword">else</span>
+          m_node<span class="operator">-</span><span class="operator">&gt;</span>url <span class="operator">=</span> m_oldValue;
+      <span class="keyword">emit</span> m_bookmarkManagaer<span class="operator">-</span><span class="operator">&gt;</span>entryChanged(m_node);
+  }
+
+  <span class="type">void</span> ChangeBookmarkCommand<span class="operator">::</span>redo()
+  {
+      <span class="keyword">if</span> (m_title)
+          m_node<span class="operator">-</span><span class="operator">&gt;</span>title <span class="operator">=</span> m_newValue;
+      <span class="keyword">else</span>
+          m_node<span class="operator">-</span><span class="operator">&gt;</span>url <span class="operator">=</span> m_newValue;
+      <span class="keyword">emit</span> m_bookmarkManagaer<span class="operator">-</span><span class="operator">&gt;</span>entryChanged(m_node);
+  }
+
+  BookmarksModel<span class="operator">::</span>BookmarksModel(BookmarksManager <span class="operator">*</span>bookmarkManager<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span>(parent)
+      <span class="operator">,</span> m_endMacro(<span class="keyword">false</span>)
+      <span class="operator">,</span> m_bookmarksManager(bookmarkManager)
+  {
+      connect(bookmarkManager<span class="operator">,</span> SIGNAL(entryAdded(BookmarkNode<span class="operator">*</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(entryAdded(BookmarkNode<span class="operator">*</span>)));
+      connect(bookmarkManager<span class="operator">,</span> SIGNAL(entryRemoved(BookmarkNode<span class="operator">*</span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span>BookmarkNode<span class="operator">*</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(entryRemoved(BookmarkNode<span class="operator">*</span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span>BookmarkNode<span class="operator">*</span>)));
+      connect(bookmarkManager<span class="operator">,</span> SIGNAL(entryChanged(BookmarkNode<span class="operator">*</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(entryChanged(BookmarkNode<span class="operator">*</span>)));
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> BookmarksModel<span class="operator">::</span>index(BookmarkNode <span class="operator">*</span>node) <span class="keyword">const</span>
+  {
+      BookmarkNode <span class="operator">*</span>parent <span class="operator">=</span> node<span class="operator">-</span><span class="operator">&gt;</span>parent();
+      <span class="keyword">if</span> (<span class="operator">!</span>parent)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+      <span class="keyword">return</span> createIndex(parent<span class="operator">-</span><span class="operator">&gt;</span>children()<span class="operator">.</span>indexOf(node)<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> node);
+  }
+
+  <span class="type">void</span> BookmarksModel<span class="operator">::</span>entryAdded(BookmarkNode <span class="operator">*</span>item)
+  {
+      Q_ASSERT(item <span class="operator">&amp;</span><span class="operator">&amp;</span> item<span class="operator">-</span><span class="operator">&gt;</span>parent());
+      <span class="type">int</span> row <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>parent()<span class="operator">-</span><span class="operator">&gt;</span>children()<span class="operator">.</span>indexOf(item);
+      BookmarkNode <span class="operator">*</span>parent <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>parent();
+      <span class="comment">// item was already added so remove beore beginInsertRows is called</span>
+      parent<span class="operator">-</span><span class="operator">&gt;</span>remove(item);
+      beginInsertRows(index(parent)<span class="operator">,</span> row<span class="operator">,</span> row);
+      parent<span class="operator">-</span><span class="operator">&gt;</span>add(item<span class="operator">,</span> row);
+      endInsertRows();
+  }
+
+  <span class="type">void</span> BookmarksModel<span class="operator">::</span>entryRemoved(BookmarkNode <span class="operator">*</span>parent<span class="operator">,</span> <span class="type">int</span> row<span class="operator">,</span> BookmarkNode <span class="operator">*</span>item)
+  {
+      <span class="comment">// item was already removed, re-add so beginRemoveRows works</span>
+      parent<span class="operator">-</span><span class="operator">&gt;</span>add(item<span class="operator">,</span> row);
+      beginRemoveRows(index(parent)<span class="operator">,</span> row<span class="operator">,</span> row);
+      parent<span class="operator">-</span><span class="operator">&gt;</span>remove(item);
+      endRemoveRows();
+  }
+
+  <span class="type">void</span> BookmarksModel<span class="operator">::</span>entryChanged(BookmarkNode <span class="operator">*</span>item)
+  {
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> idx <span class="operator">=</span> index(item);
+      <span class="keyword">emit</span> dataChanged(idx<span class="operator">,</span> idx);
+  }
+
+  bool BookmarksModel<span class="operator">::</span>removeRows(<span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> count<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent)
+  {
+      <span class="keyword">if</span> (row <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> count <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> row <span class="operator">+</span> count <span class="operator">&gt;</span> rowCount(parent))
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      BookmarkNode <span class="operator">*</span>bookmarkNode <span class="operator">=</span> node(parent);
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> row <span class="operator">+</span> count <span class="operator">-</span> <span class="number">1</span>; i <span class="operator">&gt;</span><span class="operator">=</span> row; <span class="operator">-</span><span class="operator">-</span>i) {
+          BookmarkNode <span class="operator">*</span>node <span class="operator">=</span> bookmarkNode<span class="operator">-</span><span class="operator">&gt;</span>children()<span class="operator">.</span>at(i);
+          <span class="keyword">if</span> (node <span class="operator">=</span><span class="operator">=</span> m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>menu()
+              <span class="operator">|</span><span class="operator">|</span> node <span class="operator">=</span><span class="operator">=</span> m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>toolbar())
+              <span class="keyword">continue</span>;
+
+          m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>removeBookmark(node);
+      }
+      <span class="keyword">if</span> (m_endMacro) {
+          m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>undoRedoStack()<span class="operator">-</span><span class="operator">&gt;</span>endMacro();
+          m_endMacro <span class="operator">=</span> <span class="keyword">false</span>;
+      }
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> BookmarksModel<span class="operator">::</span>headerData(<span class="type">int</span> section<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Orientation orientation<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (orientation <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal <span class="operator">&amp;</span><span class="operator">&amp;</span> role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole) {
+          <span class="keyword">switch</span> (section) {
+              <span class="keyword">case</span> <span class="number">0</span>: <span class="keyword">return</span> tr(<span class="string">&quot;Title&quot;</span>);
+              <span class="keyword">case</span> <span class="number">1</span>: <span class="keyword">return</span> tr(<span class="string">&quot;Address&quot;</span>);
+          }
+      }
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span><span class="operator">::</span>headerData(section<span class="operator">,</span> orientation<span class="operator">,</span> role);
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> BookmarksModel<span class="operator">::</span>data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid() <span class="operator">|</span><span class="operator">|</span> index<span class="operator">.</span>model() <span class="operator">!</span><span class="operator">=</span> <span class="keyword">this</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+      <span class="keyword">const</span> BookmarkNode <span class="operator">*</span>bookmarkNode <span class="operator">=</span> node(index);
+      <span class="keyword">switch</span> (role) {
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole:
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole:
+          <span class="keyword">if</span> (bookmarkNode<span class="operator">-</span><span class="operator">&gt;</span>type() <span class="operator">=</span><span class="operator">=</span> BookmarkNode<span class="operator">::</span>Separator) {
+              <span class="keyword">switch</span> (index<span class="operator">.</span>column()) {
+              <span class="keyword">case</span> <span class="number">0</span>: <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="number">50</span><span class="operator">,</span> <span class="number">0xB7</span>);
+              <span class="keyword">case</span> <span class="number">1</span>: <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+              }
+          }
+
+          <span class="keyword">switch</span> (index<span class="operator">.</span>column()) {
+          <span class="keyword">case</span> <span class="number">0</span>: <span class="keyword">return</span> bookmarkNode<span class="operator">-</span><span class="operator">&gt;</span>title;
+          <span class="keyword">case</span> <span class="number">1</span>: <span class="keyword">return</span> bookmarkNode<span class="operator">-</span><span class="operator">&gt;</span>url;
+          }
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> BookmarksModel<span class="operator">::</span>UrlRole:
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(bookmarkNode<span class="operator">-</span><span class="operator">&gt;</span>url);
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> BookmarksModel<span class="operator">::</span>UrlStringRole:
+          <span class="keyword">return</span> bookmarkNode<span class="operator">-</span><span class="operator">&gt;</span>url;
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> BookmarksModel<span class="operator">::</span>TypeRole:
+          <span class="keyword">return</span> bookmarkNode<span class="operator">-</span><span class="operator">&gt;</span>type();
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> BookmarksModel<span class="operator">::</span>SeparatorRole:
+          <span class="keyword">return</span> (bookmarkNode<span class="operator">-</span><span class="operator">&gt;</span>type() <span class="operator">=</span><span class="operator">=</span> BookmarkNode<span class="operator">::</span>Separator);
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DecorationRole:
+          <span class="keyword">if</span> (index<span class="operator">.</span>column() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>) {
+              <span class="keyword">if</span> (bookmarkNode<span class="operator">-</span><span class="operator">&gt;</span>type() <span class="operator">=</span><span class="operator">=</span> BookmarkNode<span class="operator">::</span>Folder)
+                  <span class="keyword">return</span> <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span><span class="operator">::</span>style()<span class="operator">-</span><span class="operator">&gt;</span>standardIcon(<span class="type"><a href="../qtwidgets/qstyle.html">QStyle</a></span><span class="operator">::</span>SP_DirIcon);
+              <span class="keyword">return</span> BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>icon(bookmarkNode<span class="operator">-</span><span class="operator">&gt;</span>url);
+          }
+      }
+
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+  }
+
+  <span class="type">int</span> BookmarksModel<span class="operator">::</span>columnCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> (parent<span class="operator">.</span>column() <span class="operator">&gt;</span> <span class="number">0</span>) <span class="operator">?</span> <span class="number">0</span> : <span class="number">2</span>;
+  }
+
+  <span class="type">int</span> BookmarksModel<span class="operator">::</span>rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (parent<span class="operator">.</span>column() <span class="operator">&gt;</span> <span class="number">0</span>)
+          <span class="keyword">return</span> <span class="number">0</span>;
+
+      <span class="keyword">if</span> (<span class="operator">!</span>parent<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>bookmarks()<span class="operator">-</span><span class="operator">&gt;</span>children()<span class="operator">.</span>count();
+
+      <span class="keyword">const</span> BookmarkNode <span class="operator">*</span>item <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>BookmarkNode<span class="operator">*</span><span class="operator">&gt;</span>(parent<span class="operator">.</span>internalPointer());
+      <span class="keyword">return</span> item<span class="operator">-</span><span class="operator">&gt;</span>children()<span class="operator">.</span>count();
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> BookmarksModel<span class="operator">::</span>index(<span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> column<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (row <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> column <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> row <span class="operator">&gt;</span><span class="operator">=</span> rowCount(parent) <span class="operator">|</span><span class="operator">|</span> column <span class="operator">&gt;</span><span class="operator">=</span> columnCount(parent))
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      <span class="comment">// get the parent node</span>
+      BookmarkNode <span class="operator">*</span>parentNode <span class="operator">=</span> node(parent);
+      <span class="keyword">return</span> createIndex(row<span class="operator">,</span> column<span class="operator">,</span> parentNode<span class="operator">-</span><span class="operator">&gt;</span>children()<span class="operator">.</span>at(row));
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> BookmarksModel<span class="operator">::</span>parent(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      BookmarkNode <span class="operator">*</span>itemNode <span class="operator">=</span> node(index);
+      BookmarkNode <span class="operator">*</span>parentNode <span class="operator">=</span> (itemNode <span class="operator">?</span> itemNode<span class="operator">-</span><span class="operator">&gt;</span>parent() : <span class="number">0</span>);
+      <span class="keyword">if</span> (<span class="operator">!</span>parentNode <span class="operator">|</span><span class="operator">|</span> parentNode <span class="operator">=</span><span class="operator">=</span> m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>bookmarks())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      <span class="comment">// get the parent's row</span>
+      BookmarkNode <span class="operator">*</span>grandParentNode <span class="operator">=</span> parentNode<span class="operator">-</span><span class="operator">&gt;</span>parent();
+      <span class="type">int</span> parentRow <span class="operator">=</span> grandParentNode<span class="operator">-</span><span class="operator">&gt;</span>children()<span class="operator">.</span>indexOf(parentNode);
+      Q_ASSERT(parentRow <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span>);
+      <span class="keyword">return</span> createIndex(parentRow<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> parentNode);
+  }
+
+  bool BookmarksModel<span class="operator">::</span>hasChildren(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>parent<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="keyword">true</span>;
+      <span class="keyword">const</span> BookmarkNode <span class="operator">*</span>parentNode <span class="operator">=</span> node(parent);
+      <span class="keyword">return</span> (parentNode<span class="operator">-</span><span class="operator">&gt;</span>type() <span class="operator">=</span><span class="operator">=</span> BookmarkNode<span class="operator">::</span>Folder);
+  }
+
+  <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemFlags BookmarksModel<span class="operator">::</span>flags(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoItemFlags;
+
+      <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemFlags flags <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsSelectable <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsEnabled;
+
+      BookmarkNode <span class="operator">*</span>bookmarkNode <span class="operator">=</span> node(index);
+
+      <span class="keyword">if</span> (bookmarkNode <span class="operator">!</span><span class="operator">=</span> m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>menu()
+          <span class="operator">&amp;</span><span class="operator">&amp;</span> bookmarkNode <span class="operator">!</span><span class="operator">=</span> m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>toolbar()) {
+          flags <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsDragEnabled;
+          <span class="keyword">if</span> (bookmarkNode<span class="operator">-</span><span class="operator">&gt;</span>type() <span class="operator">!</span><span class="operator">=</span> BookmarkNode<span class="operator">::</span>Separator)
+              flags <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsEditable;
+      }
+      <span class="keyword">if</span> (hasChildren(index))
+          flags <span class="operator">|</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsDropEnabled;
+      <span class="keyword">return</span> flags;
+  }
+
+  <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DropActions BookmarksModel<span class="operator">::</span>supportedDropActions () <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CopyAction <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>MoveAction;
+  }
+
+  <span class="preprocessor">#define MIMETYPE QLatin1String(&quot;application/bookmarks.xbel&quot;)</span>
+
+  <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> BookmarksModel<span class="operator">::</span>mimeTypes() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> types;
+      types <span class="operator">&lt;</span><span class="operator">&lt;</span> MIMETYPE;
+      <span class="keyword">return</span> types;
+  }
+
+  <span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span> <span class="operator">*</span>BookmarksModel<span class="operator">::</span>mimeData(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html#QModelIndexList-typedef">QModelIndexList</a></span> <span class="operator">&amp;</span>indexes) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span> <span class="operator">*</span>mimeData <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span>();
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> data;
+      <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> stream(<span class="operator">&amp;</span>data<span class="operator">,</span> <span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>WriteOnly);
+      foreach (<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index<span class="operator">,</span> indexes) {
+          <span class="keyword">if</span> (index<span class="operator">.</span>column() <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>index<span class="operator">.</span>isValid())
+              <span class="keyword">continue</span>;
+          <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> encodedData;
+          <span class="type"><a href="../qtcore/qbuffer.html">QBuffer</a></span> buffer(<span class="operator">&amp;</span>encodedData);
+          buffer<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qbuffer.html">QBuffer</a></span><span class="operator">::</span>ReadWrite);
+          XbelWriter writer;
+          <span class="keyword">const</span> BookmarkNode <span class="operator">*</span>parentNode <span class="operator">=</span> node(index);
+          writer<span class="operator">.</span>write(<span class="operator">&amp;</span>buffer<span class="operator">,</span> parentNode);
+          stream <span class="operator">&lt;</span><span class="operator">&lt;</span> encodedData;
+      }
+      mimeData<span class="operator">-</span><span class="operator">&gt;</span>setData(MIMETYPE<span class="operator">,</span> data);
+      <span class="keyword">return</span> mimeData;
+  }
+
+  bool BookmarksModel<span class="operator">::</span>dropMimeData(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span> <span class="operator">*</span>data<span class="operator">,</span>
+       <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DropAction action<span class="operator">,</span> <span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> column<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent)
+  {
+      <span class="keyword">if</span> (action <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>IgnoreAction)
+          <span class="keyword">return</span> <span class="keyword">true</span>;
+
+      <span class="keyword">if</span> (<span class="operator">!</span>data<span class="operator">-</span><span class="operator">&gt;</span>hasFormat(MIMETYPE)
+          <span class="operator">|</span><span class="operator">|</span> column <span class="operator">&gt;</span> <span class="number">0</span>)
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> ba <span class="operator">=</span> data<span class="operator">-</span><span class="operator">&gt;</span>data(MIMETYPE);
+      <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> stream(<span class="operator">&amp;</span>ba<span class="operator">,</span> <span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly);
+      <span class="keyword">if</span> (stream<span class="operator">.</span>atEnd())
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      <span class="type"><a href="../qtwidgets/qundostack.html">QUndoStack</a></span> <span class="operator">*</span>undoStack <span class="operator">=</span> m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>undoRedoStack();
+      undoStack<span class="operator">-</span><span class="operator">&gt;</span>beginMacro(QLatin1String(<span class="string">&quot;Move Bookmarks&quot;</span>));
+
+      <span class="keyword">while</span> (<span class="operator">!</span>stream<span class="operator">.</span>atEnd()) {
+          <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> encodedData;
+          stream <span class="operator">&gt;</span><span class="operator">&gt;</span> encodedData;
+          <span class="type"><a href="../qtcore/qbuffer.html">QBuffer</a></span> buffer(<span class="operator">&amp;</span>encodedData);
+          buffer<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qbuffer.html">QBuffer</a></span><span class="operator">::</span>ReadOnly);
+
+          XbelReader reader;
+          BookmarkNode <span class="operator">*</span>rootNode <span class="operator">=</span> reader<span class="operator">.</span>read(<span class="operator">&amp;</span>buffer);
+          <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>BookmarkNode<span class="operator">*</span><span class="operator">&gt;</span> children <span class="operator">=</span> rootNode<span class="operator">-</span><span class="operator">&gt;</span>children();
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> children<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>i) {
+              BookmarkNode <span class="operator">*</span>bookmarkNode <span class="operator">=</span> children<span class="operator">.</span>at(i);
+              rootNode<span class="operator">-</span><span class="operator">&gt;</span>remove(bookmarkNode);
+              row <span class="operator">=</span> <a href="../qtcore/qtglobal.html#qMax">qMax</a>(<span class="number">0</span><span class="operator">,</span> row);
+              BookmarkNode <span class="operator">*</span>parentNode <span class="operator">=</span> node(parent);
+              m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>addBookmark(parentNode<span class="operator">,</span> bookmarkNode<span class="operator">,</span> row);
+              m_endMacro <span class="operator">=</span> <span class="keyword">true</span>;
+          }
+          <span class="keyword">delete</span> rootNode;
+      }
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  bool BookmarksModel<span class="operator">::</span>setData(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> <span class="operator">&amp;</span>value<span class="operator">,</span> <span class="type">int</span> role)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid() <span class="operator">|</span><span class="operator">|</span> (flags(index) <span class="operator">&amp;</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsEditable) <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      BookmarkNode <span class="operator">*</span>item <span class="operator">=</span> node(index);
+
+      <span class="keyword">switch</span> (role) {
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole:
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole:
+          <span class="keyword">if</span> (index<span class="operator">.</span>column() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>) {
+              m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>setTitle(item<span class="operator">,</span> value<span class="operator">.</span>toString());
+              <span class="keyword">break</span>;
+          }
+          <span class="keyword">if</span> (index<span class="operator">.</span>column() <span class="operator">=</span><span class="operator">=</span> <span class="number">1</span>) {
+              m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>setUrl(item<span class="operator">,</span> value<span class="operator">.</span>toString());
+              <span class="keyword">break</span>;
+          }
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      <span class="keyword">case</span> BookmarksModel<span class="operator">::</span>UrlRole:
+          m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>setUrl(item<span class="operator">,</span> value<span class="operator">.</span>toUrl()<span class="operator">.</span>toString());
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> BookmarksModel<span class="operator">::</span>UrlStringRole:
+          m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>setUrl(item<span class="operator">,</span> value<span class="operator">.</span>toString());
+          <span class="keyword">break</span>;
+      <span class="keyword">default</span>:
+          <span class="keyword">break</span>;
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      }
+
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  BookmarkNode <span class="operator">*</span>BookmarksModel<span class="operator">::</span>node(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      BookmarkNode <span class="operator">*</span>itemNode <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>BookmarkNode<span class="operator">*</span><span class="operator">&gt;</span>(index<span class="operator">.</span>internalPointer());
+      <span class="keyword">if</span> (<span class="operator">!</span>itemNode)
+          <span class="keyword">return</span> m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>bookmarks();
+      <span class="keyword">return</span> itemNode;
+  }
+
+  AddBookmarkProxyModel<span class="operator">::</span>AddBookmarkProxyModel(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span>(parent)
+  {
+  }
+
+  <span class="type">int</span> AddBookmarkProxyModel<span class="operator">::</span>columnCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <a href="../qtcore/qtglobal.html#qMin">qMin</a>(<span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span><span class="operator">::</span>columnCount(parent));
+  }
+
+  bool AddBookmarkProxyModel<span class="operator">::</span>filterAcceptsRow(<span class="type">int</span> source_row<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>source_parent) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> idx <span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>index(source_row<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> source_parent);
+      <span class="keyword">return</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>hasChildren(idx);
+  }
+
+  AddBookmarkDialog<span class="operator">::</span>AddBookmarkDialog(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>url<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>title<span class="operator">,</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent<span class="operator">,</span> BookmarksManager <span class="operator">*</span>bookmarkManager)
+      : <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span>(parent)
+      <span class="operator">,</span> m_url(url)
+      <span class="operator">,</span> m_bookmarksManager(bookmarkManager)
+  {
+      setWindowFlags(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Sheet);
+      <span class="keyword">if</span> (<span class="operator">!</span>m_bookmarksManager)
+          m_bookmarksManager <span class="operator">=</span> BrowserApplication<span class="operator">::</span>bookmarksManager();
+      setupUi(<span class="keyword">this</span>);
+      <span class="type"><a href="../qtwidgets/qtreeview.html">QTreeView</a></span> <span class="operator">*</span>view <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtreeview.html">QTreeView</a></span>(<span class="keyword">this</span>);
+      m_proxyModel <span class="operator">=</span> <span class="keyword">new</span> AddBookmarkProxyModel(<span class="keyword">this</span>);
+      BookmarksModel <span class="operator">*</span>model <span class="operator">=</span> m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>bookmarksModel();
+      m_proxyModel<span class="operator">-</span><span class="operator">&gt;</span>setSourceModel(model);
+      view<span class="operator">-</span><span class="operator">&gt;</span>setModel(m_proxyModel);
+      view<span class="operator">-</span><span class="operator">&gt;</span>expandAll();
+      view<span class="operator">-</span><span class="operator">&gt;</span>header()<span class="operator">-</span><span class="operator">&gt;</span>setStretchLastSection(<span class="keyword">true</span>);
+      view<span class="operator">-</span><span class="operator">&gt;</span>header()<span class="operator">-</span><span class="operator">&gt;</span>hide();
+      view<span class="operator">-</span><span class="operator">&gt;</span>setItemsExpandable(<span class="keyword">false</span>);
+      view<span class="operator">-</span><span class="operator">&gt;</span>setRootIsDecorated(<span class="keyword">false</span>);
+      view<span class="operator">-</span><span class="operator">&gt;</span>setIndentation(<span class="number">10</span>);
+      location<span class="operator">-</span><span class="operator">&gt;</span>setModel(m_proxyModel);
+      view<span class="operator">-</span><span class="operator">&gt;</span>show();
+      location<span class="operator">-</span><span class="operator">&gt;</span>setView(view);
+      BookmarkNode <span class="operator">*</span>menu <span class="operator">=</span> m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>menu();
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> idx <span class="operator">=</span> m_proxyModel<span class="operator">-</span><span class="operator">&gt;</span>mapFromSource(model<span class="operator">-</span><span class="operator">&gt;</span>index(menu));
+      view<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(idx);
+      location<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(idx<span class="operator">.</span>row());
+      name<span class="operator">-</span><span class="operator">&gt;</span>setText(title);
+  }
+
+  <span class="type">void</span> AddBookmarkDialog<span class="operator">::</span>accept()
+  {
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index <span class="operator">=</span> location<span class="operator">-</span><span class="operator">&gt;</span>view()<span class="operator">-</span><span class="operator">&gt;</span>currentIndex();
+      index <span class="operator">=</span> m_proxyModel<span class="operator">-</span><span class="operator">&gt;</span>mapToSource(index);
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid())
+          index <span class="operator">=</span> m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>bookmarksModel()<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      BookmarkNode <span class="operator">*</span>parent <span class="operator">=</span> m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>bookmarksModel()<span class="operator">-</span><span class="operator">&gt;</span>node(index);
+      BookmarkNode <span class="operator">*</span>bookmark <span class="operator">=</span> <span class="keyword">new</span> BookmarkNode(BookmarkNode<span class="operator">::</span>Bookmark);
+      bookmark<span class="operator">-</span><span class="operator">&gt;</span>url <span class="operator">=</span> m_url;
+      bookmark<span class="operator">-</span><span class="operator">&gt;</span>title <span class="operator">=</span> name<span class="operator">-</span><span class="operator">&gt;</span>text();
+      m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>addBookmark(parent<span class="operator">,</span> bookmark);
+      <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span><span class="operator">::</span>accept();
+  }
+
+  BookmarksMenu<span class="operator">::</span>BookmarksMenu(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : ModelMenu(parent)
+      <span class="operator">,</span> m_bookmarksManager(<span class="number">0</span>)
+  {
+      connect(<span class="keyword">this</span><span class="operator">,</span> SIGNAL(activated(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(activated(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>)));
+      setMaxRows(<span class="operator">-</span><span class="number">1</span>);
+      setHoverRole(BookmarksModel<span class="operator">::</span>UrlStringRole);
+      setSeparatorRole(BookmarksModel<span class="operator">::</span>SeparatorRole);
+  }
+
+  <span class="type">void</span> BookmarksMenu<span class="operator">::</span>activated(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index)
+  {
+      <span class="keyword">emit</span> openUrl(index<span class="operator">.</span>data(BookmarksModel<span class="operator">::</span>UrlRole)<span class="operator">.</span>toUrl());
+  }
+
+  bool BookmarksMenu<span class="operator">::</span>prePopulated()
+  {
+      m_bookmarksManager <span class="operator">=</span> BrowserApplication<span class="operator">::</span>bookmarksManager();
+      setModel(m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>bookmarksModel());
+      setRootIndex(m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>bookmarksModel()<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">1</span><span class="operator">,</span> <span class="number">0</span>));
+      <span class="comment">// initial actions</span>
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_initialActions<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>i)
+          addAction(m_initialActions<span class="operator">.</span>at(i));
+      <span class="keyword">if</span> (<span class="operator">!</span>m_initialActions<span class="operator">.</span>isEmpty())
+          addSeparator();
+      createMenu(model()<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span>)<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="keyword">this</span>);
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  <span class="type">void</span> BookmarksMenu<span class="operator">::</span>setInitialActions(<span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">*</span><span class="operator">&gt;</span> actions)
+  {
+      m_initialActions <span class="operator">=</span> actions;
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_initialActions<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>i)
+          addAction(m_initialActions<span class="operator">.</span>at(i));
+  }
+
+  BookmarksDialog<span class="operator">::</span>BookmarksDialog(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent<span class="operator">,</span> BookmarksManager <span class="operator">*</span>manager)
+      : <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span>(parent)
+  {
+      m_bookmarksManager <span class="operator">=</span> manager;
+      <span class="keyword">if</span> (<span class="operator">!</span>m_bookmarksManager)
+          m_bookmarksManager <span class="operator">=</span> BrowserApplication<span class="operator">::</span>bookmarksManager();
+      setupUi(<span class="keyword">this</span>);
+
+      tree<span class="operator">-</span><span class="operator">&gt;</span>setUniformRowHeights(<span class="keyword">true</span>);
+      tree<span class="operator">-</span><span class="operator">&gt;</span>setSelectionBehavior(<span class="type"><a href="../qtwidgets/qabstractitemview.html">QAbstractItemView</a></span><span class="operator">::</span>SelectRows);
+      tree<span class="operator">-</span><span class="operator">&gt;</span>setSelectionMode(<span class="type"><a href="../qtwidgets/qabstractitemview.html">QAbstractItemView</a></span><span class="operator">::</span>ContiguousSelection);
+      tree<span class="operator">-</span><span class="operator">&gt;</span>setTextElideMode(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ElideMiddle);
+      m_bookmarksModel <span class="operator">=</span> m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>bookmarksModel();
+      m_proxyModel <span class="operator">=</span> <span class="keyword">new</span> TreeProxyModel(<span class="keyword">this</span>);
+      connect(search<span class="operator">,</span> SIGNAL(textChanged(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span>
+              m_proxyModel<span class="operator">,</span> SLOT(setFilterFixedString(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>)));
+      connect(removeButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> tree<span class="operator">,</span> SLOT(removeOne()));
+      m_proxyModel<span class="operator">-</span><span class="operator">&gt;</span>setSourceModel(m_bookmarksModel);
+      tree<span class="operator">-</span><span class="operator">&gt;</span>setModel(m_proxyModel);
+      tree<span class="operator">-</span><span class="operator">&gt;</span>setDragDropMode(<span class="type"><a href="../qtwidgets/qabstractitemview.html">QAbstractItemView</a></span><span class="operator">::</span>InternalMove);
+      tree<span class="operator">-</span><span class="operator">&gt;</span>setExpanded(m_proxyModel<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span>)<span class="operator">,</span> <span class="keyword">true</span>);
+      tree<span class="operator">-</span><span class="operator">&gt;</span>setAlternatingRowColors(<span class="keyword">true</span>);
+      <span class="type"><a href="../qtgui/qfontmetrics.html">QFontMetrics</a></span> fm(font());
+      <span class="type">int</span> header <span class="operator">=</span> fm<span class="operator">.</span>width(QLatin1Char(<span class="char">'m'</span>)) <span class="operator">*</span> <span class="number">40</span>;
+      tree<span class="operator">-</span><span class="operator">&gt;</span>header()<span class="operator">-</span><span class="operator">&gt;</span>resizeSection(<span class="number">0</span><span class="operator">,</span> header);
+      tree<span class="operator">-</span><span class="operator">&gt;</span>header()<span class="operator">-</span><span class="operator">&gt;</span>setStretchLastSection(<span class="keyword">true</span>);
+      connect(tree<span class="operator">,</span> SIGNAL(activated(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(open()));
+      tree<span class="operator">-</span><span class="operator">&gt;</span>setContextMenuPolicy(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CustomContextMenu);
+      connect(tree<span class="operator">,</span> SIGNAL(customContextMenuRequested(<span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(customContextMenuRequested(<span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>)));
+      connect(addFolderButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(newFolder()));
+      expandNodes(m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>bookmarks());
+      setAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WA_DeleteOnClose);
+  }
+
+  BookmarksDialog<span class="operator">::</span><span class="operator">~</span>BookmarksDialog()
+  {
+      <span class="keyword">if</span> (saveExpandedNodes(tree<span class="operator">-</span><span class="operator">&gt;</span>rootIndex()))
+          m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>changeExpanded();
+  }
+
+  bool BookmarksDialog<span class="operator">::</span>saveExpandedNodes(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent)
+  {
+      bool changed <span class="operator">=</span> <span class="keyword">false</span>;
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_proxyModel<span class="operator">-</span><span class="operator">&gt;</span>rowCount(parent); <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> child <span class="operator">=</span> m_proxyModel<span class="operator">-</span><span class="operator">&gt;</span>index(i<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> parent);
+          <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> sourceIndex <span class="operator">=</span> m_proxyModel<span class="operator">-</span><span class="operator">&gt;</span>mapToSource(child);
+          BookmarkNode <span class="operator">*</span>childNode <span class="operator">=</span> m_bookmarksModel<span class="operator">-</span><span class="operator">&gt;</span>node(sourceIndex);
+          bool wasExpanded <span class="operator">=</span> childNode<span class="operator">-</span><span class="operator">&gt;</span>expanded;
+          <span class="keyword">if</span> (tree<span class="operator">-</span><span class="operator">&gt;</span>isExpanded(child)) {
+              childNode<span class="operator">-</span><span class="operator">&gt;</span>expanded <span class="operator">=</span> <span class="keyword">true</span>;
+              changed <span class="operator">|</span><span class="operator">=</span> saveExpandedNodes(child);
+          } <span class="keyword">else</span> {
+              childNode<span class="operator">-</span><span class="operator">&gt;</span>expanded <span class="operator">=</span> <span class="keyword">false</span>;
+          }
+          changed <span class="operator">|</span><span class="operator">=</span> (wasExpanded <span class="operator">!</span><span class="operator">=</span> childNode<span class="operator">-</span><span class="operator">&gt;</span>expanded);
+      }
+      <span class="keyword">return</span> changed;
+  }
+
+  <span class="type">void</span> BookmarksDialog<span class="operator">::</span>expandNodes(BookmarkNode <span class="operator">*</span>node)
+  {
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> node<span class="operator">-</span><span class="operator">&gt;</span>children()<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>i) {
+          BookmarkNode <span class="operator">*</span>childNode <span class="operator">=</span> node<span class="operator">-</span><span class="operator">&gt;</span>children()<span class="operator">[</span>i<span class="operator">]</span>;
+          <span class="keyword">if</span> (childNode<span class="operator">-</span><span class="operator">&gt;</span>expanded) {
+              <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> idx <span class="operator">=</span> m_bookmarksModel<span class="operator">-</span><span class="operator">&gt;</span>index(childNode);
+              idx <span class="operator">=</span> m_proxyModel<span class="operator">-</span><span class="operator">&gt;</span>mapFromSource(idx);
+              tree<span class="operator">-</span><span class="operator">&gt;</span>setExpanded(idx<span class="operator">,</span> <span class="keyword">true</span>);
+              expandNodes(childNode);
+          }
+      }
+  }
+
+  <span class="type">void</span> BookmarksDialog<span class="operator">::</span>customContextMenuRequested(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <span class="operator">&amp;</span>pos)
+  {
+      <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> menu;
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index <span class="operator">=</span> tree<span class="operator">-</span><span class="operator">&gt;</span>indexAt(pos);
+      index <span class="operator">=</span> index<span class="operator">.</span>sibling(index<span class="operator">.</span>row()<span class="operator">,</span> <span class="number">0</span>);
+      <span class="keyword">if</span> (index<span class="operator">.</span>isValid() <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>tree<span class="operator">-</span><span class="operator">&gt;</span>model()<span class="operator">-</span><span class="operator">&gt;</span>hasChildren(index)) {
+          menu<span class="operator">.</span>addAction(tr(<span class="string">&quot;Open&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(open()));
+          menu<span class="operator">.</span>addSeparator();
+      }
+      menu<span class="operator">.</span>addAction(tr(<span class="string">&quot;Delete&quot;</span>)<span class="operator">,</span> tree<span class="operator">,</span> SLOT(removeOne()));
+      menu<span class="operator">.</span>exec(<span class="type"><a href="../qtgui/qcursor.html">QCursor</a></span><span class="operator">::</span>pos());
+  }
+
+  <span class="type">void</span> BookmarksDialog<span class="operator">::</span>open()
+  {
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index <span class="operator">=</span> tree<span class="operator">-</span><span class="operator">&gt;</span>currentIndex();
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>parent()<span class="operator">.</span>isValid())
+          <span class="keyword">return</span>;
+      <span class="keyword">emit</span> openUrl(index<span class="operator">.</span>sibling(index<span class="operator">.</span>row()<span class="operator">,</span> <span class="number">1</span>)<span class="operator">.</span>data(BookmarksModel<span class="operator">::</span>UrlRole)<span class="operator">.</span>toUrl());
+  }
+
+  <span class="type">void</span> BookmarksDialog<span class="operator">::</span>newFolder()
+  {
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> currentIndex <span class="operator">=</span> tree<span class="operator">-</span><span class="operator">&gt;</span>currentIndex();
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> idx <span class="operator">=</span> currentIndex;
+      <span class="keyword">if</span> (idx<span class="operator">.</span>isValid() <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>idx<span class="operator">.</span>model()<span class="operator">-</span><span class="operator">&gt;</span>hasChildren(idx))
+          idx <span class="operator">=</span> idx<span class="operator">.</span>parent();
+      <span class="keyword">if</span> (<span class="operator">!</span>idx<span class="operator">.</span>isValid())
+          idx <span class="operator">=</span> tree<span class="operator">-</span><span class="operator">&gt;</span>rootIndex();
+      idx <span class="operator">=</span> m_proxyModel<span class="operator">-</span><span class="operator">&gt;</span>mapToSource(idx);
+      BookmarkNode <span class="operator">*</span>parent <span class="operator">=</span> m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>bookmarksModel()<span class="operator">-</span><span class="operator">&gt;</span>node(idx);
+      BookmarkNode <span class="operator">*</span>node <span class="operator">=</span> <span class="keyword">new</span> BookmarkNode(BookmarkNode<span class="operator">::</span>Folder);
+      node<span class="operator">-</span><span class="operator">&gt;</span>title <span class="operator">=</span> tr(<span class="string">&quot;New Folder&quot;</span>);
+      m_bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>addBookmark(parent<span class="operator">,</span> node<span class="operator">,</span> currentIndex<span class="operator">.</span>row() <span class="operator">+</span> <span class="number">1</span>);
+  }
+
+  BookmarksToolBar<span class="operator">::</span>BookmarksToolBar(BookmarksModel <span class="operator">*</span>model<span class="operator">,</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtwidgets/qtoolbar.html">QToolBar</a></span>(tr(<span class="string">&quot;Bookmark&quot;</span>)<span class="operator">,</span> parent)
+      <span class="operator">,</span> m_bookmarksModel(model)
+  {
+      connect(<span class="keyword">this</span><span class="operator">,</span> SIGNAL(actionTriggered(<span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">*</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(triggered(<span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">*</span>)));
+      setRootIndex(model<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span>));
+      connect(m_bookmarksModel<span class="operator">,</span> SIGNAL(modelReset())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(build()));
+      connect(m_bookmarksModel<span class="operator">,</span> SIGNAL(rowsInserted(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(build()));
+      connect(m_bookmarksModel<span class="operator">,</span> SIGNAL(rowsRemoved(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(build()));
+      connect(m_bookmarksModel<span class="operator">,</span> SIGNAL(dataChanged(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(build()));
+      setAcceptDrops(<span class="keyword">true</span>);
+  }
+
+  <span class="type">void</span> BookmarksToolBar<span class="operator">::</span>dragEnterEvent(<span class="type"><a href="../qtgui/qdragenterevent.html">QDragEnterEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span> <span class="operator">*</span>mimeData <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>mimeData();
+      <span class="keyword">if</span> (mimeData<span class="operator">-</span><span class="operator">&gt;</span>hasUrls())
+          event<span class="operator">-</span><span class="operator">&gt;</span>acceptProposedAction();
+      <span class="type"><a href="../qtwidgets/qtoolbar.html">QToolBar</a></span><span class="operator">::</span>dragEnterEvent(event);
+  }
+
+  <span class="type">void</span> BookmarksToolBar<span class="operator">::</span>dropEvent(<span class="type"><a href="../qtgui/qdropevent.html">QDropEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmimedata.html">QMimeData</a></span> <span class="operator">*</span>mimeData <span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>mimeData();
+      <span class="keyword">if</span> (mimeData<span class="operator">-</span><span class="operator">&gt;</span>hasUrls() <span class="operator">&amp;</span><span class="operator">&amp;</span> mimeData<span class="operator">-</span><span class="operator">&gt;</span>hasText()) {
+          <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">&gt;</span> urls <span class="operator">=</span> mimeData<span class="operator">-</span><span class="operator">&gt;</span>urls();
+          <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>action <span class="operator">=</span> actionAt(event<span class="operator">-</span><span class="operator">&gt;</span>pos());
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> dropText;
+          <span class="keyword">if</span> (action)
+              dropText <span class="operator">=</span> action<span class="operator">-</span><span class="operator">&gt;</span>text();
+          <span class="type">int</span> row <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>;
+          <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> parentIndex <span class="operator">=</span> m_root;
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_bookmarksModel<span class="operator">-</span><span class="operator">&gt;</span>rowCount(m_root); <span class="operator">+</span><span class="operator">+</span>i) {
+              <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> idx <span class="operator">=</span> m_bookmarksModel<span class="operator">-</span><span class="operator">&gt;</span>index(i<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> m_root);
+              <span class="type"><a href="../qtcore/qstring.html">QString</a></span> title <span class="operator">=</span> idx<span class="operator">.</span>data()<span class="operator">.</span>toString();
+              <span class="keyword">if</span> (title <span class="operator">=</span><span class="operator">=</span> dropText) {
+                  row <span class="operator">=</span> i;
+                  <span class="keyword">if</span> (m_bookmarksModel<span class="operator">-</span><span class="operator">&gt;</span>hasChildren(idx)) {
+                      parentIndex <span class="operator">=</span> idx;
+                      row <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>;
+                  }
+                  <span class="keyword">break</span>;
+              }
+          }
+          BookmarkNode <span class="operator">*</span>bookmark <span class="operator">=</span> <span class="keyword">new</span> BookmarkNode(BookmarkNode<span class="operator">::</span>Bookmark);
+          bookmark<span class="operator">-</span><span class="operator">&gt;</span>url <span class="operator">=</span> urls<span class="operator">.</span>at(<span class="number">0</span>)<span class="operator">.</span>toString();
+          bookmark<span class="operator">-</span><span class="operator">&gt;</span>title <span class="operator">=</span> mimeData<span class="operator">-</span><span class="operator">&gt;</span>text();
+
+          BookmarkNode <span class="operator">*</span>parent <span class="operator">=</span> m_bookmarksModel<span class="operator">-</span><span class="operator">&gt;</span>node(parentIndex);
+          BookmarksManager <span class="operator">*</span>bookmarksManager <span class="operator">=</span> m_bookmarksModel<span class="operator">-</span><span class="operator">&gt;</span>bookmarksManager();
+          bookmarksManager<span class="operator">-</span><span class="operator">&gt;</span>addBookmark(parent<span class="operator">,</span> bookmark<span class="operator">,</span> row);
+          event<span class="operator">-</span><span class="operator">&gt;</span>acceptProposedAction();
+      }
+      <span class="type"><a href="../qtwidgets/qtoolbar.html">QToolBar</a></span><span class="operator">::</span>dropEvent(event);
+  }
+
+  <span class="type">void</span> BookmarksToolBar<span class="operator">::</span>setRootIndex(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index)
+  {
+      m_root <span class="operator">=</span> index;
+      build();
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> BookmarksToolBar<span class="operator">::</span>rootIndex() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_root;
+  }
+
+  <span class="type">void</span> BookmarksToolBar<span class="operator">::</span>build()
+  {
+      clear();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_bookmarksModel<span class="operator">-</span><span class="operator">&gt;</span>rowCount(m_root); <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> idx <span class="operator">=</span> m_bookmarksModel<span class="operator">-</span><span class="operator">&gt;</span>index(i<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> m_root);
+          <span class="keyword">if</span> (m_bookmarksModel<span class="operator">-</span><span class="operator">&gt;</span>hasChildren(idx)) {
+              <span class="type"><a href="../qtwidgets/qtoolbutton.html">QToolButton</a></span> <span class="operator">*</span>button <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtoolbutton.html">QToolButton</a></span>(<span class="keyword">this</span>);
+              button<span class="operator">-</span><span class="operator">&gt;</span>setPopupMode(<span class="type"><a href="../qtwidgets/qtoolbutton.html">QToolButton</a></span><span class="operator">::</span>InstantPopup);
+              button<span class="operator">-</span><span class="operator">&gt;</span>setArrowType(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DownArrow);
+              button<span class="operator">-</span><span class="operator">&gt;</span>setText(idx<span class="operator">.</span>data()<span class="operator">.</span>toString());
+              ModelMenu <span class="operator">*</span>menu <span class="operator">=</span> <span class="keyword">new</span> ModelMenu(<span class="keyword">this</span>);
+              connect(menu<span class="operator">,</span> SIGNAL(activated(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>))<span class="operator">,</span>
+                      <span class="keyword">this</span><span class="operator">,</span> SLOT(activated(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>)));
+              menu<span class="operator">-</span><span class="operator">&gt;</span>setModel(m_bookmarksModel);
+              menu<span class="operator">-</span><span class="operator">&gt;</span>setRootIndex(idx);
+              menu<span class="operator">-</span><span class="operator">&gt;</span>addAction(<span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span>(menu));
+              button<span class="operator">-</span><span class="operator">&gt;</span>setMenu(menu);
+              button<span class="operator">-</span><span class="operator">&gt;</span>setToolButtonStyle(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ToolButtonTextOnly);
+              <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>a <span class="operator">=</span> addWidget(button);
+              a<span class="operator">-</span><span class="operator">&gt;</span>setText(idx<span class="operator">.</span>data()<span class="operator">.</span>toString());
+          } <span class="keyword">else</span> {
+              <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>action <span class="operator">=</span> addAction(idx<span class="operator">.</span>data()<span class="operator">.</span>toString());
+              action<span class="operator">-</span><span class="operator">&gt;</span>setData(idx<span class="operator">.</span>data(BookmarksModel<span class="operator">::</span>UrlRole));
+          }
+      }
+  }
+
+  <span class="type">void</span> BookmarksToolBar<span class="operator">::</span>triggered(<span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>action)
+  {
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> v <span class="operator">=</span> action<span class="operator">-</span><span class="operator">&gt;</span>data();
+      <span class="keyword">if</span> (v<span class="operator">.</span>canConvert<span class="operator">&lt;</span><span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">&gt;</span>()) {
+          <span class="keyword">emit</span> openUrl(v<span class="operator">.</span>toUrl());
+      }
+  }
+
+  <span class="type">void</span> BookmarksToolBar<span class="operator">::</span>activated(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index)
+  {
+      <span class="keyword">emit</span> openUrl(index<span class="operator">.</span>data(BookmarksModel<span class="operator">::</span>UrlRole)<span class="operator">.</span>toUrl());
+  }
+
+</pre>
+</div>
+<!-- @@@webenginewidgets/demobrowser/bookmarks.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

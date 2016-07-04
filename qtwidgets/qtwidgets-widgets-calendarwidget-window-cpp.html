@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>window.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-widgets-calendarwidget-example.html">Calendar Widget Example</a></td><td >window.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">window.cpp Example File</h1>
+<span class="subtitle">widgets/calendarwidget/window.cpp</span>
+<!-- $$$widgets/calendarwidget/window.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+
+  <span class="preprocessor">#include &quot;window.h&quot;</span>
+
+  Window<span class="operator">::</span>Window()
+  {
+      createPreviewGroupBox();
+      createGeneralOptionsGroupBox();
+      createDatesGroupBox();
+      createTextFormatsGroupBox();
+
+      <span class="type"><a href="qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(previewGroupBox<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(generalOptionsGroupBox<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(datesGroupBox<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(textFormatsGroupBox<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>setSizeConstraint(<span class="type"><a href="qlayout.html">QLayout</a></span><span class="operator">::</span>SetFixedSize);
+      setLayout(layout);
+
+      previewLayout<span class="operator">-</span><span class="operator">&gt;</span>setRowMinimumHeight(<span class="number">0</span><span class="operator">,</span> calendar<span class="operator">-</span><span class="operator">&gt;</span>sizeHint()<span class="operator">.</span>height());
+      previewLayout<span class="operator">-</span><span class="operator">&gt;</span>setColumnMinimumWidth(<span class="number">0</span><span class="operator">,</span> calendar<span class="operator">-</span><span class="operator">&gt;</span>sizeHint()<span class="operator">.</span>width());
+
+      setWindowTitle(tr(<span class="string">&quot;Calendar Widget&quot;</span>));
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>localeChanged(<span class="type">int</span> index)
+  {
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span> newLocale(localeCombo<span class="operator">-</span><span class="operator">&gt;</span>itemData(index)<span class="operator">.</span>toLocale());
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setLocale(newLocale);
+      <span class="type">int</span> newLocaleFirstDayIndex <span class="operator">=</span> firstDayCombo<span class="operator">-</span><span class="operator">&gt;</span>findData(newLocale<span class="operator">.</span>firstDayOfWeek());
+      firstDayCombo<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(newLocaleFirstDayIndex);
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>firstDayChanged(<span class="type">int</span> index)
+  {
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setFirstDayOfWeek(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DayOfWeek(
+                                  firstDayCombo<span class="operator">-</span><span class="operator">&gt;</span>itemData(index)<span class="operator">.</span>toInt()));
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>selectionModeChanged(<span class="type">int</span> index)
+  {
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setSelectionMode(<span class="type"><a href="qcalendarwidget.html">QCalendarWidget</a></span><span class="operator">::</span>SelectionMode(
+                                 selectionModeCombo<span class="operator">-</span><span class="operator">&gt;</span>itemData(index)<span class="operator">.</span>toInt()));
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>horizontalHeaderChanged(<span class="type">int</span> index)
+  {
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setHorizontalHeaderFormat(<span class="type"><a href="qcalendarwidget.html">QCalendarWidget</a></span><span class="operator">::</span>HorizontalHeaderFormat(
+          horizontalHeaderCombo<span class="operator">-</span><span class="operator">&gt;</span>itemData(index)<span class="operator">.</span>toInt()));
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>verticalHeaderChanged(<span class="type">int</span> index)
+  {
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setVerticalHeaderFormat(<span class="type"><a href="qcalendarwidget.html">QCalendarWidget</a></span><span class="operator">::</span>VerticalHeaderFormat(
+          verticalHeaderCombo<span class="operator">-</span><span class="operator">&gt;</span>itemData(index)<span class="operator">.</span>toInt()));
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>selectedDateChanged()
+  {
+      currentDateEdit<span class="operator">-</span><span class="operator">&gt;</span>setDate(calendar<span class="operator">-</span><span class="operator">&gt;</span>selectedDate());
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>minimumDateChanged(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qdate.html">QDate</a></span> <span class="operator">&amp;</span>date)
+  {
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setMinimumDate(date);
+      maximumDateEdit<span class="operator">-</span><span class="operator">&gt;</span>setDate(calendar<span class="operator">-</span><span class="operator">&gt;</span>maximumDate());
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>maximumDateChanged(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qdate.html">QDate</a></span> <span class="operator">&amp;</span>date)
+  {
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setMaximumDate(date);
+      minimumDateEdit<span class="operator">-</span><span class="operator">&gt;</span>setDate(calendar<span class="operator">-</span><span class="operator">&gt;</span>minimumDate());
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>weekdayFormatChanged()
+  {
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> format;
+
+      format<span class="operator">.</span>setForeground(qvariant_cast<span class="operator">&lt;</span><span class="type"><a href="../qtgui/qcolor.html">QColor</a></span><span class="operator">&gt;</span>(
+          weekdayColorCombo<span class="operator">-</span><span class="operator">&gt;</span>itemData(weekdayColorCombo<span class="operator">-</span><span class="operator">&gt;</span>currentIndex())));
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setWeekdayTextFormat(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Monday<span class="operator">,</span> format);
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setWeekdayTextFormat(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Tuesday<span class="operator">,</span> format);
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setWeekdayTextFormat(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Wednesday<span class="operator">,</span> format);
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setWeekdayTextFormat(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Thursday<span class="operator">,</span> format);
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setWeekdayTextFormat(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Friday<span class="operator">,</span> format);
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>weekendFormatChanged()
+  {
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> format;
+
+      format<span class="operator">.</span>setForeground(qvariant_cast<span class="operator">&lt;</span><span class="type"><a href="../qtgui/qcolor.html">QColor</a></span><span class="operator">&gt;</span>(
+          weekendColorCombo<span class="operator">-</span><span class="operator">&gt;</span>itemData(weekendColorCombo<span class="operator">-</span><span class="operator">&gt;</span>currentIndex())));
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setWeekdayTextFormat(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Saturday<span class="operator">,</span> format);
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setWeekdayTextFormat(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Sunday<span class="operator">,</span> format);
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>reformatHeaders()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> text <span class="operator">=</span> headerTextFormatCombo<span class="operator">-</span><span class="operator">&gt;</span>currentText();
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> format;
+
+      <span class="keyword">if</span> (text <span class="operator">=</span><span class="operator">=</span> tr(<span class="string">&quot;Bold&quot;</span>)) {
+          format<span class="operator">.</span>setFontWeight(<span class="type"><a href="../qtgui/qfont.html">QFont</a></span><span class="operator">::</span>Bold);
+      } <span class="keyword">else</span> <span class="keyword">if</span> (text <span class="operator">=</span><span class="operator">=</span> tr(<span class="string">&quot;Italic&quot;</span>)) {
+          format<span class="operator">.</span>setFontItalic(<span class="keyword">true</span>);
+      } <span class="keyword">else</span> <span class="keyword">if</span> (text <span class="operator">=</span><span class="operator">=</span> tr(<span class="string">&quot;Green&quot;</span>)) {
+          format<span class="operator">.</span>setForeground(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>green);
+      }
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setHeaderTextFormat(format);
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>reformatCalendarPage()
+  {
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> mayFirstFormat;
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qdate.html">QDate</a></span> mayFirst(calendar<span class="operator">-</span><span class="operator">&gt;</span>yearShown()<span class="operator">,</span> <span class="number">5</span><span class="operator">,</span> <span class="number">1</span>);
+
+      <span class="type"><a href="../qtgui/qtextcharformat.html">QTextCharFormat</a></span> firstFridayFormat;
+      <span class="type"><a href="../qtcore/qdate.html">QDate</a></span> firstFriday(calendar<span class="operator">-</span><span class="operator">&gt;</span>yearShown()<span class="operator">,</span> calendar<span class="operator">-</span><span class="operator">&gt;</span>monthShown()<span class="operator">,</span> <span class="number">1</span>);
+      <span class="keyword">while</span> (firstFriday<span class="operator">.</span>dayOfWeek() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Friday)
+          firstFriday <span class="operator">=</span> firstFriday<span class="operator">.</span>addDays(<span class="number">1</span>);
+
+      <span class="keyword">if</span> (firstFridayCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked()) {
+          firstFridayFormat<span class="operator">.</span>setForeground(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>blue);
+      } <span class="keyword">else</span> { <span class="comment">// Revert to regular colour for this day of the week.</span>
+          <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DayOfWeek dayOfWeek(<span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DayOfWeek<span class="operator">&gt;</span>(firstFriday<span class="operator">.</span>dayOfWeek()));
+          firstFridayFormat<span class="operator">.</span>setForeground(calendar<span class="operator">-</span><span class="operator">&gt;</span>weekdayTextFormat(dayOfWeek)<span class="operator">.</span>foreground());
+      }
+
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setDateTextFormat(firstFriday<span class="operator">,</span> firstFridayFormat);
+
+      <span class="comment">// When it is checked, &quot;May First in Red&quot; always takes precedence over &quot;First Friday in Blue&quot;.</span>
+      <span class="keyword">if</span> (mayFirstCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked()) {
+          mayFirstFormat<span class="operator">.</span>setForeground(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>red);
+      } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="operator">!</span>firstFridayCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked() <span class="operator">|</span><span class="operator">|</span> firstFriday <span class="operator">!</span><span class="operator">=</span> mayFirst) {
+          <span class="comment">// We can now be certain we won't be resetting &quot;May First in Red&quot; when we restore</span>
+          <span class="comment">// may 1st's regular colour for this day of the week.</span>
+          <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DayOfWeek dayOfWeek(<span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DayOfWeek<span class="operator">&gt;</span>(mayFirst<span class="operator">.</span>dayOfWeek()));
+          calendar<span class="operator">-</span><span class="operator">&gt;</span>setDateTextFormat(mayFirst<span class="operator">,</span> calendar<span class="operator">-</span><span class="operator">&gt;</span>weekdayTextFormat(dayOfWeek));
+      }
+
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setDateTextFormat(mayFirst<span class="operator">,</span> mayFirstFormat);
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>createPreviewGroupBox()
+  {
+      previewGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Preview&quot;</span>));
+
+      calendar <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcalendarwidget.html">QCalendarWidget</a></span>;
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setMinimumDate(<span class="type"><a href="../qtcore/qdate.html">QDate</a></span>(<span class="number">1900</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>));
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setMaximumDate(<span class="type"><a href="../qtcore/qdate.html">QDate</a></span>(<span class="number">3000</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>));
+      calendar<span class="operator">-</span><span class="operator">&gt;</span>setGridVisible(<span class="keyword">true</span>);
+
+      connect(calendar<span class="operator">,</span> SIGNAL(currentPageChanged(<span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(reformatCalendarPage()));
+
+      previewLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+      previewLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(calendar<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignCenter);
+      previewGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(previewLayout);
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>createGeneralOptionsGroupBox()
+  {
+      generalOptionsGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;General Options&quot;</span>));
+
+      localeCombo <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcombobox.html">QComboBox</a></span>;
+      <span class="type">int</span> curLocaleIndex <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>;
+      <span class="type">int</span> index <span class="operator">=</span> <span class="number">0</span>;
+      <span class="keyword">for</span> (<span class="type">int</span> _lang <span class="operator">=</span> <span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span><span class="operator">::</span>C; _lang <span class="operator">&lt;</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span><span class="operator">::</span>LastLanguage; <span class="operator">+</span><span class="operator">+</span>_lang) {
+          <span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span><span class="operator">::</span>Language lang <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span><span class="operator">::</span>Language<span class="operator">&gt;</span>(_lang);
+          <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span><span class="operator">::</span>Country<span class="operator">&gt;</span> countries <span class="operator">=</span> <span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span><span class="operator">::</span>countriesForLanguage(lang);
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> countries<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>i) {
+              <span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span><span class="operator">::</span>Country country <span class="operator">=</span> countries<span class="operator">.</span>at(i);
+              <span class="type"><a href="../qtcore/qstring.html">QString</a></span> label <span class="operator">=</span> <span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span><span class="operator">::</span>languageToString(lang);
+              label <span class="operator">+</span><span class="operator">=</span> QLatin1Char(<span class="char">'/'</span>);
+              label <span class="operator">+</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span><span class="operator">::</span>countryToString(country);
+              <span class="type"><a href="../qtcore/qlocale.html">QLocale</a></span> locale(lang<span class="operator">,</span> country);
+              <span class="keyword">if</span> (<span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>locale()<span class="operator">.</span>language() <span class="operator">=</span><span class="operator">=</span> lang <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="keyword">this</span><span class="operator">-</span><span class="operator">&gt;</span>locale()<span class="operator">.</span>country() <span class="operator">=</span><span class="operator">=</span> country)
+                  curLocaleIndex <span class="operator">=</span> index;
+              localeCombo<span class="operator">-</span><span class="operator">&gt;</span>addItem(label<span class="operator">,</span> locale);
+              <span class="operator">+</span><span class="operator">+</span>index;
+          }
+      }
+      <span class="keyword">if</span> (curLocaleIndex <span class="operator">!</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+          localeCombo<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(curLocaleIndex);
+      localeLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;&amp;Locale&quot;</span>));
+      localeLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(localeCombo);
+
+      firstDayCombo <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcombobox.html">QComboBox</a></span>;
+      firstDayCombo<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Sunday&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Sunday);
+      firstDayCombo<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Monday&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Monday);
+      firstDayCombo<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Tuesday&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Tuesday);
+      firstDayCombo<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Wednesday&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Wednesday);
+      firstDayCombo<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Thursday&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Thursday);
+      firstDayCombo<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Friday&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Friday);
+      firstDayCombo<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Saturday&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Saturday);
+
+      firstDayLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Wee&amp;k starts on:&quot;</span>));
+      firstDayLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(firstDayCombo);
+
+      selectionModeCombo <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcombobox.html">QComboBox</a></span>;
+      selectionModeCombo<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Single selection&quot;</span>)<span class="operator">,</span>
+                                  <span class="type"><a href="qcalendarwidget.html">QCalendarWidget</a></span><span class="operator">::</span>SingleSelection);
+      selectionModeCombo<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;None&quot;</span>)<span class="operator">,</span> <span class="type"><a href="qcalendarwidget.html">QCalendarWidget</a></span><span class="operator">::</span>NoSelection);
+
+      selectionModeLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;&amp;Selection mode:&quot;</span>));
+      selectionModeLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(selectionModeCombo);
+
+      gridCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;&amp;Grid&quot;</span>));
+      gridCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(calendar<span class="operator">-</span><span class="operator">&gt;</span>isGridVisible());
+
+      navigationCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;&amp;Navigation bar&quot;</span>));
+      navigationCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+      horizontalHeaderCombo <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcombobox.html">QComboBox</a></span>;
+      horizontalHeaderCombo<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Single letter day names&quot;</span>)<span class="operator">,</span>
+                                     <span class="type"><a href="qcalendarwidget.html">QCalendarWidget</a></span><span class="operator">::</span>SingleLetterDayNames);
+      horizontalHeaderCombo<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Short day names&quot;</span>)<span class="operator">,</span>
+                                     <span class="type"><a href="qcalendarwidget.html">QCalendarWidget</a></span><span class="operator">::</span>ShortDayNames);
+      horizontalHeaderCombo<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;None&quot;</span>)<span class="operator">,</span>
+                                     <span class="type"><a href="qcalendarwidget.html">QCalendarWidget</a></span><span class="operator">::</span>NoHorizontalHeader);
+      horizontalHeaderCombo<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(<span class="number">1</span>);
+
+      horizontalHeaderLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;&amp;Horizontal header:&quot;</span>));
+      horizontalHeaderLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(horizontalHeaderCombo);
+
+      verticalHeaderCombo <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcombobox.html">QComboBox</a></span>;
+      verticalHeaderCombo<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;ISO week numbers&quot;</span>)<span class="operator">,</span>
+                                   <span class="type"><a href="qcalendarwidget.html">QCalendarWidget</a></span><span class="operator">::</span>ISOWeekNumbers);
+      verticalHeaderCombo<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;None&quot;</span>)<span class="operator">,</span> <span class="type"><a href="qcalendarwidget.html">QCalendarWidget</a></span><span class="operator">::</span>NoVerticalHeader);
+
+      verticalHeaderLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;&amp;Vertical header:&quot;</span>));
+      verticalHeaderLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(verticalHeaderCombo);
+
+      connect(localeCombo<span class="operator">,</span> SIGNAL(currentIndexChanged(<span class="type">int</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(localeChanged(<span class="type">int</span>)));
+      connect(firstDayCombo<span class="operator">,</span> SIGNAL(currentIndexChanged(<span class="type">int</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(firstDayChanged(<span class="type">int</span>)));
+      connect(selectionModeCombo<span class="operator">,</span> SIGNAL(currentIndexChanged(<span class="type">int</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(selectionModeChanged(<span class="type">int</span>)));
+      connect(gridCheckBox<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span>
+              calendar<span class="operator">,</span> SLOT(setGridVisible(bool)));
+      connect(navigationCheckBox<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span>
+              calendar<span class="operator">,</span> SLOT(setNavigationBarVisible(bool)));
+      connect(horizontalHeaderCombo<span class="operator">,</span> SIGNAL(currentIndexChanged(<span class="type">int</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(horizontalHeaderChanged(<span class="type">int</span>)));
+      connect(verticalHeaderCombo<span class="operator">,</span> SIGNAL(currentIndexChanged(<span class="type">int</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(verticalHeaderChanged(<span class="type">int</span>)));
+
+      <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>checkBoxLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span>;
+      checkBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(gridCheckBox);
+      checkBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addStretch();
+      checkBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(navigationCheckBox);
+
+      <span class="type"><a href="qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>outerLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+      outerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(localeLabel<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      outerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(localeCombo<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+      outerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(firstDayLabel<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+      outerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(firstDayCombo<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+      outerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(selectionModeLabel<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">0</span>);
+      outerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(selectionModeCombo<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">1</span>);
+      outerLayout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(checkBoxLayout<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span>);
+      outerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(horizontalHeaderLabel<span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> <span class="number">0</span>);
+      outerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(horizontalHeaderCombo<span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> <span class="number">1</span>);
+      outerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(verticalHeaderLabel<span class="operator">,</span> <span class="number">5</span><span class="operator">,</span> <span class="number">0</span>);
+      outerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(verticalHeaderCombo<span class="operator">,</span> <span class="number">5</span><span class="operator">,</span> <span class="number">1</span>);
+      generalOptionsGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(outerLayout);
+
+      firstDayChanged(firstDayCombo<span class="operator">-</span><span class="operator">&gt;</span>currentIndex());
+      selectionModeChanged(selectionModeCombo<span class="operator">-</span><span class="operator">&gt;</span>currentIndex());
+      horizontalHeaderChanged(horizontalHeaderCombo<span class="operator">-</span><span class="operator">&gt;</span>currentIndex());
+      verticalHeaderChanged(verticalHeaderCombo<span class="operator">-</span><span class="operator">&gt;</span>currentIndex());
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>createDatesGroupBox()
+  {
+      datesGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Dates&quot;</span>));
+
+      minimumDateEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qdateedit.html">QDateEdit</a></span>;
+      minimumDateEdit<span class="operator">-</span><span class="operator">&gt;</span>setDisplayFormat(<span class="string">&quot;MMM d yyyy&quot;</span>);
+      minimumDateEdit<span class="operator">-</span><span class="operator">&gt;</span>setDateRange(calendar<span class="operator">-</span><span class="operator">&gt;</span>minimumDate()<span class="operator">,</span>
+                                    calendar<span class="operator">-</span><span class="operator">&gt;</span>maximumDate());
+      minimumDateEdit<span class="operator">-</span><span class="operator">&gt;</span>setDate(calendar<span class="operator">-</span><span class="operator">&gt;</span>minimumDate());
+
+      minimumDateLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;&amp;Minimum Date:&quot;</span>));
+      minimumDateLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(minimumDateEdit);
+
+      currentDateEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qdateedit.html">QDateEdit</a></span>;
+      currentDateEdit<span class="operator">-</span><span class="operator">&gt;</span>setDisplayFormat(<span class="string">&quot;MMM d yyyy&quot;</span>);
+      currentDateEdit<span class="operator">-</span><span class="operator">&gt;</span>setDate(calendar<span class="operator">-</span><span class="operator">&gt;</span>selectedDate());
+      currentDateEdit<span class="operator">-</span><span class="operator">&gt;</span>setDateRange(calendar<span class="operator">-</span><span class="operator">&gt;</span>minimumDate()<span class="operator">,</span>
+                                    calendar<span class="operator">-</span><span class="operator">&gt;</span>maximumDate());
+
+      currentDateLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;&amp;Current Date:&quot;</span>));
+      currentDateLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(currentDateEdit);
+
+      maximumDateEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qdateedit.html">QDateEdit</a></span>;
+      maximumDateEdit<span class="operator">-</span><span class="operator">&gt;</span>setDisplayFormat(<span class="string">&quot;MMM d yyyy&quot;</span>);
+      maximumDateEdit<span class="operator">-</span><span class="operator">&gt;</span>setDateRange(calendar<span class="operator">-</span><span class="operator">&gt;</span>minimumDate()<span class="operator">,</span>
+                                    calendar<span class="operator">-</span><span class="operator">&gt;</span>maximumDate());
+      maximumDateEdit<span class="operator">-</span><span class="operator">&gt;</span>setDate(calendar<span class="operator">-</span><span class="operator">&gt;</span>maximumDate());
+
+      maximumDateLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Ma&amp;ximum Date:&quot;</span>));
+      maximumDateLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(maximumDateEdit);
+
+      connect(currentDateEdit<span class="operator">,</span> SIGNAL(dateChanged(<span class="type"><a href="../qtcore/qdate.html">QDate</a></span>))<span class="operator">,</span>
+              calendar<span class="operator">,</span> SLOT(setSelectedDate(<span class="type"><a href="../qtcore/qdate.html">QDate</a></span>)));
+      connect(calendar<span class="operator">,</span> SIGNAL(selectionChanged())<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(selectedDateChanged()));
+      connect(minimumDateEdit<span class="operator">,</span> SIGNAL(dateChanged(<span class="type"><a href="../qtcore/qdate.html">QDate</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(minimumDateChanged(<span class="type"><a href="../qtcore/qdate.html">QDate</a></span>)));
+      connect(maximumDateEdit<span class="operator">,</span> SIGNAL(dateChanged(<span class="type"><a href="../qtcore/qdate.html">QDate</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(maximumDateChanged(<span class="type"><a href="../qtcore/qdate.html">QDate</a></span>)));
+
+      <span class="type"><a href="qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>dateBoxLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+      dateBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(currentDateLabel<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+      dateBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(currentDateEdit<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+      dateBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(minimumDateLabel<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      dateBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(minimumDateEdit<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+      dateBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(maximumDateLabel<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">0</span>);
+      dateBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(maximumDateEdit<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">1</span>);
+      dateBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>setRowStretch(<span class="number">3</span><span class="operator">,</span> <span class="number">1</span>);
+
+      datesGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(dateBoxLayout);
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>createTextFormatsGroupBox()
+  {
+      textFormatsGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Text Formats&quot;</span>));
+
+      weekdayColorCombo <span class="operator">=</span> createColorComboBox();
+      weekdayColorCombo<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(
+              weekdayColorCombo<span class="operator">-</span><span class="operator">&gt;</span>findText(tr(<span class="string">&quot;Black&quot;</span>)));
+
+      weekdayColorLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;&amp;Weekday color:&quot;</span>));
+      weekdayColorLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(weekdayColorCombo);
+
+      weekendColorCombo <span class="operator">=</span> createColorComboBox();
+      weekendColorCombo<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(
+              weekendColorCombo<span class="operator">-</span><span class="operator">&gt;</span>findText(tr(<span class="string">&quot;Red&quot;</span>)));
+
+      weekendColorLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Week&amp;end color:&quot;</span>));
+      weekendColorLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(weekendColorCombo);
+
+      headerTextFormatCombo <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcombobox.html">QComboBox</a></span>;
+      headerTextFormatCombo<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Bold&quot;</span>));
+      headerTextFormatCombo<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Italic&quot;</span>));
+      headerTextFormatCombo<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Plain&quot;</span>));
+
+      headerTextFormatLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;&amp;Header text:&quot;</span>));
+      headerTextFormatLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(headerTextFormatCombo);
+
+      firstFridayCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;&amp;First Friday in blue&quot;</span>));
+
+      mayFirstCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;May &amp;1 in red&quot;</span>));
+
+      connect(weekdayColorCombo<span class="operator">,</span> SIGNAL(currentIndexChanged(<span class="type">int</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(weekdayFormatChanged()));
+      connect(weekdayColorCombo<span class="operator">,</span> SIGNAL(currentIndexChanged(<span class="type">int</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(reformatCalendarPage()));
+      connect(weekendColorCombo<span class="operator">,</span> SIGNAL(currentIndexChanged(<span class="type">int</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(weekendFormatChanged()));
+      connect(weekendColorCombo<span class="operator">,</span> SIGNAL(currentIndexChanged(<span class="type">int</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(reformatCalendarPage()));
+      connect(headerTextFormatCombo<span class="operator">,</span> SIGNAL(currentIndexChanged(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(reformatHeaders()));
+      connect(firstFridayCheckBox<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(reformatCalendarPage()));
+      connect(mayFirstCheckBox<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(reformatCalendarPage()));
+
+      <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>checkBoxLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span>;
+      checkBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(firstFridayCheckBox);
+      checkBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addStretch();
+      checkBoxLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(mayFirstCheckBox);
+
+      <span class="type"><a href="qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>outerLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+      outerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(weekdayColorLabel<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      outerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(weekdayColorCombo<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+      outerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(weekendColorLabel<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+      outerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(weekendColorCombo<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+      outerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(headerTextFormatLabel<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">0</span>);
+      outerLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(headerTextFormatCombo<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">1</span>);
+      outerLayout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(checkBoxLayout<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span>);
+      textFormatsGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(outerLayout);
+
+      weekdayFormatChanged();
+      weekendFormatChanged();
+      reformatHeaders();
+      reformatCalendarPage();
+  }
+
+  <span class="type"><a href="qcombobox.html">QComboBox</a></span> <span class="operator">*</span>Window<span class="operator">::</span>createColorComboBox()
+  {
+      <span class="type"><a href="qcombobox.html">QComboBox</a></span> <span class="operator">*</span>comboBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcombobox.html">QComboBox</a></span>;
+      comboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Red&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>red));
+      comboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Blue&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>blue));
+      comboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Black&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black));
+      comboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Magenta&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>magenta));
+      <span class="keyword">return</span> comboBox;
+  }
+
+</pre>
+</div>
+<!-- @@@widgets/calendarwidget/window.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

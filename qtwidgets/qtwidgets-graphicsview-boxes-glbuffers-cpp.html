@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>glbuffers.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-graphicsview-boxes-example.html">Boxes</a></td><td >glbuffers.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">glbuffers.cpp Example File</h1>
+<span class="subtitle">graphicsview/boxes/glbuffers.cpp</span>
+<!-- $$$graphicsview/boxes/glbuffers.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;glbuffers.h&quot;</span>
+  <span class="preprocessor">#include &lt;QtGui/qmatrix4x4.h&gt;</span>
+
+  <span class="type">void</span> qgluPerspective(GLdouble fovy<span class="operator">,</span> GLdouble aspect<span class="operator">,</span> GLdouble zNear<span class="operator">,</span> GLdouble zFar)
+  {
+      <span class="keyword">const</span> GLdouble ymax <span class="operator">=</span> zNear <span class="operator">*</span> tan(fovy <span class="operator">*</span> M_PI <span class="operator">/</span> <span class="number">360.0</span>);
+      <span class="keyword">const</span> GLdouble ymin <span class="operator">=</span> <span class="operator">-</span>ymax;
+      <span class="keyword">const</span> GLdouble xmin <span class="operator">=</span> ymin <span class="operator">*</span> aspect;
+      <span class="keyword">const</span> GLdouble xmax <span class="operator">=</span> ymax <span class="operator">*</span> aspect;
+      glFrustum(xmin<span class="operator">,</span> xmax<span class="operator">,</span> ymin<span class="operator">,</span> ymax<span class="operator">,</span> zNear<span class="operator">,</span> zFar);
+  }
+
+  <span class="comment">//============================================================================//</span>
+  <span class="comment">//                                  GLTexture                                 //</span>
+  <span class="comment">//============================================================================//</span>
+
+  GLTexture<span class="operator">::</span>GLTexture() : m_texture(<span class="number">0</span>)<span class="operator">,</span> m_failed(<span class="keyword">false</span>)
+  {
+      glGenTextures(<span class="number">1</span><span class="operator">,</span> <span class="operator">&amp;</span>m_texture);
+  }
+
+  GLTexture<span class="operator">::</span><span class="operator">~</span>GLTexture()
+  {
+      glDeleteTextures(<span class="number">1</span><span class="operator">,</span> <span class="operator">&amp;</span>m_texture);
+  }
+
+  <span class="comment">//============================================================================//</span>
+  <span class="comment">//                                 GLTexture2D                                //</span>
+  <span class="comment">//============================================================================//</span>
+
+  GLTexture2D<span class="operator">::</span>GLTexture2D(<span class="type">int</span> width<span class="operator">,</span> <span class="type">int</span> height)
+  {
+      glBindTexture(GL_TEXTURE_2D<span class="operator">,</span> m_texture);
+      glTexImage2D(GL_TEXTURE_2D<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> width<span class="operator">,</span> height<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span>
+          GL_BGRA<span class="operator">,</span> GL_UNSIGNED_BYTE<span class="operator">,</span> <span class="number">0</span>);
+
+      glTexParameteri(GL_TEXTURE_2D<span class="operator">,</span> GL_TEXTURE_WRAP_S<span class="operator">,</span> GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D<span class="operator">,</span> GL_TEXTURE_WRAP_T<span class="operator">,</span> GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D<span class="operator">,</span> GL_TEXTURE_MAG_FILTER<span class="operator">,</span> GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D<span class="operator">,</span> GL_TEXTURE_MIN_FILTER<span class="operator">,</span> GL_LINEAR);
+      <span class="comment">//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);</span>
+      <span class="comment">//glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);</span>
+      glBindTexture(GL_TEXTURE_2D<span class="operator">,</span> <span class="number">0</span>);
+  }
+
+  GLTexture2D<span class="operator">::</span>GLTexture2D(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">&amp;</span> fileName<span class="operator">,</span> <span class="type">int</span> width<span class="operator">,</span> <span class="type">int</span> height)
+  {
+      <span class="comment">// TODO: Add error handling.</span>
+      <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> image(fileName);
+
+      <span class="keyword">if</span> (image<span class="operator">.</span>isNull()) {
+          m_failed <span class="operator">=</span> <span class="keyword">true</span>;
+          <span class="keyword">return</span>;
+      }
+
+      image <span class="operator">=</span> image<span class="operator">.</span>convertToFormat(<span class="type"><a href="../qtgui/qimage.html">QImage</a></span><span class="operator">::</span>Format_ARGB32);
+
+      <span class="comment">//qDebug() &lt;&lt; &quot;Image size:&quot; &lt;&lt; image.width() &lt;&lt; &quot;x&quot; &lt;&lt; image.height();</span>
+      <span class="keyword">if</span> (width <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">0</span>)
+          width <span class="operator">=</span> image<span class="operator">.</span>width();
+      <span class="keyword">if</span> (height <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">0</span>)
+          height <span class="operator">=</span> image<span class="operator">.</span>height();
+      <span class="keyword">if</span> (width <span class="operator">!</span><span class="operator">=</span> image<span class="operator">.</span>width() <span class="operator">|</span><span class="operator">|</span> height <span class="operator">!</span><span class="operator">=</span> image<span class="operator">.</span>height())
+          image <span class="operator">=</span> image<span class="operator">.</span>scaled(width<span class="operator">,</span> height<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>IgnoreAspectRatio<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>SmoothTransformation);
+
+      glBindTexture(GL_TEXTURE_2D<span class="operator">,</span> m_texture);
+
+      <span class="comment">// Works on x86, so probably works on all little-endian systems.</span>
+      <span class="comment">// Does it work on big-endian systems?</span>
+      glTexImage2D(GL_TEXTURE_2D<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> image<span class="operator">.</span>width()<span class="operator">,</span> image<span class="operator">.</span>height()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span>
+          GL_BGRA<span class="operator">,</span> GL_UNSIGNED_BYTE<span class="operator">,</span> image<span class="operator">.</span>bits());
+
+      glTexParameteri(GL_TEXTURE_2D<span class="operator">,</span> GL_TEXTURE_WRAP_S<span class="operator">,</span> GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D<span class="operator">,</span> GL_TEXTURE_WRAP_T<span class="operator">,</span> GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D<span class="operator">,</span> GL_TEXTURE_MAG_FILTER<span class="operator">,</span> GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D<span class="operator">,</span> GL_TEXTURE_MIN_FILTER<span class="operator">,</span> GL_LINEAR);
+      <span class="comment">//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);</span>
+      <span class="comment">//glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);</span>
+      glBindTexture(GL_TEXTURE_2D<span class="operator">,</span> <span class="number">0</span>);
+  }
+
+  <span class="type">void</span> GLTexture2D<span class="operator">::</span>load(<span class="type">int</span> width<span class="operator">,</span> <span class="type">int</span> height<span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span> <span class="operator">*</span>data)
+  {
+      glBindTexture(GL_TEXTURE_2D<span class="operator">,</span> m_texture);
+      glTexImage2D(GL_TEXTURE_2D<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> width<span class="operator">,</span> height<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span>
+          GL_BGRA<span class="operator">,</span> GL_UNSIGNED_BYTE<span class="operator">,</span> data);
+      glBindTexture(GL_TEXTURE_2D<span class="operator">,</span> <span class="number">0</span>);
+  }
+
+  <span class="type">void</span> GLTexture2D<span class="operator">::</span>bind()
+  {
+      glBindTexture(GL_TEXTURE_2D<span class="operator">,</span> m_texture);
+      glEnable(GL_TEXTURE_2D);
+  }
+
+  <span class="type">void</span> GLTexture2D<span class="operator">::</span>unbind()
+  {
+      glBindTexture(GL_TEXTURE_2D<span class="operator">,</span> <span class="number">0</span>);
+      glDisable(GL_TEXTURE_2D);
+  }
+
+  <span class="comment">//============================================================================//</span>
+  <span class="comment">//                                 GLTexture3D                                //</span>
+  <span class="comment">//============================================================================//</span>
+
+  GLTexture3D<span class="operator">::</span>GLTexture3D(<span class="type">int</span> width<span class="operator">,</span> <span class="type">int</span> height<span class="operator">,</span> <span class="type">int</span> depth)
+  {
+      GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLTexture3D::GLTexture3D&quot;</span><span class="operator">,</span> glTexImage3D<span class="operator">,</span> <span class="keyword">return</span>)
+
+      glBindTexture(GL_TEXTURE_3D<span class="operator">,</span> m_texture);
+      glTexImage3D(GL_TEXTURE_3D<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> width<span class="operator">,</span> height<span class="operator">,</span> depth<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span>
+          GL_BGRA<span class="operator">,</span> GL_UNSIGNED_BYTE<span class="operator">,</span> <span class="number">0</span>);
+
+      glTexParameteri(GL_TEXTURE_3D<span class="operator">,</span> GL_TEXTURE_WRAP_S<span class="operator">,</span> GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_3D<span class="operator">,</span> GL_TEXTURE_WRAP_T<span class="operator">,</span> GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_3D<span class="operator">,</span> GL_TEXTURE_WRAP_R<span class="operator">,</span> GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_3D<span class="operator">,</span> GL_TEXTURE_MAG_FILTER<span class="operator">,</span> GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_3D<span class="operator">,</span> GL_TEXTURE_MIN_FILTER<span class="operator">,</span> GL_LINEAR);
+      <span class="comment">//glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);</span>
+      <span class="comment">//glTexParameteri(GL_TEXTURE_3D, GL_GENERATE_MIPMAP, GL_TRUE);</span>
+      glBindTexture(GL_TEXTURE_3D<span class="operator">,</span> <span class="number">0</span>);
+  }
+
+  <span class="type">void</span> GLTexture3D<span class="operator">::</span>load(<span class="type">int</span> width<span class="operator">,</span> <span class="type">int</span> height<span class="operator">,</span> <span class="type">int</span> depth<span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span> <span class="operator">*</span>data)
+  {
+      GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLTexture3D::load&quot;</span><span class="operator">,</span> glTexImage3D<span class="operator">,</span> <span class="keyword">return</span>)
+
+      glBindTexture(GL_TEXTURE_3D<span class="operator">,</span> m_texture);
+      glTexImage3D(GL_TEXTURE_3D<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> width<span class="operator">,</span> height<span class="operator">,</span> depth<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span>
+          GL_BGRA<span class="operator">,</span> GL_UNSIGNED_BYTE<span class="operator">,</span> data);
+      glBindTexture(GL_TEXTURE_3D<span class="operator">,</span> <span class="number">0</span>);
+  }
+
+  <span class="type">void</span> GLTexture3D<span class="operator">::</span>bind()
+  {
+      glBindTexture(GL_TEXTURE_3D<span class="operator">,</span> m_texture);
+      glEnable(GL_TEXTURE_3D);
+  }
+
+  <span class="type">void</span> GLTexture3D<span class="operator">::</span>unbind()
+  {
+      glBindTexture(GL_TEXTURE_3D<span class="operator">,</span> <span class="number">0</span>);
+      glDisable(GL_TEXTURE_3D);
+  }
+
+  <span class="comment">//============================================================================//</span>
+  <span class="comment">//                                GLTextureCube                               //</span>
+  <span class="comment">//============================================================================//</span>
+
+  GLTextureCube<span class="operator">::</span>GLTextureCube(<span class="type">int</span> size)
+  {
+      glBindTexture(GL_TEXTURE_CUBE_MAP<span class="operator">,</span> m_texture);
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> <span class="number">6</span>; <span class="operator">+</span><span class="operator">+</span>i)
+          glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X <span class="operator">+</span> i<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> size<span class="operator">,</span> size<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span>
+              GL_BGRA<span class="operator">,</span> GL_UNSIGNED_BYTE<span class="operator">,</span> <span class="number">0</span>);
+
+      glTexParameteri(GL_TEXTURE_CUBE_MAP<span class="operator">,</span> GL_TEXTURE_WRAP_S<span class="operator">,</span> GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_CUBE_MAP<span class="operator">,</span> GL_TEXTURE_WRAP_T<span class="operator">,</span> GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_CUBE_MAP<span class="operator">,</span> GL_TEXTURE_WRAP_R<span class="operator">,</span> GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_CUBE_MAP<span class="operator">,</span> GL_TEXTURE_MAG_FILTER<span class="operator">,</span> GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_CUBE_MAP<span class="operator">,</span> GL_TEXTURE_MIN_FILTER<span class="operator">,</span> GL_LINEAR);
+      <span class="comment">//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);</span>
+      <span class="comment">//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_GENERATE_MIPMAP, GL_TRUE);</span>
+      glBindTexture(GL_TEXTURE_CUBE_MAP<span class="operator">,</span> <span class="number">0</span>);
+  }
+
+  GLTextureCube<span class="operator">::</span>GLTextureCube(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span><span class="operator">&amp;</span> fileNames<span class="operator">,</span> <span class="type">int</span> size)
+  {
+      <span class="comment">// TODO: Add error handling.</span>
+
+      glBindTexture(GL_TEXTURE_CUBE_MAP<span class="operator">,</span> m_texture);
+
+      <span class="type">int</span> index <span class="operator">=</span> <span class="number">0</span>;
+      foreach (<span class="type"><a href="../qtcore/qstring.html">QString</a></span> file<span class="operator">,</span> fileNames) {
+          <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> image(file);
+          <span class="keyword">if</span> (image<span class="operator">.</span>isNull()) {
+              m_failed <span class="operator">=</span> <span class="keyword">true</span>;
+              <span class="keyword">break</span>;
+          }
+
+          image <span class="operator">=</span> image<span class="operator">.</span>convertToFormat(<span class="type"><a href="../qtgui/qimage.html">QImage</a></span><span class="operator">::</span>Format_ARGB32);
+
+          <span class="comment">//qDebug() &lt;&lt; &quot;Image size:&quot; &lt;&lt; image.width() &lt;&lt; &quot;x&quot; &lt;&lt; image.height();</span>
+          <span class="keyword">if</span> (size <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">0</span>)
+              size <span class="operator">=</span> image<span class="operator">.</span>width();
+          <span class="keyword">if</span> (size <span class="operator">!</span><span class="operator">=</span> image<span class="operator">.</span>width() <span class="operator">|</span><span class="operator">|</span> size <span class="operator">!</span><span class="operator">=</span> image<span class="operator">.</span>height())
+              image <span class="operator">=</span> image<span class="operator">.</span>scaled(size<span class="operator">,</span> size<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>IgnoreAspectRatio<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>SmoothTransformation);
+
+          <span class="comment">// Works on x86, so probably works on all little-endian systems.</span>
+          <span class="comment">// Does it work on big-endian systems?</span>
+          glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X <span class="operator">+</span> index<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> image<span class="operator">.</span>width()<span class="operator">,</span> image<span class="operator">.</span>height()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span>
+              GL_BGRA<span class="operator">,</span> GL_UNSIGNED_BYTE<span class="operator">,</span> image<span class="operator">.</span>bits());
+
+          <span class="keyword">if</span> (<span class="operator">+</span><span class="operator">+</span>index <span class="operator">=</span><span class="operator">=</span> <span class="number">6</span>)
+              <span class="keyword">break</span>;
+      }
+
+      <span class="comment">// Clear remaining faces.</span>
+      <span class="keyword">while</span> (index <span class="operator">&lt;</span> <span class="number">6</span>) {
+          glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X <span class="operator">+</span> index<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> size<span class="operator">,</span> size<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span>
+              GL_BGRA<span class="operator">,</span> GL_UNSIGNED_BYTE<span class="operator">,</span> <span class="number">0</span>);
+          <span class="operator">+</span><span class="operator">+</span>index;
+      }
+
+      glTexParameteri(GL_TEXTURE_CUBE_MAP<span class="operator">,</span> GL_TEXTURE_WRAP_S<span class="operator">,</span> GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_CUBE_MAP<span class="operator">,</span> GL_TEXTURE_WRAP_T<span class="operator">,</span> GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_CUBE_MAP<span class="operator">,</span> GL_TEXTURE_WRAP_R<span class="operator">,</span> GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_CUBE_MAP<span class="operator">,</span> GL_TEXTURE_MAG_FILTER<span class="operator">,</span> GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_CUBE_MAP<span class="operator">,</span> GL_TEXTURE_MIN_FILTER<span class="operator">,</span> GL_LINEAR);
+      <span class="comment">//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);</span>
+      <span class="comment">//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_GENERATE_MIPMAP, GL_TRUE);</span>
+      glBindTexture(GL_TEXTURE_CUBE_MAP<span class="operator">,</span> <span class="number">0</span>);
+  }
+
+  <span class="type">void</span> GLTextureCube<span class="operator">::</span>load(<span class="type">int</span> size<span class="operator">,</span> <span class="type">int</span> face<span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span> <span class="operator">*</span>data)
+  {
+      glBindTexture(GL_TEXTURE_CUBE_MAP<span class="operator">,</span> m_texture);
+          glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X <span class="operator">+</span> face<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> size<span class="operator">,</span> size<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span>
+              GL_BGRA<span class="operator">,</span> GL_UNSIGNED_BYTE<span class="operator">,</span> data);
+      glBindTexture(GL_TEXTURE_CUBE_MAP<span class="operator">,</span> <span class="number">0</span>);
+  }
+
+  <span class="type">void</span> GLTextureCube<span class="operator">::</span>bind()
+  {
+      glBindTexture(GL_TEXTURE_CUBE_MAP<span class="operator">,</span> m_texture);
+      glEnable(GL_TEXTURE_CUBE_MAP);
+  }
+
+  <span class="type">void</span> GLTextureCube<span class="operator">::</span>unbind()
+  {
+      glBindTexture(GL_TEXTURE_CUBE_MAP<span class="operator">,</span> <span class="number">0</span>);
+      glDisable(GL_TEXTURE_CUBE_MAP);
+  }
+
+  <span class="comment">//============================================================================//</span>
+  <span class="comment">//                            GLFrameBufferObject                             //</span>
+  <span class="comment">//============================================================================//</span>
+
+  GLFrameBufferObject<span class="operator">::</span>GLFrameBufferObject(<span class="type">int</span> width<span class="operator">,</span> <span class="type">int</span> height)
+      : m_fbo(<span class="number">0</span>)
+      <span class="operator">,</span> m_depthBuffer(<span class="number">0</span>)
+      <span class="operator">,</span> m_width(width)
+      <span class="operator">,</span> m_height(height)
+      <span class="operator">,</span> m_failed(<span class="keyword">false</span>)
+  {
+      GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLFrameBufferObject::GLFrameBufferObject&quot;</span><span class="operator">,</span>
+          glGenFramebuffersEXT <span class="operator">&amp;</span><span class="operator">&amp;</span> glGenRenderbuffersEXT <span class="operator">&amp;</span><span class="operator">&amp;</span> glBindRenderbufferEXT <span class="operator">&amp;</span><span class="operator">&amp;</span> glRenderbufferStorageEXT<span class="operator">,</span> <span class="keyword">return</span>)
+
+      <span class="comment">// TODO: share depth buffers of same size</span>
+      glGenFramebuffersEXT(<span class="number">1</span><span class="operator">,</span> <span class="operator">&amp;</span>m_fbo);
+      <span class="comment">//glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fbo);</span>
+      glGenRenderbuffersEXT(<span class="number">1</span><span class="operator">,</span> <span class="operator">&amp;</span>m_depthBuffer);
+      glBindRenderbufferEXT(GL_RENDERBUFFER_EXT<span class="operator">,</span> m_depthBuffer);
+      glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT<span class="operator">,</span> GL_DEPTH_COMPONENT<span class="operator">,</span> m_width<span class="operator">,</span> m_height);
+      <span class="comment">//glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, m_depthBuffer);</span>
+      <span class="comment">//glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);</span>
+  }
+
+  GLFrameBufferObject<span class="operator">::</span><span class="operator">~</span>GLFrameBufferObject()
+  {
+      GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLFrameBufferObject::~GLFrameBufferObject&quot;</span><span class="operator">,</span>
+          glDeleteFramebuffersEXT <span class="operator">&amp;</span><span class="operator">&amp;</span> glDeleteRenderbuffersEXT<span class="operator">,</span> <span class="keyword">return</span>)
+
+      glDeleteFramebuffersEXT(<span class="number">1</span><span class="operator">,</span> <span class="operator">&amp;</span>m_fbo);
+      glDeleteRenderbuffersEXT(<span class="number">1</span><span class="operator">,</span> <span class="operator">&amp;</span>m_depthBuffer);
+  }
+
+  <span class="type">void</span> GLFrameBufferObject<span class="operator">::</span>setAsRenderTarget(bool state)
+  {
+      GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLFrameBufferObject::setAsRenderTarget&quot;</span><span class="operator">,</span> glBindFramebufferEXT<span class="operator">,</span> <span class="keyword">return</span>)
+
+      <span class="keyword">if</span> (state) {
+          glBindFramebufferEXT(GL_FRAMEBUFFER_EXT<span class="operator">,</span> m_fbo);
+          glPushAttrib(GL_VIEWPORT_BIT);
+          glViewport(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> m_width<span class="operator">,</span> m_height);
+      } <span class="keyword">else</span> {
+          glPopAttrib();
+          glBindFramebufferEXT(GL_FRAMEBUFFER_EXT<span class="operator">,</span> <span class="number">0</span>);
+      }
+  }
+
+  bool GLFrameBufferObject<span class="operator">::</span>isComplete()
+  {
+      GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLFrameBufferObject::isComplete&quot;</span><span class="operator">,</span> glCheckFramebufferStatusEXT<span class="operator">,</span> <span class="keyword">return</span> <span class="keyword">false</span>)
+
+      <span class="keyword">return</span> GL_FRAMEBUFFER_COMPLETE_EXT <span class="operator">=</span><span class="operator">=</span> glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+  }
+
+  <span class="comment">//============================================================================//</span>
+  <span class="comment">//                             GLRenderTargetCube                             //</span>
+  <span class="comment">//============================================================================//</span>
+
+  GLRenderTargetCube<span class="operator">::</span>GLRenderTargetCube(<span class="type">int</span> size)
+      : GLTextureCube(size)
+      <span class="operator">,</span> m_fbo(size<span class="operator">,</span> size)
+  {
+  }
+
+  <span class="type">void</span> GLRenderTargetCube<span class="operator">::</span>begin(<span class="type">int</span> face)
+  {
+      GLBUFFERS_ASSERT_OPENGL(<span class="string">&quot;GLRenderTargetCube::begin&quot;</span><span class="operator">,</span>
+          glFramebufferTexture2DEXT <span class="operator">&amp;</span><span class="operator">&amp;</span> glFramebufferRenderbufferEXT<span class="operator">,</span> <span class="keyword">return</span>)
+
+      m_fbo<span class="operator">.</span>setAsRenderTarget(<span class="keyword">true</span>);
+      glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT<span class="operator">,</span> GL_COLOR_ATTACHMENT0_EXT<span class="operator">,</span>
+          GL_TEXTURE_CUBE_MAP_POSITIVE_X <span class="operator">+</span> face<span class="operator">,</span> m_texture<span class="operator">,</span> <span class="number">0</span>);
+      glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT<span class="operator">,</span> GL_DEPTH_ATTACHMENT_EXT<span class="operator">,</span> GL_RENDERBUFFER_EXT<span class="operator">,</span> m_fbo<span class="operator">.</span>m_depthBuffer);
+  }
+
+  <span class="type">void</span> GLRenderTargetCube<span class="operator">::</span>end()
+  {
+      m_fbo<span class="operator">.</span>setAsRenderTarget(<span class="keyword">false</span>);
+  }
+
+  <span class="type">void</span> GLRenderTargetCube<span class="operator">::</span>getViewMatrix(QMatrix4x4<span class="operator">&amp;</span> mat<span class="operator">,</span> <span class="type">int</span> face)
+  {
+      <span class="keyword">if</span> (face <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> face <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">6</span>) {
+          <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>(<span class="string">&quot;GLRenderTargetCube::getViewMatrix: 'face' must be in the range [0, 6). (face == %d)&quot;</span><span class="operator">,</span> face);
+          <span class="keyword">return</span>;
+      }
+
+      <span class="keyword">static</span> <span class="type">int</span> perm<span class="operator">[</span><span class="number">6</span><span class="operator">]</span><span class="operator">[</span><span class="number">3</span><span class="operator">]</span> <span class="operator">=</span> {
+          {<span class="number">2</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>}<span class="operator">,</span>
+          {<span class="number">2</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>}<span class="operator">,</span>
+          {<span class="number">0</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">1</span>}<span class="operator">,</span>
+          {<span class="number">0</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">1</span>}<span class="operator">,</span>
+          {<span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span>}<span class="operator">,</span>
+          {<span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span>}<span class="operator">,</span>
+      };
+
+      <span class="keyword">static</span> <span class="type">float</span> signs<span class="operator">[</span><span class="number">6</span><span class="operator">]</span><span class="operator">[</span><span class="number">3</span><span class="operator">]</span> <span class="operator">=</span> {
+          {<span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span>}<span class="operator">,</span>
+          {<span class="operator">+</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1.0f</span>}<span class="operator">,</span>
+          {<span class="operator">+</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span>}<span class="operator">,</span>
+          {<span class="operator">+</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1.0f</span>}<span class="operator">,</span>
+          {<span class="operator">+</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span>}<span class="operator">,</span>
+          {<span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">+</span><span class="number">1.0f</span>}<span class="operator">,</span>
+      };
+
+      mat<span class="operator">.</span>fill(<span class="number">0.0f</span>);
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> <span class="number">3</span>; <span class="operator">+</span><span class="operator">+</span>i)
+          mat(i<span class="operator">,</span> perm<span class="operator">[</span>face<span class="operator">]</span><span class="operator">[</span>i<span class="operator">]</span>) <span class="operator">=</span> signs<span class="operator">[</span>face<span class="operator">]</span><span class="operator">[</span>i<span class="operator">]</span>;
+      mat(<span class="number">3</span><span class="operator">,</span> <span class="number">3</span>) <span class="operator">=</span> <span class="number">1.0f</span>;
+  }
+
+  <span class="type">void</span> GLRenderTargetCube<span class="operator">::</span>getProjectionMatrix(QMatrix4x4<span class="operator">&amp;</span> mat<span class="operator">,</span> <span class="type">float</span> nearZ<span class="operator">,</span> <span class="type">float</span> farZ)
+  {
+      <span class="keyword">static</span> <span class="keyword">const</span> QMatrix4x4 reference(
+              <span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span>
+              <span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span>
+              <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span>
+              <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span>);
+
+      mat <span class="operator">=</span> reference;
+      mat(<span class="number">2</span><span class="operator">,</span> <span class="number">2</span>) <span class="operator">=</span> (nearZ<span class="operator">+</span>farZ)<span class="operator">/</span>(nearZ<span class="operator">-</span>farZ);
+      mat(<span class="number">2</span><span class="operator">,</span> <span class="number">3</span>) <span class="operator">=</span> <span class="number">2.0f</span><span class="operator">*</span>nearZ<span class="operator">*</span>farZ<span class="operator">/</span>(nearZ<span class="operator">-</span>farZ);
+  }
+
+</pre>
+</div>
+<!-- @@@graphicsview/boxes/glbuffers.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

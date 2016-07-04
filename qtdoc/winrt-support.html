@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- winrt.qdoc -->
+  <title>Qt for WinRT | Qt 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.7</a></td><td >Qt for WinRT</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#requirements">Requirements</a></li>
+<li class="level1"><a href="#getting-started">Getting Started</a></li>
+<li class="level2"><a href="#notes-to-desktop-users">Notes to Desktop Users</a></li>
+<li class="level2"><a href="#building-applications">Building Applications</a></li>
+<li class="level1"><a href="#building-from-source">Building from Source</a></li>
+<li class="level1"><a href="#running-applications-from-command-line">Running Applications from Command Line</a></li>
+<li class="level2"><a href="#package-content">Package Content</a></li>
+<li class="level2"><a href="#winrt-runner-tool">WinRT Runner Tool</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt for WinRT</h1>
+<span class="subtitle"></span>
+<!-- $$$winrt_support.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>Qt for <a href="build-sources.html#winrt">WinRT</a> allows you to run Qt applications on devices supporting the Windows Store App APIs. This includes Modern UI applications in Windows 8.1 and up, as well as devices running Windows RT 8.1 and Windows Phone 8.1 and up.</p>
+<p>Microsoft introduced a new design paradigm with the Windows 8 Modern UI. A core part of this new approach is Windows Runtime (<a href="build-sources.html#winrt">WinRT</a>) that supports development using different programming languages, such as C++/CX (component extensions), C# VB.NET, or JavaScript. The Qt port uses the C++ capabilities. While <a href="build-sources.html#winrt">WinRT</a> supports the component extensions internally, they are not used inside Qt and you do not need to use them. <a href="build-sources.html#winrt">WinRT</a> applications run in a sandboxed environment for security reasons and support different architectures, such as ARM and x86.</p>
+<a name="requirements"></a>
+<h2 id="requirements">Requirements</h2>
+<p>Development for Windows Runtime requires a Microsoft Windows development host. The minimum version supported is Windows 8.1&#x2e;</p>
+<p>Depending on your device target you will need the following tools provided by Microsoft to be installed:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th >Device Target</th><th >Environment</th></tr></thead>
+<tr valign="top" class="odd"><td >Windows 8.1 Modern UI</td><td >Visual Studio 2013 for Windows</td></tr>
+<tr valign="top" class="even"><td >Windows RT</td><td >Visual Studio 2013 for Windows</td></tr>
+<tr valign="top" class="odd"><td >Windows Phone 8.1</td><td >Visual Studio 2013 for Windows Phone</td></tr>
+<tr valign="top" class="even"><td >Windows 10</td><td >Visual Studio 2015</td></tr>
+</table></div>
+<p>If you are targeting a remote device, please follow all instructions by Visual Studio to set it up correctly.</p>
+<p>If you are targeting an emulator for Windows Phone, Windows 8.1 Pro is required by Microsoft to launch the emulator itself.</p>
+<a name="getting-started"></a>
+<h2 id="getting-started">Getting Started</h2>
+<a name="notes-to-desktop-users"></a>
+<h3 >Notes to Desktop Users</h3>
+<p>As <a href="build-sources.html#winrt">WinRT</a> applications run in a sandboxed environment, some restrictions should be taken into account when considering porting or writing cross-platform applications:</p>
+<ul>
+<li>The class <a href="../qtcore/qprocess.html">QProcess</a> is not implemented (indicated by the macro <code>QT_NO_PROCESS</code> being defined) as no subprocesses can be launched.</li>
+<li>Some paths returned by <a href="../qtcore/qstandardpaths.html#writableLocation">QStandardPaths::writableLocation</a>() may be empty.</li>
+<li>A <a href="build-sources.html#winrt">WinRT</a> application may not do socket-based communication with another application running on the same host (as this would violate the sandboxing).</li>
+<li>Applications run in fullscreen mode only (see <a href="../qtgui/qstylehints.html">QStyleHints</a>). On desktop, the screen size varies as the application is resized.</li>
+<li>There are no environment variables. Qt emulates the functionality by maintaining the values locally, so that <a href="../qtcore/qtglobal.html#qputenv">qputenv</a>() and related functions continue to work. All known variables influencing Qt can be set in source code.</li>
+<li><a href="build-sources.html#winrt">WinRT</a> applications are UI applications by nature. This implies that console type applications will have a window created internally, which is always visible.</li>
+<li>Applications should not exit programmatically. In particular, calling exit() before the UI is shown causes a crash.</li>
+<li>The <a href="build-sources.html#winrt">WinRT</a> clipboard is local to the application; it cannot be retrieved by a desktop application.</li>
+</ul>
+<a name="building-applications"></a>
+<h3 >Building Applications</h3>
+<p>You can develop applications for <a href="build-sources.html#winrt">WinRT</a> just as any other Qt applications. Use your favorite editor or IDE (such as Qt Creator) and create your application or load a Qt example. Then run <code>qmake</code> and <code>nmake/jom</code> to build your application.</p>
+<a name="building-applications-with-visual-studio"></a>
+<h4 >Building Applications with Visual Studio</h4>
+<p>To launch your project with Visual Studio a corresponding project needs to be created. <code>qmake</code> supports converting a <code>.pro</code> project into Visual Studio format by passing the parameters <code>-tp</code> vc.</p>
+<pre class="cpp">
+
+  qmake <span class="operator">-</span>tp vc <span class="operator">&lt;</span>your project<span class="operator">&gt;</span><span class="operator">.</span>pro
+
+</pre>
+<p>Be aware of using the correct match of <code>qmake</code> and Visual Studio. As the Visual Studio format is generic, it does not return an immediate error if for instance you open a Windows Phone project inside Visual Studio for Windows.</p>
+<p>This creates a project which supports building applications and running them with Visual Studio. It does not embed Qt libraries into the package and requires you to add them manually. For this purpose, the command line tool <a href="windows-deployment.html#the-windows-deployment-tool">windeployqt</a> has been included in the installed package. To enable automatic parsing of dependencies and adding the libraries and dependencies into the application package, create the project with the following options:</p>
+<pre class="cpp">
+
+  qmake <span class="operator">-</span>tp vc <span class="operator">&lt;</span>your project<span class="operator">&gt;</span><span class="operator">.</span>pro <span class="string">&quot;CONFIG+=windeployqt&quot;</span>
+
+</pre>
+<a name="building-applications-with-qt-creator"></a>
+<h4 >Building Applications with Qt Creator</h4>
+<p>You will not need to do any conversion to open your project in Qt Creator. Please follow the generic instructions on how to open and build a project.</p>
+<p>Qt Creator deploys your application on the <a href="build-sources.html#winrt">WinRT</a> device, if the device is detected by the PC.</p>
+<p><b>Note: </b>Remote PCs, such as the Surface, are not yet supported for deployment by Creator.</p><a name="building-from-source"></a>
+<h2 id="building-from-source">Building from Source</h2>
+<p>We assume that you have cloned the Qt 5 repositories (or obtained the Qt sources elsewhere) and followed the platform-independent requirements for building Qt. The process of building Qt is found in the <a href="build-sources.html">Building Qt Sources</a> page.</p>
+<p>Qt for <a href="build-sources.html#winrt">WinRT</a> is always built as a cross-build, because tools, such as qmake, are built as desktop applications. For compiling those, a desktop development environment is required. If you have installed Visual Studio 2013 for Windows, this will only create binaries for <a href="build-sources.html#winrt">WinRT</a>. You will need Visual Studio for Windows Desktop as well to create those desktop tools.</p>
+<p>Please make sure to use an x86 command prompt (either use the <i>VS x86 Native Tools Command Prompt</i> or call <i>vcvarsall.bat</i> without any parameter or with <code>x86</code>) for every <a href="build-sources.html#winrt">WinRT</a>/Windows Phone build. While the toolchain which is used for the target is set automatically, the command prompt decides what will be used for the host tools like <i>qmake</i> or <i>moc</i>. Building these tools might fail if another command prompt is used.</p>
+<p>The <a href="build-sources.html#winrt">WinRT</a> mkspec format is <code>&lt;platform&gt;-&lt;architecture&gt;-&lt;toolchain&gt;</code> where <i>platform</i> can be <code>winrt</code> or <code>winphone</code> and architecture can be <code>arm</code>, <code>x86</code>, or <code>x64</code>. The following is an example of building qtbase for <a href="build-sources.html#winrt">WinRT</a>:</p>
+<pre class="cpp">
+
+  <span class="operator">&gt;</span> <span class="operator">.</span><span class="operator">/</span>configure <span class="operator">-</span>xplatform winrt<span class="operator">-</span>x64<span class="operator">-</span>msvc2013 <span class="operator">-</span>release
+  <span class="operator">&gt;</span> nmake<span class="operator">/</span>jom
+
+</pre>
+<a name="running-applications-from-command-line"></a>
+<h2 id="running-applications-from-command-line">Running Applications from Command Line</h2>
+<p><a href="build-sources.html#winrt">WinRT</a> applications must be packaged (including all dependencies) and installed or registered with the application service in order to be launched. <a href="winrt-support.html#winrtrunner">The WinRT Runner Tool</a> can be used to launch these applications from the command line.</p>
+<a name="package-content"></a>
+<h3 >Package Content</h3>
+<p>Package content consists of the application executable and its dependencies, as for every Windows application. The dependencies are the needed (Qt) libraries and plugins. Note that Qt plugins have to be put into a folder named after their category (platforms, imageformats, and so on) without using a <code>plugins</code> folder as root. For more information, see <a href="windows-deployment.html">Qt for Windows - Deployment</a>.</p>
+<p>As <a href="build-sources.html#winrt">WinRT</a> applications are run in a sandboxed environment, setting the path variable to point to the files required will not work.</p>
+<p>The <a href="windows-deployment.html#the-windows-deployment-tool">windeployqt</a> convenience tool looks up the application's dependencies and copies Qt libraries and plugins to the appropriate directories, as necessary.</p>
+<p>Because all resources are placed to one directory, you can register the directory using an XML file (AppxManifest.xml) and Windows Powershell. The reference for these manifest files can be found <a href="http://msdn.microsoft.com/en-us/library/windows/apps/br211473.aspx">here</a>. The target processor architecture must be specified (as opposed to the default, 'neutral'). As soon as these requirements are met, change into your <i>packaged</i> directory in PowerShell and call:</p>
+<pre class="cpp">
+
+  <span class="operator">&gt;</span> Add<span class="operator">-</span>AppxPackage <span class="operator">-</span>Register AppxManifest<span class="operator">.</span>xml
+
+</pre>
+<p><b>Note: </b><a href="winrt-support.html#winrtrunner">The WinRT Runner Tool</a> can perform the same operation with the --install option.</p><p>If that worked, you should be able to find your application in Windows 8.1's start screen. To remove your application, use Windows' built-in way to uninstall applications (right-click or tap and hold the application and choose <code>Uninstall</code>).</p>
+<p><b>Note: </b><a href="winrt-support.html#winrtrunner">The WinRT Runner Tool</a> can perform the same operation with the --remove option.</p><a name="winrt-runner-tool"></a>
+<h3 >WinRT Runner Tool</h3>
+<a name="winrtrunner"></a><p>The <a href="build-sources.html#winrt">WinRT</a> Runner Tool can be found in QTDIR/bin/winrtrunner. It is intended to aid in the deployment, launching, and debugging of Qt for <a href="build-sources.html#winrt">WinRT</a> applications. It can be used from the command line, or invoked by the IDE.</p>
+<pre class="cpp">
+
+  Usage: winrtrunner.exe [options] package [arguments]
+  winrtrunner installs, runs, and collects test results for packages made with Qt.
+
+  Options:
+    --test                            Installs, starts, collects output, stops (if
+                                      needed), and uninstalls the package. This is
+                                      the default action of winrtrunner.
+    --start                           Starts the package. The package is installed
+                                      if it is not already installed. Pass
+                                      --install to force reinstallation.
+    --debug &lt;debugger&gt;                Starts the package with the debugger
+                                      attached. The package is installed if it is
+                                      not already installed. Pass --install to
+                                      force reinstallation.
+    --debugger-arguments &lt;arguments&gt;  Sets the arguments to be passed to the
+                                      debugger when --debug is used. If no
+                                      debugger was provided, this option is ignored.
+    --suspend                         Suspends a running package. When combined
+                                      with --stop or --test, the app will be
+                                      suspended before being terminated.
+    --stop                            Terminates a running package. Can be be
+                                      combined with --start and --suspend.
+    --wait &lt;seconds&gt;                  If the package is running, waits the given
+                                      number of seconds before continuing to the
+                                      next task. Passing 0 causes the runner to
+                                      wait indefinitely.
+    --install                         (Re)installs the package.
+    --remove                          Uninstalls the package.
+    --device &lt;name|index&gt;             Specifies the device to target as a device
+                                      name or index. Use --list-devices to find
+                                      available devices. The default device is the
+                                      first device found for the active run
+                                      profile.
+    --profile &lt;name&gt;                  Forces a particular run profile.
+    --list-devices                    Lists the available devices (for use with
+                                      --device).
+    --verbose &lt;level&gt;                 Sets the verbosity level of the message output
+                                      (0 - silent, 1 - info, 2 - debug). Defaults
+                                      to 1.
+    --ignore-errors                   Always exits with code 0, regardless of the
+                                      error state.
+    -?, -h, --help                    Displays this help.
+
+  Arguments:
+    package [arguments]               The executable or package manifest to act
+                                      upon. Arguments after the package name will
+                                      be passed to the application when it starts.
+
+</pre>
+</div>
+<!-- @@@winrt_support.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

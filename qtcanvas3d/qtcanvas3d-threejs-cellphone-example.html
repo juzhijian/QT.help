@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- cellphone.qdoc -->
+  <title>Interactive Mobile Phone Example | Qt Canvas 3D 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcanvas3d-index.html">Qt Canvas 3D</a></td><td >Interactive Mobile Phone Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#qt-quick-implementation">Qt Quick Implementation</a></li>
+<li class="level1"><a href="#the-javascript-code">The JavaScript Code</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Interactive Mobile Phone Example</h1>
+<span class="subtitle"></span>
+<!-- $$$threejs/cellphone-description -->
+<div class="descr"> <a name="details"></a>
+<p>This example demonstrates how to implement an application that uses Qt Quick 2D element as a texture in a three.js scene. The example shows a 3D model of a mobile phone with an UI implemented with Qt Quick. When the phone is not rotating, the UI can be interacted with.</p>
+<p class="centerAlign"><img src="images/cellphone-example.png" alt="" /></p><a name="qt-quick-implementation"></a>
+<h2 id="qt-quick-implementation">Qt Quick Implementation</h2>
+<p>The Qt Quick Implementation <a href="qtcanvas3d-threejs-cellphone-qml-cellphone-main-qml.html">main.qml</a> of the example renders the 3D model of the mobile phone using <a href="qml-qtcanvas3d-canvas3d.html">Canvas3D</a> type. The phone UI is composed of the <code>textureSource</code> Qt Quick item and its children. To make it possible to use the item as a texture source for <a href="qml-qtcanvas3d-canvas3d.html">Canvas3D</a>, we must enable the layer of the item:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">textureSource</span>
+      <span class="name">layer</span>.enabled: <span class="number">true</span>
+      <span class="name">layer</span>.smooth: <span class="number">true</span>
+      <span class="name">layer</span>.textureMirroring: <span class="name">ShaderEffectSource</span>.<span class="name">NoMirroring</span>
+      ...
+
+</pre>
+<p>The texture mirroring is disabled so that the OpenGL texture generated from the item is oriented as the three.js expects.</p>
+<p>The <code>textureSource</code> item is passed as a parameter to the JavaScript function handling the OpenGL initialization in <a href="qml-qtcanvas3d-canvas3d.html">Canvas3D</a>:</p>
+<pre class="qml">
+
+  <span class="name">onInitializeGL</span>: <span class="name">GLCode</span>.<span class="name">initializeGL</span>(<span class="name">canvas3d</span>, <span class="name">textureSource</span>)
+
+</pre>
+<p>The texture generated from the <code>textureSource</code> is not interactable by itself, as it is just a regular texture. To make it appear interactable, we make it so that the phone UI is interactable only when the phone is not rotating and superimpose the actual <code>textureSource</code> item over the <a href="qml-qtcanvas3d-canvas3d.html">Canvas3D</a> so that both the 3D model and the <code>textureSource</code> items are perfectly aligned. The 3D model and the Qt Quick UI are aligned by careful positioning of the model and scaling of the <code>textureSource</code> item using its <a href="../qtquick/qml-qtquick-item.html#transform-prop">transform</a> property. The <code>textureSource</code> item is set fully transparent so that there are no visual artifacts:</p>
+<pre class="qml">
+
+  <span class="name">transform</span>: [
+      <span class="type"><a href="../qtquick/qml-qtquick-scale.html">Scale</a></span> {
+          <span class="name">origin</span>.y: <span class="name">textureSource</span>.<span class="name">height</span> <span class="operator">/</span> <span class="number">2</span>
+          <span class="name">origin</span>.x: <span class="name">textureSource</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">2</span>
+          <span class="name">yScale</span>: <span class="number">0.5</span> <span class="operator">*</span> <span class="name">mainView</span>.<span class="name">height</span> <span class="operator">/</span> <span class="name">mainView</span>.<span class="name">initialHeight</span>
+          <span class="name">xScale</span>: <span class="number">0.5</span> <span class="operator">*</span> <span class="name">mainView</span>.<span class="name">height</span> <span class="operator">/</span> <span class="name">mainView</span>.<span class="name">initialHeight</span>
+      }
+  ]
+  <span class="name">opacity</span>: <span class="number">0.0</span>
+
+</pre>
+<p>To ensure user cannot interact with the UI when the phone is rotating, we hide the <code>textureSource</code> item behind the <a href="qml-qtcanvas3d-canvas3d.html">Canvas3D</a> by adjusting its <a href="../qtquick/qml-qtquick-item.html#z-prop">z</a> property when the phone starts its rotation animation.</p>
+<a name="the-javascript-code"></a>
+<h2 id="the-javascript-code">The JavaScript Code</h2>
+<p>The JavaScript side of the implementation, <a href="qtcanvas3d-threejs-cellphone-qml-cellphone-cellphone-js.html">cellphone.js</a>, is done using a version of <code>three.js</code> that is ported for <a href="qtcanvas3d-index.html">Qt Canvas 3D</a>: <a href="https://github.com/tronlec/three.js">three.js</a>.</p>
+<p>The <code>initializeGL()</code> method creates the scene. It also adds the lights and the camera to the scene and creates materials and meshes used in the scene. The part relevant to the main point of this example is how the <code>textureSource</code> is handled. It is very simple to create a texture from a Qt Quick texture source: simply create a new <code>THREE.QtQuickItemTexture</code> with the <code>textureSource</code> as a parameter and you are done:</p>
+<pre class="js">
+
+  var <span class="name">frontTexture</span> = new <span class="name">THREE</span>.<span class="name">QtQuickItemTexture</span>( <span class="name">textureSource</span> );
+
+</pre>
+<p>The texture created this way can be used as a map to a material just like a regular texture:</p>
+<pre class="js">
+
+  var <span class="name">frontMaterial</span> = new <span class="name">THREE</span>.<span class="name">MeshPhongMaterial</span>( { map: <span class="name">frontTexture</span> } );
+
+</pre>
+<p>The scene is rendered in <code>paintGL()</code> method, which simply adjusts the rotations of the phone meshes, repositions the camera and light, and renders the scene.</p>
+<p>For more information on how to use <code>three.js</code> the documentation is available here: <a href="http://threejs.org/docs/">three.js/docs</a></p>
+<p>The background sphere uses Pluto texture map, which is Copyright (c) by James Hastings-Trew <a href="http://planetpixelemporium.com/planets.html">http://planetpixelemporium.com/planets.html</a>. Used with permission.</p>
+<p>Files:</p>
+<ul>
+<li><a href="qtcanvas3d-threejs-cellphone-qml-cellphone-cellphone-js.html">threejs/cellphone/qml/cellphone/cellphone.js</a></li>
+<li><a href="qtcanvas3d-threejs-cellphone-qml-cellphone-cellphoneapp-qml.html">threejs/cellphone/qml/cellphone/cellphoneapp.qml</a></li>
+<li><a href="qtcanvas3d-threejs-cellphone-qml-cellphone-cellphonecanvas-qml.html">threejs/cellphone/qml/cellphone/cellphonecanvas.qml</a></li>
+<li><a href="qtcanvas3d-threejs-cellphone-qml-cellphone-colorselector-qml.html">threejs/cellphone/qml/cellphone/colorselector.qml</a></li>
+<li><a href="qtcanvas3d-threejs-cellphone-qml-cellphone-fpsdisplay-qml.html">threejs/cellphone/qml/cellphone/fpsdisplay.qml</a></li>
+<li><a href="qtcanvas3d-threejs-cellphone-qml-cellphone-main-qml.html">threejs/cellphone/qml/cellphone/main.qml</a></li>
+<li><a href="qtcanvas3d-threejs-cellphone-main-cpp.html">threejs/cellphone/main.cpp</a></li>
+<li><a href="qtcanvas3d-threejs-cellphone-cellphone-pro.html">threejs/cellphone/cellphone.pro</a></li>
+<li><a href="qtcanvas3d-threejs-cellphone-cellphone-qrc.html">threejs/cellphone/cellphone.qrc</a></li>
+</ul>
+<p>Images:</p>
+<ul>
+<li><a href="images/used-in-examples/threejs/cellphone/images/calendar.png">threejs/cellphone/images/calendar.png</a></li>
+<li><a href="images/used-in-examples/threejs/cellphone/images/camera.png">threejs/cellphone/images/camera.png</a></li>
+<li><a href="images/used-in-examples/threejs/cellphone/images/clock.png">threejs/cellphone/images/clock.png</a></li>
+<li><a href="images/used-in-examples/threejs/cellphone/images/contacts.png">threejs/cellphone/images/contacts.png</a></li>
+<li><a href="images/used-in-examples/threejs/cellphone/images/gallery.png">threejs/cellphone/images/gallery.png</a></li>
+<li><a href="images/used-in-examples/threejs/cellphone/images/games.png">threejs/cellphone/images/games.png</a></li>
+<li><a href="images/used-in-examples/threejs/cellphone/images/lock.png">threejs/cellphone/images/lock.png</a></li>
+<li><a href="images/used-in-examples/threejs/cellphone/images/mail.png">threejs/cellphone/images/mail.png</a></li>
+<li><a href="images/used-in-examples/threejs/cellphone/images/maps.png">threejs/cellphone/images/maps.png</a></li>
+<li><a href="images/used-in-examples/threejs/cellphone/images/menu_background.jpg">threejs/cellphone/images/menu_background.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/cellphone/images/music.png">threejs/cellphone/images/music.png</a></li>
+<li><a href="images/used-in-examples/threejs/cellphone/images/plutomap1k.jpg">threejs/cellphone/images/plutomap1k.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/cellphone/images/qtlogo_with_alpha.png">threejs/cellphone/images/qtlogo_with_alpha.png</a></li>
+<li><a href="images/used-in-examples/threejs/cellphone/images/settings.png">threejs/cellphone/images/settings.png</a></li>
+<li><a href="images/used-in-examples/threejs/cellphone/images/todo.png">threejs/cellphone/images/todo.png</a></li>
+<li><a href="images/used-in-examples/threejs/cellphone/images/videos.png">threejs/cellphone/images/videos.png</a></li>
+</ul>
+</div>
+<!-- @@@threejs/cellphone -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

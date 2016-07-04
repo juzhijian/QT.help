@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- oneqt.qdoc -->
+  <title>One Qt Example | Qt Canvas 3D 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcanvas3d-index.html">Qt Canvas 3D</a></td><td >One Qt Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#main-qml-file">Main QML File</a></li>
+<li class="level1"><a href="#the-custom-3d-qml-control">The Custom 3D QML Control</a></li>
+<li class="level1"><a href="#the-javascript-code">The JavaScript Code</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">One Qt Example</h1>
+<span class="subtitle"></span>
+<!-- $$$threejs/oneqt-description -->
+<div class="descr"> <a name="details"></a>
+<p>One Qt example demonstrates how to implement a simple QML 3D control that combines the use of <code>three.js</code> library-based <a href="qml-qtcanvas3d-canvas3d.html">Canvas3D</a> rendering with Qt Quick 2D elements. The example shows a view with various benefits of using Qt with related images picked from <a href="http://qt.io">http://qt.io</a>. The images are displayed on the side of a spinning 3D cube that spins to show the correct image when the tabs at the top of the application are selected. You can also use swipe gestures to spin the cube to navigate between the tabs. The 3D cube control has been implemented as a simple QML type that internaly uses <code>three.js</code> library and <a href="qtcanvas3d-index.html">Qt Canvas 3D</a>.</p>
+<p class="centerAlign"><img src="images/oneqt-example.png" alt="" /></p><a name="main-qml-file"></a>
+<h2 id="main-qml-file">Main QML File</h2>
+<p>In <a href="qtcanvas3d-threejs-oneqt-oneqt-qml.html">oneqt.qml</a>, we build the 2D content as normal in QML. Then we add a custom <code>ImageCube</code> type into the scene behind the text elements. This custom type, implemented using <code>three.js</code> library, handles the painting of the 3D cube.</p>
+<pre class="qml">
+
+  <span class="type">ImageCube</span> {
+      <span class="name">id</span>: <span class="name">imageCube</span>
+      <span class="name">width</span>: <span class="number">512</span> <span class="operator">*</span> (<span class="name">parent</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">1280</span>)
+      <span class="name">height</span>: <span class="number">512</span> <span class="operator">*</span> (<span class="name">parent</span>.<span class="name">height</span> <span class="operator">/</span> <span class="number">768</span>)
+      <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+      <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+      ...
+
+</pre>
+<p><b>Note: </b>The <code>ImageCube</code> 3D UI component can be created and anchored just like any other QML type.</p><a name="the-custom-3d-qml-control"></a>
+<h2 id="the-custom-3d-qml-control">The Custom 3D QML Control</h2>
+<p>The <a href="qtcanvas3d-threejs-oneqt-imagecube-qml.html">ImageCube.qml</a> takes six images that it loads and places to the sides of the cube. In addition, the type has a state that defines which of these images are visible and a <code>backgroundColor</code> property that is used when painting the 3D cube. The <code>angleOffset</code> property can be used to adjust the cube's direction when displaying the selected image. In this example the cube component sits on the right edge of the screen so we twist it slightly to the left so that it appears to be facing the rest of the content. This angle is also used by the 3D light so that the light always illuminates the selected face of the cube.</p>
+<pre class="qml">
+
+  <span class="name">state</span>: <span class="string">&quot;image6&quot;</span>
+  property <span class="type">color</span> <span class="name">backgroundColor</span>: <span class="string">&quot;#FCFCFC&quot;</span>
+  property <span class="type">real</span> <span class="name">angleOffset</span>: -<span class="number">180</span> <span class="operator">/</span> <span class="number">8.0</span>
+  property <span class="type">string</span> <span class="name">image1</span>: <span class="string">&quot;&quot;</span>
+      ...
+
+</pre>
+<p>The custom type defines six states, one for each side of the cube along with the x-, y-, and z-rotations, that must be set to show the face of the cube corresponding to the state.</p>
+<pre class="qml">
+
+  <span class="name">states</span>: [
+      <span class="type"><a href="../qtqml/qml-qtqml-statemachine-state.html">State</a></span> {
+          <span class="name">name</span>: <span class="string">&quot;image1&quot;</span>
+          <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">cube</span>; <span class="name">xRotation</span>: <span class="number">0</span>; }
+          <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">cube</span>; <span class="name">yRotation</span>: <span class="number">180</span> <span class="operator">*</span> <span class="number">1.5</span> <span class="operator">+</span> <span class="name">angleOffset</span>; }
+          <span class="type"><a href="../qtquick/qml-qtquick-propertychanges.html">PropertyChanges</a></span> { <span class="name">target</span>: <span class="name">cube</span>; <span class="name">zRotation</span>: <span class="number">0</span> }
+      },
+      ...
+
+</pre>
+<p>We use <code>RotationAnimation</code> to animate the transition between angles. It enables us to get smooth transitions between different cube orientations and to always rotate the cube along the shortest possible angle distance.</p>
+<pre class="qml">
+
+  <span class="name">transitions</span>: [
+      <span class="type"><a href="../qtquick/qml-qtquick-transition.html">Transition</a></span> {
+          <span class="name">id</span>: <span class="name">turnTransition</span>
+          <span class="name">from</span>: <span class="string">&quot;*&quot;</span>
+          <span class="name">to</span>: <span class="string">&quot;*&quot;</span>
+          <span class="type"><a href="../qtquick/qml-qtquick-rotationanimation.html">RotationAnimation</a></span> {
+              <span class="name">properties</span>: <span class="string">&quot;xRotation,yRotation,zRotation&quot;</span>
+              <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutCubic</span>
+              <span class="name">direction</span>: <span class="name">RotationAnimation</span>.<span class="name">Shortest</span>
+              <span class="name">duration</span>: <span class="number">450</span>
+          }
+      }
+  ]
+      ...
+
+</pre>
+<p>We call the JavaScript code that uses <code>three.js</code> to do the rendering of the cube, calling it on the <code>initializeGL</code>, <code>paintGL</code>, and <code>resizeGL</code> signals.</p>
+<pre class="qml">
+
+  <span class="name">onInitializeGL</span>: {
+      <span class="name">GLCode</span>.<span class="name">initializeGL</span>(<span class="name">cube</span>);
+  }
+
+  <span class="name">onPaintGL</span>: {
+      <span class="name">GLCode</span>.<span class="name">paintGL</span>(<span class="name">cube</span>);
+  }
+
+  <span class="name">onResizeGL</span>: {
+      <span class="name">GLCode</span>.<span class="name">resizeGL</span>(<span class="name">cube</span>);
+  }
+
+</pre>
+<a name="the-javascript-code"></a>
+<h2 id="the-javascript-code">The JavaScript Code</h2>
+<p>The JavaScript side of the implementation, <a href="qtcanvas3d-threejs-oneqt-imagecube-js.html">imagecube.js</a>, is done using a version of <code>three.js</code> that is ported for <a href="qtcanvas3d-index.html">Qt Canvas 3D</a>: <a href="https://github.com/tronlec/three.js">three.js</a>.</p>
+<p>In <a href="qtcanvas3d-threejs-oneqt-imagecube-js.html">imagecube.js</a>, we start by creating the camera and the scene that contains all the rest of the <code>three.js</code> objects.</p>
+<pre class="js">
+
+  <span class="name">camera</span> <span class="operator">=</span> new <span class="name">THREE</span>.<span class="name">PerspectiveCamera</span>(<span class="number">50</span>, <span class="name">canvas</span>.<span class="name">width</span> <span class="operator">/</span> <span class="name">canvas</span>.<span class="name">height</span>, <span class="number">1</span>, <span class="number">2000</span>);
+  <span class="name">camera</span>.<span class="name">position</span>.<span class="name">z</span> <span class="operator">=</span> <span class="number">400</span>;
+  <span class="name">camera</span>.<span class="name">position</span>.<span class="name">y</span> <span class="operator">=</span> <span class="number">140</span>;
+
+  <span class="name">scene</span> <span class="operator">=</span> new <span class="name">THREE</span>.<span class="name">Scene</span>();
+      ...
+
+</pre>
+<p>Then we start the asynchronous loading of the textures and create a material array for the sides of the cube (note that the cube needs 12 materials as each side consists of two triangles).</p>
+<pre class="js">
+
+  <span class="comment">// Load textures</span>
+  var <span class="name">textureLoader</span> = new <span class="name">THREE</span>.<span class="name">TextureLoader</span>();
+  var <span class="name">textureCase1</span> = <span class="name">textureLoader</span>.<span class="name">load</span>(<span class="name">canvas</span>.<span class="name">image1</span>);
+  var <span class="name">textureCase2</span> = <span class="name">textureLoader</span>.<span class="name">load</span>(<span class="name">canvas</span>.<span class="name">image2</span>);
+  var <span class="name">textureCase3</span> = <span class="name">textureLoader</span>.<span class="name">load</span>(<span class="name">canvas</span>.<span class="name">image3</span>);
+  var <span class="name">textureCase4</span> = <span class="name">textureLoader</span>.<span class="name">load</span>(<span class="name">canvas</span>.<span class="name">image4</span>);
+  var <span class="name">textureCase5</span> = <span class="name">textureLoader</span>.<span class="name">load</span>(<span class="name">canvas</span>.<span class="name">image5</span>);
+  var <span class="name">textureCase6</span> = <span class="name">textureLoader</span>.<span class="name">load</span>(<span class="name">canvas</span>.<span class="name">image6</span>);
+
+  <span class="comment">// Materials</span>
+  var <span class="name">materials</span> = [];
+  <span class="name">materials</span>.<span class="name">push</span>(new <span class="name">THREE</span>.<span class="name">MeshLambertMaterial</span>({ map: <span class="name">textureCase1</span> }));
+  <span class="name">materials</span>.<span class="name">push</span>(new <span class="name">THREE</span>.<span class="name">MeshLambertMaterial</span>({ map: <span class="name">textureCase1</span> }));
+      ...
+
+</pre>
+<p>We then create the needed geometry as <code>BoxGeometry</code> binding the created materials to the faces of the cube. We then create a <code>MeshFaceMaterial</code> from the array of materials.</p>
+<pre class="js">
+
+  var <span class="name">geometry</span> = new <span class="name">THREE</span>.<span class="name">BoxGeometry</span>(<span class="number">200</span>, <span class="number">200</span>, <span class="number">200</span>);
+  <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>, <span class="name">len</span> = <span class="name">geometry</span>.<span class="name">faces</span>.<span class="name">length</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">len</span>; i ++) {
+      <span class="name">geometry</span>.<span class="name">faces</span>[ <span class="name">i</span> ].<span class="name">materialIndex</span> <span class="operator">=</span> <span class="name">i</span>;
+  }
+  <span class="name">geometry</span>.<span class="name">materials</span> <span class="operator">=</span> <span class="name">materials</span>;
+  var <span class="name">faceMaterial</span> = new <span class="name">THREE</span>.<span class="name">MeshFaceMaterial</span>(<span class="name">materials</span>);
+
+</pre>
+<p>Finally we create the cube mesh from the geometry and material, position it, and add it to the 3D scene.</p>
+<pre class="js">
+
+  <span class="name">cube</span> <span class="operator">=</span> new <span class="name">THREE</span>.<span class="name">Mesh</span>(<span class="name">geometry</span>, <span class="name">faceMaterial</span>);
+  <span class="name">scene</span>.<span class="name">add</span>(<span class="name">cube</span>);
+
+</pre>
+<p>Next we create and add some lights to the scene. <code>AmbientLight</code> defines the surrounding light amount and the directional light is positioned so that it highlights the face of the cube that is currently selected.</p>
+<pre class="js">
+
+  <span class="name">scene</span>.<span class="name">add</span>(new <span class="name">THREE</span>.<span class="name">AmbientLight</span>(<span class="number">0x444444</span>));
+
+  var <span class="name">directionalLight</span> = new <span class="name">THREE</span>.<span class="name">DirectionalLight</span>(<span class="number">0xffffff</span>, <span class="number">1.0</span>);
+
+  <span class="name">directionalLight</span>.<span class="name">position</span>.<span class="name">y</span> <span class="operator">=</span> <span class="number">130</span>;
+  <span class="name">directionalLight</span>.<span class="name">position</span>.<span class="name">z</span> <span class="operator">=</span> <span class="number">700</span>;
+  <span class="name">directionalLight</span>.<span class="name">position</span>.<span class="name">x</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">tan</span>(<span class="name">canvas</span>.<span class="name">angleOffset</span>) <span class="operator">*</span> <span class="name">directionalLight</span>.<span class="name">position</span>.<span class="name">z</span>;
+  <span class="name">directionalLight</span>.<span class="name">position</span>.<span class="name">normalize</span>();
+  <span class="name">scene</span>.<span class="name">add</span>(<span class="name">directionalLight</span>);
+
+</pre>
+<p>Final step in the initialization phase is to create the <code>Canvas3D</code> renderer and set the initial size and clear color (color of the background) to the renderer.</p>
+<pre class="js">
+
+  <span class="name">renderer</span> <span class="operator">=</span> new <span class="name">THREE</span>.<span class="name">Canvas3DRenderer</span>(
+              { canvas: <span class="name">canvas</span>, antialias: <span class="number">true</span>, devicePixelRatio: <span class="name">canvas</span>.<span class="name">devicePixelRatio</span> });
+  <span class="name">renderer</span>.<span class="name">setPixelRatio</span>(<span class="name">canvas</span>.<span class="name">devicePixelRatio</span>);
+  <span class="name">renderer</span>.<span class="name">setSize</span>(<span class="name">canvas</span>.<span class="name">width</span>, <span class="name">canvas</span>.<span class="name">height</span>);
+  <span class="name">setBackgroundColor</span>(<span class="name">canvas</span>.<span class="name">backgroundColor</span>);
+
+</pre>
+<p>When we need to render the scene in response to the <code>paintGL</code> signal from <a href="qml-qtcanvas3d-canvas3d.html">Canvas3D</a>, we just copy the current rotation values from the QML side to the cube mesh in the <code>paintGL()</code> method.</p>
+<pre class="js">
+
+  <span class="keyword">function</span> <span class="name">paintGL</span>(<span class="name">canvas</span>) {
+      <span class="name">cube</span>.<span class="name">rotation</span>.<span class="name">x</span> <span class="operator">=</span> <span class="name">canvas</span>.<span class="name">xRotation</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">PI</span> <span class="operator">/</span> <span class="number">180</span>;
+      <span class="name">cube</span>.<span class="name">rotation</span>.<span class="name">y</span> <span class="operator">=</span> <span class="name">canvas</span>.<span class="name">yRotation</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">PI</span> <span class="operator">/</span> <span class="number">180</span>;
+      <span class="name">cube</span>.<span class="name">rotation</span>.<span class="name">z</span> <span class="operator">=</span> <span class="name">canvas</span>.<span class="name">zRotation</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">PI</span> <span class="operator">/</span> <span class="number">180</span>;
+      <span class="name">renderer</span>.<span class="name">render</span>(<span class="name">scene</span>, <span class="name">camera</span>);
+  }
+
+</pre>
+<p>For more information on how to use <code>three.js</code> the documentation is available here: <a href="http://threejs.org/docs/">three.js/docs</a></p>
+<p>Files:</p>
+<ul>
+<li><a href="qtcanvas3d-threejs-oneqt-imagecube-qml.html">threejs/oneqt/ImageCube.qml</a></li>
+<li><a href="qtcanvas3d-threejs-oneqt-infosheet-qml.html">threejs/oneqt/InfoSheet.qml</a></li>
+<li><a href="qtcanvas3d-threejs-oneqt-navibutton-qml.html">threejs/oneqt/Navibutton.qml</a></li>
+<li><a href="qtcanvas3d-threejs-oneqt-swipearea-qml.html">threejs/oneqt/SwipeArea.qml</a></li>
+<li><a href="qtcanvas3d-threejs-oneqt-imagecube-js.html">threejs/oneqt/imagecube.js</a></li>
+<li><a href="qtcanvas3d-threejs-oneqt-oneqt-qml.html">threejs/oneqt/oneqt.qml</a></li>
+<li><a href="qtcanvas3d-threejs-oneqt-main-cpp.html">threejs/oneqt/main.cpp</a></li>
+<li><a href="qtcanvas3d-threejs-oneqt-oneqt-pro.html">threejs/oneqt/oneqt.pro</a></li>
+<li><a href="qtcanvas3d-threejs-oneqt-oneqt-qrc.html">threejs/oneqt/oneqt.qrc</a></li>
+</ul>
+</div>
+<!-- @@@threejs/oneqt -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

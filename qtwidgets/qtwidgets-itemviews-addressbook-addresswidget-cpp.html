@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>addresswidget.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-itemviews-addressbook-example.html">Address Book Example</a></td><td >addresswidget.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">addresswidget.cpp Example File</h1>
+<span class="subtitle">itemviews/addressbook/addresswidget.cpp</span>
+<!-- $$$itemviews/addressbook/addresswidget.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;adddialog.h&quot;</span>
+  <span class="preprocessor">#include &quot;addresswidget.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+
+  AddressWidget<span class="operator">::</span>AddressWidget(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qtabwidget.html">QTabWidget</a></span>(parent)
+  {
+      table <span class="operator">=</span> <span class="keyword">new</span> TableModel(<span class="keyword">this</span>);
+      newAddressTab <span class="operator">=</span> <span class="keyword">new</span> NewAddressTab(<span class="keyword">this</span>);
+      connect(newAddressTab<span class="operator">,</span> <span class="operator">&amp;</span>NewAddressTab<span class="operator">::</span>sendDetails<span class="operator">,</span>
+          <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>AddressWidget<span class="operator">::</span>addEntry);
+
+      addTab(newAddressTab<span class="operator">,</span> <span class="string">&quot;Address Book&quot;</span>);
+
+      setupTabs();
+  }
+
+  <span class="type">void</span> AddressWidget<span class="operator">::</span>showAddEntryDialog()
+  {
+      AddDialog aDialog;
+
+      <span class="keyword">if</span> (aDialog<span class="operator">.</span>exec()) {
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> name <span class="operator">=</span> aDialog<span class="operator">.</span>nameText<span class="operator">-</span><span class="operator">&gt;</span>text();
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> address <span class="operator">=</span> aDialog<span class="operator">.</span>addressText<span class="operator">-</span><span class="operator">&gt;</span>toPlainText();
+
+          addEntry(name<span class="operator">,</span> address);
+      }
+  }
+
+  <span class="type">void</span> AddressWidget<span class="operator">::</span>addEntry(<span class="type"><a href="../qtcore/qstring.html">QString</a></span> name<span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> address)
+  {
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">&gt;</span> <span class="operator">&gt;</span>list <span class="operator">=</span> table<span class="operator">-</span><span class="operator">&gt;</span>getList();
+      <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">&gt;</span> pair(name<span class="operator">,</span> address);
+
+      <span class="keyword">if</span> (<span class="operator">!</span>list<span class="operator">.</span>contains(pair)) {
+          table<span class="operator">-</span><span class="operator">&gt;</span>insertRows(<span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>());
+
+          <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index <span class="operator">=</span> table<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>());
+          table<span class="operator">-</span><span class="operator">&gt;</span>setData(index<span class="operator">,</span> name<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole);
+          index <span class="operator">=</span> table<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>());
+          table<span class="operator">-</span><span class="operator">&gt;</span>setData(index<span class="operator">,</span> address<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole);
+          removeTab(indexOf(newAddressTab));
+      } <span class="keyword">else</span> {
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Duplicate Name&quot;</span>)<span class="operator">,</span>
+              tr(<span class="string">&quot;The name \&quot;%1\&quot; already exists.&quot;</span>)<span class="operator">.</span>arg(name));
+      }
+  }
+
+  <span class="type">void</span> AddressWidget<span class="operator">::</span>editEntry()
+  {
+      <span class="type"><a href="qtableview.html">QTableView</a></span> <span class="operator">*</span>temp <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="qtableview.html">QTableView</a></span><span class="operator">*</span><span class="operator">&gt;</span>(currentWidget());
+      <span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span> <span class="operator">*</span>proxy <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span><span class="operator">*</span><span class="operator">&gt;</span>(temp<span class="operator">-</span><span class="operator">&gt;</span>model());
+      <span class="type"><a href="../qtcore/qitemselectionmodel.html">QItemSelectionModel</a></span> <span class="operator">*</span>selectionModel <span class="operator">=</span> temp<span class="operator">-</span><span class="operator">&gt;</span>selectionModel();
+
+      <span class="type"><a href="../qtcore/qmodelindex.html#QModelIndexList-typedef">QModelIndexList</a></span> indexes <span class="operator">=</span> selectionModel<span class="operator">-</span><span class="operator">&gt;</span>selectedRows();
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> name;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> address;
+      <span class="type">int</span> row <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>;
+
+      foreach (<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index<span class="operator">,</span> indexes) {
+          row <span class="operator">=</span> proxy<span class="operator">-</span><span class="operator">&gt;</span>mapToSource(index)<span class="operator">.</span>row();
+          <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> nameIndex <span class="operator">=</span> table<span class="operator">-</span><span class="operator">&gt;</span>index(row<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>());
+          <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> varName <span class="operator">=</span> table<span class="operator">-</span><span class="operator">&gt;</span>data(nameIndex<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole);
+          name <span class="operator">=</span> varName<span class="operator">.</span>toString();
+
+          <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> addressIndex <span class="operator">=</span> table<span class="operator">-</span><span class="operator">&gt;</span>index(row<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>());
+          <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> varAddr <span class="operator">=</span> table<span class="operator">-</span><span class="operator">&gt;</span>data(addressIndex<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole);
+          address <span class="operator">=</span> varAddr<span class="operator">.</span>toString();
+      }
+
+      AddDialog aDialog;
+      aDialog<span class="operator">.</span>setWindowTitle(tr(<span class="string">&quot;Edit a Contact&quot;</span>));
+
+      aDialog<span class="operator">.</span>nameText<span class="operator">-</span><span class="operator">&gt;</span>setReadOnly(<span class="keyword">true</span>);
+      aDialog<span class="operator">.</span>nameText<span class="operator">-</span><span class="operator">&gt;</span>setText(name);
+      aDialog<span class="operator">.</span>addressText<span class="operator">-</span><span class="operator">&gt;</span>setText(address);
+
+      <span class="keyword">if</span> (aDialog<span class="operator">.</span>exec()) {
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> newAddress <span class="operator">=</span> aDialog<span class="operator">.</span>addressText<span class="operator">-</span><span class="operator">&gt;</span>toPlainText();
+          <span class="keyword">if</span> (newAddress <span class="operator">!</span><span class="operator">=</span> address) {
+              <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index <span class="operator">=</span> table<span class="operator">-</span><span class="operator">&gt;</span>index(row<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>());
+              table<span class="operator">-</span><span class="operator">&gt;</span>setData(index<span class="operator">,</span> newAddress<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole);
+          }
+      }
+  }
+
+  <span class="type">void</span> AddressWidget<span class="operator">::</span>removeEntry()
+  {
+      <span class="type"><a href="qtableview.html">QTableView</a></span> <span class="operator">*</span>temp <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="qtableview.html">QTableView</a></span><span class="operator">*</span><span class="operator">&gt;</span>(currentWidget());
+      <span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span> <span class="operator">*</span>proxy <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span><span class="operator">*</span><span class="operator">&gt;</span>(temp<span class="operator">-</span><span class="operator">&gt;</span>model());
+      <span class="type"><a href="../qtcore/qitemselectionmodel.html">QItemSelectionModel</a></span> <span class="operator">*</span>selectionModel <span class="operator">=</span> temp<span class="operator">-</span><span class="operator">&gt;</span>selectionModel();
+
+      <span class="type"><a href="../qtcore/qmodelindex.html#QModelIndexList-typedef">QModelIndexList</a></span> indexes <span class="operator">=</span> selectionModel<span class="operator">-</span><span class="operator">&gt;</span>selectedRows();
+
+      foreach (<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index<span class="operator">,</span> indexes) {
+          <span class="type">int</span> row <span class="operator">=</span> proxy<span class="operator">-</span><span class="operator">&gt;</span>mapToSource(index)<span class="operator">.</span>row();
+          table<span class="operator">-</span><span class="operator">&gt;</span>removeRows(row<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>());
+      }
+
+      <span class="keyword">if</span> (table<span class="operator">-</span><span class="operator">&gt;</span>rowCount(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()) <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>) {
+          insertTab(<span class="number">0</span><span class="operator">,</span> newAddressTab<span class="operator">,</span> <span class="string">&quot;Address Book&quot;</span>);
+      }
+  }
+
+  <span class="type">void</span> AddressWidget<span class="operator">::</span>setupTabs()
+  {
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> groups;
+      groups <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;ABC&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;DEF&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;GHI&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;JKL&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;MNO&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;PQR&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;STU&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;VW&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;XYZ&quot;</span>;
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> groups<span class="operator">.</span>size(); <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> str <span class="operator">=</span> groups<span class="operator">.</span>at(i);
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> regExp <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="string">&quot;^[%1].*&quot;</span>)<span class="operator">.</span>arg(str);
+
+          proxyModel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span>(<span class="keyword">this</span>);
+          proxyModel<span class="operator">-</span><span class="operator">&gt;</span>setSourceModel(table);
+          proxyModel<span class="operator">-</span><span class="operator">&gt;</span>setFilterRegExp(<span class="type"><a href="../qtcore/qregexp.html">QRegExp</a></span>(regExp<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CaseInsensitive));
+          proxyModel<span class="operator">-</span><span class="operator">&gt;</span>setFilterKeyColumn(<span class="number">0</span>);
+
+          <span class="type"><a href="qtableview.html">QTableView</a></span> <span class="operator">*</span>tableView <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtableview.html">QTableView</a></span>;
+          tableView<span class="operator">-</span><span class="operator">&gt;</span>setModel(proxyModel);
+
+          tableView<span class="operator">-</span><span class="operator">&gt;</span>setSelectionBehavior(<span class="type"><a href="qabstractitemview.html">QAbstractItemView</a></span><span class="operator">::</span>SelectRows);
+          tableView<span class="operator">-</span><span class="operator">&gt;</span>horizontalHeader()<span class="operator">-</span><span class="operator">&gt;</span>setStretchLastSection(<span class="keyword">true</span>);
+          tableView<span class="operator">-</span><span class="operator">&gt;</span>verticalHeader()<span class="operator">-</span><span class="operator">&gt;</span>hide();
+          tableView<span class="operator">-</span><span class="operator">&gt;</span>setEditTriggers(<span class="type"><a href="qabstractitemview.html">QAbstractItemView</a></span><span class="operator">::</span>NoEditTriggers);
+          tableView<span class="operator">-</span><span class="operator">&gt;</span>setSelectionMode(<span class="type"><a href="qabstractitemview.html">QAbstractItemView</a></span><span class="operator">::</span>SingleSelection);
+
+          tableView<span class="operator">-</span><span class="operator">&gt;</span>setSortingEnabled(<span class="keyword">true</span>);
+
+          connect(tableView<span class="operator">-</span><span class="operator">&gt;</span>selectionModel()<span class="operator">,</span>
+              <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qitemselectionmodel.html">QItemSelectionModel</a></span><span class="operator">::</span>selectionChanged<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>AddressWidget<span class="operator">::</span>selectionChanged);
+
+          addTab(tableView<span class="operator">,</span> str);
+      }
+  }
+
+  <span class="type">void</span> AddressWidget<span class="operator">::</span>readFromFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+
+      <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly)) {
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Unable to open file&quot;</span>)<span class="operator">,</span>
+              file<span class="operator">.</span>errorString());
+          <span class="keyword">return</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">&gt;</span> <span class="operator">&gt;</span> pairs <span class="operator">=</span> table<span class="operator">-</span><span class="operator">&gt;</span>getList();
+      <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> in(<span class="operator">&amp;</span>file);
+      in <span class="operator">&gt;</span><span class="operator">&gt;</span> pairs;
+
+      <span class="keyword">if</span> (pairs<span class="operator">.</span>isEmpty()) {
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;No contacts in file&quot;</span>)<span class="operator">,</span>
+                                   tr(<span class="string">&quot;The file you are attempting to open contains no contacts.&quot;</span>));
+      } <span class="keyword">else</span> {
+          <span class="keyword">for</span> (<span class="type">int</span> i<span class="operator">=</span><span class="number">0</span>; i<span class="operator">&lt;</span>pairs<span class="operator">.</span>size(); <span class="operator">+</span><span class="operator">+</span>i) {
+              <span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">&gt;</span> p <span class="operator">=</span> pairs<span class="operator">.</span>at(i);
+              addEntry(p<span class="operator">.</span>first<span class="operator">,</span> p<span class="operator">.</span>second);
+          }
+      }
+  }
+
+  <span class="type">void</span> AddressWidget<span class="operator">::</span>writeToFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+
+      <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>WriteOnly)) {
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Unable to open file&quot;</span>)<span class="operator">,</span> file<span class="operator">.</span>errorString());
+          <span class="keyword">return</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qpair.html">QPair</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">,</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">&gt;</span> <span class="operator">&gt;</span> pairs <span class="operator">=</span> table<span class="operator">-</span><span class="operator">&gt;</span>getList();
+      <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> out(<span class="operator">&amp;</span>file);
+      out <span class="operator">&lt;</span><span class="operator">&lt;</span> pairs;
+  }
+
+</pre>
+</div>
+<!-- @@@itemviews/addressbook/addresswidget.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>lib.js Example File | Qt Sensors 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtsensors-index.html">Qt Sensors</a></td><td ><a href="qtsensors-maze-example.html">Qt Sensors - Maze QML Example</a></td><td >lib.js Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">lib.js Example File</h1>
+<span class="subtitle">maze/lib.js</span>
+<!-- $$$maze/lib.js-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="js">
+
+  <span class="comment">//global variables</span>
+  var <span class="name">labyrinth</span> = <span class="number">null</span>;
+  var <span class="name">dimension</span> = <span class="number">24</span>;
+  var <span class="name">cellDimension</span> = <span class="number">13</span>;
+  var <span class="name">won</span>;
+  var <span class="name">objectArray</span> = <span class="number">null</span>;
+  var <span class="name">sec</span> = <span class="number">0.0</span>
+
+  <span class="comment">//Allocate labyrinth arrays and create labyrinth and way reflected in the labyrinth array</span>
+  <span class="keyword">function</span> <span class="name">createLabyrinth</span>()
+  {
+      <span class="name">won</span> <span class="operator">=</span> <span class="number">false</span>;
+      <span class="comment">//create the labyrinth matrix</span>
+      <span class="name">labyrinth</span> <span class="operator">=</span> <span class="number">null</span>;
+      <span class="name">labyrinth</span> <span class="operator">=</span> new <span class="name">Array</span>(<span class="name">dimension</span>);
+      <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">x</span> = <span class="number">0</span>; <span class="name">x</span> <span class="operator">&lt;</span> <span class="name">dimension</span>; x++ ){
+          <span class="name">labyrinth</span>[<span class="name">x</span>] <span class="operator">=</span> new <span class="name">Array</span>(<span class="name">dimension</span>);
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">y</span> = <span class="number">0</span>; <span class="name">y</span> <span class="operator">&lt;</span> <span class="name">dimension</span>; y++ ){
+              <span class="name">labyrinth</span>[<span class="name">x</span>][<span class="name">y</span>] <span class="operator">=</span> <span class="number">0</span>;
+          }
+      }
+      <span class="name">createWay</span>();
+      <span class="name">createLab</span>();
+  }
+
+  <span class="comment">//Create a way where the mouse can reach the cheese</span>
+  <span class="keyword">function</span> <span class="name">createWay</span>()
+  {
+      <span class="comment">//Create rnd way to have at least one solution</span>
+      <span class="comment">//A way square is marked as a 2 in the labyrinth array</span>
+      var <span class="name">x</span> = <span class="number">0</span>;
+      var <span class="name">y</span> = <span class="number">0</span>;
+      var <span class="name">ox</span> = <span class="name">x</span>;
+      var <span class="name">oy</span> = <span class="name">y</span>;
+      <span class="name">labyrinth</span>[<span class="number">0</span>][<span class="number">0</span>] <span class="operator">=</span> <span class="number">2</span>;
+      <span class="keyword">while</span> (<span class="name">x</span> <span class="operator">&lt;</span> <span class="name">dimension</span> <span class="operator">&amp;&amp;</span> <span class="name">y</span> <span class="operator">&lt;</span> <span class="name">dimension</span>){
+          var <span class="name">rnd</span> = <span class="name">Math</span>.<span class="name">floor</span>(<span class="name">Math</span>.<span class="name">random</span>()<span class="operator">*</span><span class="number">5</span>);
+          <span class="keyword">if</span> (<span class="name">Math</span>.<span class="name">floor</span>(<span class="name">Math</span>.<span class="name">random</span>()<span class="operator">*</span><span class="number">2</span>) <span class="operator">==</span> <span class="number">1</span>){
+              <span class="keyword">if</span> (<span class="name">rnd</span> <span class="operator">==</span> <span class="number">0</span>) x--;
+              <span class="keyword">if</span> (<span class="name">rnd</span> <span class="operator">&gt;=</span> <span class="number">1</span>) x++;
+              <span class="keyword">if</span> (<span class="name">x</span> <span class="operator">&lt;</span> <span class="number">0</span>) x++;
+              <span class="keyword">if</span> (<span class="name">x</span> <span class="operator">&gt;=</span> <span class="name">dimension</span>){
+                  <span class="name">x</span> <span class="operator">=</span> <span class="name">ox</span>;
+                  <span class="keyword">break</span>;
+              }
+          }
+          <span class="keyword">else</span> {
+              <span class="keyword">if</span> (<span class="name">rnd</span> <span class="operator">==</span> <span class="number">0</span>) y--;
+              <span class="keyword">if</span> (<span class="name">rnd</span> <span class="operator">&gt;=</span> <span class="number">1</span>) y++;
+              <span class="keyword">if</span> (<span class="name">y</span> <span class="operator">&lt;</span> <span class="number">0</span>) y++;
+              <span class="keyword">if</span> (<span class="name">y</span> <span class="operator">&gt;=</span> <span class="name">dimension</span>){
+                  <span class="name">y</span> <span class="operator">=</span> <span class="name">oy</span>;
+                  <span class="keyword">break</span>;
+              }
+          }
+
+          <span class="comment">/*avoid to have [2]2|
+                          |2|2|*/</span>
+          <span class="keyword">if</span> (<span class="name">x</span> <span class="operator">&lt;</span> (<span class="name">dimension</span> <span class="operator">-</span> <span class="number">1</span>) <span class="operator">&amp;&amp;</span> <span class="name">y</span> <span class="operator">&lt;</span> (<span class="name">dimension</span> <span class="operator">-</span> <span class="number">1</span>)){
+              <span class="keyword">if</span> (<span class="name">labyrinth</span>[<span class="name">x</span> <span class="operator">+</span> <span class="number">1</span>][<span class="name">y</span>] <span class="operator">==</span> <span class="number">2</span>
+                  <span class="operator">&amp;&amp;</span> <span class="name">labyrinth</span>[<span class="name">x</span>][<span class="name">y</span> <span class="operator">+</span> <span class="number">1</span>] <span class="operator">==</span> <span class="number">2</span>
+                  <span class="operator">&amp;&amp;</span> <span class="name">labyrinth</span>[<span class="name">x</span> <span class="operator">+</span> <span class="number">1</span>][<span class="name">y</span> <span class="operator">+</span> <span class="number">1</span>] <span class="operator">==</span> <span class="number">2</span>){
+                  <span class="name">y</span> <span class="operator">=</span> <span class="name">oy</span>;
+                  <span class="name">x</span> <span class="operator">=</span> <span class="name">ox</span>;
+                  <span class="keyword">continue</span>;
+              }
+          }
+          <span class="comment">/*avoid to have |2[2]
+                          |2|2|*/</span>
+          <span class="keyword">if</span> (<span class="name">x</span> <span class="operator">&gt;</span> <span class="number">0</span> <span class="operator">&amp;&amp;</span> <span class="name">y</span> <span class="operator">&lt;</span> (<span class="name">dimension</span> <span class="operator">-</span> <span class="number">1</span>)){
+              <span class="keyword">if</span> (<span class="name">labyrinth</span>[<span class="name">x</span> <span class="operator">-</span> <span class="number">1</span>][<span class="name">y</span>] <span class="operator">==</span> <span class="number">2</span>
+                  <span class="operator">&amp;&amp;</span> <span class="name">labyrinth</span>[<span class="name">x</span>][<span class="name">y</span> <span class="operator">+</span> <span class="number">1</span>] <span class="operator">==</span> <span class="number">2</span>
+                  <span class="operator">&amp;&amp;</span> <span class="name">labyrinth</span>[<span class="name">x</span> <span class="operator">-</span> <span class="number">1</span>][<span class="name">y</span> <span class="operator">+</span> <span class="number">1</span>] <span class="operator">==</span> <span class="number">2</span>){
+                  <span class="name">y</span> <span class="operator">=</span> <span class="name">oy</span>;
+                  <span class="name">x</span> <span class="operator">=</span> <span class="name">ox</span>;
+                  <span class="keyword">continue</span>;
+              }
+          }
+          <span class="comment">/*avoid to have |2|2|
+                          [2]2|*/</span>
+          <span class="keyword">if</span> (<span class="name">x</span> <span class="operator">&lt;</span> (<span class="name">dimension</span> <span class="operator">-</span> <span class="number">1</span>) <span class="operator">&amp;&amp;</span> <span class="name">y</span> <span class="operator">&gt;</span> <span class="number">0</span>){
+              <span class="keyword">if</span> (<span class="name">labyrinth</span>[<span class="name">x</span> <span class="operator">+</span> <span class="number">1</span>][<span class="name">y</span>] <span class="operator">==</span> <span class="number">2</span>
+                  <span class="operator">&amp;&amp;</span> <span class="name">labyrinth</span>[<span class="name">x</span>][<span class="name">y</span> <span class="operator">-</span> <span class="number">1</span>] <span class="operator">==</span> <span class="number">2</span>
+                  <span class="operator">&amp;&amp;</span> <span class="name">labyrinth</span>[<span class="name">x</span> <span class="operator">+</span> <span class="number">1</span>][<span class="name">y</span> <span class="operator">-</span> <span class="number">1</span>] <span class="operator">==</span> <span class="number">2</span>){
+                  <span class="name">y</span> <span class="operator">=</span> <span class="name">oy</span>;
+                  <span class="name">x</span> <span class="operator">=</span> <span class="name">ox</span>;
+                  <span class="keyword">continue</span>;
+              }
+          }
+          <span class="comment">/*avoid to have |2|2|
+                          |2[2]*/</span>
+          <span class="keyword">if</span> (<span class="name">x</span> <span class="operator">&gt;</span> <span class="number">0</span> <span class="operator">&amp;&amp;</span> <span class="name">y</span> <span class="operator">&gt;</span> <span class="number">0</span>){
+              <span class="keyword">if</span> (<span class="name">labyrinth</span>[<span class="name">x</span> <span class="operator">-</span> <span class="number">1</span>][<span class="name">y</span>] <span class="operator">==</span> <span class="number">2</span>
+                  <span class="operator">&amp;&amp;</span> <span class="name">labyrinth</span>[<span class="name">x</span>][<span class="name">y</span> <span class="operator">-</span> <span class="number">1</span>] <span class="operator">==</span> <span class="number">2</span>
+                  <span class="operator">&amp;&amp;</span> <span class="name">labyrinth</span>[<span class="name">x</span> <span class="operator">-</span> <span class="number">1</span>][<span class="name">y</span> <span class="operator">-</span> <span class="number">1</span>] <span class="operator">==</span> <span class="number">2</span>){
+                  <span class="name">y</span> <span class="operator">=</span> <span class="name">oy</span>;
+                  <span class="name">x</span> <span class="operator">=</span> <span class="name">ox</span>;
+                  <span class="keyword">continue</span>;
+              }
+          }
+
+          <span class="name">labyrinth</span>[<span class="name">x</span>][<span class="name">y</span>] <span class="operator">=</span> <span class="number">2</span>;
+          <span class="name">ox</span> <span class="operator">=</span> <span class="name">x</span>;
+          <span class="name">oy</span> <span class="operator">=</span> <span class="name">y</span>;
+      }
+      <span class="comment">//finish way</span>
+      <span class="keyword">while</span> (<span class="name">x</span> <span class="operator">&lt;</span> (<span class="name">dimension</span> <span class="operator">-</span> <span class="number">1</span>)){
+          <span class="name">labyrinth</span>[<span class="name">x</span>][<span class="name">y</span>] <span class="operator">=</span> <span class="number">2</span>;
+          x++;
+      }
+      <span class="keyword">while</span> (<span class="name">y</span> <span class="operator">&lt;</span> (<span class="name">dimension</span> <span class="operator">-</span> <span class="number">1</span>)){
+          <span class="name">labyrinth</span>[<span class="name">x</span>][<span class="name">y</span>] <span class="operator">=</span> <span class="number">2</span>;
+          y++;
+      }
+  }
+
+  <span class="comment">//Create the labyrinth with rnd values</span>
+  <span class="keyword">function</span> <span class="name">createLab</span>()
+  {
+      <span class="comment">//A wall square is marked as a 1 in the labyrinth array</span>
+      <span class="comment">//Not a wall square is marked as a 0 in the labyrinth array</span>
+      <span class="comment">//The Cheese square is marked as a 3 in the labyrinth array</span>
+      <span class="comment">//The start is marked as a -1 in the labyrinth array</span>
+      <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">x</span> = <span class="number">0</span>; <span class="name">x</span> <span class="operator">&lt;</span> <span class="name">dimension</span>; x++ ){
+          var <span class="name">rnd</span> = <span class="number">0</span>;
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">y</span> = <span class="number">0</span>; <span class="name">y</span> <span class="operator">&lt;</span> <span class="name">dimension</span>; y++){
+              <span class="comment">//But don't overwrite the way</span>
+              <span class="keyword">if</span> (<span class="name">labyrinth</span>[<span class="name">x</span>][<span class="name">y</span>] <span class="operator">!=</span> <span class="number">2</span>){
+                  var <span class="name">rnd</span> = <span class="name">Math</span>.<span class="name">floor</span>(<span class="name">Math</span>.<span class="name">random</span>()<span class="operator">*</span><span class="number">2</span>);
+                  var <span class="name">xy</span> = <span class="number">0</span>;
+                  var <span class="name">xxy</span> = <span class="number">0</span>;
+                  var <span class="name">xyy</span> = <span class="number">0</span>;
+                  var <span class="name">xxyy</span> = <span class="number">0</span>;
+
+                  <span class="keyword">if</span> (<span class="name">x</span> <span class="operator">&gt;</span> <span class="number">0</span> <span class="operator">&amp;&amp;</span> <span class="name">y</span> <span class="operator">&gt;</span> <span class="number">0</span>){
+                      <span class="name">xy</span> <span class="operator">=</span> <span class="name">labyrinth</span>[<span class="name">x</span> <span class="operator">-</span> <span class="number">1</span>][<span class="name">y</span> <span class="operator">-</span> <span class="number">1</span>];
+                      <span class="keyword">if</span> (<span class="name">xy</span> <span class="operator">==</span> <span class="number">2</span>)
+                          <span class="name">xy</span> <span class="operator">=</span> <span class="number">0</span>;
+
+                      <span class="name">xyy</span> <span class="operator">=</span> <span class="name">labyrinth</span>[<span class="name">x</span> <span class="operator">-</span> <span class="number">1</span>][<span class="name">y</span>];
+                      <span class="keyword">if</span> (<span class="name">xyy</span> <span class="operator">==</span> <span class="number">2</span>)
+                          <span class="name">xyy</span> <span class="operator">=</span> <span class="number">0</span>;
+
+                      <span class="name">xxy</span> <span class="operator">=</span> <span class="name">labyrinth</span>[<span class="name">x</span>][<span class="name">y</span> <span class="operator">-</span> <span class="number">1</span>];
+                      <span class="keyword">if</span> (<span class="name">xxy</span> <span class="operator">==</span> <span class="number">2</span>)
+                          <span class="name">xxy</span> <span class="operator">=</span> <span class="number">0</span>;
+
+                      <span class="name">xxyy</span> <span class="operator">=</span> <span class="name">rnd</span>;
+                      <span class="keyword">if</span> (<span class="name">xxyy</span> <span class="operator">==</span> <span class="number">2</span>)
+                          <span class="name">xxyy</span> <span class="operator">=</span> <span class="number">0</span>;
+
+                      <span class="comment">//avoid to have to many |0|1| or |1|0| [xy  ][xxy ]</span>
+                      <span class="comment">//                      |1[0]    |0[1] [xyy ][xxyy]</span>
+                      <span class="keyword">if</span> (<span class="name">xyy</span> <span class="operator">==</span> <span class="name">xxy</span> <span class="operator">&amp;&amp;</span> <span class="name">xy</span> <span class="operator">==</span> <span class="name">xxyy</span> <span class="operator">&amp;&amp;</span> <span class="name">xy</span> <span class="operator">!=</span> <span class="name">xxy</span>){
+                          <span class="keyword">if</span> (<span class="name">rnd</span> <span class="operator">==</span> <span class="number">1</span>)
+                              <span class="name">rnd</span> <span class="operator">=</span> <span class="number">0</span>;
+                          <span class="keyword">else</span> <span class="name">rnd</span> <span class="operator">=</span> <span class="number">1</span>;
+                      }
+
+                      <span class="comment">//avoid to have to many |1|1| or |0|0|</span>
+                      <span class="comment">//                      |1[1]    |0[0]</span>
+                      <span class="keyword">if</span> (<span class="name">xy</span> <span class="operator">==</span> <span class="name">xxy</span> <span class="operator">&amp;&amp;</span> <span class="name">xxy</span> <span class="operator">==</span> <span class="name">xxyy</span> <span class="operator">&amp;&amp;</span> <span class="name">xxyy</span> <span class="operator">==</span> <span class="name">xyy</span>){
+                          <span class="keyword">if</span> (<span class="name">rnd</span> <span class="operator">==</span> <span class="number">1</span>)
+                              <span class="name">rnd</span> <span class="operator">=</span> <span class="number">0</span>;
+                          <span class="keyword">else</span> <span class="name">rnd</span> <span class="operator">=</span> <span class="number">1</span>;
+                      }
+                  }
+                  <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">x</span> <span class="operator">==</span> <span class="number">0</span> <span class="operator">&amp;&amp;</span> <span class="name">y</span> <span class="operator">&gt;</span> <span class="number">0</span>){
+                      <span class="name">xy</span> <span class="operator">=</span> <span class="name">labyrinth</span>[<span class="name">x</span>][<span class="name">y</span> <span class="operator">-</span> <span class="number">1</span>];
+                      <span class="keyword">if</span> (<span class="name">xy</span> <span class="operator">==</span> <span class="number">2</span>)
+                          <span class="name">xy</span> <span class="operator">=</span> <span class="number">0</span>;
+
+                      <span class="name">xyy</span> <span class="operator">=</span> <span class="name">rnd</span>;
+                      <span class="keyword">if</span> (<span class="name">xyy</span> <span class="operator">==</span> <span class="number">2</span>)
+                          <span class="name">xyy</span> <span class="operator">=</span> <span class="number">0</span>;
+
+                      <span class="name">xxy</span> <span class="operator">=</span> <span class="name">labyrinth</span>[<span class="name">x</span> <span class="operator">+</span> <span class="number">1</span>][<span class="name">y</span> <span class="operator">-</span> <span class="number">1</span>];
+                      <span class="keyword">if</span> (<span class="name">xxy</span> <span class="operator">==</span> <span class="number">2</span>)
+                          <span class="name">xxy</span> <span class="operator">=</span> <span class="number">0</span>;
+
+                      <span class="name">xxyy</span> <span class="operator">=</span> <span class="name">labyrinth</span>[<span class="name">x</span> <span class="operator">+</span> <span class="number">1</span>][<span class="name">y</span>];
+                      <span class="keyword">if</span> (<span class="name">xxyy</span> <span class="operator">==</span> <span class="number">2</span>)
+                          <span class="name">xxyy</span> <span class="operator">=</span> <span class="number">0</span>;
+
+                      <span class="comment">//avoid to have to many |1|1| or |0|0|</span>
+                      <span class="comment">//                      |1[1]    |0[0]</span>
+                      <span class="keyword">if</span> (<span class="name">xy</span> <span class="operator">==</span> <span class="name">xxy</span> <span class="operator">&amp;&amp;</span> <span class="name">xxy</span> <span class="operator">==</span> <span class="name">xxyy</span> <span class="operator">&amp;&amp;</span> <span class="name">xxyy</span> <span class="operator">==</span> <span class="name">xyy</span>){
+                          <span class="keyword">if</span> (<span class="name">rnd</span> <span class="operator">==</span> <span class="number">1</span>)
+                              <span class="name">rnd</span> <span class="operator">=</span> <span class="number">0</span>;
+                          <span class="keyword">else</span> <span class="name">rnd</span> <span class="operator">=</span> <span class="number">1</span>;
+                      }
+
+                      <span class="comment">//avoid to have to many |0|1| or |1|0| [xy  ][xxy ]</span>
+                      <span class="comment">//                      |1[0]    |0[1] [xyy ][xxyy]</span>
+                      <span class="keyword">if</span> (<span class="name">xyy</span> <span class="operator">==</span> <span class="name">xxy</span> <span class="operator">&amp;&amp;</span> <span class="name">xy</span> <span class="operator">==</span> <span class="name">xxyy</span> <span class="operator">&amp;&amp;</span> <span class="name">xy</span> <span class="operator">!=</span> <span class="name">xxy</span>){
+                          <span class="keyword">if</span> (<span class="name">rnd</span> <span class="operator">==</span> <span class="number">1</span>)
+                              <span class="name">rnd</span> <span class="operator">=</span> <span class="number">0</span>;
+                          <span class="keyword">else</span> <span class="name">rnd</span> <span class="operator">=</span> <span class="number">1</span>;
+                      }
+                  }
+                  <span class="name">labyrinth</span>[<span class="name">x</span>][<span class="name">y</span>] <span class="operator">=</span> <span class="name">rnd</span>;
+              }
+
+          }
+      }
+      <span class="comment">//set start and end</span>
+      <span class="name">labyrinth</span>[<span class="number">0</span>][<span class="number">0</span>] <span class="operator">=</span> -<span class="number">1</span>;
+      <span class="name">labyrinth</span>[<span class="number">0</span>][<span class="number">1</span>] <span class="operator">=</span> <span class="number">0</span>;
+      <span class="name">labyrinth</span>[<span class="number">1</span>][<span class="number">0</span>] <span class="operator">=</span> <span class="number">0</span>;
+      <span class="name">labyrinth</span>[<span class="number">1</span>][<span class="number">1</span>] <span class="operator">=</span> <span class="number">0</span>;
+
+      <span class="name">labyrinth</span>[<span class="name">dimension</span> <span class="operator">-</span> <span class="number">2</span>][<span class="name">dimension</span> <span class="operator">-</span> <span class="number">2</span>] <span class="operator">=</span> <span class="number">0</span>;
+      <span class="name">labyrinth</span>[<span class="name">dimension</span> <span class="operator">-</span> <span class="number">2</span>][<span class="name">dimension</span> <span class="operator">-</span> <span class="number">1</span>] <span class="operator">=</span> <span class="number">0</span>;
+      <span class="name">labyrinth</span>[<span class="name">dimension</span> <span class="operator">-</span> <span class="number">1</span>][<span class="name">dimension</span> <span class="operator">-</span> <span class="number">2</span>] <span class="operator">=</span> <span class="number">0</span>;
+      <span class="name">labyrinth</span>[<span class="name">dimension</span> <span class="operator">-</span> <span class="number">1</span>][<span class="name">dimension</span> <span class="operator">-</span> <span class="number">1</span>] <span class="operator">=</span> <span class="number">3</span>;
+  }
+
+  <span class="comment">//Function that checks if the mouse can be moved in x and y</span>
+  <span class="keyword">function</span> <span class="name">canMove</span>(<span class="name">x</span>, y)
+  {
+      <span class="comment">//Check if movement is allowed</span>
+      var <span class="name">xcenter</span> = <span class="name">x</span> <span class="operator">+</span> (<span class="name">cellDimension</span> <span class="operator">/</span> <span class="number">2</span>);
+      var <span class="name">ycenter</span> = <span class="name">y</span> <span class="operator">+</span> (<span class="name">cellDimension</span> <span class="operator">/</span> <span class="number">2</span>);
+      <span class="comment">//try to get the index</span>
+      var <span class="name">idx</span> = <span class="name">Math</span>.<span class="name">floor</span>(<span class="name">xcenter</span> <span class="operator">/</span> <span class="name">cellDimension</span>);
+      var <span class="name">idy</span> = <span class="name">Math</span>.<span class="name">floor</span>(<span class="name">ycenter</span> <span class="operator">/</span> <span class="name">cellDimension</span>);
+      var <span class="name">dx</span> = <span class="name">xcenter</span> <span class="operator">-</span> (<span class="name">idx</span> <span class="operator">*</span> <span class="name">cellDimension</span> <span class="operator">+</span> ( <span class="name">cellDimension</span> <span class="operator">/</span> <span class="number">2</span> ));
+      var <span class="name">dy</span> = <span class="name">ycenter</span> <span class="operator">-</span> (<span class="name">idy</span> <span class="operator">*</span> <span class="name">cellDimension</span> <span class="operator">+</span> ( <span class="name">cellDimension</span> <span class="operator">/</span> <span class="number">2</span> ));
+
+      <span class="keyword">if</span> (<span class="name">dx</span> <span class="operator">&gt;</span> <span class="number">0</span>){
+          <span class="keyword">if</span> (<span class="name">labyrinth</span>[<span class="name">idx</span>][<span class="name">idy</span>] <span class="operator">==</span> <span class="number">1</span>)
+              <span class="keyword">return</span> <span class="number">false</span>;
+      }
+      <span class="keyword">if</span> (<span class="name">dx</span> <span class="operator">&lt;</span> <span class="number">0</span>){
+          <span class="keyword">if</span> (<span class="name">labyrinth</span>[<span class="name">idx</span>][<span class="name">idy</span>] <span class="operator">==</span> <span class="number">1</span>)
+              <span class="keyword">return</span> <span class="number">false</span>;
+      }
+      <span class="keyword">if</span> (<span class="name">dy</span> <span class="operator">&gt;</span> <span class="number">0</span>){
+          <span class="keyword">if</span> (<span class="name">labyrinth</span>[<span class="name">idx</span>][<span class="name">idy</span>] <span class="operator">==</span> <span class="number">1</span>)
+              <span class="keyword">return</span> <span class="number">false</span>;
+      }
+      <span class="keyword">if</span> (<span class="name">dy</span> <span class="operator">&lt;</span> <span class="number">0</span>){
+          <span class="keyword">if</span> (<span class="name">labyrinth</span>[<span class="name">idx</span>][<span class="name">idy</span>] <span class="operator">==</span> <span class="number">1</span>)
+              <span class="keyword">return</span> <span class="number">false</span>;
+      }
+      <span class="comment">//check if won</span>
+      <span class="keyword">if</span> (<span class="name">idx</span> <span class="operator">==</span> (<span class="name">dimension</span> <span class="operator">-</span> <span class="number">1</span>) <span class="operator">&amp;&amp;</span> <span class="name">idy</span> <span class="operator">==</span> (<span class="name">dimension</span> <span class="operator">-</span> <span class="number">1</span>))
+          <span class="name">won</span> <span class="operator">=</span> <span class="number">true</span>;
+      <span class="keyword">return</span> <span class="number">true</span>;
+  }
+
+  <span class="comment">//Function that prints out the labyrith array values in the console</span>
+  <span class="keyword">function</span> <span class="name">printLab</span>()
+  {
+      <span class="comment">//for debug purposes print out lab n console</span>
+      var <span class="name">iy</span> = <span class="number">0</span>;
+      <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">y</span> = <span class="number">0</span>; <span class="name">y</span> <span class="operator">&lt;</span> <span class="name">dimension</span>; y++ ){
+          var <span class="name">line</span> = <span class="string">&quot;&quot;</span>;
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">x</span> = <span class="number">0</span>; <span class="name">x</span> <span class="operator">&lt;</span> <span class="name">dimension</span>; x++ ){
+              <span class="name">line</span> <span class="operator">+=</span> <span class="name">labyrinth</span>[<span class="name">x</span>][<span class="name">y</span>];
+          }
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">line</span>);
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@maze/lib.js -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>main.cpp Example File | Qt 3D 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-basicshapes-cpp-example.html">Qt 3D: Basic Shapes C++ Example</a></td><td >main.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">main.cpp Example File</h1>
+<span class="subtitle">basicshapes-cpp/main.cpp</span>
+<!-- $$$basicshapes-cpp/main.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2014 Klaralvdalens Datakonsult AB (KDAB).
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt3D module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;scenemodifier.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QGuiApplication&gt;</span>
+
+  <span class="preprocessor">#include &lt;Qt3DRender/qcamera.h&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DCore/qentity.h&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DRender/qcameralens.h&gt;</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets/QApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QWidget&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QHBoxLayout&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QCheckBox&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QCommandLinkButton&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QScreen&gt;</span>
+
+  <span class="preprocessor">#include &lt;Qt3DInput/QInputAspect&gt;</span>
+
+  <span class="preprocessor">#include &lt;Qt3DExtras/qtorusmesh.h&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DRender/qmesh.h&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DRender/qtechnique.h&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DRender/qmaterial.h&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DRender/qeffect.h&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DRender/qtexture.h&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DRender/qrenderpass.h&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DRender/qsceneloader.h&gt;</span>
+
+  <span class="preprocessor">#include &lt;Qt3DCore/qtransform.h&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DCore/qaspectengine.h&gt;</span>
+
+  <span class="preprocessor">#include &lt;Qt3DRender/qrenderaspect.h&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DExtras/qforwardrenderer.h&gt;</span>
+
+  <span class="preprocessor">#include &lt;Qt3DExtras/qt3dwindow.h&gt;</span>
+  <span class="preprocessor">#include &lt;Qt3DExtras/qfirstpersoncameracontroller.h&gt;</span>
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span>argv)
+  {
+      <span class="type">QApplication</span> app(argc<span class="operator">,</span> argv);
+      <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">Qt3DWindow</span> <span class="operator">*</span>view <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">Qt3DWindow</span>();
+      view<span class="operator">-</span><span class="operator">&gt;</span>defaultFramegraph()<span class="operator">-</span><span class="operator">&gt;</span>setClearColor(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span>(<span class="number">0x4d4d4f</span>)));
+      <span class="type">QWidget</span> <span class="operator">*</span>container <span class="operator">=</span> <span class="type">QWidget</span><span class="operator">::</span>createWindowContainer(view);
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> screenSize <span class="operator">=</span> view<span class="operator">-</span><span class="operator">&gt;</span>screen()<span class="operator">-</span><span class="operator">&gt;</span>size();
+      container<span class="operator">-</span><span class="operator">&gt;</span>setMinimumSize(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">200</span><span class="operator">,</span> <span class="number">100</span>));
+      container<span class="operator">-</span><span class="operator">&gt;</span>setMaximumSize(screenSize);
+
+      <span class="type">QWidget</span> <span class="operator">*</span>widget <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QWidget</span>;
+      <span class="type">QHBoxLayout</span> <span class="operator">*</span>hLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QHBoxLayout</span>(widget);
+      <span class="type">QVBoxLayout</span> <span class="operator">*</span>vLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QVBoxLayout</span>();
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>setAlignment(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignTop);
+      hLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(container<span class="operator">,</span> <span class="number">1</span>);
+      hLayout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(vLayout);
+
+      widget<span class="operator">-</span><span class="operator">&gt;</span>setWindowTitle(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Basic shapes&quot;</span>));
+
+      <span class="type"><a href="qt3dinput-module.html">Qt3DInput</a></span><span class="operator">::</span><span class="type">QInputAspect</span> <span class="operator">*</span>input <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dinput-module.html">Qt3DInput</a></span><span class="operator">::</span><span class="type">QInputAspect</span>;
+      view<span class="operator">-</span><span class="operator">&gt;</span>registerAspect(input);
+
+      <span class="comment">// Root entity</span>
+      <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span> <span class="operator">*</span>rootEntity <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span>();
+
+      <span class="comment">// Camera</span>
+      <span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QCamera</span> <span class="operator">*</span>cameraEntity <span class="operator">=</span> view<span class="operator">-</span><span class="operator">&gt;</span>camera();
+
+      cameraEntity<span class="operator">-</span><span class="operator">&gt;</span>lens()<span class="operator">-</span><span class="operator">&gt;</span>setPerspectiveProjection(<span class="number">45.0f</span><span class="operator">,</span> <span class="number">16.0f</span><span class="operator">/</span><span class="number">9.0f</span><span class="operator">,</span> <span class="number">0.1f</span><span class="operator">,</span> <span class="number">1000.0f</span>);
+      cameraEntity<span class="operator">-</span><span class="operator">&gt;</span>setPosition(QVector3D(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">20.0f</span>));
+      cameraEntity<span class="operator">-</span><span class="operator">&gt;</span>setUpVector(QVector3D(<span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>));
+      cameraEntity<span class="operator">-</span><span class="operator">&gt;</span>setViewCenter(QVector3D(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>));
+
+      <span class="comment">// For camera controls</span>
+      <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QFirstPersonCameraController</span> <span class="operator">*</span>camController <span class="operator">=</span> <span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QFirstPersonCameraController</span>(rootEntity);
+      camController<span class="operator">-</span><span class="operator">&gt;</span>setCamera(cameraEntity);
+
+      <span class="comment">// Scenemodifier</span>
+      SceneModifier <span class="operator">*</span>modifier <span class="operator">=</span> <span class="keyword">new</span> SceneModifier(rootEntity);
+
+      <span class="comment">// Set root object of the scene</span>
+      view<span class="operator">-</span><span class="operator">&gt;</span>setRootEntity(rootEntity);
+
+      <span class="comment">// Create control widgets</span>
+      <span class="type">QCommandLinkButton</span> <span class="operator">*</span>info <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCommandLinkButton</span>();
+      info<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Qt3D ready-made meshes&quot;</span>));
+      info<span class="operator">-</span><span class="operator">&gt;</span>setDescription(<span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>fromLatin1(<span class="string">&quot;Qt3D provides several ready-made meshes, like torus, cylinder, cone, &quot;</span>
+                                               <span class="string">&quot;cube, plane and sphere.&quot;</span>));
+      info<span class="operator">-</span><span class="operator">&gt;</span>setIconSize(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">0</span><span class="operator">,</span><span class="number">0</span>));
+
+      <span class="type">QCheckBox</span> <span class="operator">*</span>torusCB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCheckBox</span>(widget);
+      torusCB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      torusCB<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Torus&quot;</span>));
+
+      <span class="type">QCheckBox</span> <span class="operator">*</span>coneCB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCheckBox</span>(widget);
+      coneCB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      coneCB<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Cone&quot;</span>));
+
+      <span class="type">QCheckBox</span> <span class="operator">*</span>cylinderCB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCheckBox</span>(widget);
+      cylinderCB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      cylinderCB<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Cylinder&quot;</span>));
+
+      <span class="type">QCheckBox</span> <span class="operator">*</span>cuboidCB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCheckBox</span>(widget);
+      cuboidCB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      cuboidCB<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Cuboid&quot;</span>));
+
+      <span class="type">QCheckBox</span> <span class="operator">*</span>planeCB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCheckBox</span>(widget);
+      planeCB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      planeCB<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Plane&quot;</span>));
+
+      <span class="type">QCheckBox</span> <span class="operator">*</span>sphereCB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCheckBox</span>(widget);
+      sphereCB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      sphereCB<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Sphere&quot;</span>));
+
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(info);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(torusCB);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(coneCB);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(cylinderCB);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(cuboidCB);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(planeCB);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(sphereCB);
+
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(torusCB<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>stateChanged<span class="operator">,</span>
+                       modifier<span class="operator">,</span> <span class="operator">&amp;</span>SceneModifier<span class="operator">::</span>enableTorus);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(coneCB<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>stateChanged<span class="operator">,</span>
+                       modifier<span class="operator">,</span> <span class="operator">&amp;</span>SceneModifier<span class="operator">::</span>enableCone);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(cylinderCB<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>stateChanged<span class="operator">,</span>
+                       modifier<span class="operator">,</span> <span class="operator">&amp;</span>SceneModifier<span class="operator">::</span>enableCylinder);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(cuboidCB<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>stateChanged<span class="operator">,</span>
+                       modifier<span class="operator">,</span> <span class="operator">&amp;</span>SceneModifier<span class="operator">::</span>enableCuboid);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(planeCB<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>stateChanged<span class="operator">,</span>
+                       modifier<span class="operator">,</span> <span class="operator">&amp;</span>SceneModifier<span class="operator">::</span>enablePlane);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(sphereCB<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>stateChanged<span class="operator">,</span>
+                       modifier<span class="operator">,</span> <span class="operator">&amp;</span>SceneModifier<span class="operator">::</span>enableSphere);
+
+      torusCB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      coneCB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      cylinderCB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      cuboidCB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      planeCB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      sphereCB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+      <span class="comment">// Show window</span>
+      widget<span class="operator">-</span><span class="operator">&gt;</span>show();
+      widget<span class="operator">-</span><span class="operator">&gt;</span>resize(<span class="number">1200</span><span class="operator">,</span> <span class="number">800</span>);
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+</div>
+<!-- @@@basicshapes-cpp/main.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

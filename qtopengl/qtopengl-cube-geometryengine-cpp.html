@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>geometryengine.cpp Example File | Qt OpenGL</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtopengl-index.html">Qt OpenGL</a></td><td ><a href="qtopengl-cube-example.html">Cube OpenGL ES 2.0 example</a></td><td >geometryengine.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">geometryengine.cpp Example File</h1>
+<span class="subtitle">cube/geometryengine.cpp</span>
+<!-- $$$cube/geometryengine.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the QtCore module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;geometryengine.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QVector2D&gt;</span>
+  <span class="preprocessor">#include &lt;QVector3D&gt;</span>
+
+  <span class="keyword">struct</span> VertexData
+  {
+      QVector3D position;
+      QVector2D texCoord;
+  };
+
+  GeometryEngine<span class="operator">::</span>GeometryEngine()
+      : indexBuf(<span class="type"><a href="../qtgui/qopenglbuffer.html">QOpenGLBuffer</a></span><span class="operator">::</span>IndexBuffer)
+  {
+      initializeOpenGLFunctions();
+
+      <span class="comment">// Generate 2 VBOs</span>
+      arrayBuf<span class="operator">.</span>create();
+      indexBuf<span class="operator">.</span>create();
+
+      <span class="comment">// Initializes cube geometry and transfers it to VBOs</span>
+      initCubeGeometry();
+  }
+
+  GeometryEngine<span class="operator">::</span><span class="operator">~</span>GeometryEngine()
+  {
+      arrayBuf<span class="operator">.</span>destroy();
+      indexBuf<span class="operator">.</span>destroy();
+  }
+
+  <span class="type">void</span> GeometryEngine<span class="operator">::</span>initCubeGeometry()
+  {
+      <span class="comment">// For cube we would need only 8 vertices but we have to</span>
+      <span class="comment">// duplicate vertex for each face because texture coordinate</span>
+      <span class="comment">// is different.</span>
+      VertexData vertices<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> {
+          <span class="comment">// Vertex data for face 0</span>
+          {QVector3D(<span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span>)}<span class="operator">,</span>  <span class="comment">// v0</span>
+          {QVector3D( <span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.33f</span><span class="operator">,</span> <span class="number">0.0f</span>)}<span class="operator">,</span> <span class="comment">// v1</span>
+          {QVector3D(<span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.5f</span>)}<span class="operator">,</span>  <span class="comment">// v2</span>
+          {QVector3D( <span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.33f</span><span class="operator">,</span> <span class="number">0.5f</span>)}<span class="operator">,</span> <span class="comment">// v3</span>
+
+          <span class="comment">// Vertex data for face 1</span>
+          {QVector3D( <span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span>)<span class="operator">,</span> QVector2D( <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.5f</span>)}<span class="operator">,</span> <span class="comment">// v4</span>
+          {QVector3D( <span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.33f</span><span class="operator">,</span> <span class="number">0.5f</span>)}<span class="operator">,</span> <span class="comment">// v5</span>
+          {QVector3D( <span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span>)}<span class="operator">,</span>  <span class="comment">// v6</span>
+          {QVector3D( <span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.33f</span><span class="operator">,</span> <span class="number">1.0f</span>)}<span class="operator">,</span> <span class="comment">// v7</span>
+
+          <span class="comment">// Vertex data for face 2</span>
+          {QVector3D( <span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.66f</span><span class="operator">,</span> <span class="number">0.5f</span>)}<span class="operator">,</span> <span class="comment">// v8</span>
+          {QVector3D(<span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.5f</span>)}<span class="operator">,</span>  <span class="comment">// v9</span>
+          {QVector3D( <span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.66f</span><span class="operator">,</span> <span class="number">1.0f</span>)}<span class="operator">,</span> <span class="comment">// v10</span>
+          {QVector3D(<span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">1.0f</span><span class="operator">,</span> <span class="number">1.0f</span>)}<span class="operator">,</span>  <span class="comment">// v11</span>
+
+          <span class="comment">// Vertex data for face 3</span>
+          {QVector3D(<span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.66f</span><span class="operator">,</span> <span class="number">0.0f</span>)}<span class="operator">,</span> <span class="comment">// v12</span>
+          {QVector3D(<span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span>)}<span class="operator">,</span>  <span class="comment">// v13</span>
+          {QVector3D(<span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.66f</span><span class="operator">,</span> <span class="number">0.5f</span>)}<span class="operator">,</span> <span class="comment">// v14</span>
+          {QVector3D(<span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.5f</span>)}<span class="operator">,</span>  <span class="comment">// v15</span>
+
+          <span class="comment">// Vertex data for face 4</span>
+          {QVector3D(<span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.33f</span><span class="operator">,</span> <span class="number">0.0f</span>)}<span class="operator">,</span> <span class="comment">// v16</span>
+          {QVector3D( <span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.66f</span><span class="operator">,</span> <span class="number">0.0f</span>)}<span class="operator">,</span> <span class="comment">// v17</span>
+          {QVector3D(<span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.33f</span><span class="operator">,</span> <span class="number">0.5f</span>)}<span class="operator">,</span> <span class="comment">// v18</span>
+          {QVector3D( <span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.66f</span><span class="operator">,</span> <span class="number">0.5f</span>)}<span class="operator">,</span> <span class="comment">// v19</span>
+
+          <span class="comment">// Vertex data for face 5</span>
+          {QVector3D(<span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.33f</span><span class="operator">,</span> <span class="number">0.5f</span>)}<span class="operator">,</span> <span class="comment">// v20</span>
+          {QVector3D( <span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.66f</span><span class="operator">,</span> <span class="number">0.5f</span>)}<span class="operator">,</span> <span class="comment">// v21</span>
+          {QVector3D(<span class="operator">-</span><span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.33f</span><span class="operator">,</span> <span class="number">1.0f</span>)}<span class="operator">,</span> <span class="comment">// v22</span>
+          {QVector3D( <span class="number">1.0f</span><span class="operator">,</span>  <span class="number">1.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.0f</span>)<span class="operator">,</span> QVector2D(<span class="number">0.66f</span><span class="operator">,</span> <span class="number">1.0f</span>)}  <span class="comment">// v23</span>
+      };
+
+      <span class="comment">// Indices for drawing cube faces using triangle strips.</span>
+      <span class="comment">// Triangle strips can be connected by duplicating indices</span>
+      <span class="comment">// between the strips. If connecting strips have opposite</span>
+      <span class="comment">// vertex order then last index of the first strip and first</span>
+      <span class="comment">// index of the second strip needs to be duplicated. If</span>
+      <span class="comment">// connecting strips have same vertex order then only last</span>
+      <span class="comment">// index of the first strip needs to be duplicated.</span>
+      GLushort indices<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> {
+           <span class="number">0</span><span class="operator">,</span>  <span class="number">1</span><span class="operator">,</span>  <span class="number">2</span><span class="operator">,</span>  <span class="number">3</span><span class="operator">,</span>  <span class="number">3</span><span class="operator">,</span>     <span class="comment">// Face 0 - triangle strip ( v0,  v1,  v2,  v3)</span>
+           <span class="number">4</span><span class="operator">,</span>  <span class="number">4</span><span class="operator">,</span>  <span class="number">5</span><span class="operator">,</span>  <span class="number">6</span><span class="operator">,</span>  <span class="number">7</span><span class="operator">,</span>  <span class="number">7</span><span class="operator">,</span> <span class="comment">// Face 1 - triangle strip ( v4,  v5,  v6,  v7)</span>
+           <span class="number">8</span><span class="operator">,</span>  <span class="number">8</span><span class="operator">,</span>  <span class="number">9</span><span class="operator">,</span> <span class="number">10</span><span class="operator">,</span> <span class="number">11</span><span class="operator">,</span> <span class="number">11</span><span class="operator">,</span> <span class="comment">// Face 2 - triangle strip ( v8,  v9, v10, v11)</span>
+          <span class="number">12</span><span class="operator">,</span> <span class="number">12</span><span class="operator">,</span> <span class="number">13</span><span class="operator">,</span> <span class="number">14</span><span class="operator">,</span> <span class="number">15</span><span class="operator">,</span> <span class="number">15</span><span class="operator">,</span> <span class="comment">// Face 3 - triangle strip (v12, v13, v14, v15)</span>
+          <span class="number">16</span><span class="operator">,</span> <span class="number">16</span><span class="operator">,</span> <span class="number">17</span><span class="operator">,</span> <span class="number">18</span><span class="operator">,</span> <span class="number">19</span><span class="operator">,</span> <span class="number">19</span><span class="operator">,</span> <span class="comment">// Face 4 - triangle strip (v16, v17, v18, v19)</span>
+          <span class="number">20</span><span class="operator">,</span> <span class="number">20</span><span class="operator">,</span> <span class="number">21</span><span class="operator">,</span> <span class="number">22</span><span class="operator">,</span> <span class="number">23</span>      <span class="comment">// Face 5 - triangle strip (v20, v21, v22, v23)</span>
+      };
+
+      <span class="comment">// Transfer vertex data to VBO 0</span>
+      arrayBuf<span class="operator">.</span>bind();
+      arrayBuf<span class="operator">.</span>allocate(vertices<span class="operator">,</span> <span class="number">24</span> <span class="operator">*</span> <span class="keyword">sizeof</span>(VertexData));
+
+      <span class="comment">// Transfer index data to VBO 1</span>
+      indexBuf<span class="operator">.</span>bind();
+      indexBuf<span class="operator">.</span>allocate(indices<span class="operator">,</span> <span class="number">34</span> <span class="operator">*</span> <span class="keyword">sizeof</span>(GLushort));
+  }
+
+  <span class="type">void</span> GeometryEngine<span class="operator">::</span>drawCubeGeometry(<span class="type"><a href="../qtgui/qopenglshaderprogram.html">QOpenGLShaderProgram</a></span> <span class="operator">*</span>program)
+  {
+      <span class="comment">// Tell OpenGL which VBOs to use</span>
+      arrayBuf<span class="operator">.</span>bind();
+      indexBuf<span class="operator">.</span>bind();
+
+      <span class="comment">// Offset for position</span>
+      quintptr offset <span class="operator">=</span> <span class="number">0</span>;
+
+      <span class="comment">// Tell OpenGL programmable pipeline how to locate vertex position data</span>
+      <span class="type">int</span> vertexLocation <span class="operator">=</span> program<span class="operator">-</span><span class="operator">&gt;</span>attributeLocation(<span class="string">&quot;a_position&quot;</span>);
+      program<span class="operator">-</span><span class="operator">&gt;</span>enableAttributeArray(vertexLocation);
+      program<span class="operator">-</span><span class="operator">&gt;</span>setAttributeBuffer(vertexLocation<span class="operator">,</span> GL_FLOAT<span class="operator">,</span> offset<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="keyword">sizeof</span>(VertexData));
+
+      <span class="comment">// Offset for texture coordinate</span>
+      offset <span class="operator">+</span><span class="operator">=</span> <span class="keyword">sizeof</span>(QVector3D);
+
+      <span class="comment">// Tell OpenGL programmable pipeline how to locate vertex texture coordinate data</span>
+      <span class="type">int</span> texcoordLocation <span class="operator">=</span> program<span class="operator">-</span><span class="operator">&gt;</span>attributeLocation(<span class="string">&quot;a_texcoord&quot;</span>);
+      program<span class="operator">-</span><span class="operator">&gt;</span>enableAttributeArray(texcoordLocation);
+      program<span class="operator">-</span><span class="operator">&gt;</span>setAttributeBuffer(texcoordLocation<span class="operator">,</span> GL_FLOAT<span class="operator">,</span> offset<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="keyword">sizeof</span>(VertexData));
+
+      <span class="comment">// Draw cube geometry using indices from VBO 1</span>
+      glDrawElements(GL_TRIANGLE_STRIP<span class="operator">,</span> <span class="number">34</span><span class="operator">,</span> GL_UNSIGNED_SHORT<span class="operator">,</span> <span class="number">0</span>);
+  }
+
+</pre>
+</div>
+<!-- @@@cube/geometryengine.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

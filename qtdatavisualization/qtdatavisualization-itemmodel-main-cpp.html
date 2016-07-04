@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>main.cpp Example File | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td ><a href="qtdatavisualization-itemmodel-example.html">Item Model Example</a></td><td >main.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">main.cpp Example File</h1>
+<span class="subtitle">itemmodel/main.cpp</span>
+<!-- $$$itemmodel/main.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Data Visualization module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtDataVisualization/q3dbars.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/qcategory3daxis.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/qitemmodelbardataproxy.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/qvalue3daxis.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/q3dscene.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/q3dcamera.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/qbar3dseries.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/q3dtheme.h&gt;</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets/QApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QVBoxLayout&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QTableWidget&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QScreen&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QTimer&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QFont&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QDebug&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QHeaderView&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QMessageBox&gt;</span>
+
+  <span class="preprocessor">#define USE_STATIC_DATA</span>
+
+  <span class="keyword">using</span> <span class="keyword">namespace</span> <span class="type"><a href="qtdatavisualization-qmlmodule.html">QtDataVisualization</a></span>;
+
+  <span class="keyword">class</span> GraphDataGenerator : <span class="keyword">public</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>
+  {
+  <span class="keyword">public</span>:
+      <span class="keyword">explicit</span> GraphDataGenerator(<span class="type"><a href="q3dbars.html">Q3DBars</a></span> <span class="operator">*</span>bargraph<span class="operator">,</span> <span class="type">QTableWidget</span> <span class="operator">*</span>tableWidget);
+      <span class="operator">~</span>GraphDataGenerator();
+
+      <span class="type">void</span> setupModel();
+      <span class="type">void</span> addRow();
+      <span class="type">void</span> changeStyle();
+      <span class="type">void</span> changePresetCamera();
+      <span class="type">void</span> changeTheme();
+      <span class="type">void</span> start();
+      <span class="type">void</span> selectFromTable(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <span class="operator">&amp;</span>selection);
+      <span class="type">void</span> selectedFromTable(<span class="type">int</span> currentRow<span class="operator">,</span> <span class="type">int</span> currentColumn<span class="operator">,</span> <span class="type">int</span> previousRow<span class="operator">,</span> <span class="type">int</span> previousColumn);
+      <span class="type">void</span> fixTableSize();
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="q3dbars.html">Q3DBars</a></span> <span class="operator">*</span>m_graph;
+      <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span> <span class="operator">*</span>m_dataTimer;
+      <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span> <span class="operator">*</span>m_styleTimer;
+      <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span> <span class="operator">*</span>m_presetTimer;
+      <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span> <span class="operator">*</span>m_themeTimer;
+      <span class="type">int</span> m_columnCount;
+      <span class="type">int</span> m_rowCount;
+      <span class="type">QTableWidget</span> <span class="operator">*</span>m_tableWidget; <span class="comment">// not owned</span>
+  };
+
+  GraphDataGenerator<span class="operator">::</span>GraphDataGenerator(<span class="type"><a href="q3dbars.html">Q3DBars</a></span> <span class="operator">*</span>bargraph<span class="operator">,</span> <span class="type">QTableWidget</span> <span class="operator">*</span>tableWidget)
+      : m_graph(bargraph)<span class="operator">,</span>
+        m_dataTimer(<span class="number">0</span>)<span class="operator">,</span>
+        m_styleTimer(<span class="number">0</span>)<span class="operator">,</span>
+        m_presetTimer(<span class="number">0</span>)<span class="operator">,</span>
+        m_themeTimer(<span class="number">0</span>)<span class="operator">,</span>
+        m_columnCount(<span class="number">100</span>)<span class="operator">,</span>
+        m_rowCount(<span class="number">50</span>)<span class="operator">,</span>
+        m_tableWidget(tableWidget)
+  {
+      <span class="comment">// Set up bar specifications; make the bars as wide as they are deep,</span>
+      <span class="comment">// and add a small space between them</span>
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setBarThickness(<span class="number">1.0f</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setBarSpacing(<span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span>(<span class="number">0.2</span><span class="operator">,</span> <span class="number">0.2</span>));
+
+  <span class="preprocessor">#ifndef USE_STATIC_DATA</span>
+      <span class="comment">// Set up sample space; make it as deep as it's wide</span>
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>rowAxis()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="number">0</span><span class="operator">,</span> m_rowCount);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>columnAxis()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="number">0</span><span class="operator">,</span> m_columnCount);
+      m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setColumnCount(m_columnCount);
+
+      <span class="comment">// Set selection mode to full</span>
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setSelectionMode(QAbstract3DGraph<span class="operator">::</span>SelectionItemRowAndColumn);
+
+      <span class="comment">// Hide axis labels by explicitly setting one empty string as label list</span>
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>rowAxis()<span class="operator">-</span><span class="operator">&gt;</span>setLabels(<span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span>(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>()));
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>columnAxis()<span class="operator">-</span><span class="operator">&gt;</span>setLabels(<span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span>(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>()));
+
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>seriesList()<span class="operator">.</span>at(<span class="number">0</span>)<span class="operator">-</span><span class="operator">&gt;</span>setItemLabelFormat(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;@valueLabel&quot;</span>));
+  <span class="preprocessor">#else</span>
+      <span class="comment">// Set selection mode to slice row</span>
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setSelectionMode(QAbstract3DGraph<span class="operator">::</span>SelectionItemAndRow <span class="operator">|</span> QAbstract3DGraph<span class="operator">::</span>SelectionSlice);
+
+  <span class="preprocessor">#endif</span>
+
+      <span class="comment">// Set theme</span>
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setType(<span class="type"><a href="q3dtheme.html">Q3DTheme</a></span><span class="operator">::</span>ThemeDigia);
+
+      <span class="comment">// Set font</span>
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setFont(<span class="type"><a href="../qtgui/qfont.html">QFont</a></span>(<span class="string">&quot;Impact&quot;</span><span class="operator">,</span> <span class="number">20</span>));
+
+      <span class="comment">// Set preset camera position</span>
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">-</span><span class="operator">&gt;</span>setCameraPreset(<span class="type"><a href="q3dcamera.html">Q3DCamera</a></span><span class="operator">::</span>CameraPresetFront);
+  }
+
+  GraphDataGenerator<span class="operator">::</span><span class="operator">~</span>GraphDataGenerator()
+  {
+      <span class="keyword">if</span> (m_dataTimer) {
+          m_dataTimer<span class="operator">-</span><span class="operator">&gt;</span>stop();
+          <span class="keyword">delete</span> m_dataTimer;
+      }
+      <span class="keyword">delete</span> m_graph;
+  }
+
+  <span class="type">void</span> GraphDataGenerator<span class="operator">::</span>start()
+  {
+  <span class="preprocessor">#ifndef USE_STATIC_DATA</span>
+      m_dataTimer <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span>();
+      m_dataTimer<span class="operator">-</span><span class="operator">&gt;</span>setTimerType(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CoarseTimer);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(m_dataTimer<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span><span class="operator">::</span>timeout<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>GraphDataGenerator<span class="operator">::</span>addRow);
+      m_dataTimer<span class="operator">-</span><span class="operator">&gt;</span>start(<span class="number">0</span>);
+      m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setFixedWidth(m_graph<span class="operator">-</span><span class="operator">&gt;</span>width());
+  <span class="preprocessor">#else</span>
+      setupModel();
+
+      <span class="comment">// Table needs to be shown before the size of its headers can be accurately obtained,</span>
+      <span class="comment">// so we postpone it a bit</span>
+      m_dataTimer <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span>();
+      m_dataTimer<span class="operator">-</span><span class="operator">&gt;</span>setSingleShot(<span class="keyword">true</span>);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(m_dataTimer<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span><span class="operator">::</span>timeout<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>GraphDataGenerator<span class="operator">::</span>fixTableSize);
+      m_dataTimer<span class="operator">-</span><span class="operator">&gt;</span>start(<span class="number">0</span>);
+  <span class="preprocessor">#endif</span>
+  }
+
+  <span class="type">void</span> GraphDataGenerator<span class="operator">::</span>setupModel()
+  {
+      <span class="comment">// Set up row and column names</span>
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> days;
+      days <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Monday&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Tuesday&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Wednesday&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Thursday&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Friday&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Saturday&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Sunday&quot;</span>;
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> weeks;
+      weeks <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;week 1&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;week 2&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;week 3&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;week 4&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;week 5&quot;</span>;
+
+      <span class="comment">// Set up data         Mon  Tue  Wed  Thu  Fri  Sat  Sun</span>
+      <span class="type">float</span> hours<span class="operator">[</span><span class="number">5</span><span class="operator">]</span><span class="operator">[</span><span class="number">7</span><span class="operator">]</span> <span class="operator">=</span> {{<span class="number">2.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">3.0f</span><span class="operator">,</span> <span class="number">0.2f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">5.0f</span><span class="operator">,</span> <span class="number">10.0f</span>}<span class="operator">,</span>     <span class="comment">// week 1</span>
+                           {<span class="number">0.5f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">3.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">2.0f</span><span class="operator">,</span> <span class="number">2.0f</span><span class="operator">,</span> <span class="number">3.0f</span>}<span class="operator">,</span>      <span class="comment">// week 2</span>
+                           {<span class="number">1.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">2.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">4.0f</span><span class="operator">,</span> <span class="number">4.0f</span><span class="operator">,</span> <span class="number">4.0f</span>}<span class="operator">,</span>      <span class="comment">// week 3</span>
+                           {<span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">2.0f</span><span class="operator">,</span> <span class="number">2.0f</span><span class="operator">,</span> <span class="number">0.3f</span>}<span class="operator">,</span>      <span class="comment">// week 4</span>
+                           {<span class="number">3.0f</span><span class="operator">,</span> <span class="number">3.0f</span><span class="operator">,</span> <span class="number">6.0f</span><span class="operator">,</span> <span class="number">2.0f</span><span class="operator">,</span> <span class="number">2.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">1.0f</span>}};     <span class="comment">// week 5</span>
+
+      <span class="comment">// Add labels</span>
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>rowAxis()<span class="operator">-</span><span class="operator">&gt;</span>setTitle(<span class="string">&quot;Week of year&quot;</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>rowAxis()<span class="operator">-</span><span class="operator">&gt;</span>setTitleVisible(<span class="keyword">true</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>columnAxis()<span class="operator">-</span><span class="operator">&gt;</span>setTitle(<span class="string">&quot;Day of week&quot;</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>columnAxis()<span class="operator">-</span><span class="operator">&gt;</span>setTitleVisible(<span class="keyword">true</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>valueAxis()<span class="operator">-</span><span class="operator">&gt;</span>setTitle(<span class="string">&quot;Hours spent on the Internet&quot;</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>valueAxis()<span class="operator">-</span><span class="operator">&gt;</span>setTitleVisible(<span class="keyword">true</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>valueAxis()<span class="operator">-</span><span class="operator">&gt;</span>setLabelFormat(<span class="string">&quot;%.1f h&quot;</span>);
+
+      m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setRowCount(<span class="number">5</span>);
+      m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setColumnCount(<span class="number">7</span>);
+      m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setHorizontalHeaderLabels(days);
+      m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setVerticalHeaderLabels(weeks);
+      m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setHorizontalScrollBarPolicy(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ScrollBarAlwaysOff);
+      m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setVerticalScrollBarPolicy(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ScrollBarAlwaysOff);
+      m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setCurrentCell(<span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span>);
+      m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setSelectionMode(<span class="type">QAbstractItemView</span><span class="operator">::</span>SingleSelection);
+
+      <span class="keyword">for</span> (<span class="type">int</span> week <span class="operator">=</span> <span class="number">0</span>; week <span class="operator">&lt;</span> weeks<span class="operator">.</span>size(); week<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="keyword">for</span> (<span class="type">int</span> day <span class="operator">=</span> <span class="number">0</span>; day <span class="operator">&lt;</span> days<span class="operator">.</span>size(); day<span class="operator">+</span><span class="operator">+</span>) {
+              <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index <span class="operator">=</span> m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>model()<span class="operator">-</span><span class="operator">&gt;</span>index(week<span class="operator">,</span> day);
+              m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>model()<span class="operator">-</span><span class="operator">&gt;</span>setData(index<span class="operator">,</span> hours<span class="operator">[</span>week<span class="operator">]</span><span class="operator">[</span>day<span class="operator">]</span>);
+          }
+      }
+  }
+
+  <span class="type">void</span> GraphDataGenerator<span class="operator">::</span>addRow()
+  {
+      m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>model()<span class="operator">-</span><span class="operator">&gt;</span>insertRow(<span class="number">0</span>);
+      <span class="keyword">if</span> (m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>model()<span class="operator">-</span><span class="operator">&gt;</span>rowCount() <span class="operator">&gt;</span> m_rowCount)
+          m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>model()<span class="operator">-</span><span class="operator">&gt;</span>removeRow(m_rowCount);
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_columnCount; i<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index <span class="operator">=</span> m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>model()<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">0</span><span class="operator">,</span> i);
+          m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>model()<span class="operator">-</span><span class="operator">&gt;</span>setData(index<span class="operator">,</span>
+              ((<span class="type">float</span>)i <span class="operator">/</span> (<span class="type">float</span>)m_columnCount) <span class="operator">/</span> <span class="number">2.0f</span> <span class="operator">+</span> (<span class="type">float</span>)(rand() <span class="operator">%</span> <span class="number">30</span>) <span class="operator">/</span> <span class="number">100.0f</span>);
+      }
+      m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>resizeColumnsToContents();
+  }
+
+  <span class="type">void</span> GraphDataGenerator<span class="operator">::</span>selectFromTable(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <span class="operator">&amp;</span>selection)
+  {
+      m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setFocus();
+      m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setCurrentCell(selection<span class="operator">.</span>x()<span class="operator">,</span> selection<span class="operator">.</span>y());
+  }
+
+  <span class="type">void</span> GraphDataGenerator<span class="operator">::</span>selectedFromTable(<span class="type">int</span> currentRow<span class="operator">,</span> <span class="type">int</span> currentColumn<span class="operator">,</span>
+                                             <span class="type">int</span> previousRow<span class="operator">,</span> <span class="type">int</span> previousColumn)
+  {
+      Q_UNUSED(previousRow)
+      Q_UNUSED(previousColumn)
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>seriesList()<span class="operator">.</span>at(<span class="number">0</span>)<span class="operator">-</span><span class="operator">&gt;</span>setSelectedBar(<span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(currentRow<span class="operator">,</span> currentColumn));
+  }
+
+  <span class="type">void</span> GraphDataGenerator<span class="operator">::</span>fixTableSize()
+  {
+      <span class="type">int</span> width <span class="operator">=</span> m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>horizontalHeader()<span class="operator">-</span><span class="operator">&gt;</span>length();
+      width <span class="operator">+</span><span class="operator">=</span> m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>verticalHeader()<span class="operator">-</span><span class="operator">&gt;</span>width();
+      m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setFixedWidth(width <span class="operator">+</span> <span class="number">2</span>);
+      <span class="type">int</span> height <span class="operator">=</span> m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>verticalHeader()<span class="operator">-</span><span class="operator">&gt;</span>length();
+      height <span class="operator">+</span><span class="operator">=</span> m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>horizontalHeader()<span class="operator">-</span><span class="operator">&gt;</span>height();
+      m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setFixedHeight(height <span class="operator">+</span> <span class="number">2</span>);
+  }
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span>argv)
+  {
+      <span class="type">QApplication</span> app(argc<span class="operator">,</span> argv);
+      <span class="type"><a href="q3dbars.html">Q3DBars</a></span> <span class="operator">*</span>graph <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="q3dbars.html">Q3DBars</a></span>();
+      <span class="type">QWidget</span> <span class="operator">*</span>container <span class="operator">=</span> <span class="type">QWidget</span><span class="operator">::</span>createWindowContainer(graph);
+
+      <span class="keyword">if</span> (<span class="operator">!</span>graph<span class="operator">-</span><span class="operator">&gt;</span>hasContext()) {
+          <span class="type">QMessageBox</span> msgBox;
+          msgBox<span class="operator">.</span>setText(<span class="string">&quot;Couldn't initialize the OpenGL context.&quot;</span>);
+          msgBox<span class="operator">.</span>exec();
+          <span class="keyword">return</span> <span class="operator">-</span><span class="number">1</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> screenSize <span class="operator">=</span> graph<span class="operator">-</span><span class="operator">&gt;</span>screen()<span class="operator">-</span><span class="operator">&gt;</span>size();
+      container<span class="operator">-</span><span class="operator">&gt;</span>setMinimumSize(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(screenSize<span class="operator">.</span>width() <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> screenSize<span class="operator">.</span>height() <span class="operator">/</span> <span class="number">2</span>));
+      container<span class="operator">-</span><span class="operator">&gt;</span>setMaximumSize(screenSize);
+      container<span class="operator">-</span><span class="operator">&gt;</span>setSizePolicy(<span class="type">QSizePolicy</span><span class="operator">::</span>Expanding<span class="operator">,</span> <span class="type">QSizePolicy</span><span class="operator">::</span>Expanding);
+      container<span class="operator">-</span><span class="operator">&gt;</span>setFocusPolicy(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>StrongFocus);
+
+      <span class="type">QWidget</span> widget;
+      <span class="type">QVBoxLayout</span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QVBoxLayout</span>(<span class="operator">&amp;</span>widget);
+      <span class="type">QTableWidget</span> <span class="operator">*</span>tableWidget <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QTableWidget</span>(<span class="operator">&amp;</span>widget);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(container<span class="operator">,</span> <span class="number">1</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(tableWidget<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignHCenter);
+
+      tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setSizePolicy(<span class="type">QSizePolicy</span><span class="operator">::</span>Expanding<span class="operator">,</span> <span class="type">QSizePolicy</span><span class="operator">::</span>Fixed);
+      tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setAlternatingRowColors(<span class="keyword">true</span>);
+      widget<span class="operator">.</span>setWindowTitle(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Hours spent on the Internet&quot;</span>));
+
+      <span class="comment">// Since we are dealing with QTableWidget, the model will already have data sorted properly</span>
+      <span class="comment">// into rows and columns, so we simply set useModelCategories property to true to utilize this.</span>
+      <span class="type"><a href="qitemmodelbardataproxy.html">QItemModelBarDataProxy</a></span> <span class="operator">*</span>proxy <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qitemmodelbardataproxy.html">QItemModelBarDataProxy</a></span>(tableWidget<span class="operator">-</span><span class="operator">&gt;</span>model());
+      proxy<span class="operator">-</span><span class="operator">&gt;</span>setUseModelCategories(<span class="keyword">true</span>);
+      QBar3DSeries <span class="operator">*</span>series <span class="operator">=</span> <span class="keyword">new</span> QBar3DSeries(proxy);
+      series<span class="operator">-</span><span class="operator">&gt;</span>setMesh(QAbstract3DSeries<span class="operator">::</span>MeshPyramid);
+      graph<span class="operator">-</span><span class="operator">&gt;</span>addSeries(series);
+
+      GraphDataGenerator generator(graph<span class="operator">,</span> tableWidget);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(series<span class="operator">,</span> <span class="operator">&amp;</span>QBar3DSeries<span class="operator">::</span>selectedBarChanged<span class="operator">,</span> <span class="operator">&amp;</span>generator<span class="operator">,</span>
+                       <span class="operator">&amp;</span>GraphDataGenerator<span class="operator">::</span>selectFromTable);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(tableWidget<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QTableWidget</span><span class="operator">::</span>currentCellChanged<span class="operator">,</span> <span class="operator">&amp;</span>generator<span class="operator">,</span>
+                       <span class="operator">&amp;</span>GraphDataGenerator<span class="operator">::</span>selectedFromTable);
+
+      widget<span class="operator">.</span>show();
+      generator<span class="operator">.</span>start();
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+</div>
+<!-- @@@itemmodel/main.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

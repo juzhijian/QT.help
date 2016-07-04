@@ -1,0 +1,1359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>history.cpp Example File | Qt WebEngine 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwebengine-index.html">Qt WebEngine</a></td><td ><a href="qtwebengine-webenginewidgets-demobrowser-example.html">WebEngine Demo Browser Example</a></td><td >history.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">history.cpp Example File</h1>
+<span class="subtitle">webenginewidgets/demobrowser/history.cpp</span>
+<!-- $$$webenginewidgets/demobrowser/history.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;history.h&quot;</span>
+
+  <span class="preprocessor">#include &quot;autosaver.h&quot;</span>
+  <span class="preprocessor">#include &quot;browserapplication.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtCore/QBuffer&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QDir&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QFile&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QFileInfo&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QSettings&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QTemporaryFile&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QTextStream&gt;</span>
+
+  <span class="preprocessor">#include &lt;QtCore/QtAlgorithms&gt;</span>
+
+  <span class="preprocessor">#include &lt;QtGui/QClipboard&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QDesktopServices&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QHeaderView&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QStyle&gt;</span>
+
+  <span class="preprocessor">#include &lt;QWebEngineSettings&gt;</span>
+
+  <span class="preprocessor">#include &lt;QtCore/QDebug&gt;</span>
+
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">unsigned</span> <span class="type">int</span> HISTORY_VERSION <span class="operator">=</span> <span class="number">23</span>;
+
+  HistoryManager<span class="operator">::</span>HistoryManager(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qobject.html">QObject</a></span>(parent)
+      <span class="operator">,</span> m_saveTimer(<span class="keyword">new</span> AutoSaver(<span class="keyword">this</span>))
+      <span class="operator">,</span> m_historyLimit(<span class="number">30</span>)
+      <span class="operator">,</span> m_historyModel(<span class="number">0</span>)
+      <span class="operator">,</span> m_historyFilterModel(<span class="number">0</span>)
+      <span class="operator">,</span> m_historyTreeModel(<span class="number">0</span>)
+  {
+      m_expiredTimer<span class="operator">.</span>setSingleShot(<span class="keyword">true</span>);
+      connect(<span class="operator">&amp;</span>m_expiredTimer<span class="operator">,</span> SIGNAL(timeout())<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(checkForExpired()));
+      connect(<span class="keyword">this</span><span class="operator">,</span> SIGNAL(entryAdded(HistoryItem))<span class="operator">,</span>
+              m_saveTimer<span class="operator">,</span> SLOT(changeOccurred()));
+      connect(<span class="keyword">this</span><span class="operator">,</span> SIGNAL(entryRemoved(HistoryItem))<span class="operator">,</span>
+              m_saveTimer<span class="operator">,</span> SLOT(changeOccurred()));
+      load();
+
+      m_historyModel <span class="operator">=</span> <span class="keyword">new</span> HistoryModel(<span class="keyword">this</span><span class="operator">,</span> <span class="keyword">this</span>);
+      m_historyFilterModel <span class="operator">=</span> <span class="keyword">new</span> HistoryFilterModel(m_historyModel<span class="operator">,</span> <span class="keyword">this</span>);
+      m_historyTreeModel <span class="operator">=</span> <span class="keyword">new</span> HistoryTreeModel(m_historyFilterModel<span class="operator">,</span> <span class="keyword">this</span>);
+  }
+
+  HistoryManager<span class="operator">::</span><span class="operator">~</span>HistoryManager()
+  {
+      m_saveTimer<span class="operator">-</span><span class="operator">&gt;</span>saveIfNeccessary();
+  }
+
+  <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>HistoryItem<span class="operator">&gt;</span> <span class="operator">&amp;</span>HistoryManager<span class="operator">::</span>history()
+  {
+      <span class="keyword">return</span> m_history;
+  }
+
+  bool HistoryManager<span class="operator">::</span>historyContains(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>url) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_historyFilterModel<span class="operator">-</span><span class="operator">&gt;</span>historyContains(url);
+  }
+
+  <span class="type">void</span> HistoryManager<span class="operator">::</span>addHistoryEntry(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>url)
+  {
+      <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> cleanUrl(url);
+      cleanUrl<span class="operator">.</span>setPassword(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>());
+      cleanUrl<span class="operator">.</span>setHost(cleanUrl<span class="operator">.</span>host()<span class="operator">.</span>toLower());
+      HistoryItem item(cleanUrl<span class="operator">.</span>toString()<span class="operator">,</span> <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span><span class="operator">::</span>currentDateTime());
+      addHistoryItem(item);
+  }
+
+  <span class="type">void</span> HistoryManager<span class="operator">::</span>removeHistoryEntry(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>url)
+  {
+      <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> cleanUrl(url);
+      cleanUrl<span class="operator">.</span>setPassword(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>());
+      cleanUrl<span class="operator">.</span>setHost(cleanUrl<span class="operator">.</span>host()<span class="operator">.</span>toLower());
+      HistoryItem item(cleanUrl<span class="operator">.</span>toString()<span class="operator">,</span> <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span><span class="operator">::</span>currentDateTime());
+      removeHistoryItem(item);
+  }
+
+  <span class="type">void</span> HistoryManager<span class="operator">::</span>setHistory(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>HistoryItem<span class="operator">&gt;</span> <span class="operator">&amp;</span>history<span class="operator">,</span> bool loadedAndSorted)
+  {
+      m_history <span class="operator">=</span> history;
+
+      <span class="comment">// verify that it is sorted by date</span>
+      <span class="keyword">if</span> (<span class="operator">!</span>loadedAndSorted)
+          <a href="../qtcore/qtalgorithms-obsolete.html#qSort-2">qSort</a>(m_history<span class="operator">.</span>begin()<span class="operator">,</span> m_history<span class="operator">.</span>end());
+
+      checkForExpired();
+
+      <span class="keyword">if</span> (loadedAndSorted) {
+          m_lastSavedUrl <span class="operator">=</span> m_history<span class="operator">.</span>value(<span class="number">0</span>)<span class="operator">.</span>url;
+      } <span class="keyword">else</span> {
+          m_lastSavedUrl <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+          m_saveTimer<span class="operator">-</span><span class="operator">&gt;</span>changeOccurred();
+      }
+      <span class="keyword">emit</span> historyReset();
+  }
+
+  HistoryModel <span class="operator">*</span>HistoryManager<span class="operator">::</span>historyModel() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_historyModel;
+  }
+
+  HistoryFilterModel <span class="operator">*</span>HistoryManager<span class="operator">::</span>historyFilterModel() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_historyFilterModel;
+  }
+
+  HistoryTreeModel <span class="operator">*</span>HistoryManager<span class="operator">::</span>historyTreeModel() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_historyTreeModel;
+  }
+
+  <span class="type">void</span> HistoryManager<span class="operator">::</span>checkForExpired()
+  {
+      <span class="keyword">if</span> (m_historyLimit <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> m_history<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> now <span class="operator">=</span> <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span><span class="operator">::</span>currentDateTime();
+      <span class="type">int</span> nextTimeout <span class="operator">=</span> <span class="number">0</span>;
+
+      <span class="keyword">while</span> (<span class="operator">!</span>m_history<span class="operator">.</span>isEmpty()) {
+          <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> checkForExpired <span class="operator">=</span> m_history<span class="operator">.</span>last()<span class="operator">.</span>dateTime;
+          checkForExpired<span class="operator">.</span>setDate(checkForExpired<span class="operator">.</span>date()<span class="operator">.</span>addDays(m_historyLimit));
+          <span class="keyword">if</span> (now<span class="operator">.</span>daysTo(checkForExpired) <span class="operator">&gt;</span> <span class="number">7</span>) {
+              <span class="comment">// check at most in a week to prevent int overflows on the timer</span>
+              nextTimeout <span class="operator">=</span> <span class="number">7</span> <span class="operator">*</span> <span class="number">86400</span>;
+          } <span class="keyword">else</span> {
+              nextTimeout <span class="operator">=</span> now<span class="operator">.</span>secsTo(checkForExpired);
+          }
+          <span class="keyword">if</span> (nextTimeout <span class="operator">&gt;</span> <span class="number">0</span>)
+              <span class="keyword">break</span>;
+          <span class="keyword">const</span> HistoryItem<span class="operator">&amp;</span> item <span class="operator">=</span> m_history<span class="operator">.</span>last();
+          <span class="comment">// remove from saved file also</span>
+          m_lastSavedUrl <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+          <span class="keyword">emit</span> entryRemoved(item);
+      }
+
+      <span class="keyword">if</span> (nextTimeout <span class="operator">&gt;</span> <span class="number">0</span>)
+          m_expiredTimer<span class="operator">.</span>start(nextTimeout <span class="operator">*</span> <span class="number">1000</span>);
+  }
+
+  <span class="type">void</span> HistoryManager<span class="operator">::</span>addHistoryItem(<span class="keyword">const</span> HistoryItem <span class="operator">&amp;</span>item)
+  {
+      <span class="keyword">if</span> (BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>privateBrowsing())
+          <span class="keyword">return</span>;
+
+      <span class="keyword">emit</span> entryAdded(item);
+      <span class="keyword">if</span> (m_history<span class="operator">.</span>count() <span class="operator">=</span><span class="operator">=</span> <span class="number">1</span>)
+          checkForExpired();
+  }
+
+  <span class="type">void</span> HistoryManager<span class="operator">::</span>removeHistoryItem(<span class="keyword">const</span> HistoryItem <span class="operator">&amp;</span>item)
+  {
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> m_history<span class="operator">.</span>count() <span class="operator">-</span> <span class="number">1</span> ; i <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span>; <span class="operator">-</span><span class="operator">-</span>i) {
+          <span class="keyword">if</span> (item<span class="operator">.</span>url <span class="operator">=</span><span class="operator">=</span> m_history<span class="operator">.</span>at(i)<span class="operator">.</span>url) {
+              <span class="comment">//delete all related entries with that url</span>
+              <span class="keyword">emit</span> entryRemoved(m_history<span class="operator">.</span>at(i));
+          }
+      }
+  }
+
+  <span class="type">void</span> HistoryManager<span class="operator">::</span>updateHistoryItem(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>url<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>title)
+  {
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_history<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="keyword">if</span> (url <span class="operator">=</span><span class="operator">=</span> m_history<span class="operator">.</span>at(i)<span class="operator">.</span>url) {
+              m_history<span class="operator">[</span>i<span class="operator">]</span><span class="operator">.</span>title <span class="operator">=</span> title;
+              m_saveTimer<span class="operator">-</span><span class="operator">&gt;</span>changeOccurred();
+              <span class="keyword">if</span> (m_lastSavedUrl<span class="operator">.</span>isEmpty())
+                  m_lastSavedUrl <span class="operator">=</span> m_history<span class="operator">.</span>at(i)<span class="operator">.</span>url;
+              <span class="keyword">emit</span> entryUpdated(i);
+              <span class="keyword">break</span>;
+          }
+      }
+  }
+
+  <span class="type">int</span> HistoryManager<span class="operator">::</span>historyLimit() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_historyLimit;
+  }
+
+  <span class="type">void</span> HistoryManager<span class="operator">::</span>setHistoryLimit(<span class="type">int</span> limit)
+  {
+      <span class="keyword">if</span> (m_historyLimit <span class="operator">=</span><span class="operator">=</span> limit)
+          <span class="keyword">return</span>;
+      m_historyLimit <span class="operator">=</span> limit;
+      checkForExpired();
+      m_saveTimer<span class="operator">-</span><span class="operator">&gt;</span>changeOccurred();
+  }
+
+  <span class="type">void</span> HistoryManager<span class="operator">::</span>clear()
+  {
+      m_lastSavedUrl <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+      <span class="keyword">emit</span> historyReset();
+      m_saveTimer<span class="operator">-</span><span class="operator">&gt;</span>changeOccurred();
+      m_saveTimer<span class="operator">-</span><span class="operator">&gt;</span>saveIfNeccessary();
+  }
+
+  <span class="type">void</span> HistoryManager<span class="operator">::</span>loadSettings()
+  {
+      <span class="comment">// load settings</span>
+      <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> settings;
+      settings<span class="operator">.</span>beginGroup(QLatin1String(<span class="string">&quot;history&quot;</span>));
+      m_historyLimit <span class="operator">=</span> settings<span class="operator">.</span>value(QLatin1String(<span class="string">&quot;historyLimit&quot;</span>)<span class="operator">,</span> <span class="number">30</span>)<span class="operator">.</span>toInt();
+  }
+
+  <span class="type">void</span> HistoryManager<span class="operator">::</span>load()
+  {
+      loadSettings();
+
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> historyFile(<span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>writableLocation(<span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>DataLocation)
+          <span class="operator">+</span> QLatin1String(<span class="string">&quot;/history&quot;</span>));
+      <span class="keyword">if</span> (<span class="operator">!</span>historyFile<span class="operator">.</span>exists())
+          <span class="keyword">return</span>;
+      <span class="keyword">if</span> (<span class="operator">!</span>historyFile<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>ReadOnly)) {
+          <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Unable to open history file&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> historyFile<span class="operator">.</span>fileName();
+          <span class="keyword">return</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>HistoryItem<span class="operator">&gt;</span> list;
+      <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> in(<span class="operator">&amp;</span>historyFile);
+      <span class="comment">// Double check that the history file is sorted as it is read in</span>
+      bool needToSort <span class="operator">=</span> <span class="keyword">false</span>;
+      HistoryItem lastInsertedItem;
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> data;
+      <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> stream;
+      <span class="type"><a href="../qtcore/qbuffer.html">QBuffer</a></span> buffer;
+      stream<span class="operator">.</span>setDevice(<span class="operator">&amp;</span>buffer);
+      <span class="keyword">while</span> (<span class="operator">!</span>historyFile<span class="operator">.</span>atEnd()) {
+          in <span class="operator">&gt;</span><span class="operator">&gt;</span> data;
+          buffer<span class="operator">.</span>close();
+          buffer<span class="operator">.</span>setBuffer(<span class="operator">&amp;</span>data);
+          buffer<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly);
+          <span class="type"><a href="../qtcore/qtglobal.html#quint32-typedef">quint32</a></span> ver;
+          stream <span class="operator">&gt;</span><span class="operator">&gt;</span> ver;
+          <span class="keyword">if</span> (ver <span class="operator">!</span><span class="operator">=</span> HISTORY_VERSION)
+              <span class="keyword">continue</span>;
+          HistoryItem item;
+          stream <span class="operator">&gt;</span><span class="operator">&gt;</span> item<span class="operator">.</span>url;
+          stream <span class="operator">&gt;</span><span class="operator">&gt;</span> item<span class="operator">.</span>dateTime;
+          stream <span class="operator">&gt;</span><span class="operator">&gt;</span> item<span class="operator">.</span>title;
+
+          <span class="keyword">if</span> (<span class="operator">!</span>item<span class="operator">.</span>dateTime<span class="operator">.</span>isValid())
+              <span class="keyword">continue</span>;
+
+          <span class="keyword">if</span> (item <span class="operator">=</span><span class="operator">=</span> lastInsertedItem) {
+              <span class="keyword">if</span> (lastInsertedItem<span class="operator">.</span>title<span class="operator">.</span>isEmpty() <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>list<span class="operator">.</span>isEmpty())
+                  list<span class="operator">[</span><span class="number">0</span><span class="operator">]</span><span class="operator">.</span>title <span class="operator">=</span> item<span class="operator">.</span>title;
+              <span class="keyword">continue</span>;
+          }
+
+          <span class="keyword">if</span> (<span class="operator">!</span>needToSort <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>list<span class="operator">.</span>isEmpty() <span class="operator">&amp;</span><span class="operator">&amp;</span> lastInsertedItem <span class="operator">&lt;</span> item)
+              needToSort <span class="operator">=</span> <span class="keyword">true</span>;
+
+          list<span class="operator">.</span>prepend(item);
+          lastInsertedItem <span class="operator">=</span> item;
+      }
+      <span class="keyword">if</span> (needToSort)
+          <a href="../qtcore/qtalgorithms-obsolete.html#qSort-2">qSort</a>(list<span class="operator">.</span>begin()<span class="operator">,</span> list<span class="operator">.</span>end());
+
+      setHistory(list<span class="operator">,</span> <span class="keyword">true</span>);
+
+      <span class="comment">// If we had to sort re-write the whole history sorted</span>
+      <span class="keyword">if</span> (needToSort) {
+          m_lastSavedUrl <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+          m_saveTimer<span class="operator">-</span><span class="operator">&gt;</span>changeOccurred();
+      }
+  }
+
+  <span class="type">void</span> HistoryManager<span class="operator">::</span>save()
+  {
+      <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> settings;
+      settings<span class="operator">.</span>beginGroup(QLatin1String(<span class="string">&quot;history&quot;</span>));
+      settings<span class="operator">.</span>setValue(QLatin1String(<span class="string">&quot;historyLimit&quot;</span>)<span class="operator">,</span> m_historyLimit);
+
+      bool saveAll <span class="operator">=</span> m_lastSavedUrl<span class="operator">.</span>isEmpty();
+      <span class="type">int</span> first <span class="operator">=</span> m_history<span class="operator">.</span>count() <span class="operator">-</span> <span class="number">1</span>;
+      <span class="keyword">if</span> (<span class="operator">!</span>saveAll) {
+          <span class="comment">// find the first one to save</span>
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_history<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>i) {
+              <span class="keyword">if</span> (m_history<span class="operator">.</span>at(i)<span class="operator">.</span>url <span class="operator">=</span><span class="operator">=</span> m_lastSavedUrl) {
+                  first <span class="operator">=</span> i <span class="operator">-</span> <span class="number">1</span>;
+                  <span class="keyword">break</span>;
+              }
+          }
+      }
+      <span class="keyword">if</span> (first <span class="operator">=</span><span class="operator">=</span> m_history<span class="operator">.</span>count() <span class="operator">-</span> <span class="number">1</span>)
+          saveAll <span class="operator">=</span> <span class="keyword">true</span>;
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> directory <span class="operator">=</span> <span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>writableLocation(<span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>DataLocation);
+      <span class="keyword">if</span> (directory<span class="operator">.</span>isEmpty())
+          directory <span class="operator">=</span> <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>homePath() <span class="operator">+</span> QLatin1String(<span class="string">&quot;/.&quot;</span>) <span class="operator">+</span> <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>applicationName();
+      <span class="keyword">if</span> (<span class="operator">!</span><span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>exists(directory)) {
+          <span class="type"><a href="../qtcore/qdir.html">QDir</a></span> dir;
+          dir<span class="operator">.</span>mkpath(directory);
+      }
+
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> historyFile(directory <span class="operator">+</span> QLatin1String(<span class="string">&quot;/history&quot;</span>));
+      <span class="comment">// When saving everything use a temporary file to prevent possible data loss.</span>
+      <span class="type"><a href="../qtcore/qtemporaryfile.html">QTemporaryFile</a></span> tempFile;
+      tempFile<span class="operator">.</span>setAutoRemove(<span class="keyword">false</span>);
+      bool open <span class="operator">=</span> <span class="keyword">false</span>;
+      <span class="keyword">if</span> (saveAll) {
+          open <span class="operator">=</span> tempFile<span class="operator">.</span>open();
+      } <span class="keyword">else</span> {
+          open <span class="operator">=</span> historyFile<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>Append);
+      }
+
+      <span class="keyword">if</span> (<span class="operator">!</span>open) {
+          <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Unable to open history file for saving&quot;</span>
+                     <span class="operator">&lt;</span><span class="operator">&lt;</span> (saveAll <span class="operator">?</span> tempFile<span class="operator">.</span>fileName() : historyFile<span class="operator">.</span>fileName());
+          <span class="keyword">return</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> out(saveAll <span class="operator">?</span> <span class="operator">&amp;</span>tempFile : <span class="operator">&amp;</span>historyFile);
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> first; i <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span>; <span class="operator">-</span><span class="operator">-</span>i) {
+          <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> data;
+          <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> stream(<span class="operator">&amp;</span>data<span class="operator">,</span> <span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>WriteOnly);
+          HistoryItem item <span class="operator">=</span> m_history<span class="operator">.</span>at(i);
+          stream <span class="operator">&lt;</span><span class="operator">&lt;</span> HISTORY_VERSION <span class="operator">&lt;</span><span class="operator">&lt;</span> item<span class="operator">.</span>url <span class="operator">&lt;</span><span class="operator">&lt;</span> item<span class="operator">.</span>dateTime <span class="operator">&lt;</span><span class="operator">&lt;</span> item<span class="operator">.</span>title;
+          out <span class="operator">&lt;</span><span class="operator">&lt;</span> data;
+      }
+      tempFile<span class="operator">.</span>close();
+
+      <span class="keyword">if</span> (saveAll) {
+          <span class="keyword">if</span> (historyFile<span class="operator">.</span>exists() <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>historyFile<span class="operator">.</span>remove())
+              <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;History: error removing old history.&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> historyFile<span class="operator">.</span>errorString();
+          <span class="keyword">if</span> (<span class="operator">!</span>tempFile<span class="operator">.</span>rename(historyFile<span class="operator">.</span>fileName()))
+              <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;History: error moving new history over old.&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> tempFile<span class="operator">.</span>errorString() <span class="operator">&lt;</span><span class="operator">&lt;</span> historyFile<span class="operator">.</span>fileName();
+      }
+      m_lastSavedUrl <span class="operator">=</span> m_history<span class="operator">.</span>value(<span class="number">0</span>)<span class="operator">.</span>url;
+  }
+
+  HistoryModel<span class="operator">::</span>HistoryModel(HistoryManager <span class="operator">*</span>history<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qabstracttablemodel.html">QAbstractTableModel</a></span>(parent)
+      <span class="operator">,</span> m_history(history)
+  {
+      Q_ASSERT(m_history);
+      connect(m_history<span class="operator">,</span> SIGNAL(historyReset())<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(historyReset()));
+      connect(m_history<span class="operator">,</span> SIGNAL(entryRemoved(HistoryItem))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(entryRemoved(HistoryItem)));
+
+      connect(m_history<span class="operator">,</span> SIGNAL(entryAdded(HistoryItem))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(entryAdded(HistoryItem)));
+      connect(m_history<span class="operator">,</span> SIGNAL(entryUpdated(<span class="type">int</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(entryUpdated(<span class="type">int</span>)));
+  }
+
+  <span class="type">void</span> HistoryModel<span class="operator">::</span>historyReset()
+  {
+      beginResetModel();
+      m_history<span class="operator">-</span><span class="operator">&gt;</span>history()<span class="operator">.</span>clear();
+      endResetModel();
+  }
+
+  <span class="type">void</span> HistoryModel<span class="operator">::</span>entryAdded(<span class="keyword">const</span> HistoryItem <span class="operator">&amp;</span>item)
+  {
+      beginInsertRows(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      m_history<span class="operator">-</span><span class="operator">&gt;</span>history()<span class="operator">.</span>prepend(item);
+      endInsertRows();
+  }
+
+  <span class="type">void</span> HistoryModel<span class="operator">::</span>entryRemoved(<span class="keyword">const</span> HistoryItem <span class="operator">&amp;</span>item)
+  {
+      <span class="type">int</span> index <span class="operator">=</span> m_history<span class="operator">-</span><span class="operator">&gt;</span>history()<span class="operator">.</span>indexOf(item);
+      Q_ASSERT(index <span class="operator">&gt;</span> <span class="operator">-</span><span class="number">1</span>);
+      beginRemoveRows(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()<span class="operator">,</span>index<span class="operator">,</span> index);
+      m_history<span class="operator">-</span><span class="operator">&gt;</span>history()<span class="operator">.</span>takeAt(index);
+      endRemoveRows();
+  }
+
+  <span class="type">void</span> HistoryModel<span class="operator">::</span>entryUpdated(<span class="type">int</span> offset)
+  {
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> idx <span class="operator">=</span> index(offset<span class="operator">,</span> <span class="number">0</span>);
+      <span class="keyword">emit</span> dataChanged(idx<span class="operator">,</span> idx);
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> HistoryModel<span class="operator">::</span>headerData(<span class="type">int</span> section<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Orientation orientation<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (orientation <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal
+          <span class="operator">&amp;</span><span class="operator">&amp;</span> role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole) {
+          <span class="keyword">switch</span> (section) {
+              <span class="keyword">case</span> <span class="number">0</span>: <span class="keyword">return</span> tr(<span class="string">&quot;Title&quot;</span>);
+              <span class="keyword">case</span> <span class="number">1</span>: <span class="keyword">return</span> tr(<span class="string">&quot;Address&quot;</span>);
+          }
+      }
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qabstracttablemodel.html">QAbstractTableModel</a></span><span class="operator">::</span>headerData(section<span class="operator">,</span> orientation<span class="operator">,</span> role);
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> HistoryModel<span class="operator">::</span>data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>HistoryItem<span class="operator">&gt;</span> lst <span class="operator">=</span> m_history<span class="operator">-</span><span class="operator">&gt;</span>history();
+      <span class="keyword">if</span> (index<span class="operator">.</span>row() <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> index<span class="operator">.</span>row() <span class="operator">&gt;</span><span class="operator">=</span> lst<span class="operator">.</span>size())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+      <span class="keyword">const</span> HistoryItem <span class="operator">&amp;</span>item <span class="operator">=</span> lst<span class="operator">.</span>at(index<span class="operator">.</span>row());
+      <span class="keyword">switch</span> (role) {
+      <span class="keyword">case</span> DateTimeRole:
+          <span class="keyword">return</span> item<span class="operator">.</span>dateTime;
+      <span class="keyword">case</span> DateRole:
+          <span class="keyword">return</span> item<span class="operator">.</span>dateTime<span class="operator">.</span>date();
+      <span class="keyword">case</span> UrlRole:
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(item<span class="operator">.</span>url);
+      <span class="keyword">case</span> UrlStringRole:
+          <span class="keyword">return</span> item<span class="operator">.</span>url;
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole:
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole: {
+          <span class="keyword">switch</span> (index<span class="operator">.</span>column()) {
+              <span class="keyword">case</span> <span class="number">0</span>:
+                  <span class="comment">// when there is no title try to generate one from the url</span>
+                  <span class="keyword">if</span> (item<span class="operator">.</span>title<span class="operator">.</span>isEmpty()) {
+                      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> page <span class="operator">=</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span>(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(item<span class="operator">.</span>url)<span class="operator">.</span>path())<span class="operator">.</span>fileName();
+                      <span class="keyword">if</span> (<span class="operator">!</span>page<span class="operator">.</span>isEmpty())
+                          <span class="keyword">return</span> page;
+                      <span class="keyword">return</span> item<span class="operator">.</span>url;
+                  }
+                  <span class="keyword">return</span> item<span class="operator">.</span>title;
+              <span class="keyword">case</span> <span class="number">1</span>:
+                  <span class="keyword">return</span> item<span class="operator">.</span>url;
+          }
+          }
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DecorationRole:
+          <span class="keyword">if</span> (index<span class="operator">.</span>column() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>) {
+              <span class="keyword">return</span> BrowserApplication<span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>icon(item<span class="operator">.</span>url);
+          }
+      }
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+  }
+
+  <span class="type">int</span> HistoryModel<span class="operator">::</span>columnCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> (parent<span class="operator">.</span>isValid()) <span class="operator">?</span> <span class="number">0</span> : <span class="number">2</span>;
+  }
+
+  <span class="type">int</span> HistoryModel<span class="operator">::</span>rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> (parent<span class="operator">.</span>isValid()) <span class="operator">?</span> <span class="number">0</span> : m_history<span class="operator">-</span><span class="operator">&gt;</span>history()<span class="operator">.</span>count();
+  }
+
+  bool HistoryModel<span class="operator">::</span>removeRows(<span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> count<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent)
+  {
+      <span class="keyword">if</span> (parent<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      <span class="type">int</span> lastRow <span class="operator">=</span> row <span class="operator">+</span> count <span class="operator">-</span> <span class="number">1</span>;
+      beginRemoveRows(parent<span class="operator">,</span> row<span class="operator">,</span> lastRow);
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span>HistoryItem<span class="operator">&gt;</span> <span class="operator">&amp;</span>lst <span class="operator">=</span> m_history<span class="operator">-</span><span class="operator">&gt;</span>history();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> lastRow; i <span class="operator">&gt;</span><span class="operator">=</span> row; <span class="operator">-</span><span class="operator">-</span>i)
+          lst<span class="operator">.</span>removeAt(i);
+      endRemoveRows();
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  <span class="preprocessor">#define MOVEDROWS 15</span>
+
+  <span class="comment">/*
+      Maps the first bunch of items of the source model to the root
+  */</span>
+  HistoryMenuModel<span class="operator">::</span>HistoryMenuModel(HistoryTreeModel <span class="operator">*</span>sourceModel<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qabstractproxymodel.html">QAbstractProxyModel</a></span>(parent)
+      <span class="operator">,</span> m_treeModel(sourceModel)
+  {
+      setSourceModel(sourceModel);
+  }
+
+  <span class="type">int</span> HistoryMenuModel<span class="operator">::</span>bumpedRows() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> first <span class="operator">=</span> m_treeModel<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      <span class="keyword">if</span> (<span class="operator">!</span>first<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="number">0</span>;
+      <span class="keyword">return</span> <a href="../qtcore/qtglobal.html#qMin">qMin</a>(m_treeModel<span class="operator">-</span><span class="operator">&gt;</span>rowCount(first)<span class="operator">,</span> MOVEDROWS);
+  }
+
+  <span class="type">int</span> HistoryMenuModel<span class="operator">::</span>columnCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_treeModel<span class="operator">-</span><span class="operator">&gt;</span>columnCount(mapToSource(parent));
+  }
+
+  <span class="type">int</span> HistoryMenuModel<span class="operator">::</span>rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (parent<span class="operator">.</span>column() <span class="operator">&gt;</span> <span class="number">0</span>)
+          <span class="keyword">return</span> <span class="number">0</span>;
+
+      <span class="keyword">if</span> (<span class="operator">!</span>parent<span class="operator">.</span>isValid()) {
+          <span class="type">int</span> folders <span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount();
+          <span class="type">int</span> bumpedItems <span class="operator">=</span> bumpedRows();
+          <span class="keyword">if</span> (bumpedItems <span class="operator">&lt;</span><span class="operator">=</span> MOVEDROWS
+              <span class="operator">&amp;</span><span class="operator">&amp;</span> bumpedItems <span class="operator">=</span><span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount(sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span>)))
+              <span class="operator">-</span><span class="operator">-</span>folders;
+          <span class="keyword">return</span> bumpedItems <span class="operator">+</span> folders;
+      }
+
+      <span class="keyword">if</span> (parent<span class="operator">.</span>internalId() <span class="operator">=</span><span class="operator">=</span> quintptr(<span class="operator">-</span><span class="number">1</span>)) {
+          <span class="keyword">if</span> (parent<span class="operator">.</span>row() <span class="operator">&lt;</span> bumpedRows())
+              <span class="keyword">return</span> <span class="number">0</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> idx <span class="operator">=</span> mapToSource(parent);
+      <span class="type">int</span> defaultCount <span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount(idx);
+      <span class="keyword">if</span> (idx <span class="operator">=</span><span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span>))
+          <span class="keyword">return</span> defaultCount <span class="operator">-</span> bumpedRows();
+      <span class="keyword">return</span> defaultCount;
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> HistoryMenuModel<span class="operator">::</span>mapFromSource(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>sourceIndex) <span class="keyword">const</span>
+  {
+      <span class="comment">// currently not used or autotested</span>
+      Q_ASSERT(<span class="keyword">false</span>);
+      <span class="type">int</span> sr <span class="operator">=</span> m_treeModel<span class="operator">-</span><span class="operator">&gt;</span>mapToSource(sourceIndex)<span class="operator">.</span>row();
+      <span class="keyword">return</span> createIndex(sourceIndex<span class="operator">.</span>row()<span class="operator">,</span> sourceIndex<span class="operator">.</span>column()<span class="operator">,</span> sr);
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> HistoryMenuModel<span class="operator">::</span>mapToSource(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>proxyIndex) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>proxyIndex<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      <span class="keyword">if</span> (proxyIndex<span class="operator">.</span>internalId() <span class="operator">=</span><span class="operator">=</span> quintptr(<span class="operator">-</span><span class="number">1</span>)) {
+          <span class="type">int</span> bumpedItems <span class="operator">=</span> bumpedRows();
+          <span class="keyword">if</span> (proxyIndex<span class="operator">.</span>row() <span class="operator">&lt;</span> bumpedItems)
+              <span class="keyword">return</span> m_treeModel<span class="operator">-</span><span class="operator">&gt;</span>index(proxyIndex<span class="operator">.</span>row()<span class="operator">,</span> proxyIndex<span class="operator">.</span>column()<span class="operator">,</span> m_treeModel<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span>));
+          <span class="keyword">if</span> (bumpedItems <span class="operator">&lt;</span><span class="operator">=</span> MOVEDROWS <span class="operator">&amp;</span><span class="operator">&amp;</span> bumpedItems <span class="operator">=</span><span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount(m_treeModel<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span>)))
+              <span class="operator">-</span><span class="operator">-</span>bumpedItems;
+          <span class="keyword">return</span> m_treeModel<span class="operator">-</span><span class="operator">&gt;</span>index(proxyIndex<span class="operator">.</span>row() <span class="operator">-</span> bumpedItems<span class="operator">,</span> proxyIndex<span class="operator">.</span>column());
+      }
+
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> historyIndex <span class="operator">=</span> m_treeModel<span class="operator">-</span><span class="operator">&gt;</span>sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>index(proxyIndex<span class="operator">.</span>internalId()<span class="operator">,</span> proxyIndex<span class="operator">.</span>column());
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> treeIndex <span class="operator">=</span> m_treeModel<span class="operator">-</span><span class="operator">&gt;</span>mapFromSource(historyIndex);
+      <span class="keyword">return</span> treeIndex;
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> HistoryMenuModel<span class="operator">::</span>index(<span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> column<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (row <span class="operator">&lt;</span> <span class="number">0</span>
+          <span class="operator">|</span><span class="operator">|</span> column <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> column <span class="operator">&gt;</span><span class="operator">=</span> columnCount(parent)
+          <span class="operator">|</span><span class="operator">|</span> parent<span class="operator">.</span>column() <span class="operator">&gt;</span> <span class="number">0</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+      <span class="keyword">if</span> (<span class="operator">!</span>parent<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> createIndex(row<span class="operator">,</span> column<span class="operator">,</span> quintptr(<span class="operator">-</span><span class="number">1</span>));
+
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> treeIndexParent <span class="operator">=</span> mapToSource(parent);
+
+      <span class="type">int</span> bumpedItems <span class="operator">=</span> <span class="number">0</span>;
+      <span class="keyword">if</span> (treeIndexParent <span class="operator">=</span><span class="operator">=</span> m_treeModel<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span>))
+          bumpedItems <span class="operator">=</span> bumpedRows();
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> treeIndex <span class="operator">=</span> m_treeModel<span class="operator">-</span><span class="operator">&gt;</span>index(row <span class="operator">+</span> bumpedItems<span class="operator">,</span> column<span class="operator">,</span> treeIndexParent);
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> historyIndex <span class="operator">=</span> m_treeModel<span class="operator">-</span><span class="operator">&gt;</span>mapToSource(treeIndex);
+      <span class="type">int</span> historyRow <span class="operator">=</span> historyIndex<span class="operator">.</span>row();
+      <span class="keyword">if</span> (historyRow <span class="operator">=</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+          historyRow <span class="operator">=</span> treeIndex<span class="operator">.</span>row();
+      <span class="keyword">return</span> createIndex(row<span class="operator">,</span> column<span class="operator">,</span> historyRow);
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> HistoryMenuModel<span class="operator">::</span>parent(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      <span class="type">int</span> offset <span class="operator">=</span> index<span class="operator">.</span>internalId();
+      <span class="keyword">if</span> (offset <span class="operator">=</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span> <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>index<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> historyIndex <span class="operator">=</span> m_treeModel<span class="operator">-</span><span class="operator">&gt;</span>sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>index(index<span class="operator">.</span>internalId()<span class="operator">,</span> <span class="number">0</span>);
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> treeIndex <span class="operator">=</span> m_treeModel<span class="operator">-</span><span class="operator">&gt;</span>mapFromSource(historyIndex);
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> treeIndexParent <span class="operator">=</span> treeIndex<span class="operator">.</span>parent();
+
+      <span class="type">int</span> sr <span class="operator">=</span> m_treeModel<span class="operator">-</span><span class="operator">&gt;</span>mapToSource(treeIndexParent)<span class="operator">.</span>row();
+      <span class="type">int</span> bumpedItems <span class="operator">=</span> bumpedRows();
+      <span class="keyword">if</span> (bumpedItems <span class="operator">&lt;</span><span class="operator">=</span> MOVEDROWS <span class="operator">&amp;</span><span class="operator">&amp;</span> bumpedItems <span class="operator">=</span><span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount(sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span>)))
+          <span class="operator">-</span><span class="operator">-</span>bumpedItems;
+      <span class="keyword">return</span> createIndex(bumpedItems <span class="operator">+</span> treeIndexParent<span class="operator">.</span>row()<span class="operator">,</span> treeIndexParent<span class="operator">.</span>column()<span class="operator">,</span> sr);
+  }
+
+  HistoryMenu<span class="operator">::</span>HistoryMenu(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : ModelMenu(parent)
+      <span class="operator">,</span> m_history(<span class="number">0</span>)
+  {
+      connect(<span class="keyword">this</span><span class="operator">,</span> SIGNAL(activated(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(activated(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>)));
+      setHoverRole(HistoryModel<span class="operator">::</span>UrlStringRole);
+  }
+
+  <span class="type">void</span> HistoryMenu<span class="operator">::</span>activated(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index)
+  {
+      <span class="keyword">emit</span> openUrl(index<span class="operator">.</span>data(HistoryModel<span class="operator">::</span>UrlRole)<span class="operator">.</span>toUrl());
+  }
+
+  bool HistoryMenu<span class="operator">::</span>prePopulated()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_history) {
+          m_history <span class="operator">=</span> BrowserApplication<span class="operator">::</span>historyManager();
+          m_historyMenuModel <span class="operator">=</span> <span class="keyword">new</span> HistoryMenuModel(m_history<span class="operator">-</span><span class="operator">&gt;</span>historyTreeModel()<span class="operator">,</span> <span class="keyword">this</span>);
+          setModel(m_historyMenuModel);
+      }
+      <span class="comment">// initial actions</span>
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_initialActions<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>i)
+          addAction(m_initialActions<span class="operator">.</span>at(i));
+      <span class="keyword">if</span> (<span class="operator">!</span>m_initialActions<span class="operator">.</span>isEmpty())
+          addSeparator();
+      setFirstSeparator(m_historyMenuModel<span class="operator">-</span><span class="operator">&gt;</span>bumpedRows());
+
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+  }
+
+  <span class="type">void</span> HistoryMenu<span class="operator">::</span>postPopulated()
+  {
+      <span class="keyword">if</span> (m_history<span class="operator">-</span><span class="operator">&gt;</span>history()<span class="operator">.</span>count() <span class="operator">&gt;</span> <span class="number">0</span>)
+          addSeparator();
+
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>showAllAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span>(tr(<span class="string">&quot;Show All History&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(showAllAction<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(showHistoryDialog()));
+      addAction(showAllAction);
+
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>clearAction <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span>(tr(<span class="string">&quot;Clear History&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(clearAction<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> m_history<span class="operator">,</span> SLOT(clear()));
+      addAction(clearAction);
+  }
+
+  <span class="type">void</span> HistoryMenu<span class="operator">::</span>showHistoryDialog()
+  {
+      HistoryDialog <span class="operator">*</span>dialog <span class="operator">=</span> <span class="keyword">new</span> HistoryDialog(<span class="keyword">this</span>);
+      connect(dialog<span class="operator">,</span> SIGNAL(openUrl(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SIGNAL(openUrl(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>)));
+      dialog<span class="operator">-</span><span class="operator">&gt;</span>show();
+  }
+
+  <span class="type">void</span> HistoryMenu<span class="operator">::</span>setInitialActions(<span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span><span class="operator">*</span><span class="operator">&gt;</span> actions)
+  {
+      m_initialActions <span class="operator">=</span> actions;
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_initialActions<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>i)
+          addAction(m_initialActions<span class="operator">.</span>at(i));
+  }
+
+  TreeProxyModel<span class="operator">::</span>TreeProxyModel(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent) : <span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span>(parent)
+  {
+      setSortRole(HistoryModel<span class="operator">::</span>DateTimeRole);
+      setFilterCaseSensitivity(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CaseInsensitive);
+  }
+
+  bool TreeProxyModel<span class="operator">::</span>filterAcceptsRow(<span class="type">int</span> source_row<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>source_parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span><span class="operator">::</span>filterAcceptsRow(source_row<span class="operator">,</span> source_parent);
+  }
+
+  HistoryDialog<span class="operator">::</span>HistoryDialog(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent<span class="operator">,</span> HistoryManager <span class="operator">*</span>setHistory) : <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span>(parent)
+  {
+      HistoryManager <span class="operator">*</span>history <span class="operator">=</span> setHistory;
+      <span class="keyword">if</span> (<span class="operator">!</span>history)
+          history <span class="operator">=</span> BrowserApplication<span class="operator">::</span>historyManager();
+      setupUi(<span class="keyword">this</span>);
+      tree<span class="operator">-</span><span class="operator">&gt;</span>setUniformRowHeights(<span class="keyword">true</span>);
+      tree<span class="operator">-</span><span class="operator">&gt;</span>setSelectionBehavior(<span class="type"><a href="../qtwidgets/qabstractitemview.html">QAbstractItemView</a></span><span class="operator">::</span>SelectRows);
+      tree<span class="operator">-</span><span class="operator">&gt;</span>setTextElideMode(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ElideMiddle);
+      <span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span> <span class="operator">*</span>model <span class="operator">=</span> history<span class="operator">-</span><span class="operator">&gt;</span>historyFilterModel();
+      TreeProxyModel <span class="operator">*</span>proxyModel <span class="operator">=</span> <span class="keyword">new</span> TreeProxyModel(<span class="keyword">this</span>);
+      connect(search<span class="operator">,</span> SIGNAL(textChanged(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span>
+              proxyModel<span class="operator">,</span> SLOT(setFilterFixedString(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>)));
+      connect(removeButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> tree<span class="operator">,</span> SLOT(removeOne()));
+      connect(removeAllButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> tree<span class="operator">,</span> SLOT(removeAll()));
+      proxyModel<span class="operator">-</span><span class="operator">&gt;</span>setSourceModel(model);
+      proxyModel<span class="operator">-</span><span class="operator">&gt;</span>setFilterKeyColumn(<span class="number">1</span>);
+      tree<span class="operator">-</span><span class="operator">&gt;</span>setModel(proxyModel);
+      tree<span class="operator">-</span><span class="operator">&gt;</span>setSortingEnabled(<span class="keyword">true</span>);
+      tree<span class="operator">-</span><span class="operator">&gt;</span>setExpanded(proxyModel<span class="operator">-</span><span class="operator">&gt;</span>index(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span>)<span class="operator">,</span> <span class="keyword">true</span>);
+      tree<span class="operator">-</span><span class="operator">&gt;</span>setAlternatingRowColors(<span class="keyword">true</span>);
+      <span class="type"><a href="../qtgui/qfontmetrics.html">QFontMetrics</a></span> fm(font());
+      <span class="type">int</span> header <span class="operator">=</span> fm<span class="operator">.</span>width(QLatin1Char(<span class="char">'m'</span>)) <span class="operator">*</span> <span class="number">40</span>;
+      tree<span class="operator">-</span><span class="operator">&gt;</span>header()<span class="operator">-</span><span class="operator">&gt;</span>resizeSection(<span class="number">0</span><span class="operator">,</span> header);
+      tree<span class="operator">-</span><span class="operator">&gt;</span>header()<span class="operator">-</span><span class="operator">&gt;</span>setStretchLastSection(<span class="keyword">true</span>);
+      connect(tree<span class="operator">,</span> SIGNAL(activated(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(open()));
+      tree<span class="operator">-</span><span class="operator">&gt;</span>setContextMenuPolicy(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>CustomContextMenu);
+      connect(tree<span class="operator">,</span> SIGNAL(customContextMenuRequested(<span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(customContextMenuRequested(<span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>)));
+  }
+
+  <span class="type">void</span> HistoryDialog<span class="operator">::</span>customContextMenuRequested(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <span class="operator">&amp;</span>pos)
+  {
+      <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> menu;
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index <span class="operator">=</span> tree<span class="operator">-</span><span class="operator">&gt;</span>indexAt(pos);
+      index <span class="operator">=</span> index<span class="operator">.</span>sibling(index<span class="operator">.</span>row()<span class="operator">,</span> <span class="number">0</span>);
+      <span class="keyword">if</span> (index<span class="operator">.</span>isValid() <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>tree<span class="operator">-</span><span class="operator">&gt;</span>model()<span class="operator">-</span><span class="operator">&gt;</span>hasChildren(index)) {
+          menu<span class="operator">.</span>addAction(tr(<span class="string">&quot;Open&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(open()));
+          menu<span class="operator">.</span>addSeparator();
+          menu<span class="operator">.</span>addAction(tr(<span class="string">&quot;Copy&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(copy()));
+      }
+      menu<span class="operator">.</span>addAction(tr(<span class="string">&quot;Delete&quot;</span>)<span class="operator">,</span> tree<span class="operator">,</span> SLOT(removeOne()));
+      menu<span class="operator">.</span>exec(<span class="type"><a href="../qtgui/qcursor.html">QCursor</a></span><span class="operator">::</span>pos());
+  }
+
+  <span class="type">void</span> HistoryDialog<span class="operator">::</span>open()
+  {
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index <span class="operator">=</span> tree<span class="operator">-</span><span class="operator">&gt;</span>currentIndex();
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>parent()<span class="operator">.</span>isValid())
+          <span class="keyword">return</span>;
+      <span class="keyword">emit</span> openUrl(index<span class="operator">.</span>data(HistoryModel<span class="operator">::</span>UrlRole)<span class="operator">.</span>toUrl());
+  }
+
+  <span class="type">void</span> HistoryDialog<span class="operator">::</span>copy()
+  {
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index <span class="operator">=</span> tree<span class="operator">-</span><span class="operator">&gt;</span>currentIndex();
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>parent()<span class="operator">.</span>isValid())
+          <span class="keyword">return</span>;
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> url <span class="operator">=</span> index<span class="operator">.</span>data(HistoryModel<span class="operator">::</span>UrlStringRole)<span class="operator">.</span>toString();
+
+      <span class="type"><a href="../qtgui/qclipboard.html">QClipboard</a></span> <span class="operator">*</span>clipboard <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span><span class="operator">::</span>clipboard();
+      clipboard<span class="operator">-</span><span class="operator">&gt;</span>setText(url);
+  }
+
+  HistoryFilterModel<span class="operator">::</span>HistoryFilterModel(<span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span> <span class="operator">*</span>sourceModel<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qabstractproxymodel.html">QAbstractProxyModel</a></span>(parent)<span class="operator">,</span>
+      m_loaded(<span class="keyword">false</span>)
+  {
+      setSourceModel(sourceModel);
+  }
+
+  <span class="type">void</span> HistoryFilterModel<span class="operator">::</span>setSourceModel(<span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span> <span class="operator">*</span>newSourceModel)
+  {
+      beginResetModel();
+      <span class="keyword">if</span> (sourceModel()) {
+          disconnect(sourceModel()<span class="operator">,</span> SIGNAL(modelReset())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceReset()));
+          disconnect(sourceModel()<span class="operator">,</span> SIGNAL(dataChanged(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>))<span class="operator">,</span>
+                     <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceDataChanged(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>)));
+          disconnect(sourceModel()<span class="operator">,</span> SIGNAL(rowsInserted(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceRowsInserted(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>)));
+          disconnect(sourceModel()<span class="operator">,</span> SIGNAL(rowsRemoved(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceRowsRemoved(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>)));
+      }
+
+      <span class="type"><a href="../qtcore/qabstractproxymodel.html">QAbstractProxyModel</a></span><span class="operator">::</span>setSourceModel(newSourceModel);
+
+      <span class="keyword">if</span> (sourceModel()) {
+          connect(sourceModel()<span class="operator">,</span> SIGNAL(modelReset())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceReset()));
+          connect(sourceModel()<span class="operator">,</span> SIGNAL(dataChanged(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>))<span class="operator">,</span>
+                     <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceDataChanged(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>)));
+          connect(sourceModel()<span class="operator">,</span> SIGNAL(rowsInserted(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceRowsInserted(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>)));
+          connect(sourceModel()<span class="operator">,</span> SIGNAL(rowsRemoved(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceRowsRemoved(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>)));
+      }
+      load();
+      endResetModel();
+  }
+
+  <span class="type">void</span> HistoryFilterModel<span class="operator">::</span>sourceDataChanged(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>topLeft<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>bottomRight)
+  {
+      <span class="keyword">emit</span> dataChanged(mapFromSource(topLeft)<span class="operator">,</span> mapFromSource(bottomRight));
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> HistoryFilterModel<span class="operator">::</span>headerData(<span class="type">int</span> section<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Orientation orientation<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>headerData(section<span class="operator">,</span> orientation<span class="operator">,</span> role);
+  }
+
+  <span class="type">void</span> HistoryFilterModel<span class="operator">::</span>sourceReset()
+  {
+      beginResetModel();
+      load();
+      endResetModel();
+  }
+
+  <span class="type">int</span> HistoryFilterModel<span class="operator">::</span>rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (parent<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="number">0</span>;
+      <span class="keyword">return</span> m_historyHash<span class="operator">.</span>count();
+  }
+
+  <span class="type">int</span> HistoryFilterModel<span class="operator">::</span>columnCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> (parent<span class="operator">.</span>isValid()) <span class="operator">?</span> <span class="number">0</span> : <span class="number">2</span>;
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> HistoryFilterModel<span class="operator">::</span>mapToSource(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>proxyIndex) <span class="keyword">const</span>
+  {
+      <span class="type">int</span> sourceRow <span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount() <span class="operator">-</span> proxyIndex<span class="operator">.</span>internalId();
+      <span class="keyword">return</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>index(sourceRow<span class="operator">,</span> proxyIndex<span class="operator">.</span>column());
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> HistoryFilterModel<span class="operator">::</span>mapFromSource(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>sourceIndex) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> url <span class="operator">=</span> sourceIndex<span class="operator">.</span>data(HistoryModel<span class="operator">::</span>UrlStringRole)<span class="operator">.</span>toString();
+      <span class="keyword">if</span> (<span class="operator">!</span>m_historyHash<span class="operator">.</span>contains(url))
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      <span class="comment">// This can be done in a binary search, but we can't use qBinary find</span>
+      <span class="comment">// because it can't take: qBinaryFind(m_sourceRow.end(), m_sourceRow.begin(), v);</span>
+      <span class="comment">// so if this is a performance bottlneck then convert to binary search, until then</span>
+      <span class="comment">// the cleaner/easier to read code wins the day.</span>
+      <span class="type">int</span> realRow <span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>;
+      <span class="type">int</span> sourceModelRow <span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount() <span class="operator">-</span> sourceIndex<span class="operator">.</span>row();
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_sourceRow<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="keyword">if</span> (m_sourceRow<span class="operator">.</span>at(i) <span class="operator">=</span><span class="operator">=</span> sourceModelRow) {
+              realRow <span class="operator">=</span> i;
+              <span class="keyword">break</span>;
+          }
+      }
+      <span class="keyword">if</span> (realRow <span class="operator">=</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      <span class="keyword">return</span> createIndex(realRow<span class="operator">,</span> sourceIndex<span class="operator">.</span>column()<span class="operator">,</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount() <span class="operator">-</span> sourceIndex<span class="operator">.</span>row());
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> HistoryFilterModel<span class="operator">::</span>index(<span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> column<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (row <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> row <span class="operator">&gt;</span><span class="operator">=</span> rowCount(parent)
+          <span class="operator">|</span><span class="operator">|</span> column <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> column <span class="operator">&gt;</span><span class="operator">=</span> columnCount(parent))
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      <span class="keyword">return</span> createIndex(row<span class="operator">,</span> column<span class="operator">,</span> m_sourceRow<span class="operator">[</span>row<span class="operator">]</span>);
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> HistoryFilterModel<span class="operator">::</span>parent(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+  }
+
+  <span class="type">void</span> HistoryFilterModel<span class="operator">::</span>load() <span class="keyword">const</span>
+  {
+      m_sourceRow<span class="operator">.</span>clear();
+      m_historyHash<span class="operator">.</span>clear();
+      m_historyHash<span class="operator">.</span>reserve(sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount());
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount(); <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> idx <span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>index(i<span class="operator">,</span> <span class="number">0</span>);
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> url <span class="operator">=</span> idx<span class="operator">.</span>data(HistoryModel<span class="operator">::</span>UrlStringRole)<span class="operator">.</span>toString();
+          <span class="keyword">if</span> (<span class="operator">!</span>m_historyHash<span class="operator">.</span>contains(url)) {
+              m_sourceRow<span class="operator">.</span>append(sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount() <span class="operator">-</span> i);
+              m_historyHash<span class="operator">[</span>url<span class="operator">]</span> <span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount() <span class="operator">-</span> i;
+          }
+      }
+  }
+
+  <span class="type">void</span> HistoryFilterModel<span class="operator">::</span>sourceRowsInserted(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent<span class="operator">,</span> <span class="type">int</span> start<span class="operator">,</span> <span class="type">int</span> end)
+  {
+      Q_ASSERT(start <span class="operator">=</span><span class="operator">=</span> end <span class="operator">&amp;</span><span class="operator">&amp;</span> start <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>);
+      Q_UNUSED(end);
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> idx <span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>index(start<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> parent);
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> url <span class="operator">=</span> idx<span class="operator">.</span>data(HistoryModel<span class="operator">::</span>UrlStringRole)<span class="operator">.</span>toString();
+      <span class="keyword">if</span> (m_historyHash<span class="operator">.</span>contains(url)) {
+          <span class="type">int</span> sourceRow <span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount() <span class="operator">-</span> m_historyHash<span class="operator">[</span>url<span class="operator">]</span>;
+          <span class="type">int</span> realRow <span class="operator">=</span> mapFromSource(sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>index(sourceRow<span class="operator">,</span> <span class="number">0</span>))<span class="operator">.</span>row();
+          beginRemoveRows(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()<span class="operator">,</span> realRow<span class="operator">,</span> realRow);
+          m_sourceRow<span class="operator">.</span>removeAt(realRow);
+          m_historyHash<span class="operator">.</span>remove(url);
+          endRemoveRows();
+      }
+      beginInsertRows(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      m_historyHash<span class="operator">.</span>insert(url<span class="operator">,</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount() <span class="operator">-</span> start);
+      m_sourceRow<span class="operator">.</span>insert(<span class="number">0</span><span class="operator">,</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount());
+      endInsertRows();
+  }
+
+  <span class="type">void</span> HistoryFilterModel<span class="operator">::</span>sourceRowsRemoved(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span><span class="operator">,</span> <span class="type">int</span> start<span class="operator">,</span> <span class="type">int</span> end)
+  {
+      Q_UNUSED(start);
+      Q_UNUSED(end);
+      sourceReset();
+  }
+
+  <span class="comment">/*
+      Removing a continuous block of rows will remove filtered rows too as this is
+      the users intention.
+  */</span>
+  bool HistoryFilterModel<span class="operator">::</span>removeRows(<span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> count<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent)
+  {
+      <span class="keyword">if</span> (row <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> count <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> row <span class="operator">+</span> count <span class="operator">&gt;</span> rowCount(parent) <span class="operator">|</span><span class="operator">|</span> parent<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      <span class="type">int</span> lastRow <span class="operator">=</span> row <span class="operator">+</span> count <span class="operator">-</span> <span class="number">1</span>;
+      disconnect(sourceModel()<span class="operator">,</span> SIGNAL(rowsRemoved(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceRowsRemoved(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>)));
+      beginRemoveRows(parent<span class="operator">,</span> row<span class="operator">,</span> lastRow);
+      <span class="type">int</span> oldCount <span class="operator">=</span> rowCount();
+      <span class="type">int</span> start <span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount() <span class="operator">-</span> m_sourceRow<span class="operator">.</span>value(row);
+      <span class="type">int</span> end <span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount() <span class="operator">-</span> m_sourceRow<span class="operator">.</span>value(lastRow);
+      sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>removeRows(start<span class="operator">,</span> end <span class="operator">-</span> start <span class="operator">+</span> <span class="number">1</span>);
+      endRemoveRows();
+      connect(sourceModel()<span class="operator">,</span> SIGNAL(rowsRemoved(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceRowsRemoved(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>)));
+      m_loaded <span class="operator">=</span> <span class="keyword">false</span>;
+      <span class="keyword">if</span> (oldCount <span class="operator">-</span> count <span class="operator">!</span><span class="operator">=</span> rowCount()) {
+          beginResetModel();
+          endResetModel();
+      }
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  HistoryCompletionModel<span class="operator">::</span>HistoryCompletionModel(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qabstractproxymodel.html">QAbstractProxyModel</a></span>(parent)
+  {
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> HistoryCompletionModel<span class="operator">::</span>data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (sourceModel()
+          <span class="operator">&amp;</span><span class="operator">&amp;</span> (role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole <span class="operator">|</span><span class="operator">|</span> role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole)
+          <span class="operator">&amp;</span><span class="operator">&amp;</span> index<span class="operator">.</span>isValid()) {
+          <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> idx <span class="operator">=</span> mapToSource(index);
+          idx <span class="operator">=</span> idx<span class="operator">.</span>sibling(idx<span class="operator">.</span>row()<span class="operator">,</span> <span class="number">1</span>);
+          <span class="type"><a href="../qtcore/qstring.html">QString</a></span> urlString <span class="operator">=</span> idx<span class="operator">.</span>data(HistoryModel<span class="operator">::</span>UrlStringRole)<span class="operator">.</span>toString();
+          <span class="keyword">if</span> (index<span class="operator">.</span>row() <span class="operator">%</span> <span class="number">2</span>) {
+              <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> url <span class="operator">=</span> urlString;
+              <span class="type"><a href="../qtcore/qstring.html">QString</a></span> s <span class="operator">=</span> url<span class="operator">.</span>toString(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>RemoveScheme
+                                       <span class="operator">|</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>RemoveUserInfo
+                                       <span class="operator">|</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span><span class="operator">::</span>StripTrailingSlash);
+              <span class="keyword">return</span> s<span class="operator">.</span>mid(<span class="number">2</span>);  <span class="comment">// strip // from the front</span>
+          }
+          <span class="keyword">return</span> urlString;
+      }
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qabstractproxymodel.html">QAbstractProxyModel</a></span><span class="operator">::</span>data(index<span class="operator">,</span> role);
+  }
+
+  <span class="type">int</span> HistoryCompletionModel<span class="operator">::</span>rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> (parent<span class="operator">.</span>isValid() <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>sourceModel()) <span class="operator">?</span> <span class="number">0</span> : sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount(parent) <span class="operator">*</span> <span class="number">2</span>;
+  }
+
+  <span class="type">int</span> HistoryCompletionModel<span class="operator">::</span>columnCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> (parent<span class="operator">.</span>isValid()) <span class="operator">?</span> <span class="number">0</span> : <span class="number">1</span>;
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> HistoryCompletionModel<span class="operator">::</span>mapFromSource(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>sourceIndex) <span class="keyword">const</span>
+  {
+      <span class="type">int</span> row <span class="operator">=</span> sourceIndex<span class="operator">.</span>row() <span class="operator">*</span> <span class="number">2</span>;
+      <span class="keyword">return</span> index(row<span class="operator">,</span> sourceIndex<span class="operator">.</span>column());
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> HistoryCompletionModel<span class="operator">::</span>mapToSource(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>proxyIndex) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>sourceModel())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+      <span class="type">int</span> row <span class="operator">=</span> proxyIndex<span class="operator">.</span>row() <span class="operator">/</span> <span class="number">2</span>;
+      <span class="keyword">return</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>index(row<span class="operator">,</span> proxyIndex<span class="operator">.</span>column());
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> HistoryCompletionModel<span class="operator">::</span>index(<span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> column<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (row <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> row <span class="operator">&gt;</span><span class="operator">=</span> rowCount(parent)
+          <span class="operator">|</span><span class="operator">|</span> column <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> column <span class="operator">&gt;</span><span class="operator">=</span> columnCount(parent))
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+      <span class="keyword">return</span> createIndex(row<span class="operator">,</span> column);
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> HistoryCompletionModel<span class="operator">::</span>parent(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+  }
+
+  <span class="type">void</span> HistoryCompletionModel<span class="operator">::</span>setSourceModel(<span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span> <span class="operator">*</span>newSourceModel)
+  {
+      <span class="keyword">if</span> (sourceModel()) {
+          disconnect(sourceModel()<span class="operator">,</span> SIGNAL(modelReset())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceReset()));
+          disconnect(sourceModel()<span class="operator">,</span> SIGNAL(rowsInserted(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceReset()));
+          disconnect(sourceModel()<span class="operator">,</span> SIGNAL(rowsRemoved(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceReset()));
+      }
+
+      <span class="type"><a href="../qtcore/qabstractproxymodel.html">QAbstractProxyModel</a></span><span class="operator">::</span>setSourceModel(newSourceModel);
+
+      <span class="keyword">if</span> (newSourceModel) {
+          connect(newSourceModel<span class="operator">,</span> SIGNAL(modelReset())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceReset()));
+          connect(sourceModel()<span class="operator">,</span> SIGNAL(rowsInserted(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceReset()));
+          connect(sourceModel()<span class="operator">,</span> SIGNAL(rowsRemoved(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceReset()));
+      }
+
+      beginResetModel();
+      endResetModel();
+  }
+
+  <span class="type">void</span> HistoryCompletionModel<span class="operator">::</span>sourceReset()
+  {
+      beginResetModel();
+      endResetModel();
+  }
+
+  HistoryTreeModel<span class="operator">::</span>HistoryTreeModel(<span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span> <span class="operator">*</span>sourceModel<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qabstractproxymodel.html">QAbstractProxyModel</a></span>(parent)
+  {
+      setSourceModel(sourceModel);
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> HistoryTreeModel<span class="operator">::</span>headerData(<span class="type">int</span> section<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Orientation orientation<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>headerData(section<span class="operator">,</span> orientation<span class="operator">,</span> role);
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> HistoryTreeModel<span class="operator">::</span>data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> ((role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole <span class="operator">|</span><span class="operator">|</span> role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole)) {
+          <span class="type">int</span> start <span class="operator">=</span> index<span class="operator">.</span>internalId();
+          <span class="keyword">if</span> (start <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>) {
+              <span class="type">int</span> offset <span class="operator">=</span> sourceDateRow(index<span class="operator">.</span>row());
+              <span class="keyword">if</span> (index<span class="operator">.</span>column() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>) {
+                  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> idx <span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>index(offset<span class="operator">,</span> <span class="number">0</span>);
+                  <span class="type"><a href="../qtcore/qdate.html">QDate</a></span> date <span class="operator">=</span> idx<span class="operator">.</span>data(HistoryModel<span class="operator">::</span>DateRole)<span class="operator">.</span>toDate();
+                  <span class="keyword">if</span> (date <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qdate.html">QDate</a></span><span class="operator">::</span>currentDate())
+                      <span class="keyword">return</span> tr(<span class="string">&quot;Earlier Today&quot;</span>);
+                  <span class="keyword">return</span> date<span class="operator">.</span>toString(QLatin1String(<span class="string">&quot;dddd, MMMM d, yyyy&quot;</span>));
+              }
+              <span class="keyword">if</span> (index<span class="operator">.</span>column() <span class="operator">=</span><span class="operator">=</span> <span class="number">1</span>) {
+                  <span class="keyword">return</span> tr(<span class="string">&quot;%1 items&quot;</span>)<span class="operator">.</span>arg(rowCount(index<span class="operator">.</span>sibling(index<span class="operator">.</span>row()<span class="operator">,</span> <span class="number">0</span>)));
+              }
+          }
+      }
+      <span class="keyword">if</span> (role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DecorationRole <span class="operator">&amp;</span><span class="operator">&amp;</span> index<span class="operator">.</span>column() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>index<span class="operator">.</span>parent()<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(QLatin1String(<span class="string">&quot;:history.png&quot;</span>));
+      <span class="keyword">if</span> (role <span class="operator">=</span><span class="operator">=</span> HistoryModel<span class="operator">::</span>DateRole <span class="operator">&amp;</span><span class="operator">&amp;</span> index<span class="operator">.</span>column() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> index<span class="operator">.</span>internalId() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>) {
+          <span class="type">int</span> offset <span class="operator">=</span> sourceDateRow(index<span class="operator">.</span>row());
+          <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> idx <span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>index(offset<span class="operator">,</span> <span class="number">0</span>);
+          <span class="keyword">return</span> idx<span class="operator">.</span>data(HistoryModel<span class="operator">::</span>DateRole);
+      }
+
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qabstractproxymodel.html">QAbstractProxyModel</a></span><span class="operator">::</span>data(index<span class="operator">,</span> role);
+  }
+
+  <span class="type">int</span> HistoryTreeModel<span class="operator">::</span>columnCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>columnCount(mapToSource(parent));
+  }
+
+  <span class="type">int</span> HistoryTreeModel<span class="operator">::</span>rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> ( parent<span class="operator">.</span>internalId() <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>
+          <span class="operator">|</span><span class="operator">|</span> parent<span class="operator">.</span>column() <span class="operator">&gt;</span> <span class="number">0</span>
+          <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>sourceModel())
+          <span class="keyword">return</span> <span class="number">0</span>;
+
+      <span class="comment">// row count OF dates</span>
+      <span class="keyword">if</span> (<span class="operator">!</span>parent<span class="operator">.</span>isValid()) {
+          <span class="keyword">if</span> (<span class="operator">!</span>m_sourceRowCache<span class="operator">.</span>isEmpty())
+              <span class="keyword">return</span> m_sourceRowCache<span class="operator">.</span>count();
+          <span class="type"><a href="../qtcore/qdate.html">QDate</a></span> currentDate;
+          <span class="type">int</span> rows <span class="operator">=</span> <span class="number">0</span>;
+          <span class="type">int</span> totalRows <span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount();
+
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> totalRows; <span class="operator">+</span><span class="operator">+</span>i) {
+              <span class="type"><a href="../qtcore/qdate.html">QDate</a></span> rowDate <span class="operator">=</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>index(i<span class="operator">,</span> <span class="number">0</span>)<span class="operator">.</span>data(HistoryModel<span class="operator">::</span>DateRole)<span class="operator">.</span>toDate();
+              <span class="keyword">if</span> (rowDate <span class="operator">!</span><span class="operator">=</span> currentDate) {
+                  m_sourceRowCache<span class="operator">.</span>append(i);
+                  currentDate <span class="operator">=</span> rowDate;
+                  <span class="operator">+</span><span class="operator">+</span>rows;
+              }
+          }
+          Q_ASSERT(m_sourceRowCache<span class="operator">.</span>count() <span class="operator">=</span><span class="operator">=</span> rows);
+          <span class="keyword">return</span> rows;
+      }
+
+      <span class="comment">// row count FOR a date</span>
+      <span class="type">int</span> start <span class="operator">=</span> sourceDateRow(parent<span class="operator">.</span>row());
+      <span class="type">int</span> end <span class="operator">=</span> sourceDateRow(parent<span class="operator">.</span>row() <span class="operator">+</span> <span class="number">1</span>);
+      <span class="keyword">return</span> (end <span class="operator">-</span> start);
+  }
+
+  <span class="comment">// Translate the top level date row into the offset where that date starts</span>
+  <span class="type">int</span> HistoryTreeModel<span class="operator">::</span>sourceDateRow(<span class="type">int</span> row) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (row <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="keyword">return</span> <span class="number">0</span>;
+
+      <span class="keyword">if</span> (m_sourceRowCache<span class="operator">.</span>isEmpty())
+          rowCount(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>());
+
+      <span class="keyword">if</span> (row <span class="operator">&gt;</span><span class="operator">=</span> m_sourceRowCache<span class="operator">.</span>count()) {
+          <span class="keyword">if</span> (<span class="operator">!</span>sourceModel())
+              <span class="keyword">return</span> <span class="number">0</span>;
+          <span class="keyword">return</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>rowCount();
+      }
+      <span class="keyword">return</span> m_sourceRowCache<span class="operator">.</span>at(row);
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> HistoryTreeModel<span class="operator">::</span>mapToSource(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>proxyIndex) <span class="keyword">const</span>
+  {
+      <span class="type">int</span> offset <span class="operator">=</span> proxyIndex<span class="operator">.</span>internalId();
+      <span class="keyword">if</span> (offset <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+      <span class="type">int</span> startDateRow <span class="operator">=</span> sourceDateRow(offset <span class="operator">-</span> <span class="number">1</span>);
+      <span class="keyword">return</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>index(startDateRow <span class="operator">+</span> proxyIndex<span class="operator">.</span>row()<span class="operator">,</span> proxyIndex<span class="operator">.</span>column());
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> HistoryTreeModel<span class="operator">::</span>index(<span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> column<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (row <span class="operator">&lt;</span> <span class="number">0</span>
+          <span class="operator">|</span><span class="operator">|</span> column <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> column <span class="operator">&gt;</span><span class="operator">=</span> columnCount(parent)
+          <span class="operator">|</span><span class="operator">|</span> parent<span class="operator">.</span>column() <span class="operator">&gt;</span> <span class="number">0</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      <span class="keyword">if</span> (<span class="operator">!</span>parent<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> createIndex(row<span class="operator">,</span> column);
+      <span class="keyword">return</span> createIndex(row<span class="operator">,</span> column<span class="operator">,</span> parent<span class="operator">.</span>row() <span class="operator">+</span> <span class="number">1</span>);
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> HistoryTreeModel<span class="operator">::</span>parent(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      <span class="type">int</span> offset <span class="operator">=</span> index<span class="operator">.</span>internalId();
+      <span class="keyword">if</span> (offset <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>index<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+      <span class="keyword">return</span> createIndex(offset <span class="operator">-</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+  }
+
+  bool HistoryTreeModel<span class="operator">::</span>hasChildren(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> grandparent <span class="operator">=</span> parent<span class="operator">.</span>parent();
+      <span class="keyword">if</span> (<span class="operator">!</span>grandparent<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="keyword">true</span>;
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+  }
+
+  <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemFlags HistoryTreeModel<span class="operator">::</span>flags(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>index<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoItemFlags;
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsSelectable <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsEnabled <span class="operator">|</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ItemIsDragEnabled;
+  }
+
+  bool HistoryTreeModel<span class="operator">::</span>removeRows(<span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> count<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent)
+  {
+      <span class="keyword">if</span> (row <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> count <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> row <span class="operator">+</span> count <span class="operator">&gt;</span> rowCount(parent))
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      <span class="keyword">if</span> (parent<span class="operator">.</span>isValid()) {
+          <span class="comment">// removing pages</span>
+          <span class="type">int</span> offset <span class="operator">=</span> sourceDateRow(parent<span class="operator">.</span>row());
+          <span class="keyword">return</span> sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>removeRows(offset <span class="operator">+</span> row<span class="operator">,</span> count);
+      } <span class="keyword">else</span> {
+          <span class="comment">// removing whole dates</span>
+          <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> row <span class="operator">+</span> count <span class="operator">-</span> <span class="number">1</span>; i <span class="operator">&gt;</span><span class="operator">=</span> row; <span class="operator">-</span><span class="operator">-</span>i) {
+              <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> dateParent <span class="operator">=</span> index(i<span class="operator">,</span> <span class="number">0</span>);
+              <span class="type">int</span> offset <span class="operator">=</span> sourceDateRow(dateParent<span class="operator">.</span>row());
+              <span class="keyword">if</span> (<span class="operator">!</span>sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>removeRows(offset<span class="operator">,</span> rowCount(dateParent)))
+                  <span class="keyword">return</span> <span class="keyword">false</span>;
+          }
+      }
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  <span class="type">void</span> HistoryTreeModel<span class="operator">::</span>setSourceModel(<span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span> <span class="operator">*</span>newSourceModel)
+  {
+      beginResetModel();
+      <span class="keyword">if</span> (sourceModel()) {
+          disconnect(sourceModel()<span class="operator">,</span> SIGNAL(modelReset())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceReset()));
+          disconnect(sourceModel()<span class="operator">,</span> SIGNAL(layoutChanged())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceReset()));
+          disconnect(sourceModel()<span class="operator">,</span> SIGNAL(rowsInserted(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceRowsInserted(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>)));
+          disconnect(sourceModel()<span class="operator">,</span> SIGNAL(rowsRemoved(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceRowsRemoved(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>)));
+          disconnect(sourceModel()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span><span class="operator">::</span>dataChanged<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span>
+                     <span class="operator">&amp;</span>HistoryTreeModel<span class="operator">::</span>sourceDataChanged);
+      }
+
+      <span class="type"><a href="../qtcore/qabstractproxymodel.html">QAbstractProxyModel</a></span><span class="operator">::</span>setSourceModel(newSourceModel);
+
+      <span class="keyword">if</span> (newSourceModel) {
+          connect(sourceModel()<span class="operator">,</span> SIGNAL(modelReset())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceReset()));
+          connect(sourceModel()<span class="operator">,</span> SIGNAL(layoutChanged())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceReset()));
+          connect(sourceModel()<span class="operator">,</span> SIGNAL(rowsInserted(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceRowsInserted(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>)));
+          connect(sourceModel()<span class="operator">,</span> SIGNAL(rowsRemoved(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(sourceRowsRemoved(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span><span class="operator">,</span><span class="type">int</span><span class="operator">,</span><span class="type">int</span>)));
+          connect(sourceModel()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span><span class="operator">::</span>dataChanged<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span>
+                  <span class="operator">&amp;</span>HistoryTreeModel<span class="operator">::</span>sourceDataChanged);
+      }
+      endResetModel();
+  }
+
+  <span class="type">void</span> HistoryTreeModel<span class="operator">::</span>sourceReset()
+  {
+      beginResetModel();
+      m_sourceRowCache<span class="operator">.</span>clear();
+      endResetModel();
+  }
+
+  <span class="type">void</span> HistoryTreeModel<span class="operator">::</span>sourceRowsInserted(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent<span class="operator">,</span> <span class="type">int</span> start<span class="operator">,</span> <span class="type">int</span> end)
+  {
+      Q_UNUSED(parent); <span class="comment">// Avoid warnings when compiling release</span>
+      Q_ASSERT(<span class="operator">!</span>parent<span class="operator">.</span>isValid());
+      <span class="keyword">if</span> (start <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> start <span class="operator">!</span><span class="operator">=</span> end) {
+          beginResetModel();
+          m_sourceRowCache<span class="operator">.</span>clear();
+          endResetModel();
+          <span class="keyword">return</span>;
+      }
+
+      m_sourceRowCache<span class="operator">.</span>clear();
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> treeIndex <span class="operator">=</span> mapFromSource(sourceModel()<span class="operator">-</span><span class="operator">&gt;</span>index(start<span class="operator">,</span> <span class="number">0</span>));
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> treeParent <span class="operator">=</span> treeIndex<span class="operator">.</span>parent();
+      <span class="keyword">if</span> (rowCount(treeParent) <span class="operator">=</span><span class="operator">=</span> <span class="number">1</span>) {
+          beginInsertRows(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+          endInsertRows();
+      } <span class="keyword">else</span> {
+          beginInsertRows(treeParent<span class="operator">,</span> treeIndex<span class="operator">.</span>row()<span class="operator">,</span> treeIndex<span class="operator">.</span>row());
+          endInsertRows();
+      }
+  }
+
+  <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> HistoryTreeModel<span class="operator">::</span>mapFromSource(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>sourceIndex) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>sourceIndex<span class="operator">.</span>isValid())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      <span class="keyword">if</span> (m_sourceRowCache<span class="operator">.</span>isEmpty())
+          rowCount(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>());
+
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span><span class="operator">::</span>iterator it;
+      it <span class="operator">=</span> <a href="../qtcore/qtalgorithms-obsolete.html#qLowerBound-2">qLowerBound</a>(m_sourceRowCache<span class="operator">.</span>begin()<span class="operator">,</span> m_sourceRowCache<span class="operator">.</span>end()<span class="operator">,</span> sourceIndex<span class="operator">.</span>row());
+      <span class="keyword">if</span> (<span class="operator">*</span>it <span class="operator">!</span><span class="operator">=</span> sourceIndex<span class="operator">.</span>row())
+          <span class="operator">-</span><span class="operator">-</span>it;
+      <span class="type">int</span> dateRow <span class="operator">=</span> <a href="../qtcore/qtglobal.html#qMax">qMax</a>(<span class="number">0</span><span class="operator">,</span> it <span class="operator">-</span> m_sourceRowCache<span class="operator">.</span>begin());
+      <span class="type">int</span> row <span class="operator">=</span> sourceIndex<span class="operator">.</span>row() <span class="operator">-</span> m_sourceRowCache<span class="operator">.</span>at(dateRow);
+      <span class="keyword">return</span> createIndex(row<span class="operator">,</span> sourceIndex<span class="operator">.</span>column()<span class="operator">,</span> dateRow <span class="operator">+</span> <span class="number">1</span>);
+  }
+
+  <span class="type">void</span> HistoryTreeModel<span class="operator">::</span>sourceRowsRemoved(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent<span class="operator">,</span> <span class="type">int</span> start<span class="operator">,</span> <span class="type">int</span> end)
+  {
+      Q_UNUSED(parent); <span class="comment">// Avoid warnings when compiling release</span>
+      Q_ASSERT(<span class="operator">!</span>parent<span class="operator">.</span>isValid());
+      <span class="keyword">if</span> (m_sourceRowCache<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> end; i <span class="operator">&gt;</span><span class="operator">=</span> start;) {
+          <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span><span class="operator">::</span>iterator it;
+          it <span class="operator">=</span> <a href="../qtcore/qtalgorithms-obsolete.html#qLowerBound-2">qLowerBound</a>(m_sourceRowCache<span class="operator">.</span>begin()<span class="operator">,</span> m_sourceRowCache<span class="operator">.</span>end()<span class="operator">,</span> i);
+          <span class="comment">// playing it safe</span>
+          <span class="keyword">if</span> (it <span class="operator">=</span><span class="operator">=</span> m_sourceRowCache<span class="operator">.</span>end()) {
+              beginResetModel();
+              m_sourceRowCache<span class="operator">.</span>clear();
+              endResetModel();
+              <span class="keyword">return</span>;
+          }
+
+          <span class="keyword">if</span> (<span class="operator">*</span>it <span class="operator">!</span><span class="operator">=</span> i)
+              <span class="operator">-</span><span class="operator">-</span>it;
+          <span class="type">int</span> row <span class="operator">=</span> <a href="../qtcore/qtglobal.html#qMax">qMax</a>(<span class="number">0</span><span class="operator">,</span> it <span class="operator">-</span> m_sourceRowCache<span class="operator">.</span>begin());
+          <span class="type">int</span> offset <span class="operator">=</span> m_sourceRowCache<span class="operator">[</span>row<span class="operator">]</span>;
+          <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> dateParent <span class="operator">=</span> index(row<span class="operator">,</span> <span class="number">0</span>);
+          <span class="comment">// If we can remove all the rows in the date do that and skip over them</span>
+          <span class="type">int</span> rc <span class="operator">=</span> rowCount(dateParent);
+          <span class="keyword">if</span> (i <span class="operator">-</span> rc <span class="operator">+</span> <span class="number">1</span> <span class="operator">=</span><span class="operator">=</span> offset <span class="operator">&amp;</span><span class="operator">&amp;</span> start <span class="operator">&lt;</span><span class="operator">=</span> i <span class="operator">-</span> rc <span class="operator">+</span> <span class="number">1</span>) {
+              beginRemoveRows(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()<span class="operator">,</span> row<span class="operator">,</span> row);
+              m_sourceRowCache<span class="operator">.</span>removeAt(row);
+              i <span class="operator">-</span><span class="operator">=</span> rc <span class="operator">+</span> <span class="number">1</span>;
+          } <span class="keyword">else</span> {
+              beginRemoveRows(dateParent<span class="operator">,</span> i <span class="operator">-</span> offset<span class="operator">,</span> i <span class="operator">-</span> offset);
+              <span class="operator">+</span><span class="operator">+</span>row;
+              <span class="operator">-</span><span class="operator">-</span>i;
+          }
+          <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> row; j <span class="operator">&lt;</span> m_sourceRowCache<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>j)
+              <span class="operator">-</span><span class="operator">-</span>m_sourceRowCache<span class="operator">[</span>j<span class="operator">]</span>;
+          endRemoveRows();
+      }
+  }
+
+  <span class="type">void</span> HistoryTreeModel<span class="operator">::</span>sourceDataChanged(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>topLeft<span class="operator">,</span>
+                                           <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>bottomRight<span class="operator">,</span>
+                                           <span class="keyword">const</span> <span class="type"><a href="../qtcore/qvector.html">QVector</a></span><span class="operator">&lt;</span><span class="type">int</span><span class="operator">&gt;</span> roles)
+  {
+       <span class="keyword">emit</span> dataChanged(mapFromSource(topLeft)<span class="operator">,</span> mapFromSource(bottomRight)<span class="operator">,</span> roles);
+  }
+
+</pre>
+</div>
+<!-- @@@webenginewidgets/demobrowser/history.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

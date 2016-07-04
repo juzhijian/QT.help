@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- scatter.qdoc -->
+  <title>Scatter Example | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td >Scatter Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#creating-the-application">Creating the application</a></li>
+<li class="level1"><a href="#setting-up-the-graph">Setting up the graph</a></li>
+<li class="level1"><a href="#adding-data-to-the-graph">Adding data to the graph</a></li>
+<li class="level1"><a href="#using-widgets-to-control-the-graph">Using widgets to control the graph</a></li>
+<li class="level1"><a href="#example-contents">Example contents</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Scatter Example</h1>
+<span class="subtitle"></span>
+<!-- $$$scatter-description -->
+<div class="descr"> <a name="details"></a>
+<p>The scatter example shows how to make a simple 3D scatter graph using <a href="q3dscatter.html">Q3DScatter</a> and combining the use of widgets for adjusting several adjustable qualities. The example shows how to:</p>
+<ul>
+<li>Create an application with <a href="q3dscatter.html">Q3DScatter</a> and some widgets</li>
+<li>Use <a href="qscatterdataproxy.html">QScatterDataProxy</a> to set data to the graph</li>
+<li>Adjust some graph properties using widget controls</li>
+</ul>
+<p>For instructions about how to interact with the graph, see <a href="qtdatavisualization-interacting-with-data.html">this page</a>.</p>
+<p class="centerAlign"><img src="images/scatter-example.png" alt="" /></p><a name="creating-the-application"></a>
+<h2 id="creating-the-application">Creating the application</h2>
+<p>First, in main.cpp, we create a QApplication, instantiate <a href="q3dscatter.html">Q3DScatter</a>, and a window container for it:</p>
+<pre class="cpp">
+
+  <span class="type">QApplication</span> app(argc<span class="operator">,</span> argv);
+  <span class="type"><a href="q3dscatter.html">Q3DScatter</a></span> <span class="operator">*</span>graph <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="q3dscatter.html">Q3DScatter</a></span>();
+  <span class="type">QWidget</span> <span class="operator">*</span>container <span class="operator">=</span> <span class="type">QWidget</span><span class="operator">::</span>createWindowContainer(graph);
+
+</pre>
+<p>The call to QWidget::createWindowContainer is required, as all data visualization graph classes (<a href="q3dbars.html">Q3DBars</a>, <a href="q3dscatter.html">Q3DScatter</a>, and <a href="q3dsurface.html">Q3DSurface</a>) inherit <a href="../qtgui/qwindow.html">QWindow</a>. Any class inheriting <a href="../qtgui/qwindow.html">QWindow</a> cannot be used as a widget any other way.</p>
+<p>Then we'll create horizontal and vertical layouts. We'll add the graph and the vertical layout into the horizontal one:</p>
+<pre class="cpp">
+
+  <span class="type">QWidget</span> <span class="operator">*</span>widget <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QWidget</span>;
+  <span class="type">QHBoxLayout</span> <span class="operator">*</span>hLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QHBoxLayout</span>(widget);
+  <span class="type">QVBoxLayout</span> <span class="operator">*</span>vLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QVBoxLayout</span>();
+  hLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(container<span class="operator">,</span> <span class="number">1</span>);
+  hLayout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(vLayout);
+
+</pre>
+<p>We're not using the vertical layout for anything yet, but we'll get back to it in <a href="qtdatavisualization-scatter-example.html#using-widgets-to-control-the-graph">Using widgets to control the graph</a></p>
+<p>Next, let's create another class to handle the data addition and other interaction with the graph. Let's call it <code>ScatterDataModifier</code> (See <a href="qtdatavisualization-scatter-example.html#setting-up-the-graph">Setting up the graph</a> and <a href="qtdatavisualization-scatter-example.html#adding-data-to-the-graph">Adding data to the graph</a> for details):</p>
+<pre class="cpp">
+
+  ScatterDataModifier <span class="operator">*</span>modifier <span class="operator">=</span> <span class="keyword">new</span> ScatterDataModifier(graph);
+
+</pre>
+<p>The application main is done. We can show the graph and start the event loop:</p>
+<pre class="cpp">
+
+  widget<span class="operator">-</span><span class="operator">&gt;</span>show();
+  <span class="keyword">return</span> app<span class="operator">.</span>exec();
+
+</pre>
+<a name="setting-up-the-graph"></a>
+<h2 id="setting-up-the-graph">Setting up the graph</h2>
+<p>Let's set up some visual qualities for the graph in the constructor of the <code>ScatterDataModifier</code> class we instantiated in the application main:</p>
+<pre class="cpp">
+
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setType(<span class="type"><a href="q3dtheme.html">Q3DTheme</a></span><span class="operator">::</span>ThemeEbony);
+  <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> font <span class="operator">=</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>font();
+  font<span class="operator">.</span>setPointSize(m_fontSize);
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setFont(font);
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>setShadowQuality(QAbstract3DGraph<span class="operator">::</span>ShadowQualitySoftLow);
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">-</span><span class="operator">&gt;</span>setCameraPreset(<span class="type"><a href="q3dcamera.html">Q3DCamera</a></span><span class="operator">::</span>CameraPresetFront);
+
+</pre>
+<p>None of these are required, but are used to override graph defaults. You can try how it looks with the preset defaults by commenting the block above out.</p>
+<p>Finally we create a <a href="qscatterdataproxy.html">QScatterDataProxy</a> and the associated <a href="qscatter3dseries.html">QScatter3DSeries</a>. We set custom label format and mesh smoothing for the series and add it to the graph:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="qscatterdataproxy.html">QScatterDataProxy</a></span> <span class="operator">*</span>proxy <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qscatterdataproxy.html">QScatterDataProxy</a></span>;
+  QScatter3DSeries <span class="operator">*</span>series <span class="operator">=</span> <span class="keyword">new</span> QScatter3DSeries(proxy);
+  series<span class="operator">-</span><span class="operator">&gt;</span>setItemLabelFormat(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;@xTitle: @xLabel @yTitle: @yLabel @zTitle: @zLabel&quot;</span>));
+  series<span class="operator">-</span><span class="operator">&gt;</span>setMeshSmooth(m_smooth);
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>addSeries(series);
+
+</pre>
+<p>That concludes setting up the graph.</p>
+<a name="adding-data-to-the-graph"></a>
+<h2 id="adding-data-to-the-graph">Adding data to the graph</h2>
+<p>The last thing we do in the <code>ScatterDataModifier</code> constructor is to add data to the graph:</p>
+<pre class="cpp">
+
+  addData();
+
+</pre>
+<p>The actual data addition is done in <code>addData()</code> method. First we configure the axes:</p>
+<pre class="cpp">
+
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>setTitle(<span class="string">&quot;X&quot;</span>);
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>setTitle(<span class="string">&quot;Y&quot;</span>);
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisZ()<span class="operator">-</span><span class="operator">&gt;</span>setTitle(<span class="string">&quot;Z&quot;</span>);
+
+</pre>
+<p>This could have been done in the constructor of <code>ScatterDataModifier</code>, but we added it here to keep the constructor simpler and the axes configuration near the data.</p>
+<p>Next we create a data array:</p>
+<pre class="cpp">
+
+  <span class="type">QScatterDataArray</span> <span class="operator">*</span>dataArray <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QScatterDataArray</span>;
+  dataArray<span class="operator">-</span><span class="operator">&gt;</span>resize(m_itemCount);
+  <span class="type"><a href="qscatterdataitem.html">QScatterDataItem</a></span> <span class="operator">*</span>ptrToDataArray <span class="operator">=</span> <span class="operator">&amp;</span>dataArray<span class="operator">-</span><span class="operator">&gt;</span>first();
+
+</pre>
+<p>and populate it:</p>
+<pre class="cpp">
+
+  <span class="type">float</span> limit <span class="operator">=</span> <a href="../qtcore/qtmath.html#qSqrt">qSqrt</a>(m_itemCount) <span class="operator">/</span> <span class="number">2.0f</span>;
+  <span class="keyword">for</span> (<span class="type">float</span> i <span class="operator">=</span> <span class="operator">-</span>limit; i <span class="operator">&lt;</span> limit; i<span class="operator">+</span><span class="operator">+</span>) {
+      <span class="keyword">for</span> (<span class="type">float</span> j <span class="operator">=</span> <span class="operator">-</span>limit; j <span class="operator">&lt;</span> limit; j<span class="operator">+</span><span class="operator">+</span>) {
+          ptrToDataArray<span class="operator">-</span><span class="operator">&gt;</span>setPosition(QVector3D(i <span class="operator">+</span> <span class="number">0.5f</span><span class="operator">,</span>
+                                                <a href="../qtcore/qtmath.html#qCos">qCos</a>(<a href="../qtcore/qtmath.html#qDegreesToRadians-1">qDegreesToRadians</a>((i <span class="operator">*</span> j) <span class="operator">/</span> m_curveDivider))<span class="operator">,</span>
+                                                j <span class="operator">+</span> <span class="number">0.5f</span>));
+          ptrToDataArray<span class="operator">+</span><span class="operator">+</span>;
+      }
+  }
+
+</pre>
+<p>Finally we tell the proxy to start using the data we gave it:</p>
+<pre class="cpp">
+
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>seriesList()<span class="operator">.</span>at(<span class="number">0</span>)<span class="operator">-</span><span class="operator">&gt;</span>dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>resetArray(dataArray);
+
+</pre>
+<p>Now our graph has the data and is ready to be used. There isn't much interaction yet, though, so let's continue by adding some widgets to play with.</p>
+<a name="using-widgets-to-control-the-graph"></a>
+<h2 id="using-widgets-to-control-the-graph">Using widgets to control the graph</h2>
+<p>First, back in the application main, we'll create some widgets:</p>
+<pre class="cpp">
+
+  <span class="type">QComboBox</span> <span class="operator">*</span>themeList <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QComboBox</span>(widget);
+  themeList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Qt&quot;</span>));
+  themeList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Primary Colors&quot;</span>));
+  themeList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Digia&quot;</span>));
+  themeList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Stone Moss&quot;</span>));
+  themeList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Army Blue&quot;</span>));
+  themeList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Retro&quot;</span>));
+  themeList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Ebony&quot;</span>));
+  themeList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Isabelle&quot;</span>));
+  themeList<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(<span class="number">6</span>);
+
+  <span class="type">QPushButton</span> <span class="operator">*</span>labelButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QPushButton</span>(widget);
+  labelButton<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Change label style&quot;</span>));
+
+  <span class="type">QCheckBox</span> <span class="operator">*</span>smoothCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCheckBox</span>(widget);
+  smoothCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Smooth dots&quot;</span>));
+  smoothCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+  <span class="type">QComboBox</span> <span class="operator">*</span>itemStyleList <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QComboBox</span>(widget);
+  itemStyleList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Sphere&quot;</span>)<span class="operator">,</span> <span class="type">int</span>(QAbstract3DSeries<span class="operator">::</span>MeshSphere));
+  itemStyleList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Cube&quot;</span>)<span class="operator">,</span> <span class="type">int</span>(QAbstract3DSeries<span class="operator">::</span>MeshCube));
+  itemStyleList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Minimal&quot;</span>)<span class="operator">,</span> <span class="type">int</span>(QAbstract3DSeries<span class="operator">::</span>MeshMinimal));
+  itemStyleList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Point&quot;</span>)<span class="operator">,</span> <span class="type">int</span>(QAbstract3DSeries<span class="operator">::</span>MeshPoint));
+  itemStyleList<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(<span class="number">0</span>);
+
+  <span class="type">QPushButton</span> <span class="operator">*</span>cameraButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QPushButton</span>(widget);
+  cameraButton<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Change camera preset&quot;</span>));
+
+  <span class="type">QPushButton</span> <span class="operator">*</span>itemCountButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QPushButton</span>(widget);
+  itemCountButton<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Toggle item count&quot;</span>));
+
+  <span class="type">QCheckBox</span> <span class="operator">*</span>backgroundCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCheckBox</span>(widget);
+  backgroundCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Show background&quot;</span>));
+  backgroundCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+  <span class="type">QCheckBox</span> <span class="operator">*</span>gridCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QCheckBox</span>(widget);
+  gridCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Show grid&quot;</span>));
+  gridCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+  <span class="type">QComboBox</span> <span class="operator">*</span>shadowQuality <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QComboBox</span>(widget);
+  shadowQuality<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;None&quot;</span>));
+  shadowQuality<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Low&quot;</span>));
+  shadowQuality<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Medium&quot;</span>));
+  shadowQuality<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;High&quot;</span>));
+  shadowQuality<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Low Soft&quot;</span>));
+  shadowQuality<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Medium Soft&quot;</span>));
+  shadowQuality<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;High Soft&quot;</span>));
+  shadowQuality<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(<span class="number">4</span>);
+
+  <span class="type">QFontComboBox</span> <span class="operator">*</span>fontList <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QFontComboBox</span>(widget);
+  fontList<span class="operator">-</span><span class="operator">&gt;</span>setCurrentFont(<span class="type"><a href="../qtgui/qfont.html">QFont</a></span>(<span class="string">&quot;Arial&quot;</span>));
+
+</pre>
+<p>And add them to the vertical layout we created earlier:</p>
+<pre class="cpp">
+
+  vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(labelButton<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignTop);
+  vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(cameraButton<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignTop);
+  vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(itemCountButton<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignTop);
+  vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(backgroundCheckBox);
+  vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(gridCheckBox);
+  vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(smoothCheckBox<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignTop);
+  vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(<span class="keyword">new</span> <span class="type">QLabel</span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Change dot style&quot;</span>)));
+  vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(itemStyleList);
+  vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(<span class="keyword">new</span> <span class="type">QLabel</span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Change theme&quot;</span>)));
+  vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(themeList);
+  vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(<span class="keyword">new</span> <span class="type">QLabel</span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Adjust shadow quality&quot;</span>)));
+  vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(shadowQuality);
+  vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(<span class="keyword">new</span> <span class="type">QLabel</span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Change font&quot;</span>)));
+  vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(fontList<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignTop);
+
+</pre>
+<p>Now, let's connect them to methods in ScatterDataModifier:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(cameraButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QPushButton</span><span class="operator">::</span>clicked<span class="operator">,</span> modifier<span class="operator">,</span>
+                   <span class="operator">&amp;</span>ScatterDataModifier<span class="operator">::</span>changePresetCamera);
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(labelButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QPushButton</span><span class="operator">::</span>clicked<span class="operator">,</span> modifier<span class="operator">,</span>
+                   <span class="operator">&amp;</span>ScatterDataModifier<span class="operator">::</span>changeLabelStyle);
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(itemCountButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QPushButton</span><span class="operator">::</span>clicked<span class="operator">,</span> modifier<span class="operator">,</span>
+                   <span class="operator">&amp;</span>ScatterDataModifier<span class="operator">::</span>toggleItemCount);
+
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(backgroundCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>stateChanged<span class="operator">,</span> modifier<span class="operator">,</span>
+                   <span class="operator">&amp;</span>ScatterDataModifier<span class="operator">::</span>setBackgroundEnabled);
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(gridCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>stateChanged<span class="operator">,</span> modifier<span class="operator">,</span>
+                   <span class="operator">&amp;</span>ScatterDataModifier<span class="operator">::</span>setGridEnabled);
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(smoothCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>stateChanged<span class="operator">,</span> modifier<span class="operator">,</span>
+                   <span class="operator">&amp;</span>ScatterDataModifier<span class="operator">::</span>setSmoothDots);
+
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(modifier<span class="operator">,</span> <span class="operator">&amp;</span>ScatterDataModifier<span class="operator">::</span>backgroundEnabledChanged<span class="operator">,</span>
+                   backgroundCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>setChecked);
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(modifier<span class="operator">,</span> <span class="operator">&amp;</span>ScatterDataModifier<span class="operator">::</span>gridEnabledChanged<span class="operator">,</span>
+                   gridCheckBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>setChecked);
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(itemStyleList<span class="operator">,</span> SIGNAL(currentIndexChanged(<span class="type">int</span>))<span class="operator">,</span> modifier<span class="operator">,</span>
+                   SLOT(changeStyle(<span class="type">int</span>)));
+
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(themeList<span class="operator">,</span> SIGNAL(currentIndexChanged(<span class="type">int</span>))<span class="operator">,</span> modifier<span class="operator">,</span>
+                   SLOT(changeTheme(<span class="type">int</span>)));
+
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(shadowQuality<span class="operator">,</span> SIGNAL(currentIndexChanged(<span class="type">int</span>))<span class="operator">,</span> modifier<span class="operator">,</span>
+                   SLOT(changeShadowQuality(<span class="type">int</span>)));
+
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(modifier<span class="operator">,</span> <span class="operator">&amp;</span>ScatterDataModifier<span class="operator">::</span>shadowQualityChanged<span class="operator">,</span> shadowQuality<span class="operator">,</span>
+                   <span class="operator">&amp;</span><span class="type">QComboBox</span><span class="operator">::</span>setCurrentIndex);
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(graph<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="q3dscatter.html">Q3DScatter</a></span><span class="operator">::</span>shadowQualityChanged<span class="operator">,</span> modifier<span class="operator">,</span>
+                   <span class="operator">&amp;</span>ScatterDataModifier<span class="operator">::</span>shadowQualityUpdatedByVisual);
+
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(fontList<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QFontComboBox</span><span class="operator">::</span>currentFontChanged<span class="operator">,</span> modifier<span class="operator">,</span>
+                   <span class="operator">&amp;</span>ScatterDataModifier<span class="operator">::</span>changeFont);
+
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(modifier<span class="operator">,</span> <span class="operator">&amp;</span>ScatterDataModifier<span class="operator">::</span>fontChanged<span class="operator">,</span> fontList<span class="operator">,</span>
+                   <span class="operator">&amp;</span><span class="type">QFontComboBox</span><span class="operator">::</span>setCurrentFont);
+
+</pre>
+<p>Here are the methods in ScatterDataModifier the signals were connected to:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>changeStyle(<span class="type">int</span> style)
+  {
+      <span class="type">QComboBox</span> <span class="operator">*</span>comboBox <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type">QComboBox</span> <span class="operator">*</span><span class="operator">&gt;</span>(sender());
+      <span class="keyword">if</span> (comboBox) {
+          m_style <span class="operator">=</span> QAbstract3DSeries<span class="operator">::</span>Mesh(comboBox<span class="operator">-</span><span class="operator">&gt;</span>itemData(style)<span class="operator">.</span>toInt());
+          <span class="keyword">if</span> (m_graph<span class="operator">-</span><span class="operator">&gt;</span>seriesList()<span class="operator">.</span>size())
+              m_graph<span class="operator">-</span><span class="operator">&gt;</span>seriesList()<span class="operator">.</span>at(<span class="number">0</span>)<span class="operator">-</span><span class="operator">&gt;</span>setMesh(m_style);
+      }
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>setSmoothDots(<span class="type">int</span> smooth)
+  {
+      m_smooth <span class="operator">=</span> bool(smooth);
+      QScatter3DSeries <span class="operator">*</span>series <span class="operator">=</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>seriesList()<span class="operator">.</span>at(<span class="number">0</span>);
+      series<span class="operator">-</span><span class="operator">&gt;</span>setMeshSmooth(m_smooth);
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>changeTheme(<span class="type">int</span> theme)
+  {
+      <span class="type"><a href="q3dtheme.html">Q3DTheme</a></span> <span class="operator">*</span>currentTheme <span class="operator">=</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme();
+      currentTheme<span class="operator">-</span><span class="operator">&gt;</span>setType(<span class="type"><a href="q3dtheme.html">Q3DTheme</a></span><span class="operator">::</span>Theme(theme));
+      <span class="keyword">emit</span> backgroundEnabledChanged(currentTheme<span class="operator">-</span><span class="operator">&gt;</span>isBackgroundEnabled());
+      <span class="keyword">emit</span> gridEnabledChanged(currentTheme<span class="operator">-</span><span class="operator">&gt;</span>isGridEnabled());
+      <span class="keyword">emit</span> fontChanged(currentTheme<span class="operator">-</span><span class="operator">&gt;</span>font());
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>changePresetCamera()
+  {
+      <span class="keyword">static</span> <span class="type">int</span> preset <span class="operator">=</span> <span class="type"><a href="q3dcamera.html">Q3DCamera</a></span><span class="operator">::</span>CameraPresetFrontLow;
+
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">-</span><span class="operator">&gt;</span>setCameraPreset((<span class="type"><a href="q3dcamera.html">Q3DCamera</a></span><span class="operator">::</span>CameraPreset)preset);
+
+      <span class="keyword">if</span> (<span class="operator">+</span><span class="operator">+</span>preset <span class="operator">&gt;</span> <span class="type"><a href="q3dcamera.html">Q3DCamera</a></span><span class="operator">::</span>CameraPresetDirectlyBelow)
+          preset <span class="operator">=</span> <span class="type"><a href="q3dcamera.html">Q3DCamera</a></span><span class="operator">::</span>CameraPresetFrontLow;
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>changeLabelStyle()
+  {
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setLabelBackgroundEnabled(<span class="operator">!</span>m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>isLabelBackgroundEnabled());
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>changeFont(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> <span class="operator">&amp;</span>font)
+  {
+      <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> newFont <span class="operator">=</span> font;
+      newFont<span class="operator">.</span>setPointSizeF(m_fontSize);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setFont(newFont);
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>shadowQualityUpdatedByVisual(QAbstract3DGraph<span class="operator">::</span>ShadowQuality sq)
+  {
+      <span class="type">int</span> quality <span class="operator">=</span> <span class="type">int</span>(sq);
+      <span class="keyword">emit</span> shadowQualityChanged(quality); <span class="comment">// connected to a checkbox in main.cpp</span>
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>changeShadowQuality(<span class="type">int</span> quality)
+  {
+      QAbstract3DGraph<span class="operator">::</span>ShadowQuality sq <span class="operator">=</span> QAbstract3DGraph<span class="operator">::</span>ShadowQuality(quality);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setShadowQuality(sq);
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>setBackgroundEnabled(<span class="type">int</span> enabled)
+  {
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setBackgroundEnabled((bool)enabled);
+  }
+
+  <span class="type">void</span> ScatterDataModifier<span class="operator">::</span>setGridEnabled(<span class="type">int</span> enabled)
+  {
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setGridEnabled((bool)enabled);
+  }
+
+</pre>
+<p>And so we have an application in which we can control:</p>
+<ul>
+<li>Label style</li>
+<li>Camera preset</li>
+<li>Background visibility</li>
+<li>Grid visibility</li>
+<li>Dot shading smoothness</li>
+<li>Dot style</li>
+<li>Theme</li>
+<li>Shadow quality</li>
+<li>Label font</li>
+</ul>
+<a name="example-contents"></a>
+<h2 id="example-contents">Example contents</h2>
+<p>Files:</p>
+<ul>
+<li><a href="qtdatavisualization-scatter-scatterdatamodifier-cpp.html">scatter/scatterdatamodifier.cpp</a></li>
+<li><a href="qtdatavisualization-scatter-scatterdatamodifier-h.html">scatter/scatterdatamodifier.h</a></li>
+<li><a href="qtdatavisualization-scatter-main-cpp.html">scatter/main.cpp</a></li>
+<li><a href="qtdatavisualization-scatter-scatter-pro.html">scatter/scatter.pro</a></li>
+</ul>
+</div>
+<!-- @@@scatter -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

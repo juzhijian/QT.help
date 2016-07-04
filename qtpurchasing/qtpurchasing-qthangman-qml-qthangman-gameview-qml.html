@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>GameView.qml Example File | Qt Purchasing 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtpurchasing-index.html">Qt Purchasing</a></td><td ><a href="qtpurchasing-qthangman-example.html">Qt Purchasing Examples - QtHangman</a></td><td >GameView.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">GameView.qml Example File</h1>
+<span class="subtitle">qthangman/qml/qthangman/GameView.qml</span>
+<!-- $$$qthangman/qml/qthangman/GameView.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the Purchasing module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:LGPL3-COMM$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see http://www.qt.io/terms-conditions. For further
+  ** information use the contact form at http://www.qt.io/contact-us.
+  **
+  ** GNU Lesser General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU Lesser
+  ** General Public License version 3 as published by the Free Software
+  ** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+  ** packaging of this file. Please review the following information to
+  ** ensure the GNU Lesser General Public License version 3 requirements
+  ** will be met: https://www.gnu.org/licenses/lgpl.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.2
+  import QtQuick.Controls 1.1
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">gameView</span>
+
+      <span class="keyword">function</span> <span class="name">allContained</span>(<span class="name">owned</span>, word)
+      {
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span>=<span class="number">0</span>; <span class="name">i</span><span class="operator">&lt;</span><span class="name">word</span>.<span class="name">length</span>; ++<span class="name">i</span>) {
+              <span class="keyword">if</span> (<span class="name">owned</span>.<span class="name">indexOf</span>(<span class="name">word</span>.<span class="name">charAt</span>(<span class="name">i</span>)) <span class="operator">&lt;</span> <span class="number">0</span>)
+                  <span class="keyword">return</span> <span class="number">false</span>
+          }
+          <span class="keyword">return</span> <span class="number">true</span>
+      }
+
+      property <span class="type">bool</span> <span class="name">gameOver</span>: <span class="name">applicationData</span>.<span class="name">errorCount</span> <span class="operator">&gt;</span> <span class="number">8</span>
+      property <span class="type">bool</span> <span class="name">success</span>: <span class="name">applicationData</span>.<span class="name">word</span>.<span class="name">length</span> <span class="operator">&gt;</span> <span class="number">0</span> <span class="operator">&amp;&amp;</span> !<span class="name">gameOver</span> <span class="operator">&amp;&amp;</span> <span class="name">allContained</span>(<span class="name">applicationData</span>.<span class="name">lettersOwned</span>, <span class="name">applicationData</span>.<span class="name">word</span>)
+
+      property <span class="type">alias</span> <span class="name">globalButtonHeight</span>: <span class="name">letterSelector</span>.<span class="name">keyHeight</span>
+
+      <span class="name">onGameOverChanged</span>: {
+          <span class="keyword">if</span> (<span class="name">gameOver</span>)
+              <span class="name">applicationData</span>.<span class="name">gameOverReveal</span>();
+      }
+
+      <span class="name">onSuccessChanged</span>: {
+          <span class="keyword">if</span> (<span class="name">success</span> <span class="operator">===</span> <span class="number">true</span>)
+              <span class="name">applicationData</span>.<span class="name">wordsGuessedCorrectly</span> <span class="operator">+=</span> <span class="number">1</span>;
+      }
+
+      <span class="type"><a href="../qtqml/qml-qtqml-connections.html">Connections</a></span> {
+          <span class="name">target</span>: <span class="name">applicationData</span>
+          <span class="name">onWordChanged</span>: {
+              <span class="name">applicationData</span>.<span class="name">wordsGiven</span> <span class="operator">+=</span> <span class="number">1</span>;
+          }
+      }
+
+      <span class="type">SimpleButton</span> {
+          <span class="name">id</span>: <span class="name">vowelsAvailableText</span>
+          <span class="name">height</span>: <span class="name">globalButtonHeight</span>
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">*</span> <span class="number">0.25</span>
+          <span class="name">visible</span>: !<span class="name">applicationData</span>.<span class="name">vowelsUnlocked</span>
+          <span class="name">text</span>: <span class="string">&quot;Vowels: &quot;</span> <span class="operator">+</span> <span class="name">applicationData</span>.<span class="name">vowelsAvailable</span>
+          <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+          <span class="name">anchors</span>.verticalCenter: <span class="name">helpButton</span>.<span class="name">verticalCenter</span>
+          <span class="name">anchors</span>.margins: <span class="name">topLevel</span>.<span class="name">globalMargin</span>
+          <span class="name">onClicked</span>: {
+              <span class="name">pageStack</span>.<span class="name">push</span>(<span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;StoreView.qml&quot;</span>));
+          }
+      }
+
+      <span class="type">ScoreItem</span> {
+          <span class="name">anchors</span>.margins: <span class="name">topLevel</span>.<span class="name">globalMargin</span>
+          <span class="name">anchors</span>.right: <span class="name">helpButton</span>.<span class="name">left</span>
+          <span class="name">anchors</span>.verticalCenter: <span class="name">helpButton</span>.<span class="name">verticalCenter</span>
+          <span class="name">height</span>: <span class="name">globalButtonHeight</span>
+      }
+
+      <span class="type">SimpleButton</span> {
+          <span class="name">id</span>: <span class="name">helpButton</span>
+          <span class="name">anchors</span>.top: <span class="name">parent</span>.<span class="name">top</span>
+          <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+          <span class="name">anchors</span>.margins: <span class="name">topLevel</span>.<span class="name">globalMargin</span>
+          <span class="name">height</span>: <span class="name">globalButtonHeight</span>
+          <span class="name">width</span>: <span class="name">globalButtonHeight</span>
+          <span class="name">text</span>: <span class="string">&quot;?&quot;</span>
+          <span class="name">onClicked</span>: {
+              <span class="name">pageStack</span>.<span class="name">push</span>(<span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;HowToView.qml&quot;</span>))
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+          <span class="name">anchors</span>.top: <span class="name">helpButton</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.bottom: <span class="name">word</span>.<span class="name">top</span>
+          <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+          <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+
+          <span class="type">Hangman</span> {
+              <span class="name">game</span>: <span class="name">gameView</span>
+              <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+              <span class="name">width</span>: <span class="name">Math</span>.<span class="name">min</span>(<span class="name">parent</span>.<span class="name">width</span>, <span class="name">parent</span>.<span class="name">height</span>) <span class="operator">*</span> <span class="number">0.75</span>
+              <span class="name">height</span>: <span class="name">width</span>
+          }
+      }
+
+      <span class="type">Word</span> {
+          <span class="name">id</span>: <span class="name">word</span>
+          <span class="name">text</span>: <span class="name">applicationData</span>.<span class="name">word</span>
+          <span class="name">anchors</span>.bottom: <span class="name">letterSelector</span>.<span class="name">top</span>
+          <span class="name">anchors</span>.bottomMargin: <span class="name">parent</span>.<span class="name">height</span> <span class="operator">*</span> <span class="number">0.05</span>
+          <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">*</span> <span class="number">0.8</span>
+          <span class="name">height</span>: <span class="name">parent</span>.<span class="name">height</span> <span class="operator">*</span> <span class="number">0.1</span>
+      }
+
+      <span class="type">LetterSelector</span> {
+          <span class="name">id</span>: <span class="name">letterSelector</span>
+          <span class="name">locked</span>: <span class="name">gameOver</span> <span class="operator">||</span> <span class="name">success</span>
+          <span class="name">hideVowels</span>: <span class="name">applicationData</span>.<span class="name">vowelsAvailable</span> <span class="operator">&lt;</span> <span class="number">1</span> <span class="operator">&amp;&amp;</span> !<span class="name">applicationData</span>.<span class="name">vowelsUnlocked</span>
+          <span class="name">anchors</span>.margins: <span class="name">topLevel</span>.<span class="name">globalMargin</span>
+          <span class="name">anchors</span>.bottom: <span class="name">guessButton</span>.<span class="name">top</span>
+          <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+          <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+          <span class="name">height</span>: <span class="name">parent</span>.<span class="name">height</span> <span class="operator">*</span> <span class="number">0.23</span>
+          <span class="name">onLetterSelected</span>: {
+              <span class="keyword">if</span> (<span class="name">applicationData</span>.<span class="name">isVowel</span>(<span class="name">letter</span>) <span class="operator">&amp;&amp;</span> !<span class="name">applicationData</span>.<span class="name">vowelsUnlocked</span>) {
+                  <span class="name">applicationData</span>.<span class="name">vowelsAvailable</span> <span class="operator">-=</span> <span class="number">1</span>;
+              }
+              <span class="name">applicationData</span>.<span class="name">requestLetter</span>(<span class="name">letter</span>.<span class="name">charAt</span>(<span class="number">0</span>));
+          }
+      }
+
+      <span class="type">SimpleButton</span> {
+          <span class="name">id</span>: <span class="name">revealButton</span>
+          <span class="name">anchors</span>.margins: <span class="name">topLevel</span>.<span class="name">globalMargin</span>
+          <span class="name">visible</span>: !(<span class="name">gameOver</span> <span class="operator">||</span> <span class="name">success</span>)
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+          <span class="name">height</span>: <span class="name">globalButtonHeight</span>
+          <span class="name">width</span> : <span class="name">letterSelector</span>.<span class="name">keyWidth</span> <span class="operator">*</span> <span class="number">3</span>
+          <span class="name">text</span>: <span class="string">&quot;Reveal&quot;</span>
+          <span class="name">onClicked</span>: {
+              <span class="name">applicationData</span>.<span class="name">reveal</span>();
+          }
+      }
+      <span class="type">SimpleButton</span> {
+          <span class="name">id</span>: <span class="name">guessButton</span>
+          <span class="name">anchors</span>.margins: <span class="name">topLevel</span>.<span class="name">globalMargin</span>
+          <span class="name">visible</span>: !(<span class="name">gameOver</span> <span class="operator">||</span> <span class="name">success</span>)
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.left: <span class="name">revealButton</span>.<span class="name">right</span>
+          <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+          <span class="name">height</span>: <span class="name">globalButtonHeight</span>
+          <span class="name">text</span>: <span class="string">&quot;Guess&quot;</span>
+          <span class="name">onClicked</span>: {
+              <span class="name">pageStack</span>.<span class="name">push</span>(<span class="name">Qt</span>.<span class="name">resolvedUrl</span>(<span class="string">&quot;GuessWordView.qml&quot;</span>));
+          }
+      }
+      <span class="type">SimpleButton</span> {
+          <span class="name">id</span>: <span class="name">resetButton</span>
+          <span class="name">anchors</span>.margins: <span class="name">topLevel</span>.<span class="name">globalMargin</span>
+          <span class="name">visible</span>: <span class="name">gameOver</span> <span class="operator">||</span> <span class="name">success</span>
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+          <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+          <span class="name">height</span>: <span class="name">globalButtonHeight</span>
+          <span class="name">text</span>: <span class="string">&quot;Play Again?&quot;</span>
+          <span class="name">onClicked</span>: {
+              <span class="name">letterSelector</span>.<span class="name">reset</span>();
+              <span class="name">applicationData</span>.<span class="name">reset</span>();
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+          <span class="name">id</span>: <span class="name">gameOverText</span>
+          <span class="name">visible</span>: <span class="name">gameOver</span>
+          <span class="name">anchors</span>.fill: <span class="name">letterSelector</span>
+          <span class="name">text</span>: <span class="string">&quot;Game Over&quot;</span>
+          <span class="name">fontSizeMode</span>: <span class="name">Text</span>.<span class="name">Fit</span>
+          <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+          <span class="name">verticalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignVCenter</span>
+          <span class="name">minimumPointSize</span>: <span class="number">8</span>
+          <span class="name">font</span>.pointSize: <span class="number">64</span>
+          <span class="name">color</span>: <span class="string">&quot;white&quot;</span>
+          <span class="name">font</span>.family: <span class="string">&quot;Helvetica Neue&quot;</span>
+          <span class="name">font</span>.weight: <span class="name">Font</span>.<span class="name">Light</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+          <span class="name">id</span>: <span class="name">successText</span>
+          <span class="name">visible</span>: <span class="name">success</span>
+          <span class="name">anchors</span>.fill: <span class="name">letterSelector</span>
+          <span class="name">text</span>: <span class="string">&quot;Success&quot;</span>
+          <span class="name">fontSizeMode</span>: <span class="name">Text</span>.<span class="name">Fit</span>
+          <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+          <span class="name">verticalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignVCenter</span>
+          <span class="name">minimumPointSize</span>: <span class="number">8</span>
+          <span class="name">font</span>.pointSize: <span class="number">64</span>
+          <span class="name">color</span>: <span class="string">&quot;white&quot;</span>
+          <span class="name">font</span>.family: <span class="string">&quot;Helvetica Neue&quot;</span>
+          <span class="name">font</span>.weight: <span class="name">Font</span>.<span class="name">Light</span>
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@qthangman/qml/qthangman/GameView.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

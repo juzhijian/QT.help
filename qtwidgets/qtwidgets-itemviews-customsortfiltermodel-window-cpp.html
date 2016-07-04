@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>window.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-itemviews-customsortfiltermodel-example.html">Custom Sort/Filter Model Example</a></td><td >window.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">window.cpp Example File</h1>
+<span class="subtitle">itemviews/customsortfiltermodel/window.cpp</span>
+<!-- $$$itemviews/customsortfiltermodel/window.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+
+  <span class="preprocessor">#include &quot;mysortfilterproxymodel.h&quot;</span>
+  <span class="preprocessor">#include &quot;window.h&quot;</span>
+  <span class="preprocessor">#include &quot;filterwidget.h&quot;</span>
+
+  Window<span class="operator">::</span>Window()
+  {
+      proxyModel <span class="operator">=</span> <span class="keyword">new</span> MySortFilterProxyModel(<span class="keyword">this</span>);
+
+      sourceView <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtreeview.html">QTreeView</a></span>;
+      sourceView<span class="operator">-</span><span class="operator">&gt;</span>setRootIsDecorated(<span class="keyword">false</span>);
+      sourceView<span class="operator">-</span><span class="operator">&gt;</span>setAlternatingRowColors(<span class="keyword">true</span>);
+
+      <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>sourceLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span>;
+      sourceLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(sourceView);
+      sourceGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Original Model&quot;</span>));
+      sourceGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(sourceLayout);
+
+      filterWidget <span class="operator">=</span> <span class="keyword">new</span> FilterWidget;
+      filterWidget<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="string">&quot;Grace|Sports&quot;</span>);
+      connect(filterWidget<span class="operator">,</span> <span class="operator">&amp;</span>FilterWidget<span class="operator">::</span>filterChanged<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>Window<span class="operator">::</span>textFilterChanged);
+
+      filterPatternLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;&amp;Filter pattern:&quot;</span>));
+      filterPatternLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(filterWidget);
+
+      fromDateEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qdateedit.html">QDateEdit</a></span>;
+      fromDateEdit<span class="operator">-</span><span class="operator">&gt;</span>setDate(<span class="type"><a href="../qtcore/qdate.html">QDate</a></span>(<span class="number">1970</span><span class="operator">,</span> <span class="number">01</span><span class="operator">,</span> <span class="number">01</span>));
+      fromLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;F&amp;rom:&quot;</span>));
+      fromLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(fromDateEdit);
+
+      toDateEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qdateedit.html">QDateEdit</a></span>;
+      toDateEdit<span class="operator">-</span><span class="operator">&gt;</span>setDate(<span class="type"><a href="../qtcore/qdate.html">QDate</a></span>(<span class="number">2099</span><span class="operator">,</span> <span class="number">12</span><span class="operator">,</span> <span class="number">31</span>));
+      toLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;&amp;To:&quot;</span>));
+      toLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(toDateEdit);
+
+      connect(filterWidget<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qlineedit.html">QLineEdit</a></span><span class="operator">::</span>textChanged<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>Window<span class="operator">::</span>textFilterChanged);
+      connect(fromDateEdit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qdatetimeedit.html">QDateTimeEdit</a></span><span class="operator">::</span>dateChanged<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>Window<span class="operator">::</span>dateFilterChanged);
+      connect(toDateEdit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qdatetimeedit.html">QDateTimeEdit</a></span><span class="operator">::</span>dateChanged<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>Window<span class="operator">::</span>dateFilterChanged);
+
+      proxyView <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtreeview.html">QTreeView</a></span>;
+      proxyView<span class="operator">-</span><span class="operator">&gt;</span>setRootIsDecorated(<span class="keyword">false</span>);
+      proxyView<span class="operator">-</span><span class="operator">&gt;</span>setAlternatingRowColors(<span class="keyword">true</span>);
+      proxyView<span class="operator">-</span><span class="operator">&gt;</span>setModel(proxyModel);
+      proxyView<span class="operator">-</span><span class="operator">&gt;</span>setSortingEnabled(<span class="keyword">true</span>);
+      proxyView<span class="operator">-</span><span class="operator">&gt;</span>sortByColumn(<span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AscendingOrder);
+
+      <span class="type"><a href="qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>proxyLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+      proxyLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(proxyView<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">3</span>);
+      proxyLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(filterPatternLabel<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+      proxyLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(filterWidget<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+      proxyLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(fromLabel<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">0</span>);
+      proxyLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(fromDateEdit<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span>);
+      proxyLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(toLabel<span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> <span class="number">0</span>);
+      proxyLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(toDateEdit<span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span>);
+
+      proxyGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Sorted/Filtered Model&quot;</span>));
+      proxyGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(proxyLayout);
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>mainLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(sourceGroupBox);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(proxyGroupBox);
+      setLayout(mainLayout);
+
+      setWindowTitle(tr(<span class="string">&quot;Custom Sort/Filter Model&quot;</span>));
+      resize(<span class="number">500</span><span class="operator">,</span> <span class="number">450</span>);
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>setSourceModel(<span class="type"><a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a></span> <span class="operator">*</span>model)
+  {
+      proxyModel<span class="operator">-</span><span class="operator">&gt;</span>setSourceModel(model);
+      sourceView<span class="operator">-</span><span class="operator">&gt;</span>setModel(model);
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>textFilterChanged()
+  {
+      <span class="type"><a href="../qtcore/qregexp.html">QRegExp</a></span> regExp(filterWidget<span class="operator">-</span><span class="operator">&gt;</span>text()<span class="operator">,</span>
+                     filterWidget<span class="operator">-</span><span class="operator">&gt;</span>caseSensitivity()<span class="operator">,</span>
+                     filterWidget<span class="operator">-</span><span class="operator">&gt;</span>patternSyntax());
+      proxyModel<span class="operator">-</span><span class="operator">&gt;</span>setFilterRegExp(regExp);
+  }
+
+  <span class="type">void</span> Window<span class="operator">::</span>dateFilterChanged()
+  {
+      proxyModel<span class="operator">-</span><span class="operator">&gt;</span>setFilterMinimumDate(fromDateEdit<span class="operator">-</span><span class="operator">&gt;</span>date());
+      proxyModel<span class="operator">-</span><span class="operator">&gt;</span>setFilterMaximumDate(toDateEdit<span class="operator">-</span><span class="operator">&gt;</span>date());
+  }
+
+</pre>
+</div>
+<!-- @@@itemviews/customsortfiltermodel/window.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

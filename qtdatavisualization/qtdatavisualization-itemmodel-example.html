@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- itemmodel.qdoc -->
+  <title>Item Model Example | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td >Item Model Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#creating-the-application">Creating the application</a></li>
+<li class="level1"><a href="#setting-up-the-graph">Setting up the graph</a></li>
+<li class="level1"><a href="#adding-data-to-the-graph">Adding data to the graph</a></li>
+<li class="level1"><a href="#interacting-with-the-data">Interacting with the data</a></li>
+<li class="level1"><a href="#example-contents">Example contents</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Item Model Example</h1>
+<span class="subtitle"></span>
+<!-- $$$itemmodel-description -->
+<div class="descr"> <a name="details"></a>
+<p>The item model example shows how to make a simple 3D bar graph using <a href="q3dbars.html">Q3DBars</a> and how to modify the data being drawn at run-time. The example shows how to:</p>
+<ul>
+<li>Create an application with <a href="q3dbars.html">Q3DBars</a> and widgets</li>
+<li>Use <a href="qitemmodelbardataproxy.html">QItemModelBarDataProxy</a> to set data to the graph</li>
+<li>Use a table widget to modify the data in the graph</li>
+</ul>
+<p>For instructions about how to interact with the graph, see <a href="qtdatavisualization-interacting-with-data.html">this page</a>.</p>
+<p class="centerAlign"><img src="images/itemmodel-example-2.png" alt="" /></p><a name="creating-the-application"></a>
+<h2 id="creating-the-application">Creating the application</h2>
+<p>First, in main.cpp, we create a QApplication, instantiate <a href="q3dbars.html">Q3DBars</a> and a window container for it:</p>
+<pre class="cpp">
+
+  <span class="type">QApplication</span> app(argc<span class="operator">,</span> argv);
+  <span class="type"><a href="q3dbars.html">Q3DBars</a></span> <span class="operator">*</span>graph <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="q3dbars.html">Q3DBars</a></span>();
+  <span class="type">QWidget</span> <span class="operator">*</span>container <span class="operator">=</span> <span class="type">QWidget</span><span class="operator">::</span>createWindowContainer(graph);
+
+</pre>
+<p>The call to QWidget::createWindowContainer is required, as all data visualization graph classes (<a href="q3dbars.html">Q3DBars</a>, <a href="q3dscatter.html">Q3DScatter</a>, and <a href="q3dsurface.html">Q3DSurface</a>) inherit <a href="../qtgui/qwindow.html">QWindow</a>. Any class inheriting <a href="../qtgui/qwindow.html">QWindow</a> cannot be used as a widget any other way.</p>
+<p>Then we'll create a layout and add the graph and the table widget into it:</p>
+<pre class="cpp">
+
+  <span class="type">QWidget</span> widget;
+  <span class="type">QVBoxLayout</span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QVBoxLayout</span>(<span class="operator">&amp;</span>widget);
+  <span class="type">QTableWidget</span> <span class="operator">*</span>tableWidget <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QTableWidget</span>(<span class="operator">&amp;</span>widget);
+  layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(container<span class="operator">,</span> <span class="number">1</span>);
+  layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(tableWidget<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignHCenter);
+
+</pre>
+<p>The table widget is going to be used to display the numerical data being inserted into the graph, and to modify it (See <a href="qtdatavisualization-scatter-example.html#adding-data-to-the-graph">Adding data to the graph</a> and <a href="qtdatavisualization-itemmodel-example.html#interacting-with-the-data">Interacting with the data</a>).</p>
+<p>We need to instantiate <a href="qitemmodelbardataproxy.html">QItemModelBarDataProxy</a> and a <a href="qbar3dseries.html">QBar3DSeries</a> for it, and give the series to the graph:</p>
+<pre class="cpp">
+
+  <span class="comment">// Since we are dealing with QTableWidget, the model will already have data sorted properly</span>
+  <span class="comment">// into rows and columns, so we simply set useModelCategories property to true to utilize this.</span>
+  <span class="type"><a href="qitemmodelbardataproxy.html">QItemModelBarDataProxy</a></span> <span class="operator">*</span>proxy <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qitemmodelbardataproxy.html">QItemModelBarDataProxy</a></span>(tableWidget<span class="operator">-</span><span class="operator">&gt;</span>model());
+  proxy<span class="operator">-</span><span class="operator">&gt;</span>setUseModelCategories(<span class="keyword">true</span>);
+  QBar3DSeries <span class="operator">*</span>series <span class="operator">=</span> <span class="keyword">new</span> QBar3DSeries(proxy);
+  series<span class="operator">-</span><span class="operator">&gt;</span>setMesh(QAbstract3DSeries<span class="operator">::</span>MeshPyramid);
+  graph<span class="operator">-</span><span class="operator">&gt;</span>addSeries(series);
+
+</pre>
+<p>Here we tell the proxy to directly map the model's rows and columns into the proxy's rows and columns instead of defining row and column roles to map for them. Then we give the model from the table widget to the proxy. We also create a series instance and set the proxy to it. We customize the series visuals a bit by changing the object mesh to pyramids, and finally add the series to the graph.</p>
+<p>Next, let's create another class to handle the data addition and other interaction with the graph. Let's call it <code>GraphDataGenerator</code> (See <a href="qtdatavisualization-scatter-example.html#setting-up-the-graph">Setting up the graph</a> and <a href="qtdatavisualization-scatter-example.html#adding-data-to-the-graph">Adding data to the graph</a> for details) and connect some signals between <a href="qbar3dseries.html">QBar3DSeries</a>, <code>GraphDataGenerator</code>, and QTableWidget (See <a href="qtdatavisualization-itemmodel-example.html#interacting-with-the-data">Interacting with the data</a> for a closer look):</p>
+<pre class="cpp">
+
+  GraphDataGenerator generator(graph<span class="operator">,</span> tableWidget);
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(series<span class="operator">,</span> <span class="operator">&amp;</span>QBar3DSeries<span class="operator">::</span>selectedBarChanged<span class="operator">,</span> <span class="operator">&amp;</span>generator<span class="operator">,</span>
+                   <span class="operator">&amp;</span>GraphDataGenerator<span class="operator">::</span>selectFromTable);
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(tableWidget<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QTableWidget</span><span class="operator">::</span>currentCellChanged<span class="operator">,</span> <span class="operator">&amp;</span>generator<span class="operator">,</span>
+                   <span class="operator">&amp;</span>GraphDataGenerator<span class="operator">::</span>selectedFromTable);
+
+</pre>
+<p>The application main is done and we can show the graph and start the event loop:</p>
+<pre class="cpp">
+
+  widget<span class="operator">.</span>show();
+  generator<span class="operator">.</span>start();
+  <span class="keyword">return</span> app<span class="operator">.</span>exec();
+
+</pre>
+<a name="setting-up-the-graph"></a>
+<h2 id="setting-up-the-graph">Setting up the graph</h2>
+<p>Let's set up the visual attributes for the graph in the constructor of <code>GraphDataGenerator</code>:</p>
+<pre class="cpp">
+
+  <span class="comment">// Set up bar specifications; make the bars as wide as they are deep,</span>
+  <span class="comment">// and add a small space between them</span>
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>setBarThickness(<span class="number">1.0f</span>);
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>setBarSpacing(<span class="type"><a href="../qtcore/qsizef.html">QSizeF</a></span>(<span class="number">0.2</span><span class="operator">,</span> <span class="number">0.2</span>));
+
+  <span class="comment">// Set selection mode to slice row</span>
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>setSelectionMode(QAbstract3DGraph<span class="operator">::</span>SelectionItemAndRow <span class="operator">|</span> QAbstract3DGraph<span class="operator">::</span>SelectionSlice);
+
+  <span class="comment">// Set theme</span>
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setType(<span class="type"><a href="q3dtheme.html">Q3DTheme</a></span><span class="operator">::</span>ThemeDigia);
+
+  <span class="comment">// Set font</span>
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setFont(<span class="type"><a href="../qtgui/qfont.html">QFont</a></span>(<span class="string">&quot;Impact&quot;</span><span class="operator">,</span> <span class="number">20</span>));
+
+  <span class="comment">// Set preset camera position</span>
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">-</span><span class="operator">&gt;</span>setCameraPreset(<span class="type"><a href="q3dcamera.html">Q3DCamera</a></span><span class="operator">::</span>CameraPresetFront);
+
+</pre>
+<p>First we set bar thickness ratio to 1.0, which means bars will be as wide as they are deep. 1.0 is also the default value, so the line is basically unnecessary. It's left there so you could easily try how changing it affects the graph. The second line sets bar spacings to 0.2, which means there will be a gap of 20% of the bar's thickness between the bars in both directions.</p>
+<p>We want to be able to select rows of data for a closer inspection, so we set the selection mode to slice item and row. This means that whenever we select a bar in the graph, the whole row will be displayed separately and the selected bar will be highlighted.</p>
+<p>We don't want to use the default colors, so we set one of the predefined themes as the active theme.</p>
+<p>Next line sets the font to <code>Impact</code>. If your system doesn't have it, it will be replaced by the system default.</p>
+<p>And finally, we set the camera position to one of the predefined camera positions. Now the initial graph settings are done.</p>
+<p><b>Note: </b>You do not need to set any of these in case you're happy with the defaults. You can easily try them by commenting out the contents of the constructor.</p><a name="adding-data-to-the-graph"></a>
+<h2 id="adding-data-to-the-graph">Adding data to the graph</h2>
+<p>We created the data generator in the application main and gave it the graph and the table widget as parameters:</p>
+<pre class="cpp">
+
+  GraphDataGenerator generator(graph<span class="operator">,</span> tableWidget);
+
+</pre>
+<p>We added a separate start method to the generator, so that it wouldn't start doing anything until everything else is set up. We then called the method when starting the application:</p>
+<pre class="cpp">
+
+  generator<span class="operator">.</span>start();
+
+</pre>
+<p>Let's have a look at the contents of the <code>start()</code> method:</p>
+<pre class="cpp">
+
+  setupModel();
+
+  <span class="comment">// Table needs to be shown before the size of its headers can be accurately obtained,</span>
+  <span class="comment">// so we postpone it a bit</span>
+  m_dataTimer <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span>();
+  m_dataTimer<span class="operator">-</span><span class="operator">&gt;</span>setSingleShot(<span class="keyword">true</span>);
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(m_dataTimer<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span><span class="operator">::</span>timeout<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>GraphDataGenerator<span class="operator">::</span>fixTableSize);
+  m_dataTimer<span class="operator">-</span><span class="operator">&gt;</span>start(<span class="number">0</span>);
+
+</pre>
+<p>The main thing <code>start()</code> does is set up the data model. It also activates a timer for getting the accurate dimensions of the table widget after it's been filled with data. The reason we do this is that the widget doesn't know its final visual domensions until all the data has been inserted to it and it has been shown. The data timer usage is not vital for the application, so we won't take a closer look at it. It's just there to make QTableWidget look better.</p>
+<p>In <code>setupModel()</code> we first introduce the row and column labels, and the actual data:</p>
+<pre class="cpp">
+
+  <span class="comment">// Set up row and column names</span>
+  <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> days;
+  days <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Monday&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Tuesday&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Wednesday&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Thursday&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Friday&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Saturday&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Sunday&quot;</span>;
+  <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> weeks;
+  weeks <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;week 1&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;week 2&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;week 3&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;week 4&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;week 5&quot;</span>;
+
+  <span class="comment">// Set up data         Mon  Tue  Wed  Thu  Fri  Sat  Sun</span>
+  <span class="type">float</span> hours<span class="operator">[</span><span class="number">5</span><span class="operator">]</span><span class="operator">[</span><span class="number">7</span><span class="operator">]</span> <span class="operator">=</span> {{<span class="number">2.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">3.0f</span><span class="operator">,</span> <span class="number">0.2f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">5.0f</span><span class="operator">,</span> <span class="number">10.0f</span>}<span class="operator">,</span>     <span class="comment">// week 1</span>
+                       {<span class="number">0.5f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">3.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">2.0f</span><span class="operator">,</span> <span class="number">2.0f</span><span class="operator">,</span> <span class="number">3.0f</span>}<span class="operator">,</span>      <span class="comment">// week 2</span>
+                       {<span class="number">1.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">2.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">4.0f</span><span class="operator">,</span> <span class="number">4.0f</span><span class="operator">,</span> <span class="number">4.0f</span>}<span class="operator">,</span>      <span class="comment">// week 3</span>
+                       {<span class="number">0.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">2.0f</span><span class="operator">,</span> <span class="number">2.0f</span><span class="operator">,</span> <span class="number">0.3f</span>}<span class="operator">,</span>      <span class="comment">// week 4</span>
+                       {<span class="number">3.0f</span><span class="operator">,</span> <span class="number">3.0f</span><span class="operator">,</span> <span class="number">6.0f</span><span class="operator">,</span> <span class="number">2.0f</span><span class="operator">,</span> <span class="number">2.0f</span><span class="operator">,</span> <span class="number">1.0f</span><span class="operator">,</span> <span class="number">1.0f</span>}};     <span class="comment">// week 5</span>
+
+</pre>
+<p>Then we set up the axes:</p>
+<pre class="cpp">
+
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>rowAxis()<span class="operator">-</span><span class="operator">&gt;</span>setTitle(<span class="string">&quot;Week of year&quot;</span>);
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>rowAxis()<span class="operator">-</span><span class="operator">&gt;</span>setTitleVisible(<span class="keyword">true</span>);
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>columnAxis()<span class="operator">-</span><span class="operator">&gt;</span>setTitle(<span class="string">&quot;Day of week&quot;</span>);
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>columnAxis()<span class="operator">-</span><span class="operator">&gt;</span>setTitleVisible(<span class="keyword">true</span>);
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>valueAxis()<span class="operator">-</span><span class="operator">&gt;</span>setTitle(<span class="string">&quot;Hours spent on the Internet&quot;</span>);
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>valueAxis()<span class="operator">-</span><span class="operator">&gt;</span>setTitleVisible(<span class="keyword">true</span>);
+  m_graph<span class="operator">-</span><span class="operator">&gt;</span>valueAxis()<span class="operator">-</span><span class="operator">&gt;</span>setLabelFormat(<span class="string">&quot;%.1f h&quot;</span>);
+
+</pre>
+<p>Next we will set up the table widget:</p>
+<pre class="cpp">
+
+  m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setRowCount(<span class="number">5</span>);
+  m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setColumnCount(<span class="number">7</span>);
+  m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setHorizontalHeaderLabels(days);
+  m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setVerticalHeaderLabels(weeks);
+  m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setHorizontalScrollBarPolicy(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ScrollBarAlwaysOff);
+  m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setVerticalScrollBarPolicy(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ScrollBarAlwaysOff);
+  m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setCurrentCell(<span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1</span>);
+  m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setSelectionMode(<span class="type">QAbstractItemView</span><span class="operator">::</span>SingleSelection);
+
+</pre>
+<p>After that all that's left is adding the data to the table widget:</p>
+<pre class="cpp">
+
+  <span class="keyword">for</span> (<span class="type">int</span> week <span class="operator">=</span> <span class="number">0</span>; week <span class="operator">&lt;</span> weeks<span class="operator">.</span>size(); week<span class="operator">+</span><span class="operator">+</span>) {
+      <span class="keyword">for</span> (<span class="type">int</span> day <span class="operator">=</span> <span class="number">0</span>; day <span class="operator">&lt;</span> days<span class="operator">.</span>size(); day<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> index <span class="operator">=</span> m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>model()<span class="operator">-</span><span class="operator">&gt;</span>index(week<span class="operator">,</span> day);
+          m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>model()<span class="operator">-</span><span class="operator">&gt;</span>setData(index<span class="operator">,</span> hours<span class="operator">[</span>week<span class="operator">]</span><span class="operator">[</span>day<span class="operator">]</span>);
+      }
+  }
+
+</pre>
+<p>Now we have a bar graph and a table widget, both displaying the same data.</p>
+<p>You're probably wondering how the data can be displayed in the graph, as the only thing we did was add it to the table widget? That's because of what we did earlier, in the application main:</p>
+<pre class="cpp">
+
+  <span class="comment">// Since we are dealing with QTableWidget, the model will already have data sorted properly</span>
+  <span class="comment">// into rows and columns, so we simply set useModelCategories property to true to utilize this.</span>
+  <span class="type"><a href="qitemmodelbardataproxy.html">QItemModelBarDataProxy</a></span> <span class="operator">*</span>proxy <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qitemmodelbardataproxy.html">QItemModelBarDataProxy</a></span>(tableWidget<span class="operator">-</span><span class="operator">&gt;</span>model());
+  proxy<span class="operator">-</span><span class="operator">&gt;</span>setUseModelCategories(<span class="keyword">true</span>);
+  QBar3DSeries <span class="operator">*</span>series <span class="operator">=</span> <span class="keyword">new</span> QBar3DSeries(proxy);
+  series<span class="operator">-</span><span class="operator">&gt;</span>setMesh(QAbstract3DSeries<span class="operator">::</span>MeshPyramid);
+  graph<span class="operator">-</span><span class="operator">&gt;</span>addSeries(series);
+
+</pre>
+<p>We created <a href="qitemmodelbardataproxy.html">QItemModelBarDataProxy</a> instance, and gave the proxy the model of the table widget we just created. The proxy maps the rows and the columns in the model of the table widget into rows and columns for itself directly, as we set the <a href="qitemmodelbardataproxy.html#useModelCategories-prop">QItemModelBarDataProxy::useModelCategories</a> property to true, and the graph gets the data to be displayed via the series that owns the proxy.</p>
+<a name="interacting-with-the-data"></a>
+<h2 id="interacting-with-the-data">Interacting with the data</h2>
+<p>We made a couple of signal connections in the application main earlier:</p>
+<pre class="cpp">
+
+  GraphDataGenerator generator(graph<span class="operator">,</span> tableWidget);
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(series<span class="operator">,</span> <span class="operator">&amp;</span>QBar3DSeries<span class="operator">::</span>selectedBarChanged<span class="operator">,</span> <span class="operator">&amp;</span>generator<span class="operator">,</span>
+                   <span class="operator">&amp;</span>GraphDataGenerator<span class="operator">::</span>selectFromTable);
+  <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(tableWidget<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QTableWidget</span><span class="operator">::</span>currentCellChanged<span class="operator">,</span> <span class="operator">&amp;</span>generator<span class="operator">,</span>
+                   <span class="operator">&amp;</span>GraphDataGenerator<span class="operator">::</span>selectedFromTable);
+
+</pre>
+<p>Now we'll find out what these were for.</p>
+<p>The first one connects a signal from <a href="q3dbars.html">Q3DBars</a> to the <code>GraphDataGenerator</code>. Signal <a href="qbar3dseries.html#selectedBar-prop">QBar3DSeries::selectedBarChanged</a>() is emitted when a bar is selected from the series. We connect that to a method in the data generator that selects the same data item in the table widget:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> GraphDataGenerator<span class="operator">::</span>selectFromTable(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <span class="operator">&amp;</span>selection)
+  {
+      m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setFocus();
+      m_tableWidget<span class="operator">-</span><span class="operator">&gt;</span>setCurrentCell(selection<span class="operator">.</span>x()<span class="operator">,</span> selection<span class="operator">.</span>y());
+  }
+
+</pre>
+<p>The second connection does the opposite; it connects a signal from the table widget to a method in the data generator. The method then selects the corresponding bar in the series:</p>
+<pre class="cpp">
+
+  <span class="type">void</span> GraphDataGenerator<span class="operator">::</span>selectedFromTable(<span class="type">int</span> currentRow<span class="operator">,</span> <span class="type">int</span> currentColumn<span class="operator">,</span>
+                                             <span class="type">int</span> previousRow<span class="operator">,</span> <span class="type">int</span> previousColumn)
+  {
+      Q_UNUSED(previousRow)
+      Q_UNUSED(previousColumn)
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>seriesList()<span class="operator">.</span>at(<span class="number">0</span>)<span class="operator">-</span><span class="operator">&gt;</span>setSelectedBar(<span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(currentRow<span class="operator">,</span> currentColumn));
+  }
+
+</pre>
+<p>You can even select an item in the widget and change the value of it, and the new value is updated to the graph. This is handled again by the proxy with mapping between the data in the table widget and itself.</p>
+<p class="centerAlign"><img src="images/itemmodel-example.png" alt="" /></p><a name="example-contents"></a>
+<h2 id="example-contents">Example contents</h2>
+<p>Files:</p>
+<ul>
+<li><a href="qtdatavisualization-itemmodel-main-cpp.html">itemmodel/main.cpp</a></li>
+<li><a href="qtdatavisualization-itemmodel-itemmodel-pro.html">itemmodel/itemmodel.pro</a></li>
+</ul>
+</div>
+<!-- @@@itemmodel -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

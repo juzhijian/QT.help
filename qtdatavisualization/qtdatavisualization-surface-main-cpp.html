@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>main.cpp Example File | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td ><a href="qtdatavisualization-surface-example.html">Surface Example</a></td><td >main.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">main.cpp Example File</h1>
+<span class="subtitle">surface/main.cpp</span>
+<!-- $$$surface/main.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Data Visualization module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;surfacegraph.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets/QApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QWidget&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QHBoxLayout&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QVBoxLayout&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QPushButton&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QRadioButton&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QSlider&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QGroupBox&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QComboBox&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QLabel&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QMessageBox&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QPainter&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QScreen&gt;</span>
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span><span class="operator">*</span>argv)
+  {
+      <span class="type">QApplication</span> app(argc<span class="operator">,</span> argv);
+      <span class="type"><a href="q3dsurface.html">Q3DSurface</a></span> <span class="operator">*</span>graph <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="q3dsurface.html">Q3DSurface</a></span>();
+      <span class="type">QWidget</span> <span class="operator">*</span>container <span class="operator">=</span> <span class="type">QWidget</span><span class="operator">::</span>createWindowContainer(graph);
+
+      <span class="keyword">if</span> (<span class="operator">!</span>graph<span class="operator">-</span><span class="operator">&gt;</span>hasContext()) {
+          <span class="type">QMessageBox</span> msgBox;
+          msgBox<span class="operator">.</span>setText(<span class="string">&quot;Couldn't initialize the OpenGL context.&quot;</span>);
+          msgBox<span class="operator">.</span>exec();
+          <span class="keyword">return</span> <span class="operator">-</span><span class="number">1</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> screenSize <span class="operator">=</span> graph<span class="operator">-</span><span class="operator">&gt;</span>screen()<span class="operator">-</span><span class="operator">&gt;</span>size();
+      container<span class="operator">-</span><span class="operator">&gt;</span>setMinimumSize(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(screenSize<span class="operator">.</span>width() <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> screenSize<span class="operator">.</span>height() <span class="operator">/</span> <span class="number">1.6</span>));
+      container<span class="operator">-</span><span class="operator">&gt;</span>setMaximumSize(screenSize);
+      container<span class="operator">-</span><span class="operator">&gt;</span>setSizePolicy(<span class="type">QSizePolicy</span><span class="operator">::</span>Expanding<span class="operator">,</span> <span class="type">QSizePolicy</span><span class="operator">::</span>Expanding);
+      container<span class="operator">-</span><span class="operator">&gt;</span>setFocusPolicy(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>StrongFocus);
+
+      <span class="type">QWidget</span> <span class="operator">*</span>widget <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QWidget</span>;
+      <span class="type">QHBoxLayout</span> <span class="operator">*</span>hLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QHBoxLayout</span>(widget);
+      <span class="type">QVBoxLayout</span> <span class="operator">*</span>vLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QVBoxLayout</span>();
+      hLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(container<span class="operator">,</span> <span class="number">1</span>);
+      hLayout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(vLayout);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>setAlignment(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignTop);
+
+      widget<span class="operator">-</span><span class="operator">&gt;</span>setWindowTitle(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Surface example&quot;</span>));
+
+      <span class="type">QGroupBox</span> <span class="operator">*</span>modelGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QGroupBox</span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Model&quot;</span>));
+
+      <span class="type">QRadioButton</span> <span class="operator">*</span>sqrtSinModelRB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QRadioButton</span>(widget);
+      sqrtSinModelRB<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Sqrt &amp;&amp; Sin&quot;</span>));
+      sqrtSinModelRB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+
+      <span class="type">QRadioButton</span> <span class="operator">*</span>heightMapModelRB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QRadioButton</span>(widget);
+      heightMapModelRB<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Height Map&quot;</span>));
+      heightMapModelRB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+
+      <span class="type">QVBoxLayout</span> <span class="operator">*</span>modelVBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QVBoxLayout</span>;
+      modelVBox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(sqrtSinModelRB);
+      modelVBox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(heightMapModelRB);
+      modelGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(modelVBox);
+
+      <span class="type">QGroupBox</span> <span class="operator">*</span>selectionGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QGroupBox</span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Selection Mode&quot;</span>));
+
+      <span class="type">QRadioButton</span> <span class="operator">*</span>modeNoneRB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QRadioButton</span>(widget);
+      modeNoneRB<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;No selection&quot;</span>));
+      modeNoneRB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+
+      <span class="type">QRadioButton</span> <span class="operator">*</span>modeItemRB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QRadioButton</span>(widget);
+      modeItemRB<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Item&quot;</span>));
+      modeItemRB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+
+      <span class="type">QRadioButton</span> <span class="operator">*</span>modeSliceRowRB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QRadioButton</span>(widget);
+      modeSliceRowRB<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Row Slice&quot;</span>));
+      modeSliceRowRB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+
+      <span class="type">QRadioButton</span> <span class="operator">*</span>modeSliceColumnRB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QRadioButton</span>(widget);
+      modeSliceColumnRB<span class="operator">-</span><span class="operator">&gt;</span>setText(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Column Slice&quot;</span>));
+      modeSliceColumnRB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">false</span>);
+
+      <span class="type">QVBoxLayout</span> <span class="operator">*</span>selectionVBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QVBoxLayout</span>;
+      selectionVBox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(modeNoneRB);
+      selectionVBox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(modeItemRB);
+      selectionVBox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(modeSliceRowRB);
+      selectionVBox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(modeSliceColumnRB);
+      selectionGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(selectionVBox);
+
+      <span class="type">QSlider</span> <span class="operator">*</span>axisMinSliderX <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QSlider</span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal<span class="operator">,</span> widget);
+      axisMinSliderX<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(<span class="number">0</span>);
+      axisMinSliderX<span class="operator">-</span><span class="operator">&gt;</span>setTickInterval(<span class="number">1</span>);
+      axisMinSliderX<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+      <span class="type">QSlider</span> <span class="operator">*</span>axisMaxSliderX <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QSlider</span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal<span class="operator">,</span> widget);
+      axisMaxSliderX<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(<span class="number">1</span>);
+      axisMaxSliderX<span class="operator">-</span><span class="operator">&gt;</span>setTickInterval(<span class="number">1</span>);
+      axisMaxSliderX<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+      <span class="type">QSlider</span> <span class="operator">*</span>axisMinSliderZ <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QSlider</span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal<span class="operator">,</span> widget);
+      axisMinSliderZ<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(<span class="number">0</span>);
+      axisMinSliderZ<span class="operator">-</span><span class="operator">&gt;</span>setTickInterval(<span class="number">1</span>);
+      axisMinSliderZ<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+      <span class="type">QSlider</span> <span class="operator">*</span>axisMaxSliderZ <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QSlider</span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal<span class="operator">,</span> widget);
+      axisMaxSliderZ<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(<span class="number">1</span>);
+      axisMaxSliderZ<span class="operator">-</span><span class="operator">&gt;</span>setTickInterval(<span class="number">1</span>);
+      axisMaxSliderZ<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+
+      <span class="type">QComboBox</span> <span class="operator">*</span>themeList <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QComboBox</span>(widget);
+      themeList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Qt&quot;</span>));
+      themeList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Primary Colors&quot;</span>));
+      themeList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Digia&quot;</span>));
+      themeList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Stone Moss&quot;</span>));
+      themeList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Army Blue&quot;</span>));
+      themeList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Retro&quot;</span>));
+      themeList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Ebony&quot;</span>));
+      themeList<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Isabelle&quot;</span>));
+
+      <span class="type">QGroupBox</span> <span class="operator">*</span>colorGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QGroupBox</span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Custom gradient&quot;</span>));
+
+      <span class="type"><a href="../qtgui/qlineargradient.html">QLinearGradient</a></span> grBtoY(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">100</span>);
+      grBtoY<span class="operator">.</span>setColorAt(<span class="number">1.0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black);
+      grBtoY<span class="operator">.</span>setColorAt(<span class="number">0.67</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>blue);
+      grBtoY<span class="operator">.</span>setColorAt(<span class="number">0.33</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>red);
+      grBtoY<span class="operator">.</span>setColorAt(<span class="number">0.0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>yellow);
+      <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> pm(<span class="number">24</span><span class="operator">,</span> <span class="number">100</span>);
+      <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> pmp(<span class="operator">&amp;</span>pm);
+      pmp<span class="operator">.</span>setBrush(<span class="type"><a href="../qtgui/qbrush.html">QBrush</a></span>(grBtoY));
+      pmp<span class="operator">.</span>setPen(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>NoPen);
+      pmp<span class="operator">.</span>drawRect(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">24</span><span class="operator">,</span> <span class="number">100</span>);
+      <span class="type">QPushButton</span> <span class="operator">*</span>gradientBtoYPB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QPushButton</span>(widget);
+      gradientBtoYPB<span class="operator">-</span><span class="operator">&gt;</span>setIcon(<span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(pm));
+      gradientBtoYPB<span class="operator">-</span><span class="operator">&gt;</span>setIconSize(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">24</span><span class="operator">,</span> <span class="number">100</span>));
+
+      <span class="type"><a href="../qtgui/qlineargradient.html">QLinearGradient</a></span> grGtoR(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">100</span>);
+      grGtoR<span class="operator">.</span>setColorAt(<span class="number">1.0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>darkGreen);
+      grGtoR<span class="operator">.</span>setColorAt(<span class="number">0.5</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>yellow);
+      grGtoR<span class="operator">.</span>setColorAt(<span class="number">0.2</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>red);
+      grGtoR<span class="operator">.</span>setColorAt(<span class="number">0.0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>darkRed);
+      pmp<span class="operator">.</span>setBrush(<span class="type"><a href="../qtgui/qbrush.html">QBrush</a></span>(grGtoR));
+      pmp<span class="operator">.</span>drawRect(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">24</span><span class="operator">,</span> <span class="number">100</span>);
+      <span class="type">QPushButton</span> <span class="operator">*</span>gradientGtoRPB <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QPushButton</span>(widget);
+      gradientGtoRPB<span class="operator">-</span><span class="operator">&gt;</span>setIcon(<span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(pm));
+      gradientGtoRPB<span class="operator">-</span><span class="operator">&gt;</span>setIconSize(<span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">24</span><span class="operator">,</span> <span class="number">100</span>));
+
+      <span class="type">QHBoxLayout</span> <span class="operator">*</span>colorHBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QHBoxLayout</span>;
+      colorHBox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(gradientBtoYPB);
+      colorHBox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(gradientGtoRPB);
+      colorGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(colorHBox);
+
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(modelGroupBox);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(selectionGroupBox);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(<span class="keyword">new</span> <span class="type">QLabel</span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Column range&quot;</span>)));
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(axisMinSliderX);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(axisMaxSliderX);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(<span class="keyword">new</span> <span class="type">QLabel</span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Row range&quot;</span>)));
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(axisMinSliderZ);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(axisMaxSliderZ);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(<span class="keyword">new</span> <span class="type">QLabel</span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Theme&quot;</span>)));
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(themeList);
+      vLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(colorGroupBox);
+
+      widget<span class="operator">-</span><span class="operator">&gt;</span>show();
+
+      SurfaceGraph <span class="operator">*</span>modifier <span class="operator">=</span> <span class="keyword">new</span> SurfaceGraph(graph);
+
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(heightMapModelRB<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QRadioButton</span><span class="operator">::</span>toggled<span class="operator">,</span>
+                       modifier<span class="operator">,</span> <span class="operator">&amp;</span>SurfaceGraph<span class="operator">::</span>enableHeightMapModel);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(sqrtSinModelRB<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QRadioButton</span><span class="operator">::</span>toggled<span class="operator">,</span>
+                       modifier<span class="operator">,</span> <span class="operator">&amp;</span>SurfaceGraph<span class="operator">::</span>enableSqrtSinModel);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(modeNoneRB<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QRadioButton</span><span class="operator">::</span>toggled<span class="operator">,</span>
+                       modifier<span class="operator">,</span> <span class="operator">&amp;</span>SurfaceGraph<span class="operator">::</span>toggleModeNone);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(modeItemRB<span class="operator">,</span>  <span class="operator">&amp;</span><span class="type">QRadioButton</span><span class="operator">::</span>toggled<span class="operator">,</span>
+                       modifier<span class="operator">,</span> <span class="operator">&amp;</span>SurfaceGraph<span class="operator">::</span>toggleModeItem);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(modeSliceRowRB<span class="operator">,</span>  <span class="operator">&amp;</span><span class="type">QRadioButton</span><span class="operator">::</span>toggled<span class="operator">,</span>
+                       modifier<span class="operator">,</span> <span class="operator">&amp;</span>SurfaceGraph<span class="operator">::</span>toggleModeSliceRow);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(modeSliceColumnRB<span class="operator">,</span>  <span class="operator">&amp;</span><span class="type">QRadioButton</span><span class="operator">::</span>toggled<span class="operator">,</span>
+                       modifier<span class="operator">,</span> <span class="operator">&amp;</span>SurfaceGraph<span class="operator">::</span>toggleModeSliceColumn);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(axisMinSliderX<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QSlider</span><span class="operator">::</span>valueChanged<span class="operator">,</span>
+                       modifier<span class="operator">,</span> <span class="operator">&amp;</span>SurfaceGraph<span class="operator">::</span>adjustXMin);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(axisMaxSliderX<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QSlider</span><span class="operator">::</span>valueChanged<span class="operator">,</span>
+                       modifier<span class="operator">,</span> <span class="operator">&amp;</span>SurfaceGraph<span class="operator">::</span>adjustXMax);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(axisMinSliderZ<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QSlider</span><span class="operator">::</span>valueChanged<span class="operator">,</span>
+                       modifier<span class="operator">,</span> <span class="operator">&amp;</span>SurfaceGraph<span class="operator">::</span>adjustZMin);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(axisMaxSliderZ<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QSlider</span><span class="operator">::</span>valueChanged<span class="operator">,</span>
+                       modifier<span class="operator">,</span> <span class="operator">&amp;</span>SurfaceGraph<span class="operator">::</span>adjustZMax);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(themeList<span class="operator">,</span> SIGNAL(currentIndexChanged(<span class="type">int</span>))<span class="operator">,</span>
+                       modifier<span class="operator">,</span> SLOT(changeTheme(<span class="type">int</span>)));
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(gradientBtoYPB<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QPushButton</span><span class="operator">::</span>pressed<span class="operator">,</span>
+                       modifier<span class="operator">,</span> <span class="operator">&amp;</span>SurfaceGraph<span class="operator">::</span>setBlackToYellowGradient);
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(gradientGtoRPB<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QPushButton</span><span class="operator">::</span>pressed<span class="operator">,</span>
+                       modifier<span class="operator">,</span> <span class="operator">&amp;</span>SurfaceGraph<span class="operator">::</span>setGreenToRedGradient);
+
+      modifier<span class="operator">-</span><span class="operator">&gt;</span>setAxisMinSliderX(axisMinSliderX);
+      modifier<span class="operator">-</span><span class="operator">&gt;</span>setAxisMaxSliderX(axisMaxSliderX);
+      modifier<span class="operator">-</span><span class="operator">&gt;</span>setAxisMinSliderZ(axisMinSliderZ);
+      modifier<span class="operator">-</span><span class="operator">&gt;</span>setAxisMaxSliderZ(axisMaxSliderZ);
+
+      sqrtSinModelRB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      modeItemRB<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+      themeList<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(<span class="number">2</span>);
+
+      <span class="keyword">return</span> app<span class="operator">.</span>exec();
+  }
+
+</pre>
+</div>
+<!-- @@@surface/main.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

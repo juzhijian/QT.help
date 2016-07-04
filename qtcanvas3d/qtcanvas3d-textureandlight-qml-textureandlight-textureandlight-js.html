@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>textureandlight.js Example File | Qt Canvas 3D 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcanvas3d-index.html">Qt Canvas 3D</a></td><td ><a href="qtcanvas3d-textureandlight-example.html">Lit and Textured Cube Example</a></td><td >textureandlight.js Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">textureandlight.js Example File</h1>
+<span class="subtitle">textureandlight/qml/textureandlight/textureandlight.js</span>
+<!-- $$$textureandlight/qml/textureandlight/textureandlight.js-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="js">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the QtCanvas3D module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="name">Qt</span>.<span class="name">include</span>(<span class="string">&quot;gl-matrix.js&quot;</span>)
+
+  //
+  <span class="comment">// Draws a cube that has the Qt logo as decal texture on each face.</span>
+  <span class="comment">// A simple per vertex lighting equation is used to emulate light landing on the rotating cube.</span>
+  //
+
+  var <span class="name">gl</span>;
+  var <span class="name">cubeTexture</span> = <span class="number">0</span>;
+  var <span class="name">vertexPositionAttribute</span>;
+  var <span class="name">textureCoordAttribute</span>;
+  var <span class="name">vertexNormalAttribute</span>;
+  var <span class="name">mvMatrix</span> = <span class="name">mat4</span>.<span class="name">create</span>();
+  var <span class="name">pMatrix</span>  = <span class="name">mat4</span>.<span class="name">create</span>();
+  var <span class="name">nMatrix</span>  = <span class="name">mat4</span>.<span class="name">create</span>();
+  var <span class="name">pMatrixUniform</span>;
+  var <span class="name">mvMatrixUniform</span>;
+  var <span class="name">nUniform</span>;
+  var <span class="name">width</span> = <span class="number">0</span>;
+  var <span class="name">height</span> = <span class="number">0</span>;
+  var <span class="name">canvas3d</span>;
+  var <span class="name">pixelSize</span>;
+
+  <span class="keyword">function</span> <span class="name">initializeGL</span>(<span class="name">canvas</span>) {
+      <span class="name">canvas3d</span> <span class="operator">=</span> <span class="name">canvas</span>;
+      <span class="comment">// Get the OpenGL context object that represents the API we call</span>
+      <span class="name">gl</span> <span class="operator">=</span> <span class="name">canvas</span>.<span class="name">getContext</span>(<span class="string">&quot;canvas3d&quot;</span>, {depth:<span class="number">true</span>, antialias:<span class="number">true</span>, alpha:<span class="number">false</span>});
+
+      <span class="comment">// Setup the OpenGL state</span>
+      <span class="name">gl</span>.<span class="name">enable</span>(<span class="name">gl</span>.<span class="name">DEPTH_TEST</span>);
+      <span class="name">gl</span>.<span class="name">depthFunc</span>(<span class="name">gl</span>.<span class="name">LESS</span>);
+      <span class="name">gl</span>.<span class="name">enable</span>(<span class="name">gl</span>.<span class="name">CULL_FACE</span>);
+      <span class="name">gl</span>.<span class="name">cullFace</span>(<span class="name">gl</span>.<span class="name">BACK</span>);
+      <span class="name">gl</span>.<span class="name">clearColor</span>(<span class="number">0.98</span>, <span class="number">0.98</span>, <span class="number">0.98</span>, <span class="number">1.0</span>);
+      <span class="name">gl</span>.<span class="name">clearDepth</span>(<span class="number">1.0</span>);
+      <span class="name">gl</span>.<span class="name">pixelStorei</span>(<span class="name">gl</span>.<span class="name">UNPACK_FLIP_Y_WEBGL</span>, <span class="number">false</span>);
+
+      <span class="comment">// Set viewport</span>
+      <span class="name">gl</span>.<span class="name">viewport</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="name">canvas</span>.<span class="name">width</span>, <span class="name">canvas</span>.<span class="name">height</span>);
+
+      <span class="comment">// Initialize the shader program</span>
+      <span class="name">initShaders</span>();
+
+      <span class="comment">// Initialize vertex and color buffers</span>
+      <span class="name">initBuffers</span>();
+
+      <span class="comment">// Load the textures</span>
+      var <span class="name">qtLogoImage</span> = <span class="name">TextureImageFactory</span>.<span class="name">newTexImage</span>();
+      <span class="name">qtLogoImage</span>.<span class="name">imageLoaded</span>.<span class="name">connect</span>(<span class="keyword">function</span>() {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Texture loaded, &quot;</span><span class="operator">+</span><span class="name">qtLogoImage</span>.<span class="name">src</span>);
+          <span class="comment">// Create the Canvas3DTexture object</span>
+          <span class="name">cubeTexture</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createTexture</span>();
+          <span class="comment">// Bind it</span>
+          <span class="name">gl</span>.<span class="name">bindTexture</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">cubeTexture</span>);
+          <span class="comment">// Set the properties</span>
+          <span class="name">gl</span>.<span class="name">texImage2D</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>,    <span class="comment">// target</span>
+                        <span class="number">0</span>,                <span class="comment">// level</span>
+                        <span class="name">gl</span>.<span class="name">RGBA</span>,          <span class="comment">// internalformat</span>
+                        <span class="name">gl</span>.<span class="name">RGBA</span>,          <span class="comment">// format</span>
+                        <span class="name">gl</span>.<span class="name">UNSIGNED_BYTE</span>, <span class="comment">// type</span>
+                        <span class="name">qtLogoImage</span>);     <span class="comment">// pixels</span>
+          <span class="comment">// Set texture filtering parameters</span>
+          <span class="name">gl</span>.<span class="name">texParameteri</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">gl</span>.<span class="name">TEXTURE_MAG_FILTER</span>, <span class="name">gl</span>.<span class="name">LINEAR</span>);
+          <span class="name">gl</span>.<span class="name">texParameteri</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">gl</span>.<span class="name">TEXTURE_MIN_FILTER</span>, <span class="name">gl</span>.<span class="name">LINEAR_MIPMAP_NEAREST</span>);
+          <span class="comment">// Generate mipmap</span>
+          <span class="name">gl</span>.<span class="name">generateMipmap</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>);
+      });
+      <span class="name">qtLogoImage</span>.<span class="name">imageLoadingFailed</span>.<span class="name">connect</span>(<span class="keyword">function</span>() {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Texture load FAILED, &quot;</span><span class="operator">+</span><span class="name">qtLogoImage</span>.<span class="name">errorString</span>);
+      });
+      <span class="name">qtLogoImage</span>.<span class="name">src</span> <span class="operator">=</span> <span class="string">&quot;qrc:/qtlogo.png&quot;</span>;
+  }
+
+  <span class="keyword">function</span> <span class="name">resizeGL</span>(<span class="name">canvas</span>)
+  {
+      var <span class="name">pixelRatio</span> = <span class="name">canvas</span>.<span class="name">devicePixelRatio</span>;
+      <span class="name">canvas</span>.<span class="name">pixelSize</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">size</span>(<span class="name">canvas</span>.<span class="name">width</span> <span class="operator">*</span> <span class="name">pixelRatio</span>,
+                                 <span class="name">canvas</span>.<span class="name">height</span> <span class="operator">*</span> <span class="name">pixelRatio</span>);
+  }
+
+  <span class="keyword">function</span> <span class="name">degToRad</span>(<span class="name">degrees</span>) {
+      <span class="keyword">return</span> <span class="name">degrees</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">PI</span> <span class="operator">/</span> <span class="number">180</span>;
+  }
+
+  <span class="keyword">function</span> <span class="name">paintGL</span>(<span class="name">canvas</span>) {
+      var <span class="name">pixelRatio</span> = <span class="name">canvas</span>.<span class="name">devicePixelRatio</span>;
+      var <span class="name">currentWidth</span> = <span class="name">canvas</span>.<span class="name">width</span> <span class="operator">*</span> <span class="name">pixelRatio</span>;
+      var <span class="name">currentHeight</span> = <span class="name">canvas</span>.<span class="name">height</span> <span class="operator">*</span> <span class="name">pixelRatio</span>;
+      <span class="keyword">if</span> (<span class="name">currentWidth</span> <span class="operator">!==</span> <span class="name">width</span> <span class="operator">||</span> <span class="name">currentHeight</span> <span class="operator">!==</span> <span class="name">height</span> ) {
+          <span class="name">width</span> <span class="operator">=</span> <span class="name">currentWidth</span>;
+          <span class="name">height</span> <span class="operator">=</span> <span class="name">currentHeight</span>;
+          <span class="name">gl</span>.<span class="name">viewport</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="name">width</span>, <span class="name">height</span>);
+          <span class="name">mat4</span>.<span class="name">perspective</span>(<span class="name">pMatrix</span>, <span class="name">degToRad</span>(<span class="number">45</span>), <span class="name">width</span> <span class="operator">/</span> <span class="name">height</span>, <span class="number">0.1</span>, <span class="number">500.0</span>);
+          <span class="name">gl</span>.<span class="name">uniformMatrix4fv</span>(<span class="name">pMatrixUniform</span>, <span class="number">false</span>, <span class="name">pMatrix</span>);
+      }
+
+      <span class="name">gl</span>.<span class="name">clear</span>(<span class="name">gl</span>.<span class="name">COLOR_BUFFER_BIT</span> <span class="operator">|</span> <span class="name">gl</span>.<span class="name">DEPTH_BUFFER_BIT</span>);
+
+      <span class="name">mat4</span>.<span class="name">identity</span>(<span class="name">mvMatrix</span>);
+      <span class="name">mat4</span>.<span class="name">translate</span>(<span class="name">mvMatrix</span>, <span class="name">mvMatrix</span>, [(<span class="name">canvas</span>.<span class="name">yRotAnim</span> <span class="operator">-</span> <span class="number">120.0</span>) <span class="operator">/</span> <span class="number">120.0</span>,
+                                          (<span class="name">canvas</span>.<span class="name">xRotAnim</span> <span class="operator">-</span>  <span class="number">60.0</span>) <span class="operator">/</span> <span class="number">50.0</span>,
+                                          -<span class="number">10.0</span>]);
+      <span class="name">mat4</span>.<span class="name">rotate</span>(<span class="name">mvMatrix</span>, <span class="name">mvMatrix</span>, <span class="name">degToRad</span>(<span class="name">canvas</span>.<span class="name">xRotAnim</span>), [<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>]);
+      <span class="name">mat4</span>.<span class="name">rotate</span>(<span class="name">mvMatrix</span>, <span class="name">mvMatrix</span>, <span class="name">degToRad</span>(<span class="name">canvas</span>.<span class="name">yRotAnim</span>), [<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>]);
+      <span class="name">mat4</span>.<span class="name">rotate</span>(<span class="name">mvMatrix</span>, <span class="name">mvMatrix</span>, <span class="name">degToRad</span>(<span class="name">canvas</span>.<span class="name">zRotAnim</span>), [<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>]);
+      <span class="name">gl</span>.<span class="name">uniformMatrix4fv</span>(<span class="name">mvMatrixUniform</span>, <span class="number">false</span>, <span class="name">mvMatrix</span>);
+
+      <span class="name">mat4</span>.<span class="name">invert</span>(<span class="name">nMatrix</span>, <span class="name">mvMatrix</span>);
+      <span class="name">mat4</span>.<span class="name">transpose</span>(<span class="name">nMatrix</span>, <span class="name">nMatrix</span>);
+      <span class="name">gl</span>.<span class="name">uniformMatrix4fv</span>(<span class="name">nUniform</span>, <span class="number">false</span>, <span class="name">nMatrix</span>);
+
+      <span class="name">gl</span>.<span class="name">drawElements</span>(<span class="name">gl</span>.<span class="name">TRIANGLES</span>, <span class="number">36</span>, <span class="name">gl</span>.<span class="name">UNSIGNED_SHORT</span>, <span class="number">0</span>);
+  }
+
+  <span class="keyword">function</span> <span class="name">initBuffers</span>()
+  {
+      var <span class="name">cubeVertexPositionBuffer</span> = <span class="name">gl</span>.<span class="name">createBuffer</span>();
+      <span class="name">cubeVertexPositionBuffer</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;cubeVertexPositionBuffer&quot;</span>;
+      <span class="name">gl</span>.<span class="name">bindBuffer</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>, <span class="name">cubeVertexPositionBuffer</span>);
+      <span class="name">gl</span>.<span class="name">bufferData</span>(
+                  <span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>,
+                  new <span class="name">Float32Array</span>([<span class="comment">// Front face</span>
+                                          -<span class="number">1.0</span>, -<span class="number">1.0</span>,  <span class="number">1.0</span>,
+                                          <span class="number">1.0</span>, -<span class="number">1.0</span>,  <span class="number">1.0</span>,
+                                          <span class="number">1.0</span>,  <span class="number">1.0</span>,  <span class="number">1.0</span>,
+                                          -<span class="number">1.0</span>,  <span class="number">1.0</span>,  <span class="number">1.0</span>,
+
+                                          <span class="comment">// Back face</span>
+                                          -<span class="number">1.0</span>, -<span class="number">1.0</span>, -<span class="number">1.0</span>,
+                                          -<span class="number">1.0</span>,  <span class="number">1.0</span>, -<span class="number">1.0</span>,
+                                          <span class="number">1.0</span>,  <span class="number">1.0</span>, -<span class="number">1.0</span>,
+                                          <span class="number">1.0</span>, -<span class="number">1.0</span>, -<span class="number">1.0</span>,
+
+                                          <span class="comment">// Top face</span>
+                                          -<span class="number">1.0</span>,  <span class="number">1.0</span>, -<span class="number">1.0</span>,
+                                          -<span class="number">1.0</span>,  <span class="number">1.0</span>,  <span class="number">1.0</span>,
+                                          <span class="number">1.0</span>,  <span class="number">1.0</span>,  <span class="number">1.0</span>,
+                                          <span class="number">1.0</span>,  <span class="number">1.0</span>, -<span class="number">1.0</span>,
+
+                                          <span class="comment">// Bottom face</span>
+                                          -<span class="number">1.0</span>, -<span class="number">1.0</span>, -<span class="number">1.0</span>,
+                                          <span class="number">1.0</span>, -<span class="number">1.0</span>, -<span class="number">1.0</span>,
+                                          <span class="number">1.0</span>, -<span class="number">1.0</span>,  <span class="number">1.0</span>,
+                                          -<span class="number">1.0</span>, -<span class="number">1.0</span>,  <span class="number">1.0</span>,
+
+                                          <span class="comment">// Right face</span>
+                                          <span class="number">1.0</span>, -<span class="number">1.0</span>, -<span class="number">1.0</span>,
+                                          <span class="number">1.0</span>,  <span class="number">1.0</span>, -<span class="number">1.0</span>,
+                                          <span class="number">1.0</span>,  <span class="number">1.0</span>,  <span class="number">1.0</span>,
+                                          <span class="number">1.0</span>, -<span class="number">1.0</span>,  <span class="number">1.0</span>,
+
+                                          <span class="comment">// Left face</span>
+                                          -<span class="number">1.0</span>, -<span class="number">1.0</span>, -<span class="number">1.0</span>,
+                                          -<span class="number">1.0</span>, -<span class="number">1.0</span>,  <span class="number">1.0</span>,
+                                          -<span class="number">1.0</span>,  <span class="number">1.0</span>,  <span class="number">1.0</span>,
+                                          -<span class="number">1.0</span>,  <span class="number">1.0</span>, -<span class="number">1.0</span>
+                                         ]),
+                  <span class="name">gl</span>.<span class="name">STATIC_DRAW</span>);
+      <span class="name">gl</span>.<span class="name">vertexAttribPointer</span>(<span class="name">vertexPositionAttribute</span>, <span class="number">3</span>, <span class="name">gl</span>.<span class="name">FLOAT</span>, <span class="number">false</span>, <span class="number">0</span>, <span class="number">0</span>);
+
+      var <span class="name">cubeVertexIndexBuffer</span> = <span class="name">gl</span>.<span class="name">createBuffer</span>();
+      <span class="name">gl</span>.<span class="name">bindBuffer</span>(<span class="name">gl</span>.<span class="name">ELEMENT_ARRAY_BUFFER</span>, <span class="name">cubeVertexIndexBuffer</span>);
+      <span class="name">gl</span>.<span class="name">bufferData</span>(<span class="name">gl</span>.<span class="name">ELEMENT_ARRAY_BUFFER</span>,
+                    new <span class="name">Uint16Array</span>([
+                                              <span class="number">0</span>,  <span class="number">1</span>,  <span class="number">2</span>,      <span class="number">0</span>,  <span class="number">2</span>,  <span class="number">3</span>,    <span class="comment">// front</span>
+                                              <span class="number">4</span>,  <span class="number">5</span>,  <span class="number">6</span>,      <span class="number">4</span>,  <span class="number">6</span>,  <span class="number">7</span>,    <span class="comment">// back</span>
+                                              <span class="number">8</span>,  <span class="number">9</span>,  <span class="number">10</span>,     <span class="number">8</span>,  <span class="number">10</span>, <span class="number">11</span>,   <span class="comment">// top</span>
+                                              <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>,     <span class="number">12</span>, <span class="number">14</span>, <span class="number">15</span>,   <span class="comment">// bottom</span>
+                                              <span class="number">16</span>, <span class="number">17</span>, <span class="number">18</span>,     <span class="number">16</span>, <span class="number">18</span>, <span class="number">19</span>,   <span class="comment">// right</span>
+                                              <span class="number">20</span>, <span class="number">21</span>, <span class="number">22</span>,     <span class="number">20</span>, <span class="number">22</span>, <span class="number">23</span>    <span class="comment">// left</span>
+                                          ]),
+                    <span class="name">gl</span>.<span class="name">STATIC_DRAW</span>);
+
+      var <span class="name">cubeVerticesTextureCoordBuffer</span> = <span class="name">gl</span>.<span class="name">createBuffer</span>();
+      <span class="name">cubeVerticesTextureCoordBuffer</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;cubeVerticesTextureCoordBuffer&quot;</span>;
+      <span class="name">gl</span>.<span class="name">bindBuffer</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>, <span class="name">cubeVerticesTextureCoordBuffer</span>);
+      var <span class="name">textureCoordinates</span> = [
+                  <span class="comment">// Front</span>
+                  <span class="number">1.0</span>,  <span class="number">0.0</span>,
+                  <span class="number">0.0</span>,  <span class="number">0.0</span>,
+                  <span class="number">0.0</span>,  <span class="number">1.0</span>,
+                  <span class="number">1.0</span>,  <span class="number">1.0</span>,
+                  <span class="comment">// Back</span>
+                  <span class="number">1.0</span>,  <span class="number">0.0</span>,
+                  <span class="number">0.0</span>,  <span class="number">0.0</span>,
+                  <span class="number">0.0</span>,  <span class="number">1.0</span>,
+                  <span class="number">1.0</span>,  <span class="number">1.0</span>,
+                  <span class="comment">// Top</span>
+                  <span class="number">1.0</span>,  <span class="number">0.0</span>,
+                  <span class="number">0.0</span>,  <span class="number">0.0</span>,
+                  <span class="number">0.0</span>,  <span class="number">1.0</span>,
+                  <span class="number">1.0</span>,  <span class="number">1.0</span>,
+                  <span class="comment">// Bottom</span>
+                  <span class="number">1.0</span>,  <span class="number">0.0</span>,
+                  <span class="number">0.0</span>,  <span class="number">0.0</span>,
+                  <span class="number">0.0</span>,  <span class="number">1.0</span>,
+                  <span class="number">1.0</span>,  <span class="number">1.0</span>,
+                  <span class="comment">// Right</span>
+                  <span class="number">1.0</span>,  <span class="number">0.0</span>,
+                  <span class="number">0.0</span>,  <span class="number">0.0</span>,
+                  <span class="number">0.0</span>,  <span class="number">1.0</span>,
+                  <span class="number">1.0</span>,  <span class="number">1.0</span>,
+                  <span class="comment">// Left</span>
+                  <span class="number">1.0</span>,  <span class="number">0.0</span>,
+                  <span class="number">0.0</span>,  <span class="number">0.0</span>,
+                  <span class="number">0.0</span>,  <span class="number">1.0</span>,
+                  <span class="number">1.0</span>,  <span class="number">1.0</span>
+              ];
+      <span class="name">gl</span>.<span class="name">bufferData</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>, new <span class="name">Float32Array</span>(<span class="name">textureCoordinates</span>),
+                    <span class="name">gl</span>.<span class="name">STATIC_DRAW</span>);
+      <span class="name">gl</span>.<span class="name">vertexAttribPointer</span>(<span class="name">textureCoordAttribute</span>, <span class="number">2</span>, <span class="name">gl</span>.<span class="name">FLOAT</span>, <span class="number">false</span>, <span class="number">0</span>, <span class="number">0</span>);
+
+      var <span class="name">cubeVerticesNormalBuffer</span> = <span class="name">gl</span>.<span class="name">createBuffer</span>();
+      <span class="name">gl</span>.<span class="name">bindBuffer</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>, <span class="name">cubeVerticesNormalBuffer</span>);
+      <span class="name">gl</span>.<span class="name">bufferData</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>, new <span class="name">Float32Array</span>([
+                                                                <span class="comment">// Front</span>
+                                                                <span class="number">0.0</span>,  <span class="number">0.0</span>,  <span class="number">1.0</span>,
+                                                                <span class="number">0.0</span>,  <span class="number">0.0</span>,  <span class="number">1.0</span>,
+                                                                <span class="number">0.0</span>,  <span class="number">0.0</span>,  <span class="number">1.0</span>,
+                                                                <span class="number">0.0</span>,  <span class="number">0.0</span>,  <span class="number">1.0</span>,
+
+                                                                <span class="comment">// Back</span>
+                                                                <span class="number">0.0</span>,  <span class="number">0.0</span>, -<span class="number">1.0</span>,
+                                                                <span class="number">0.0</span>,  <span class="number">0.0</span>, -<span class="number">1.0</span>,
+                                                                <span class="number">0.0</span>,  <span class="number">0.0</span>, -<span class="number">1.0</span>,
+                                                                <span class="number">0.0</span>,  <span class="number">0.0</span>, -<span class="number">1.0</span>,
+
+                                                                <span class="comment">// Top</span>
+                                                                <span class="number">0.0</span>,  <span class="number">1.0</span>,  <span class="number">0.0</span>,
+                                                                <span class="number">0.0</span>,  <span class="number">1.0</span>,  <span class="number">0.0</span>,
+                                                                <span class="number">0.0</span>,  <span class="number">1.0</span>,  <span class="number">0.0</span>,
+                                                                <span class="number">0.0</span>,  <span class="number">1.0</span>,  <span class="number">0.0</span>,
+
+                                                                <span class="comment">// Bottom</span>
+                                                                <span class="number">0.0</span>, -<span class="number">1.0</span>,  <span class="number">0.0</span>,
+                                                                <span class="number">0.0</span>, -<span class="number">1.0</span>,  <span class="number">0.0</span>,
+                                                                <span class="number">0.0</span>, -<span class="number">1.0</span>,  <span class="number">0.0</span>,
+                                                                <span class="number">0.0</span>, -<span class="number">1.0</span>,  <span class="number">0.0</span>,
+
+                                                                <span class="comment">// Right</span>
+                                                                <span class="number">1.0</span>,  <span class="number">0.0</span>,  <span class="number">0.0</span>,
+                                                                <span class="number">1.0</span>,  <span class="number">0.0</span>,  <span class="number">0.0</span>,
+                                                                <span class="number">1.0</span>,  <span class="number">0.0</span>,  <span class="number">0.0</span>,
+                                                                <span class="number">1.0</span>,  <span class="number">0.0</span>,  <span class="number">0.0</span>,
+
+                                                                <span class="comment">// Left</span>
+                                                                -<span class="number">1.0</span>,  <span class="number">0.0</span>,  <span class="number">0.0</span>,
+                                                                -<span class="number">1.0</span>,  <span class="number">0.0</span>,  <span class="number">0.0</span>,
+                                                                -<span class="number">1.0</span>,  <span class="number">0.0</span>,  <span class="number">0.0</span>,
+                                                                -<span class="number">1.0</span>,  <span class="number">0.0</span>,  <span class="number">0.0</span>
+                                                            ]), <span class="name">gl</span>.<span class="name">STATIC_DRAW</span>);
+      <span class="name">gl</span>.<span class="name">vertexAttribPointer</span>(<span class="name">vertexNormalAttribute</span>, <span class="number">3</span>, <span class="name">gl</span>.<span class="name">FLOAT</span>, <span class="number">false</span>, <span class="number">0</span>, <span class="number">0</span>);
+  }
+
+  <span class="keyword">function</span> <span class="name">initShaders</span>()
+  {
+      var <span class="name">vertexShader</span> = <span class="name">getShader</span>(<span class="name">gl</span>,
+                                   <span class="string">&quot;attribute highp vec3 aVertexNormal;    \
+                                    attribute highp vec3 aVertexPosition;  \
+                                    attribute highp vec2 aTextureCoord;    \
+                                                                           \
+                                    uniform highp mat4 uNormalMatrix;      \
+                                    uniform mat4 uMVMatrix;                \
+                                    uniform mat4 uPMatrix;                 \
+                                                                           \
+                                    varying mediump vec4 vColor;           \
+                                    varying highp vec2 vTextureCoord;      \
+                                    varying highp vec3 vLighting;          \
+                                                                           \
+                                    void main(void) {                      \
+                                        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0); \
+                                        vTextureCoord = aTextureCoord;                                   \
+                                        highp vec3 ambientLight = vec3(0.5, 0.5, 0.5);                   \
+                                        highp vec3 directionalLightColor = vec3(0.75, 0.75, 0.75);       \
+                                        highp vec3 directionalVector = vec3(0.85, 0.8, 0.75);            \
+                                        highp vec4 transformedNormal = uNormalMatrix * vec4(aVertexNormal, 1.0); \
+                                        highp float directional = max(dot(transformedNormal.xyz, directionalVector), 0.0); \
+                                        vLighting = ambientLight + (directionalLightColor * directional); \
+                                    }&quot;</span>, <span class="name">gl</span>.<span class="name">VERTEX_SHADER</span>);
+      var <span class="name">fragmentShader</span> = <span class="name">getShader</span>(<span class="name">gl</span>,
+                                     <span class="string">&quot;varying highp vec2 vTextureCoord;  \
+                                      varying highp vec3 vLighting;      \
+                                                                         \
+                                      uniform sampler2D uSampler;        \
+                                                                         \
+                                      void main(void) {                  \
+                                          mediump vec3 texelColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t)).rgb; \
+                                          gl_FragColor = vec4(texelColor * vLighting, 1.0);                                      \
+                                      }&quot;</span>, <span class="name">gl</span>.<span class="name">FRAGMENT_SHADER</span>);
+      <span class="comment">// Create the Canvas3DProgram for shader</span>
+      var <span class="name">shaderProgram</span> = <span class="name">gl</span>.<span class="name">createProgram</span>();
+
+      <span class="comment">// Attach the shader sources to the shader program</span>
+      <span class="name">gl</span>.<span class="name">attachShader</span>(<span class="name">shaderProgram</span>, <span class="name">vertexShader</span>);
+      <span class="name">gl</span>.<span class="name">attachShader</span>(<span class="name">shaderProgram</span>, <span class="name">fragmentShader</span>);
+
+      <span class="comment">// Link the program</span>
+      <span class="name">gl</span>.<span class="name">linkProgram</span>(<span class="name">shaderProgram</span>);
+
+      <span class="comment">// Check the linking status</span>
+      <span class="keyword">if</span> (!<span class="name">gl</span>.<span class="name">getProgramParameter</span>(<span class="name">shaderProgram</span>, <span class="name">gl</span>.<span class="name">LINK_STATUS</span>)) {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Could not initialise shaders&quot;</span>);
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">gl</span>.<span class="name">getProgramInfoLog</span>(<span class="name">shaderProgram</span>));
+      }
+
+      <span class="comment">// Take the shader program into use</span>
+      <span class="name">gl</span>.<span class="name">useProgram</span>(<span class="name">shaderProgram</span>);
+
+      <span class="comment">// Look up where the vertex data needs to go</span>
+      <span class="name">vertexPositionAttribute</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">getAttribLocation</span>(<span class="name">shaderProgram</span>, <span class="string">&quot;aVertexPosition&quot;</span>);
+      <span class="name">gl</span>.<span class="name">enableVertexAttribArray</span>(<span class="name">vertexPositionAttribute</span>);
+      <span class="name">textureCoordAttribute</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">getAttribLocation</span>(<span class="name">shaderProgram</span>, <span class="string">&quot;aTextureCoord&quot;</span>);
+      <span class="name">gl</span>.<span class="name">enableVertexAttribArray</span>(<span class="name">textureCoordAttribute</span>);
+      <span class="name">vertexNormalAttribute</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">getAttribLocation</span>(<span class="name">shaderProgram</span>, <span class="string">&quot;aVertexNormal&quot;</span>);
+      <span class="name">gl</span>.<span class="name">enableVertexAttribArray</span>(<span class="name">vertexNormalAttribute</span>);
+
+      <span class="comment">// Get the uniform locations</span>
+      <span class="name">pMatrixUniform</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">getUniformLocation</span>(<span class="name">shaderProgram</span>, <span class="string">&quot;uPMatrix&quot;</span>);
+      <span class="name">mvMatrixUniform</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">getUniformLocation</span>(<span class="name">shaderProgram</span>, <span class="string">&quot;uMVMatrix&quot;</span>);
+      <span class="name">nUniform</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">getUniformLocation</span>(<span class="name">shaderProgram</span>, <span class="string">&quot;uNormalMatrix&quot;</span>);
+
+      <span class="comment">// Setup texture sampler uniform</span>
+      var <span class="name">textureSamplerUniform</span> = <span class="name">gl</span>.<span class="name">getUniformLocation</span>(<span class="name">shaderProgram</span>, <span class="string">&quot;uSampler&quot;</span>)
+      <span class="name">gl</span>.<span class="name">activeTexture</span>(<span class="name">gl</span>.<span class="name">TEXTURE0</span>);
+      <span class="name">gl</span>.<span class="name">uniform1i</span>(<span class="name">textureSamplerUniform</span>, <span class="number">0</span>);
+      <span class="name">gl</span>.<span class="name">bindTexture</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="number">0</span>);
+  }
+
+  <span class="keyword">function</span> <span class="name">getShader</span>(<span class="name">gl</span>, str, type) {
+      var <span class="name">shader</span> = <span class="name">gl</span>.<span class="name">createShader</span>(<span class="name">type</span>);
+      <span class="name">gl</span>.<span class="name">shaderSource</span>(<span class="name">shader</span>, <span class="name">str</span>);
+      <span class="name">gl</span>.<span class="name">compileShader</span>(<span class="name">shader</span>);
+
+      <span class="keyword">if</span> (!<span class="name">gl</span>.<span class="name">getShaderParameter</span>(<span class="name">shader</span>, <span class="name">gl</span>.<span class="name">COMPILE_STATUS</span>)) {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;JS:Shader compile failed&quot;</span>);
+          <span class="name">console</span>.<span class="name">log</span>(<span class="name">gl</span>.<span class="name">getShaderInfoLog</span>(<span class="name">shader</span>));
+          <span class="keyword">return</span> <span class="number">null</span>;
+      }
+
+      <span class="keyword">return</span> <span class="name">shader</span>;
+  }
+
+</pre>
+</div>
+<!-- @@@textureandlight/qml/textureandlight/textureandlight.js -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

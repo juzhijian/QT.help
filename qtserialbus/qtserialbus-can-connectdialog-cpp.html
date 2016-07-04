@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>connectdialog.cpp Example File | Qt Serial Bus 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtserialbus-index.html">Qt Serial Bus</a></td><td ><a href="qtserialbus-can-example.html">CAN Bus example</a></td><td >connectdialog.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">connectdialog.cpp Example File</h1>
+<span class="subtitle">can/connectdialog.cpp</span>
+<!-- $$$can/connectdialog.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the QtSerialBus module.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;connectdialog.h&quot;</span>
+  <span class="preprocessor">#include &quot;ui_connectdialog.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QCanBus&gt;</span>
+  <span class="preprocessor">#include &lt;QDebug&gt;</span>
+
+  ConnectDialog<span class="operator">::</span>ConnectDialog(<span class="type">QWidget</span> <span class="operator">*</span>parent) :
+      <span class="type">QDialog</span>(parent)<span class="operator">,</span>
+      m_ui(<span class="keyword">new</span> Ui<span class="operator">::</span>ConnectDialog)<span class="operator">,</span>
+      m_customSpeedValidator(<span class="number">0</span>)
+  {
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>setupUi(<span class="keyword">this</span>);
+
+      m_customSpeedValidator <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QIntValidator</span>(<span class="number">0</span><span class="operator">,</span> <span class="number">1000000</span><span class="operator">,</span> <span class="keyword">this</span>);
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>errorFilterEdit<span class="operator">-</span><span class="operator">&gt;</span>setValidator(<span class="keyword">new</span> <span class="type">QIntValidator</span>(<span class="number">0</span><span class="operator">,</span> <span class="number">0x1FFFFFFFU</span><span class="operator">,</span> <span class="keyword">this</span>));
+
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>loopbackBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;unspecified&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>());
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>loopbackBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;false&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(<span class="keyword">false</span>));
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>loopbackBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;true&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(<span class="keyword">true</span>));
+
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>receiveOwnBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;unspecified&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>());
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>receiveOwnBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;false&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(<span class="keyword">false</span>));
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>receiveOwnBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;true&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(<span class="keyword">true</span>));
+
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>canFdBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;false&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(<span class="keyword">false</span>));
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>canFdBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;true&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(<span class="keyword">true</span>));
+
+      connect(m_ui<span class="operator">-</span><span class="operator">&gt;</span>okButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QPushButton</span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ConnectDialog<span class="operator">::</span>ok);
+      connect(m_ui<span class="operator">-</span><span class="operator">&gt;</span>cancelButton<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QPushButton</span><span class="operator">::</span>clicked<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ConnectDialog<span class="operator">::</span>cancel);
+      connect(m_ui<span class="operator">-</span><span class="operator">&gt;</span>useConfigurationBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QCheckBox</span><span class="operator">::</span>clicked<span class="operator">,</span> m_ui<span class="operator">-</span><span class="operator">&gt;</span>configurationBox<span class="operator">,</span> <span class="operator">&amp;</span><span class="type">QGroupBox</span><span class="operator">::</span>setEnabled);
+
+      connect(m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">,</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type">void</span> (<span class="type">QComboBox</span><span class="operator">::</span><span class="operator">*</span>)(<span class="type">int</span>)<span class="operator">&gt;</span>(<span class="operator">&amp;</span><span class="type">QComboBox</span><span class="operator">::</span>currentIndexChanged)<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>ConnectDialog<span class="operator">::</span>checkCustomSpeedPolicy);
+
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>rawFilterEdit<span class="operator">-</span><span class="operator">&gt;</span>hide();
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>rawFilterLabel<span class="operator">-</span><span class="operator">&gt;</span>hide();
+
+      fillBackends();
+      fillSpeeds();
+
+      updateSettings();
+  }
+
+  ConnectDialog<span class="operator">::</span><span class="operator">~</span>ConnectDialog()
+  {
+      <span class="keyword">delete</span> m_ui;
+  }
+
+  ConnectDialog<span class="operator">::</span>Settings ConnectDialog<span class="operator">::</span>settings() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_currentSettings;
+  }
+
+  <span class="type">void</span> ConnectDialog<span class="operator">::</span>checkCustomSpeedPolicy(<span class="type">int</span> idx)
+  {
+      <span class="keyword">const</span> bool isCustomSpeed <span class="operator">=</span> <span class="operator">!</span>m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>itemData(idx)<span class="operator">.</span>isValid();
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>setEditable(isCustomSpeed);
+      <span class="keyword">if</span> (isCustomSpeed) {
+          m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>clearEditText();
+          <span class="type">QLineEdit</span> <span class="operator">*</span>edit <span class="operator">=</span> m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>lineEdit();
+          edit<span class="operator">-</span><span class="operator">&gt;</span>setValidator(m_customSpeedValidator);
+      }
+  }
+
+  <span class="type">void</span> ConnectDialog<span class="operator">::</span>ok()
+  {
+      updateSettings();
+      accept();
+  }
+
+  <span class="type">void</span> ConnectDialog<span class="operator">::</span>cancel()
+  {
+      revertSettings();
+      reject();
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> ConnectDialog<span class="operator">::</span>configurationValue(<span class="type"><a href="qcanbusdevice.html">QCanBusDevice</a></span><span class="operator">::</span>ConfigurationKey key)
+  {
+      <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> result;
+
+      foreach (<span class="keyword">const</span> ConfigurationItem <span class="operator">&amp;</span>item<span class="operator">,</span> m_currentSettings<span class="operator">.</span>configurations) {
+          <span class="keyword">if</span> (item<span class="operator">.</span>first <span class="operator">=</span><span class="operator">=</span> key) {
+              result <span class="operator">=</span> item<span class="operator">.</span>second;
+              <span class="keyword">break</span>;
+          }
+      }
+
+      <span class="keyword">if</span> (result<span class="operator">.</span>isNull() <span class="operator">&amp;</span><span class="operator">&amp;</span> (
+                  key <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcanbusdevice.html">QCanBusDevice</a></span><span class="operator">::</span>LoopbackKey <span class="operator">|</span><span class="operator">|</span>
+                  key <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qcanbusdevice.html">QCanBusDevice</a></span><span class="operator">::</span>ReceiveOwnKey)) {
+          <span class="keyword">return</span> tr(<span class="string">&quot;unspecified&quot;</span>);
+      }
+
+      <span class="keyword">return</span> result<span class="operator">.</span>toString();
+  }
+
+  <span class="type">void</span> ConnectDialog<span class="operator">::</span>revertSettings()
+  {
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>backendListBox<span class="operator">-</span><span class="operator">&gt;</span>setCurrentText(m_currentSettings<span class="operator">.</span>backendName);
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>interfaceNameEdit<span class="operator">-</span><span class="operator">&gt;</span>setText(m_currentSettings<span class="operator">.</span>deviceInterfaceName);
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>useConfigurationBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(m_currentSettings<span class="operator">.</span>useConfigurationEnabled);
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> value <span class="operator">=</span> configurationValue(<span class="type"><a href="qcanbusdevice.html">QCanBusDevice</a></span><span class="operator">::</span>LoopbackKey);
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>loopbackBox<span class="operator">-</span><span class="operator">&gt;</span>setCurrentText(value);
+
+      value <span class="operator">=</span> configurationValue(<span class="type"><a href="qcanbusdevice.html">QCanBusDevice</a></span><span class="operator">::</span>ReceiveOwnKey);
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>receiveOwnBox<span class="operator">-</span><span class="operator">&gt;</span>setCurrentText(value);
+
+      value <span class="operator">=</span> configurationValue(<span class="type"><a href="qcanbusdevice.html">QCanBusDevice</a></span><span class="operator">::</span>ErrorFilterKey);
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>errorFilterEdit<span class="operator">-</span><span class="operator">&gt;</span>setText(value);
+
+      value <span class="operator">=</span> configurationValue(<span class="type"><a href="qcanbusdevice.html">QCanBusDevice</a></span><span class="operator">::</span>BitRateKey);
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>setCurrentText(value);
+
+      value <span class="operator">=</span> configurationValue(<span class="type"><a href="qcanbusdevice.html">QCanBusDevice</a></span><span class="operator">::</span>CanFdKey);
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>canFdBox<span class="operator">-</span><span class="operator">&gt;</span>setCurrentText(value);
+  }
+
+  <span class="type">void</span> ConnectDialog<span class="operator">::</span>updateSettings()
+  {
+      m_currentSettings<span class="operator">.</span>backendName <span class="operator">=</span> m_ui<span class="operator">-</span><span class="operator">&gt;</span>backendListBox<span class="operator">-</span><span class="operator">&gt;</span>currentText();
+      m_currentSettings<span class="operator">.</span>deviceInterfaceName <span class="operator">=</span> m_ui<span class="operator">-</span><span class="operator">&gt;</span>interfaceNameEdit<span class="operator">-</span><span class="operator">&gt;</span>text();
+      m_currentSettings<span class="operator">.</span>useConfigurationEnabled <span class="operator">=</span> m_ui<span class="operator">-</span><span class="operator">&gt;</span>useConfigurationBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked();
+
+      <span class="keyword">if</span> (m_currentSettings<span class="operator">.</span>useConfigurationEnabled) {
+          m_currentSettings<span class="operator">.</span>configurations<span class="operator">.</span>clear();
+          <span class="comment">// process LoopBack</span>
+          <span class="keyword">if</span> (m_ui<span class="operator">-</span><span class="operator">&gt;</span>loopbackBox<span class="operator">-</span><span class="operator">&gt;</span>currentIndex() <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>) {
+              ConfigurationItem item;
+              item<span class="operator">.</span>first <span class="operator">=</span> <span class="type"><a href="qcanbusdevice.html">QCanBusDevice</a></span><span class="operator">::</span>LoopbackKey;
+              item<span class="operator">.</span>second <span class="operator">=</span> m_ui<span class="operator">-</span><span class="operator">&gt;</span>loopbackBox<span class="operator">-</span><span class="operator">&gt;</span>currentData();
+              m_currentSettings<span class="operator">.</span>configurations<span class="operator">.</span>append(item);
+          }
+
+          <span class="comment">// process ReceiveOwnKey</span>
+          <span class="keyword">if</span> (m_ui<span class="operator">-</span><span class="operator">&gt;</span>receiveOwnBox<span class="operator">-</span><span class="operator">&gt;</span>currentIndex() <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>) {
+              ConfigurationItem item;
+              item<span class="operator">.</span>first <span class="operator">=</span> <span class="type"><a href="qcanbusdevice.html">QCanBusDevice</a></span><span class="operator">::</span>ReceiveOwnKey;
+              item<span class="operator">.</span>second <span class="operator">=</span> m_ui<span class="operator">-</span><span class="operator">&gt;</span>receiveOwnBox<span class="operator">-</span><span class="operator">&gt;</span>currentData();
+              m_currentSettings<span class="operator">.</span>configurations<span class="operator">.</span>append(item);
+          }
+
+          <span class="comment">// process error filter</span>
+          <span class="keyword">if</span> (<span class="operator">!</span>m_ui<span class="operator">-</span><span class="operator">&gt;</span>errorFilterEdit<span class="operator">-</span><span class="operator">&gt;</span>text()<span class="operator">.</span>isEmpty()) {
+              <span class="type"><a href="../qtcore/qstring.html">QString</a></span> value <span class="operator">=</span> m_ui<span class="operator">-</span><span class="operator">&gt;</span>errorFilterEdit<span class="operator">-</span><span class="operator">&gt;</span>text();
+              bool ok <span class="operator">=</span> <span class="keyword">false</span>;
+              <span class="type">int</span> dec <span class="operator">=</span> value<span class="operator">.</span>toInt(<span class="operator">&amp;</span>ok);
+              <span class="keyword">if</span> (ok) {
+                  ConfigurationItem item;
+                  item<span class="operator">.</span>first <span class="operator">=</span> <span class="type"><a href="qcanbusdevice.html">QCanBusDevice</a></span><span class="operator">::</span>ErrorFilterKey;
+                  item<span class="operator">.</span>second <span class="operator">=</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type"><a href="qcanbusframe.html">QCanBusFrame</a></span><span class="operator">::</span>FrameErrors(dec));
+                  m_currentSettings<span class="operator">.</span>configurations<span class="operator">.</span>append(item);
+              }
+          }
+
+          <span class="comment">// process raw filter list</span>
+          <span class="keyword">if</span> (<span class="operator">!</span>m_ui<span class="operator">-</span><span class="operator">&gt;</span>rawFilterEdit<span class="operator">-</span><span class="operator">&gt;</span>text()<span class="operator">.</span>isEmpty()) {
+              <span class="comment">//TODO current ui not sfficient to reflect this param</span>
+          }
+
+          <span class="comment">// process bitrate</span>
+          bool ok <span class="operator">=</span> <span class="keyword">false</span>;
+          <span class="type">int</span> bitrate <span class="operator">=</span> <span class="number">0</span>;
+          <span class="keyword">if</span> (m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>currentIndex() <span class="operator">=</span><span class="operator">=</span> (m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>count() <span class="operator">-</span> <span class="number">1</span>))
+              bitrate <span class="operator">=</span> m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>currentText()<span class="operator">.</span>toInt(<span class="operator">&amp;</span>ok);
+          <span class="keyword">else</span>
+              bitrate <span class="operator">=</span> m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>itemData(m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>currentIndex())<span class="operator">.</span>toInt(<span class="operator">&amp;</span>ok);
+
+          <span class="keyword">if</span> (ok <span class="operator">&amp;</span><span class="operator">&amp;</span> (bitrate <span class="operator">&gt;</span> <span class="number">0</span>)) {
+              ConfigurationItem item;
+              item<span class="operator">.</span>first <span class="operator">=</span> <span class="type"><a href="qcanbusdevice.html">QCanBusDevice</a></span><span class="operator">::</span>BitRateKey;
+              item<span class="operator">.</span>second <span class="operator">=</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>(bitrate);
+              m_currentSettings<span class="operator">.</span>configurations<span class="operator">.</span>append(item);
+          }
+
+          <span class="comment">// process CAN FD setting</span>
+          ConfigurationItem fdItem;
+          fdItem<span class="operator">.</span>first <span class="operator">=</span> <span class="type"><a href="qcanbusdevice.html">QCanBusDevice</a></span><span class="operator">::</span>CanFdKey;
+          fdItem<span class="operator">.</span>second <span class="operator">=</span> m_ui<span class="operator">-</span><span class="operator">&gt;</span>canFdBox<span class="operator">-</span><span class="operator">&gt;</span>currentData();
+          m_currentSettings<span class="operator">.</span>configurations<span class="operator">.</span>append(fdItem);
+      }
+  }
+
+  <span class="type">void</span> ConnectDialog<span class="operator">::</span>fillBackends()
+  {
+      foreach (<span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>backend<span class="operator">,</span> <span class="type"><a href="qcanbus.html">QCanBus</a></span><span class="operator">::</span>instance()<span class="operator">-</span><span class="operator">&gt;</span>plugins())
+          m_ui<span class="operator">-</span><span class="operator">&gt;</span>backendListBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(backend);
+  }
+
+  <span class="type">void</span> ConnectDialog<span class="operator">::</span>fillSpeeds()
+  {
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;10000&quot;</span>)<span class="operator">,</span> <span class="number">10000</span>);
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;20000&quot;</span>)<span class="operator">,</span> <span class="number">20000</span>);
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;50000&quot;</span>)<span class="operator">,</span> <span class="number">50000</span>);
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;100000&quot;</span>)<span class="operator">,</span> <span class="number">100000</span>);
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;125000&quot;</span>)<span class="operator">,</span> <span class="number">125000</span>);
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;250000&quot;</span>)<span class="operator">,</span> <span class="number">250000</span>);
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;500000&quot;</span>)<span class="operator">,</span> <span class="number">500000</span>);
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;800000&quot;</span>)<span class="operator">,</span> <span class="number">800000</span>);
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;1000000&quot;</span>)<span class="operator">,</span> <span class="number">1000000</span>);
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(tr(<span class="string">&quot;Custom&quot;</span>));
+
+      m_ui<span class="operator">-</span><span class="operator">&gt;</span>speedBox<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(<span class="number">6</span>); <span class="comment">// setup 500000 bits/sec by default</span>
+  }
+
+</pre>
+</div>
+<!-- @@@can/connectdialog.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

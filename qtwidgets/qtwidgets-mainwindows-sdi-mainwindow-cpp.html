@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mainwindow.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-mainwindows-sdi-example.html">SDI Example</a></td><td >mainwindow.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mainwindow.cpp Example File</h1>
+<span class="subtitle">mainwindows/sdi/mainwindow.cpp</span>
+<!-- $$$mainwindows/sdi/mainwindow.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+
+  <span class="preprocessor">#include &quot;mainwindow.h&quot;</span>
+
+  MainWindow<span class="operator">::</span>MainWindow()
+  {
+      init();
+      setCurrentFile(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>());
+  }
+
+  MainWindow<span class="operator">::</span>MainWindow(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      init();
+      loadFile(fileName);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>closeEvent(<span class="type"><a href="../qtgui/qcloseevent.html">QCloseEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (maybeSave()) {
+          writeSettings();
+          event<span class="operator">-</span><span class="operator">&gt;</span>accept();
+      } <span class="keyword">else</span> {
+          event<span class="operator">-</span><span class="operator">&gt;</span>ignore();
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>newFile()
+  {
+      MainWindow <span class="operator">*</span>other <span class="operator">=</span> <span class="keyword">new</span> MainWindow;
+      other<span class="operator">-</span><span class="operator">&gt;</span>tile(<span class="keyword">this</span>);
+      other<span class="operator">-</span><span class="operator">&gt;</span>show();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>open()
+  {
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getOpenFileName(<span class="keyword">this</span>);
+      <span class="keyword">if</span> (<span class="operator">!</span>fileName<span class="operator">.</span>isEmpty())
+          openFile(fileName);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>openFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      MainWindow <span class="operator">*</span>existing <span class="operator">=</span> findMainWindow(fileName);
+      <span class="keyword">if</span> (existing) {
+          existing<span class="operator">-</span><span class="operator">&gt;</span>show();
+          existing<span class="operator">-</span><span class="operator">&gt;</span>raise();
+          existing<span class="operator">-</span><span class="operator">&gt;</span>activateWindow();
+          <span class="keyword">return</span>;
+      }
+
+      <span class="keyword">if</span> (isUntitled <span class="operator">&amp;</span><span class="operator">&amp;</span> textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">-</span><span class="operator">&gt;</span>isEmpty() <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>isWindowModified()) {
+          loadFile(fileName);
+          <span class="keyword">return</span>;
+      }
+
+      MainWindow <span class="operator">*</span>other <span class="operator">=</span> <span class="keyword">new</span> MainWindow(fileName);
+      <span class="keyword">if</span> (other<span class="operator">-</span><span class="operator">&gt;</span>isUntitled) {
+          <span class="keyword">delete</span> other;
+          <span class="keyword">return</span>;
+      }
+      other<span class="operator">-</span><span class="operator">&gt;</span>tile(<span class="keyword">this</span>);
+      other<span class="operator">-</span><span class="operator">&gt;</span>show();
+  }
+
+  bool MainWindow<span class="operator">::</span>save()
+  {
+      <span class="keyword">return</span> isUntitled <span class="operator">?</span> saveAs() : saveFile(curFile);
+  }
+
+  bool MainWindow<span class="operator">::</span>saveAs()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getSaveFileName(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Save As&quot;</span>)<span class="operator">,</span>
+                                                      curFile);
+      <span class="keyword">if</span> (fileName<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      <span class="keyword">return</span> saveFile(fileName);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>about()
+  {
+     <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>about(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;About SDI&quot;</span>)<span class="operator">,</span>
+              tr(<span class="string">&quot;The &lt;b&gt;SDI&lt;/b&gt; example demonstrates how to write single &quot;</span>
+                 <span class="string">&quot;document interface applications using Qt.&quot;</span>));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>documentWasModified()
+  {
+      setWindowModified(<span class="keyword">true</span>);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>init()
+  {
+      setAttribute(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WA_DeleteOnClose);
+
+      isUntitled <span class="operator">=</span> <span class="keyword">true</span>;
+
+      textEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtextedit.html">QTextEdit</a></span>;
+      setCentralWidget(textEdit);
+
+      createActions();
+      createStatusBar();
+
+      readSettings();
+
+      connect(textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtgui/qtextdocument.html">QTextDocument</a></span><span class="operator">::</span>contentsChanged<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>documentWasModified);
+
+      setUnifiedTitleAndToolBarOnMac(<span class="keyword">true</span>);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>tile(<span class="keyword">const</span> <span class="type"><a href="qmainwindow.html">QMainWindow</a></span> <span class="operator">*</span>previous)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>previous)
+          <span class="keyword">return</span>;
+      <span class="type">int</span> topFrameWidth <span class="operator">=</span> previous<span class="operator">-</span><span class="operator">&gt;</span>geometry()<span class="operator">.</span>top() <span class="operator">-</span> previous<span class="operator">-</span><span class="operator">&gt;</span>pos()<span class="operator">.</span>y();
+      <span class="keyword">if</span> (<span class="operator">!</span>topFrameWidth)
+          topFrameWidth <span class="operator">=</span> <span class="number">40</span>;
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> pos <span class="operator">=</span> previous<span class="operator">-</span><span class="operator">&gt;</span>pos() <span class="operator">+</span> <span class="number">2</span> <span class="operator">*</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span>(topFrameWidth<span class="operator">,</span> topFrameWidth);
+      <span class="keyword">if</span> (<span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>desktop()<span class="operator">-</span><span class="operator">&gt;</span>availableGeometry(<span class="keyword">this</span>)<span class="operator">.</span>contains(rect()<span class="operator">.</span>bottomRight() <span class="operator">+</span> pos))
+          move(pos);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>createActions()
+  {
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>fileMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;File&quot;</span>));
+      <span class="type"><a href="qtoolbar.html">QToolBar</a></span> <span class="operator">*</span>fileToolBar <span class="operator">=</span> addToolBar(tr(<span class="string">&quot;File&quot;</span>));
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> newIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;document-new&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(<span class="string">&quot;:/images/new.png&quot;</span>));
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>newAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(newIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;New&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      newAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>New);
+      newAct<span class="operator">-</span><span class="operator">&gt;</span>setStatusTip(tr(<span class="string">&quot;Create a new file&quot;</span>));
+      connect(newAct<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>newFile);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(newAct);
+      fileToolBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(newAct);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> openIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;document-open&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(<span class="string">&quot;:/images/open.png&quot;</span>));
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>openAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(openIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Open...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      openAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Open);
+      openAct<span class="operator">-</span><span class="operator">&gt;</span>setStatusTip(tr(<span class="string">&quot;Open an existing file&quot;</span>));
+      connect(openAct<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>open);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(openAct);
+      fileToolBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(openAct);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> saveIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;document-save&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(<span class="string">&quot;:/images/save.png&quot;</span>));
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>saveAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(saveIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Save&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      saveAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Save);
+      saveAct<span class="operator">-</span><span class="operator">&gt;</span>setStatusTip(tr(<span class="string">&quot;Save the document to disk&quot;</span>));
+      connect(saveAct<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>save);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(saveAct);
+      fileToolBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(saveAct);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> saveAsIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;document-save-as&quot;</span>);
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>saveAsAct <span class="operator">=</span> fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(saveAsIcon<span class="operator">,</span> tr(<span class="string">&quot;Save &amp;As...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>saveAs);
+      saveAsAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>SaveAs);
+      saveAsAct<span class="operator">-</span><span class="operator">&gt;</span>setStatusTip(tr(<span class="string">&quot;Save the document under a new name&quot;</span>));
+
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>recentMenu <span class="operator">=</span> fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;Recent...&quot;</span>));
+      connect(recentMenu<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qmenu.html">QMenu</a></span><span class="operator">::</span>aboutToShow<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>updateRecentFileActions);
+      recentFileSubMenuAct <span class="operator">=</span> recentMenu<span class="operator">-</span><span class="operator">&gt;</span>menuAction();
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> MaxRecentFiles; <span class="operator">+</span><span class="operator">+</span>i) {
+          recentFileActs<span class="operator">[</span>i<span class="operator">]</span> <span class="operator">=</span> recentMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>()<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>openRecentFile);
+          recentFileActs<span class="operator">[</span>i<span class="operator">]</span><span class="operator">-</span><span class="operator">&gt;</span>setVisible(<span class="keyword">false</span>);
+      }
+
+      recentFileSeparator <span class="operator">=</span> fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+
+      setRecentFilesVisible(MainWindow<span class="operator">::</span>hasRecentFiles());
+
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>closeAct <span class="operator">=</span> fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Close&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qwidget.html">QWidget</a></span><span class="operator">::</span>close);
+      closeAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(tr(<span class="string">&quot;Ctrl+W&quot;</span>));
+      closeAct<span class="operator">-</span><span class="operator">&gt;</span>setStatusTip(tr(<span class="string">&quot;Close this window&quot;</span>));
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> exitIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;application-exit&quot;</span>);
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>exitAct <span class="operator">=</span> fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(exitIcon<span class="operator">,</span> tr(<span class="string">&quot;E&amp;xit&quot;</span>)<span class="operator">,</span> qApp<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>closeAllWindows);
+      exitAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Quit);
+      exitAct<span class="operator">-</span><span class="operator">&gt;</span>setStatusTip(tr(<span class="string">&quot;Exit the application&quot;</span>));
+
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>editMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Edit&quot;</span>));
+      <span class="type"><a href="qtoolbar.html">QToolBar</a></span> <span class="operator">*</span>editToolBar <span class="operator">=</span> addToolBar(tr(<span class="string">&quot;Edit&quot;</span>));
+
+  <span class="preprocessor">#ifndef QT_NO_CLIPBOARD</span>
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> cutIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;edit-cut&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(<span class="string">&quot;:/images/cut.png&quot;</span>));
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>cutAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(cutIcon<span class="operator">,</span> tr(<span class="string">&quot;Cu&amp;t&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      cutAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Cut);
+      cutAct<span class="operator">-</span><span class="operator">&gt;</span>setStatusTip(tr(<span class="string">&quot;Cut the current selection's contents to the &quot;</span>
+                              <span class="string">&quot;clipboard&quot;</span>));
+      connect(cutAct<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> textEdit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qtextedit.html">QTextEdit</a></span><span class="operator">::</span>cut);
+      editMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(cutAct);
+      editToolBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(cutAct);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> copyIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;edit-copy&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(<span class="string">&quot;:/images/copy.png&quot;</span>));
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>copyAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(copyIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Copy&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      copyAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Copy);
+      copyAct<span class="operator">-</span><span class="operator">&gt;</span>setStatusTip(tr(<span class="string">&quot;Copy the current selection's contents to the &quot;</span>
+                               <span class="string">&quot;clipboard&quot;</span>));
+      connect(copyAct<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> textEdit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qtextedit.html">QTextEdit</a></span><span class="operator">::</span>copy);
+      editMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(copyAct);
+      editToolBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(copyAct);
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span> pasteIcon <span class="operator">=</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span><span class="operator">::</span>fromTheme(<span class="string">&quot;edit-paste&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qicon.html">QIcon</a></span>(<span class="string">&quot;:/images/paste.png&quot;</span>));
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>pasteAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qaction.html">QAction</a></span>(pasteIcon<span class="operator">,</span> tr(<span class="string">&quot;&amp;Paste&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      pasteAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Paste);
+      pasteAct<span class="operator">-</span><span class="operator">&gt;</span>setStatusTip(tr(<span class="string">&quot;Paste the clipboard's contents into the current &quot;</span>
+                                <span class="string">&quot;selection&quot;</span>));
+      connect(pasteAct<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> textEdit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qtextedit.html">QTextEdit</a></span><span class="operator">::</span>paste);
+      editMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(pasteAct);
+      editToolBar<span class="operator">-</span><span class="operator">&gt;</span>addAction(pasteAct);
+
+      menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+  <span class="preprocessor">#endif // !QT_NO_CLIPBOARD</span>
+
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>helpMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Help&quot;</span>));
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>aboutAct <span class="operator">=</span> helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;About&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>about);
+      aboutAct<span class="operator">-</span><span class="operator">&gt;</span>setStatusTip(tr(<span class="string">&quot;Show the application's About box&quot;</span>));
+
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>aboutQtAct <span class="operator">=</span> helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;About &amp;Qt&quot;</span>)<span class="operator">,</span> qApp<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>aboutQt);
+      aboutQtAct<span class="operator">-</span><span class="operator">&gt;</span>setStatusTip(tr(<span class="string">&quot;Show the Qt library's About box&quot;</span>));
+
+  <span class="preprocessor">#ifndef QT_NO_CLIPBOARD</span>
+      cutAct<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      copyAct<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      connect(textEdit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qtextedit.html">QTextEdit</a></span><span class="operator">::</span>copyAvailable<span class="operator">,</span> cutAct<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>setEnabled);
+      connect(textEdit<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qtextedit.html">QTextEdit</a></span><span class="operator">::</span>copyAvailable<span class="operator">,</span> copyAct<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>setEnabled);
+  <span class="preprocessor">#endif // !QT_NO_CLIPBOARD</span>
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>createStatusBar()
+  {
+      statusBar()<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;Ready&quot;</span>));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>readSettings()
+  {
+      <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> settings(<span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>organizationName()<span class="operator">,</span> <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>applicationName());
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> geometry <span class="operator">=</span> settings<span class="operator">.</span>value(<span class="string">&quot;geometry&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span>())<span class="operator">.</span>toByteArray();
+      <span class="keyword">if</span> (geometry<span class="operator">.</span>isEmpty()) {
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> availableGeometry <span class="operator">=</span> <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>desktop()<span class="operator">-</span><span class="operator">&gt;</span>availableGeometry(<span class="keyword">this</span>);
+          resize(availableGeometry<span class="operator">.</span>width() <span class="operator">/</span> <span class="number">3</span><span class="operator">,</span> availableGeometry<span class="operator">.</span>height() <span class="operator">/</span> <span class="number">2</span>);
+          move((availableGeometry<span class="operator">.</span>width() <span class="operator">-</span> width()) <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span>
+               (availableGeometry<span class="operator">.</span>height() <span class="operator">-</span> height()) <span class="operator">/</span> <span class="number">2</span>);
+      } <span class="keyword">else</span> {
+          restoreGeometry(geometry);
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>writeSettings()
+  {
+      <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> settings(<span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>organizationName()<span class="operator">,</span> <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>applicationName());
+      settings<span class="operator">.</span>setValue(<span class="string">&quot;geometry&quot;</span><span class="operator">,</span> saveGeometry());
+  }
+
+  bool MainWindow<span class="operator">::</span>maybeSave()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">-</span><span class="operator">&gt;</span>isModified())
+          <span class="keyword">return</span> <span class="keyword">true</span>;
+      <span class="keyword">const</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>StandardButton ret
+          <span class="operator">=</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;SDI&quot;</span>)<span class="operator">,</span>
+                                 tr(<span class="string">&quot;The document has been modified.\n&quot;</span>
+                                    <span class="string">&quot;Do you want to save your changes?&quot;</span>)<span class="operator">,</span>
+                                 <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Save <span class="operator">|</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Discard
+                                 <span class="operator">|</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Cancel);
+      <span class="keyword">switch</span> (ret) {
+      <span class="keyword">case</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Save:
+          <span class="keyword">return</span> save();
+      <span class="keyword">case</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Cancel:
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      <span class="keyword">default</span>:
+          <span class="keyword">break</span>;
+      }
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>loadFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+      <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>ReadOnly <span class="operator">|</span> <span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>Text)) {
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;SDI&quot;</span>)<span class="operator">,</span>
+                               tr(<span class="string">&quot;Cannot read file %1:\n%2.&quot;</span>)
+                               <span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(fileName)<span class="operator">,</span> file<span class="operator">.</span>errorString()));
+          <span class="keyword">return</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span> in(<span class="operator">&amp;</span>file);
+      <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>setOverrideCursor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WaitCursor);
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>setPlainText(in<span class="operator">.</span>readAll());
+      <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>restoreOverrideCursor();
+
+      setCurrentFile(fileName);
+      statusBar()<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;File loaded&quot;</span>)<span class="operator">,</span> <span class="number">2000</span>);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>setRecentFilesVisible(bool visible)
+  {
+      recentFileSubMenuAct<span class="operator">-</span><span class="operator">&gt;</span>setVisible(visible);
+      recentFileSeparator<span class="operator">-</span><span class="operator">&gt;</span>setVisible(visible);
+  }
+
+  <span class="keyword">static</span> <span class="keyword">inline</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> recentFilesKey() { <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;recentFileList&quot;</span>); }
+  <span class="keyword">static</span> <span class="keyword">inline</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileKey() { <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;file&quot;</span>); }
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> readRecentFiles(<span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> <span class="operator">&amp;</span>settings)
+  {
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> result;
+      <span class="keyword">const</span> <span class="type">int</span> count <span class="operator">=</span> settings<span class="operator">.</span>beginReadArray(recentFilesKey());
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> count; <span class="operator">+</span><span class="operator">+</span>i) {
+          settings<span class="operator">.</span>setArrayIndex(i);
+          result<span class="operator">.</span>append(settings<span class="operator">.</span>value(fileKey())<span class="operator">.</span>toString());
+      }
+      settings<span class="operator">.</span>endArray();
+      <span class="keyword">return</span> result;
+  }
+
+  <span class="keyword">static</span> <span class="type">void</span> writeRecentFiles(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> <span class="operator">&amp;</span>files<span class="operator">,</span> <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> <span class="operator">&amp;</span>settings)
+  {
+      <span class="keyword">const</span> <span class="type">int</span> count <span class="operator">=</span> files<span class="operator">.</span>size();
+      settings<span class="operator">.</span>beginWriteArray(recentFilesKey());
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> count; <span class="operator">+</span><span class="operator">+</span>i) {
+          settings<span class="operator">.</span>setArrayIndex(i);
+          settings<span class="operator">.</span>setValue(fileKey()<span class="operator">,</span> files<span class="operator">.</span>at(i));
+      }
+      settings<span class="operator">.</span>endArray();
+  }
+
+  bool MainWindow<span class="operator">::</span>hasRecentFiles()
+  {
+      <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> settings(<span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>organizationName()<span class="operator">,</span> <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>applicationName());
+      <span class="keyword">const</span> <span class="type">int</span> count <span class="operator">=</span> settings<span class="operator">.</span>beginReadArray(recentFilesKey());
+      settings<span class="operator">.</span>endArray();
+      <span class="keyword">return</span> count <span class="operator">&gt;</span> <span class="number">0</span>;
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>prependToRecentFiles(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> settings(<span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>organizationName()<span class="operator">,</span> <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>applicationName());
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> oldRecentFiles <span class="operator">=</span> readRecentFiles(settings);
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> recentFiles <span class="operator">=</span> oldRecentFiles;
+      recentFiles<span class="operator">.</span>removeAll(fileName);
+      recentFiles<span class="operator">.</span>prepend(fileName);
+      <span class="keyword">if</span> (oldRecentFiles <span class="operator">!</span><span class="operator">=</span> recentFiles)
+          writeRecentFiles(recentFiles<span class="operator">,</span> settings);
+
+      setRecentFilesVisible(<span class="operator">!</span>recentFiles<span class="operator">.</span>isEmpty());
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>updateRecentFileActions()
+  {
+      <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> settings(<span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>organizationName()<span class="operator">,</span> <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>applicationName());
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> recentFiles <span class="operator">=</span> readRecentFiles(settings);
+      <span class="keyword">const</span> <span class="type">int</span> count <span class="operator">=</span> <a href="../qtcore/qtglobal.html#qMin">qMin</a>(<span class="type">int</span>(MaxRecentFiles)<span class="operator">,</span> recentFiles<span class="operator">.</span>size());
+      <span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>;
+      <span class="keyword">for</span> ( ; i <span class="operator">&lt;</span> count; <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> MainWindow<span class="operator">::</span>strippedName(recentFiles<span class="operator">.</span>at(i));
+          recentFileActs<span class="operator">[</span>i<span class="operator">]</span><span class="operator">-</span><span class="operator">&gt;</span>setText(tr(<span class="string">&quot;&amp;%1 %2&quot;</span>)<span class="operator">.</span>arg(i <span class="operator">+</span> <span class="number">1</span>)<span class="operator">.</span>arg(fileName));
+          recentFileActs<span class="operator">[</span>i<span class="operator">]</span><span class="operator">-</span><span class="operator">&gt;</span>setData(recentFiles<span class="operator">.</span>at(i));
+          recentFileActs<span class="operator">[</span>i<span class="operator">]</span><span class="operator">-</span><span class="operator">&gt;</span>setVisible(<span class="keyword">true</span>);
+      }
+      <span class="keyword">for</span> ( ; i <span class="operator">&lt;</span> MaxRecentFiles; <span class="operator">+</span><span class="operator">+</span>i)
+          recentFileActs<span class="operator">[</span>i<span class="operator">]</span><span class="operator">-</span><span class="operator">&gt;</span>setVisible(<span class="keyword">false</span>);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>openRecentFile()
+  {
+      <span class="keyword">if</span> (<span class="keyword">const</span> <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>action <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="keyword">const</span> <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(sender()))
+          openFile(action<span class="operator">-</span><span class="operator">&gt;</span>data()<span class="operator">.</span>toString());
+  }
+
+  bool MainWindow<span class="operator">::</span>saveFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(fileName);
+      <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>WriteOnly <span class="operator">|</span> <span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>Text)) {
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>warning(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;SDI&quot;</span>)<span class="operator">,</span>
+                               tr(<span class="string">&quot;Cannot write file %1:\n%2.&quot;</span>)
+                               <span class="operator">.</span>arg(<span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(fileName)<span class="operator">,</span> file<span class="operator">.</span>errorString()));
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span> out(<span class="operator">&amp;</span>file);
+      <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>setOverrideCursor(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>WaitCursor);
+      out <span class="operator">&lt;</span><span class="operator">&lt;</span> textEdit<span class="operator">-</span><span class="operator">&gt;</span>toPlainText();
+      <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>restoreOverrideCursor();
+
+      setCurrentFile(fileName);
+      statusBar()<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;File saved&quot;</span>)<span class="operator">,</span> <span class="number">2000</span>);
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>setCurrentFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      <span class="keyword">static</span> <span class="type">int</span> sequenceNumber <span class="operator">=</span> <span class="number">1</span>;
+
+      isUntitled <span class="operator">=</span> fileName<span class="operator">.</span>isEmpty();
+      <span class="keyword">if</span> (isUntitled) {
+          curFile <span class="operator">=</span> tr(<span class="string">&quot;document%1.txt&quot;</span>)<span class="operator">.</span>arg(sequenceNumber<span class="operator">+</span><span class="operator">+</span>);
+      } <span class="keyword">else</span> {
+          curFile <span class="operator">=</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span>(fileName)<span class="operator">.</span>canonicalFilePath();
+      }
+
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>document()<span class="operator">-</span><span class="operator">&gt;</span>setModified(<span class="keyword">false</span>);
+      setWindowModified(<span class="keyword">false</span>);
+
+      <span class="keyword">if</span> (<span class="operator">!</span>isUntitled <span class="operator">&amp;</span><span class="operator">&amp;</span> windowFilePath() <span class="operator">!</span><span class="operator">=</span> curFile)
+          MainWindow<span class="operator">::</span>prependToRecentFiles(curFile);
+
+      setWindowFilePath(curFile);
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> MainWindow<span class="operator">::</span>strippedName(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fullFileName)
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span>(fullFileName)<span class="operator">.</span>fileName();
+  }
+
+  MainWindow <span class="operator">*</span>MainWindow<span class="operator">::</span>findMainWindow(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> canonicalFilePath <span class="operator">=</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span>(fileName)<span class="operator">.</span>canonicalFilePath();
+
+      foreach (<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>widget<span class="operator">,</span> <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>topLevelWidgets()) {
+          MainWindow <span class="operator">*</span>mainWin <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span>MainWindow <span class="operator">*</span><span class="operator">&gt;</span>(widget);
+          <span class="keyword">if</span> (mainWin <span class="operator">&amp;</span><span class="operator">&amp;</span> mainWin<span class="operator">-</span><span class="operator">&gt;</span>curFile <span class="operator">=</span><span class="operator">=</span> canonicalFilePath)
+              <span class="keyword">return</span> mainWin;
+      }
+
+      <span class="keyword">return</span> <span class="number">0</span>;
+  }
+
+</pre>
+</div>
+<!-- @@@mainwindows/sdi/mainwindow.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

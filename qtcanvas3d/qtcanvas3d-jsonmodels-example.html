@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- jsonmodels.qdoc -->
+  <title>JSON Models Example | Qt Canvas 3D 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcanvas3d-index.html">Qt Canvas 3D</a></td><td >JSON Models Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#json-model-loader">JSON Model Loader</a></li>
+<li class="level1"><a href="#loading-the-models">Loading the Models</a></li>
+<li class="level1"><a href="#loading-the-textures">Loading the Textures</a></li>
+<li class="level1"><a href="#input-handling">Input Handling</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">JSON Models Example</h1>
+<span class="subtitle"></span>
+<!-- $$$jsonmodels-description -->
+<div class="descr"> <a name="details"></a>
+<p>The JSON Models Example demonstrates loading and displaying more than one JSON model and more than one texture. It also implements simple mouse input handling to allow rotating the scene and zooming into it.</p>
+<p class="centerAlign"><img src="images/jsonmodels-example.png" alt="" /></p><a name="json-model-loader"></a>
+<h2 id="json-model-loader">JSON Model Loader</h2>
+<p>First we include a JSON model parser, which handles parsing the JSON models into our internal models:</p>
+<pre class="js">
+
+  <span class="name">Qt</span>.<span class="name">include</span>(<span class="string">&quot;ThreeJSLoader.js&quot;</span>)
+
+</pre>
+<p>The <code>ThreeJSLoader.js</code> includes a reimplementation of the JSON parser in <code>three.js</code>, but we will not go into its implementation details.</p>
+<a name="loading-the-models"></a>
+<h2 id="loading-the-models">Loading the Models</h2>
+<p>First we need to initialize all array buffers for the models:</p>
+<pre class="js">
+
+  <span class="keyword">function</span> <span class="name">initBuffers</span>() {
+      <span class="name">modelOne</span>.<span class="name">verticesVBO</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createBuffer</span>();
+      <span class="name">modelOne</span>.<span class="name">verticesVBO</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;modelOne.verticesVBO&quot;</span>;
+      <span class="name">modelOne</span>.<span class="name">normalsVBO</span>  <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createBuffer</span>();
+      <span class="name">modelOne</span>.<span class="name">normalsVBO</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;modelOne.normalsVBO&quot;</span>;
+      <span class="name">modelOne</span>.<span class="name">texCoordVBO</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createBuffer</span>();
+      <span class="name">modelOne</span>.<span class="name">texCoordVBO</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;modelOne.texCoordVBO&quot;</span>;
+      <span class="name">modelOne</span>.<span class="name">indexVBO</span>    <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createBuffer</span>();
+      <span class="name">modelOne</span>.<span class="name">indexVBO</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;modelOne.indexVBO&quot;</span>;
+
+      <span class="name">modelTwo</span>.<span class="name">verticesVBO</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createBuffer</span>();
+      <span class="name">modelTwo</span>.<span class="name">verticesVBO</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;modelTwo.verticesVBO&quot;</span>;
+      <span class="name">modelTwo</span>.<span class="name">normalsVBO</span>  <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createBuffer</span>();
+      <span class="name">modelTwo</span>.<span class="name">normalsVBO</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;modelTwo.normalsVBO&quot;</span>;
+      <span class="name">modelTwo</span>.<span class="name">texCoordVBO</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createBuffer</span>();
+      <span class="name">modelTwo</span>.<span class="name">texCoordVBO</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;modelTwo.texCoordVBO&quot;</span>;
+      <span class="name">modelTwo</span>.<span class="name">indexVBO</span>    <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createBuffer</span>();
+      <span class="name">modelTwo</span>.<span class="name">indexVBO</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;modelTwo.indexVBO&quot;</span>;
+
+      ...
+
+</pre>
+<p>Then we request the models to be loaded:</p>
+<pre class="js">
+
+  <span class="keyword">function</span> <span class="name">loadJSONModels</span>() {
+      <span class="comment">// Load the first model</span>
+      var <span class="name">request</span> = new <span class="name">XMLHttpRequest</span>();
+      <span class="name">request</span>.<span class="name">open</span>(<span class="string">&quot;GET&quot;</span>, <span class="string">&quot;gold.json&quot;</span>);
+      <span class="name">request</span>.<span class="name">onreadystatechange</span> <span class="operator">=</span> <span class="keyword">function</span> () {
+          <span class="keyword">if</span> (<span class="name">request</span>.<span class="name">readyState</span> <span class="operator">===</span> <span class="name">XMLHttpRequest</span>.<span class="name">DONE</span>) {
+              <span class="name">handleLoadedModel</span>(<span class="name">JSON</span>.<span class="name">parse</span>(<span class="name">request</span>.<span class="name">responseText</span>));
+          }
+      }
+      <span class="name">request</span>.<span class="name">send</span>();
+      <span class="name">log</span>(<span class="string">&quot;   XMLHttpRequest sent for model one&quot;</span>)
+
+      <span class="comment">// Load the second model</span>
+      var <span class="name">request2</span> = new <span class="name">XMLHttpRequest</span>();
+      <span class="name">request2</span>.<span class="name">open</span>(<span class="string">&quot;GET&quot;</span>, <span class="string">&quot;woodbox.json&quot;</span>);
+      <span class="name">request2</span>.<span class="name">onreadystatechange</span> <span class="operator">=</span> <span class="keyword">function</span> () {
+          <span class="keyword">if</span> (<span class="name">request2</span>.<span class="name">readyState</span> <span class="operator">===</span> <span class="name">XMLHttpRequest</span>.<span class="name">DONE</span>) {
+              <span class="name">handleLoadedModel</span>(<span class="name">JSON</span>.<span class="name">parse</span>(<span class="name">request2</span>.<span class="name">responseText</span>));
+          }
+      }
+      <span class="name">request2</span>.<span class="name">send</span>();
+      <span class="name">log</span>(<span class="string">&quot;   XMLHttpRequest sent for model two&quot;</span>)
+      ...
+
+</pre>
+<p>Then, when the load requests return, we handle the models:</p>
+<pre class="js">
+
+  <span class="keyword">function</span> <span class="name">handleLoadedModel</span>(<span class="name">jsonObj</span>) {
+      <span class="name">log</span>(<span class="string">&quot;handleLoadedModel...&quot;</span>);
+      var <span class="name">modelData</span> = <span class="name">parseJSON3DModel</span>(<span class="name">jsonObj</span>, <span class="string">&quot;&quot;</span>);
+
+      <span class="keyword">if</span> (<span class="name">modelOne</span>.<span class="name">count</span> <span class="operator">===</span> <span class="number">0</span>)
+          <span class="name">fillModel</span>(<span class="name">modelData</span>, <span class="name">modelOne</span>);
+      <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">modelTwo</span>.<span class="name">count</span> <span class="operator">===</span> <span class="number">0</span>)
+          <span class="name">fillModel</span>(<span class="name">modelData</span>, <span class="name">modelTwo</span>);
+      ...
+
+</pre>
+<p>Each buffer is bound and filled with the data parsed from the json models:</p>
+<pre class="js">
+
+  <span class="keyword">function</span> <span class="name">fillModel</span>(<span class="name">modelData</span>, model) {
+      <span class="name">log</span>(<span class="string">&quot;   fillModel...&quot;</span>);
+      <span class="name">log</span>(<span class="string">&quot;   &quot;</span><span class="operator">+</span><span class="name">model</span>.<span class="name">verticesVBO</span>.<span class="name">name</span>);
+      <span class="name">gl</span>.<span class="name">bindBuffer</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>, <span class="name">model</span>.<span class="name">verticesVBO</span>);
+      <span class="name">gl</span>.<span class="name">bufferData</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>,
+                    new <span class="name">Float32Array</span>(<span class="name">modelData</span>.<span class="name">vertices</span>),
+                    <span class="name">gl</span>.<span class="name">STATIC_DRAW</span>);
+      <span class="name">log</span>(<span class="string">&quot;   &quot;</span><span class="operator">+</span><span class="name">model</span>.<span class="name">normalsVBO</span>.<span class="name">name</span>);
+      <span class="keyword">if</span> (<span class="name">isLogEnabled</span> <span class="operator">&amp;&amp;</span> <span class="name">stateDumpExt</span>)
+          <span class="name">log</span>(<span class="string">&quot;GL STATE DUMP:\n&quot;</span><span class="operator">+</span><span class="name">stateDumpExt</span>.<span class="name">getGLStateDump</span>(<span class="name">stateDumpExt</span>.<span class="name">DUMP_VERTEX_ATTRIB_ARRAYS_BIT</span> <span class="operator">||</span> <span class="name">stateDumpExt</span>.<span class="name">DUMP_VERTEX_ATTRIB_ARRAYS_CONTENTS_BIT</span>));
+
+      <span class="name">gl</span>.<span class="name">bindBuffer</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>, <span class="name">model</span>.<span class="name">normalsVBO</span>);
+      <span class="name">gl</span>.<span class="name">bufferData</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>,
+                    new <span class="name">Float32Array</span>(<span class="name">modelData</span>.<span class="name">normals</span>),
+                    <span class="name">gl</span>.<span class="name">STATIC_DRAW</span>);
+
+      <span class="name">log</span>(<span class="string">&quot;   &quot;</span><span class="operator">+</span><span class="name">model</span>.<span class="name">texCoordVBO</span>.<span class="name">name</span>);
+      <span class="name">gl</span>.<span class="name">bindBuffer</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>, <span class="name">model</span>.<span class="name">texCoordVBO</span>);
+      <span class="name">gl</span>.<span class="name">bufferData</span>(<span class="name">gl</span>.<span class="name">ARRAY_BUFFER</span>,
+                    new <span class="name">Float32Array</span>(<span class="name">modelData</span>.<span class="name">texCoords</span>[<span class="number">0</span>]),
+                    <span class="name">gl</span>.<span class="name">STATIC_DRAW</span>);
+
+      <span class="name">log</span>(<span class="string">&quot;   &quot;</span><span class="operator">+</span><span class="name">model</span>.<span class="name">indexVBO</span>.<span class="name">name</span>);
+      <span class="name">gl</span>.<span class="name">bindBuffer</span>(<span class="name">gl</span>.<span class="name">ELEMENT_ARRAY_BUFFER</span>, <span class="name">model</span>.<span class="name">indexVBO</span>);
+      <span class="name">gl</span>.<span class="name">bufferData</span>(<span class="name">gl</span>.<span class="name">ELEMENT_ARRAY_BUFFER</span>,
+                    new <span class="name">Uint16Array</span>(<span class="name">modelData</span>.<span class="name">indices</span>),
+                    <span class="name">gl</span>.<span class="name">STATIC_DRAW</span>);
+
+      <span class="name">model</span>.<span class="name">count</span> <span class="operator">=</span> <span class="name">modelData</span>.<span class="name">indices</span>.<span class="name">length</span>;
+      <span class="name">log</span>(<span class="string">&quot;   ...fillModel&quot;</span>);
+  }
+
+</pre>
+<a name="loading-the-textures"></a>
+<h2 id="loading-the-textures">Loading the Textures</h2>
+<p>First we create the <a href="qml-qtcanvas3d-textureimage.html">TextureImage</a> objects for each of the images we are going to load and register handlers for the <code>imageLoaded</code> and <code>imageLoadingFailed</code> signals. In the <code>imageLoaded</code> signal handlers we create the OpenGL textures:</p>
+<pre class="js">
+
+  <span class="keyword">function</span> <span class="name">loadTextures</span>() {
+      <span class="comment">// Load the first texture</span>
+      var <span class="name">goldImage</span> = <span class="name">TextureImageFactory</span>.<span class="name">newTexImage</span>();
+      <span class="name">goldImage</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;goldImage&quot;</span>;
+      <span class="name">goldImage</span>.<span class="name">imageLoaded</span>.<span class="name">connect</span>(<span class="keyword">function</span>() {
+          <span class="name">log</span>(<span class="string">&quot;    creating model one texture&quot;</span>);
+          <span class="name">modelOneTexture</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createTexture</span>();
+          <span class="name">modelOneTexture</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;modelOneTexture&quot;</span>;
+          <span class="name">gl</span>.<span class="name">bindTexture</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">modelOneTexture</span>);
+          <span class="name">gl</span>.<span class="name">texImage2D</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>,    <span class="comment">// target</span>
+                        <span class="number">0</span>,                <span class="comment">// level</span>
+                        <span class="name">gl</span>.<span class="name">RGBA</span>,          <span class="comment">// internalformat</span>
+                        <span class="name">gl</span>.<span class="name">RGBA</span>,          <span class="comment">// format</span>
+                        <span class="name">gl</span>.<span class="name">UNSIGNED_BYTE</span>, <span class="comment">// type</span>
+                        <span class="name">goldImage</span>);       <span class="comment">// pixels</span>
+          <span class="name">gl</span>.<span class="name">texParameteri</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">gl</span>.<span class="name">TEXTURE_MAG_FILTER</span>, <span class="name">gl</span>.<span class="name">LINEAR</span>);
+          <span class="name">gl</span>.<span class="name">texParameteri</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">gl</span>.<span class="name">TEXTURE_MIN_FILTER</span>, <span class="name">gl</span>.<span class="name">LINEAR_MIPMAP_NEAREST</span>);
+          <span class="name">gl</span>.<span class="name">generateMipmap</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>);
+      });
+      <span class="name">goldImage</span>.<span class="name">imageLoadingFailed</span>.<span class="name">connect</span>(<span class="keyword">function</span>() {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Texture load FAILED, &quot;</span><span class="operator">+</span><span class="name">goldImage</span>.<span class="name">errorString</span>);
+      });
+      <span class="name">goldImage</span>.<span class="name">src</span> <span class="operator">=</span> <span class="string">&quot;qrc:///gold.jpg&quot;</span>;
+      <span class="name">log</span>(<span class="string">&quot;   texture one source set&quot;</span>)
+
+      <span class="comment">// Load the second texture</span>
+      var <span class="name">woodBoxImage</span> = <span class="name">TextureImageFactory</span>.<span class="name">newTexImage</span>();
+      <span class="name">woodBoxImage</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;woodBoxImage&quot;</span>;
+      <span class="name">woodBoxImage</span>.<span class="name">imageLoaded</span>.<span class="name">connect</span>(<span class="keyword">function</span>() {
+          <span class="name">log</span>(<span class="string">&quot;    creating model two texture&quot;</span>);
+          <span class="name">modelTwoTexture</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createTexture</span>();
+          <span class="name">modelTwoTexture</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;modelTwoTexture&quot;</span>;
+          <span class="name">gl</span>.<span class="name">bindTexture</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">modelTwoTexture</span>);
+          <span class="name">gl</span>.<span class="name">texImage2D</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>,    <span class="comment">// target</span>
+                        <span class="number">0</span>,                <span class="comment">// level</span>
+                        <span class="name">gl</span>.<span class="name">RGBA</span>,          <span class="comment">// internalformat</span>
+                        <span class="name">gl</span>.<span class="name">RGBA</span>,          <span class="comment">// format</span>
+                        <span class="name">gl</span>.<span class="name">UNSIGNED_BYTE</span>, <span class="comment">// type</span>
+                        <span class="name">woodBoxImage</span>);    <span class="comment">// pixels</span>
+          <span class="name">gl</span>.<span class="name">texParameteri</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">gl</span>.<span class="name">TEXTURE_MAG_FILTER</span>, <span class="name">gl</span>.<span class="name">LINEAR</span>);
+          <span class="name">gl</span>.<span class="name">texParameteri</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">gl</span>.<span class="name">TEXTURE_MIN_FILTER</span>, <span class="name">gl</span>.<span class="name">LINEAR_MIPMAP_NEAREST</span>);
+          <span class="name">gl</span>.<span class="name">generateMipmap</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>);
+      });
+      <span class="name">woodBoxImage</span>.<span class="name">imageLoadingFailed</span>.<span class="name">connect</span>(<span class="keyword">function</span>() {
+          <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Texture load FAILED, &quot;</span><span class="operator">+</span><span class="name">woodBoxImage</span>.<span class="name">errorString</span>);
+      });
+      <span class="name">woodBoxImage</span>.<span class="name">src</span> <span class="operator">=</span> <span class="string">&quot;qrc:///woodbox.jpg&quot;</span>;
+      <span class="name">log</span>(<span class="string">&quot;   texture two source set&quot;</span>)
+      ...
+
+</pre>
+<a name="input-handling"></a>
+<h2 id="input-handling">Input Handling</h2>
+<p>First we add a <a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a> to fill the <a href="qml-qtcanvas3d-canvas3d.html">Canvas3D</a>:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+      ...
+
+</pre>
+<p>Before adding some functionality on it, we need to add properties to the canvas with initial values set:</p>
+<pre class="qml">
+
+  property <span class="type">double</span> <span class="name">xRot</span>: <span class="number">0.0</span>
+  property <span class="type">double</span> <span class="name">yRot</span>: <span class="number">45.0</span>
+  property <span class="type">double</span> <span class="name">distance</span>: <span class="number">2.0</span>
+
+</pre>
+<p>After that, we add rotation on mouse movement when the left mouse button is pressed:</p>
+<pre class="qml">
+
+  <span class="name">onMouseXChanged</span>: {
+      <span class="comment">// Do not rotate if we don't have previous value</span>
+      <span class="keyword">if</span> (<span class="name">previousY</span> <span class="operator">!==</span> <span class="number">0</span>)
+          <span class="name">canvas3d</span>.<span class="name">yRot</span> <span class="operator">+=</span> <span class="name">mouseY</span> <span class="operator">-</span> <span class="name">previousY</span>
+      <span class="name">previousY</span> <span class="operator">=</span> <span class="name">mouseY</span>
+      <span class="comment">// Limit the rotation to -90...90 degrees</span>
+      <span class="keyword">if</span> (<span class="name">canvas3d</span>.<span class="name">yRot</span> <span class="operator">&gt;</span> <span class="number">90</span>)
+          <span class="name">canvas3d</span>.<span class="name">yRot</span> <span class="operator">=</span> <span class="number">90</span>
+      <span class="keyword">if</span> (<span class="name">canvas3d</span>.<span class="name">yRot</span> <span class="operator">&lt;</span> -<span class="number">90</span>)
+          <span class="name">canvas3d</span>.<span class="name">yRot</span> <span class="operator">=</span> -<span class="number">90</span>
+  }
+  <span class="name">onMouseYChanged</span>: {
+      <span class="comment">// Do not rotate if we don't have previous value</span>
+      <span class="keyword">if</span> (<span class="name">previousX</span> <span class="operator">!==</span> <span class="number">0</span>)
+          <span class="name">canvas3d</span>.<span class="name">xRot</span> <span class="operator">+=</span> <span class="name">mouseX</span> <span class="operator">-</span> <span class="name">previousX</span>
+      <span class="name">previousX</span> <span class="operator">=</span> <span class="name">mouseX</span>
+      <span class="comment">// Wrap the rotation around</span>
+      <span class="keyword">if</span> (<span class="name">canvas3d</span>.<span class="name">xRot</span> <span class="operator">&gt;</span> <span class="number">180</span>)
+          <span class="name">canvas3d</span>.<span class="name">xRot</span> <span class="operator">-=</span> <span class="number">360</span>
+      <span class="keyword">if</span> (<span class="name">canvas3d</span>.<span class="name">xRot</span> <span class="operator">&lt;</span> -<span class="number">180</span>)
+          <span class="name">canvas3d</span>.<span class="name">xRot</span> <span class="operator">+=</span> <span class="number">360</span>
+  }
+  <span class="name">onReleased</span>: {
+      <span class="comment">// Reset previous mouse positions to avoid rotation jumping</span>
+      <span class="name">previousX</span> <span class="operator">=</span> <span class="number">0</span>
+      <span class="name">previousY</span> <span class="operator">=</span> <span class="number">0</span>
+  }
+
+</pre>
+<p>We need to keep the previous x and y values to avoid rotation jumping when the mouse button is released and pressed again. We store them in these properties:</p>
+<pre class="qml">
+
+  property <span class="type">int</span> <span class="name">previousY</span>: <span class="number">0</span>
+  property <span class="type">int</span> <span class="name">previousX</span>: <span class="number">0</span>
+
+</pre>
+<p>Then we add zooming by mouse wheel:</p>
+<pre class="qml">
+
+  <span class="name">onWheel</span>: {
+      <span class="name">canvas3d</span>.<span class="name">distance</span> <span class="operator">-=</span> <span class="name">wheel</span>.<span class="name">angleDelta</span>.<span class="name">y</span> <span class="operator">/</span> <span class="number">1000.0</span>
+      <span class="comment">// Limit the distance to 0.5...10</span>
+      <span class="keyword">if</span> (<span class="name">canvas3d</span>.<span class="name">distance</span> <span class="operator">&lt;</span> <span class="number">0.5</span>)
+          <span class="name">canvas3d</span>.<span class="name">distance</span> <span class="operator">=</span> <span class="number">0.5</span>
+      <span class="keyword">if</span> (<span class="name">canvas3d</span>.<span class="name">distance</span> <span class="operator">&gt;</span> <span class="number">10</span>)
+          <span class="name">canvas3d</span>.<span class="name">distance</span> <span class="operator">=</span> <span class="number">10</span>
+  }
+
+</pre>
+<p>These properties are then used in the JavaScript side when calculating eye/camera movement:</p>
+<pre class="js">
+
+  <span class="comment">// Get the view matrix</span>
+  <span class="name">mat4</span>.<span class="name">identity</span>(<span class="name">vMatrix</span>);
+  <span class="name">eye</span> <span class="operator">=</span> <span class="name">moveEye</span>(<span class="name">canvas</span>.<span class="name">xRot</span>, <span class="name">canvas</span>.<span class="name">yRot</span>, <span class="name">canvas</span>.<span class="name">distance</span>);
+  <span class="name">mat4</span>.<span class="name">lookAt</span>(<span class="name">vMatrix</span>, <span class="name">eye</span>, [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>], [<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>]);
+
+</pre>
+<p>Converting the rotation values into movement is done as follows:</p>
+<pre class="js">
+
+  <span class="keyword">function</span> <span class="name">moveEye</span>(<span class="name">xRot</span>, yRot, distance) {
+      var <span class="name">xAngle</span> = <span class="name">degToRad</span>(<span class="name">xRot</span>);
+      var <span class="name">yAngle</span> = <span class="name">degToRad</span>(<span class="name">yRot</span>);
+
+      var <span class="name">zPos</span> = <span class="name">distance</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">cos</span>(<span class="name">xAngle</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">cos</span>(<span class="name">yAngle</span>);
+      var <span class="name">xPos</span> = <span class="name">distance</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">sin</span>(<span class="name">xAngle</span>) <span class="operator">*</span> <span class="name">Math</span>.<span class="name">cos</span>(<span class="name">yAngle</span>);
+      var <span class="name">yPos</span> = <span class="name">distance</span> <span class="operator">*</span> <span class="name">Math</span>.<span class="name">sin</span>(<span class="name">yAngle</span>);
+
+      <span class="keyword">return</span> [-<span class="name">xPos</span>, <span class="name">yPos</span>, <span class="name">zPos</span>];
+  }
+
+</pre>
+<p>Files:</p>
+<ul>
+<li><a href="qtcanvas3d-jsonmodels-qml-jsonmodels-jsonmodels-js.html">jsonmodels/qml/jsonmodels/jsonmodels.js</a></li>
+<li><a href="qtcanvas3d-jsonmodels-qml-jsonmodels-jsonmodels-qml.html">jsonmodels/qml/jsonmodels/jsonmodels.qml</a></li>
+<li><a href="qtcanvas3d-jsonmodels-main-cpp.html">jsonmodels/main.cpp</a></li>
+<li><a href="qtcanvas3d-jsonmodels-jsonmodels-pro.html">jsonmodels/jsonmodels.pro</a></li>
+<li><a href="qtcanvas3d-jsonmodels-qml-qrc.html">jsonmodels/qml.qrc</a></li>
+</ul>
+</div>
+<!-- @@@jsonmodels -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>beziercurve.cpp Example File | Qt Quick 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-scenegraph-customgeometry-example.html">Scene Graph - Custom Geometry</a></td><td >beziercurve.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">beziercurve.cpp Example File</h1>
+<span class="subtitle">scenegraph/customgeometry/beziercurve.cpp</span>
+<!-- $$$scenegraph/customgeometry/beziercurve.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;beziercurve.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtQuick/qsgnode.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtQuick/qsgflatcolormaterial.h&gt;</span>
+
+  BezierCurve<span class="operator">::</span>BezierCurve(<span class="type"><a href="qquickitem.html">QQuickItem</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qquickitem.html">QQuickItem</a></span>(parent)
+      <span class="operator">,</span> m_p1(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span>)
+      <span class="operator">,</span> m_p2(<span class="number">1</span><span class="operator">,</span> <span class="number">0</span>)
+      <span class="operator">,</span> m_p3(<span class="number">0</span><span class="operator">,</span> <span class="number">1</span>)
+      <span class="operator">,</span> m_p4(<span class="number">1</span><span class="operator">,</span> <span class="number">1</span>)
+      <span class="operator">,</span> m_segmentCount(<span class="number">32</span>)
+  {
+      setFlag(ItemHasContents<span class="operator">,</span> <span class="keyword">true</span>);
+  }
+
+  BezierCurve<span class="operator">::</span><span class="operator">~</span>BezierCurve()
+  {
+  }
+
+  <span class="type">void</span> BezierCurve<span class="operator">::</span>setP1(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> <span class="operator">&amp;</span>p)
+  {
+      <span class="keyword">if</span> (p <span class="operator">=</span><span class="operator">=</span> m_p1)
+          <span class="keyword">return</span>;
+
+      m_p1 <span class="operator">=</span> p;
+      <span class="keyword">emit</span> p1Changed(p);
+      update();
+  }
+
+  <span class="type">void</span> BezierCurve<span class="operator">::</span>setP2(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> <span class="operator">&amp;</span>p)
+  {
+      <span class="keyword">if</span> (p <span class="operator">=</span><span class="operator">=</span> m_p2)
+          <span class="keyword">return</span>;
+
+      m_p2 <span class="operator">=</span> p;
+      <span class="keyword">emit</span> p2Changed(p);
+      update();
+  }
+
+  <span class="type">void</span> BezierCurve<span class="operator">::</span>setP3(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> <span class="operator">&amp;</span>p)
+  {
+      <span class="keyword">if</span> (p <span class="operator">=</span><span class="operator">=</span> m_p3)
+          <span class="keyword">return</span>;
+
+      m_p3 <span class="operator">=</span> p;
+      <span class="keyword">emit</span> p3Changed(p);
+      update();
+  }
+
+  <span class="type">void</span> BezierCurve<span class="operator">::</span>setP4(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> <span class="operator">&amp;</span>p)
+  {
+      <span class="keyword">if</span> (p <span class="operator">=</span><span class="operator">=</span> m_p4)
+          <span class="keyword">return</span>;
+
+      m_p4 <span class="operator">=</span> p;
+      <span class="keyword">emit</span> p4Changed(p);
+      update();
+  }
+
+  <span class="type">void</span> BezierCurve<span class="operator">::</span>setSegmentCount(<span class="type">int</span> count)
+  {
+      <span class="keyword">if</span> (m_segmentCount <span class="operator">=</span><span class="operator">=</span> count)
+          <span class="keyword">return</span>;
+
+      m_segmentCount <span class="operator">=</span> count;
+      <span class="keyword">emit</span> segmentCountChanged(count);
+      update();
+  }
+
+  <span class="type"><a href="qsgnode.html">QSGNode</a></span> <span class="operator">*</span>BezierCurve<span class="operator">::</span>updatePaintNode(<span class="type"><a href="qsgnode.html">QSGNode</a></span> <span class="operator">*</span>oldNode<span class="operator">,</span> UpdatePaintNodeData <span class="operator">*</span>)
+  {
+      <span class="type"><a href="qsggeometrynode.html">QSGGeometryNode</a></span> <span class="operator">*</span>node <span class="operator">=</span> <span class="number">0</span>;
+      <span class="type"><a href="qsggeometry.html">QSGGeometry</a></span> <span class="operator">*</span>geometry <span class="operator">=</span> <span class="number">0</span>;
+
+      <span class="keyword">if</span> (<span class="operator">!</span>oldNode) {
+          node <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qsggeometrynode.html">QSGGeometryNode</a></span>;
+          geometry <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qsggeometry.html">QSGGeometry</a></span>(<span class="type"><a href="qsggeometry.html">QSGGeometry</a></span><span class="operator">::</span>defaultAttributes_Point2D()<span class="operator">,</span> m_segmentCount);
+          geometry<span class="operator">-</span><span class="operator">&gt;</span>setLineWidth(<span class="number">2</span>);
+          geometry<span class="operator">-</span><span class="operator">&gt;</span>setDrawingMode(GL_LINE_STRIP);
+          node<span class="operator">-</span><span class="operator">&gt;</span>setGeometry(geometry);
+          node<span class="operator">-</span><span class="operator">&gt;</span>setFlag(<span class="type"><a href="qsgnode.html">QSGNode</a></span><span class="operator">::</span>OwnsGeometry);
+          <span class="type"><a href="qsgflatcolormaterial.html">QSGFlatColorMaterial</a></span> <span class="operator">*</span>material <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qsgflatcolormaterial.html">QSGFlatColorMaterial</a></span>;
+          material<span class="operator">-</span><span class="operator">&gt;</span>setColor(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="number">255</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>));
+          node<span class="operator">-</span><span class="operator">&gt;</span>setMaterial(material);
+          node<span class="operator">-</span><span class="operator">&gt;</span>setFlag(<span class="type"><a href="qsgnode.html">QSGNode</a></span><span class="operator">::</span>OwnsMaterial);
+      } <span class="keyword">else</span> {
+          node <span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type"><a href="qsggeometrynode.html">QSGGeometryNode</a></span> <span class="operator">*</span><span class="operator">&gt;</span>(oldNode);
+          geometry <span class="operator">=</span> node<span class="operator">-</span><span class="operator">&gt;</span>geometry();
+          geometry<span class="operator">-</span><span class="operator">&gt;</span>allocate(m_segmentCount);
+      }
+
+      <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> bounds <span class="operator">=</span> boundingRect();
+      <span class="type"><a href="qsggeometry.html">QSGGeometry</a></span><span class="operator">::</span>Point2D <span class="operator">*</span>vertices <span class="operator">=</span> geometry<span class="operator">-</span><span class="operator">&gt;</span>vertexDataAsPoint2D();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_segmentCount; <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> t <span class="operator">=</span> i <span class="operator">/</span> <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>(m_segmentCount <span class="operator">-</span> <span class="number">1</span>);
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> invt <span class="operator">=</span> <span class="number">1</span> <span class="operator">-</span> t;
+
+          <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> pos <span class="operator">=</span> invt <span class="operator">*</span> invt <span class="operator">*</span> invt <span class="operator">*</span> m_p1
+                      <span class="operator">+</span> <span class="number">3</span> <span class="operator">*</span> invt <span class="operator">*</span> invt <span class="operator">*</span> t <span class="operator">*</span> m_p2
+                      <span class="operator">+</span> <span class="number">3</span> <span class="operator">*</span> invt <span class="operator">*</span> t <span class="operator">*</span> t <span class="operator">*</span> m_p3
+                      <span class="operator">+</span> t <span class="operator">*</span> t <span class="operator">*</span> t <span class="operator">*</span> m_p4;
+
+          <span class="type">float</span> x <span class="operator">=</span> bounds<span class="operator">.</span>x() <span class="operator">+</span> pos<span class="operator">.</span>x() <span class="operator">*</span> bounds<span class="operator">.</span>width();
+          <span class="type">float</span> y <span class="operator">=</span> bounds<span class="operator">.</span>y() <span class="operator">+</span> pos<span class="operator">.</span>y() <span class="operator">*</span> bounds<span class="operator">.</span>height();
+
+          vertices<span class="operator">[</span>i<span class="operator">]</span><span class="operator">.</span>set(x<span class="operator">,</span> y);
+      }
+      node<span class="operator">-</span><span class="operator">&gt;</span>markDirty(<span class="type"><a href="qsgnode.html">QSGNode</a></span><span class="operator">::</span>DirtyGeometry);
+
+      <span class="keyword">return</span> node;
+  }
+
+</pre>
+</div>
+<!-- @@@scenegraph/customgeometry/beziercurve.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

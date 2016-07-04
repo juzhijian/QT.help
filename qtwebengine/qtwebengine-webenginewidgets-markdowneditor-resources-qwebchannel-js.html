@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>qwebchannel.js Example File | Qt WebEngine 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwebengine-index.html">Qt WebEngine</a></td><td ><a href="qtwebengine-webenginewidgets-markdowneditor-example.html">WebEngine Markdown Editor Example</a></td><td >qwebchannel.js Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">qwebchannel.js Example File</h1>
+<span class="subtitle">webenginewidgets/markdowneditor/resources/qwebchannel.js</span>
+<!-- $$$webenginewidgets/markdowneditor/resources/qwebchannel.js-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="js">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Copyright (C) 2014 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com, author Milian Wolff &lt;milian.wolff@kdab.com&gt;
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the QtWebChannel module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="string">&quot;use strict&quot;</span>;
+
+  var <span class="name">QWebChannelMessageTypes</span> = {
+      signal: <span class="number">1</span>,
+      propertyUpdate: <span class="number">2</span>,
+      init: <span class="number">3</span>,
+      idle: <span class="number">4</span>,
+      debug: <span class="number">5</span>,
+      invokeMethod: <span class="number">6</span>,
+      connectToSignal: <span class="number">7</span>,
+      disconnectFromSignal: <span class="number">8</span>,
+      setProperty: <span class="number">9</span>,
+      response: <span class="number">10</span>,
+  };
+
+  var <span class="name">QWebChannel</span> = <span class="keyword">function</span>(<span class="name">transport</span>, initCallback)
+  {
+      <span class="keyword">if</span> (typeof <span class="name">transport</span> <span class="operator">!==</span> <span class="string">&quot;object&quot;</span> <span class="operator">||</span> typeof <span class="name">transport</span>.<span class="name">send</span> <span class="operator">!==</span> <span class="string">&quot;function&quot;</span>) {
+          <span class="name">console</span>.<span class="name">error</span>(<span class="string">&quot;The QWebChannel expects a transport object with a send function and onmessage callback property.&quot;</span> <span class="operator">+</span>
+                        <span class="string">&quot; Given is: transport: &quot;</span> <span class="operator">+</span> typeof(<span class="name">transport</span>) <span class="operator">+</span> <span class="string">&quot;, transport.send: &quot;</span> <span class="operator">+</span> typeof(<span class="name">transport</span>.<span class="name">send</span>));
+          <span class="keyword">return</span>;
+      }
+
+      var <span class="name">channel</span> = this;
+      this.<span class="name">transport</span> <span class="operator">=</span> <span class="name">transport</span>;
+
+      this.<span class="name">send</span> <span class="operator">=</span> <span class="keyword">function</span>(<span class="name">data</span>)
+      {
+          <span class="keyword">if</span> (typeof(<span class="name">data</span>) <span class="operator">!==</span> <span class="string">&quot;string&quot;</span>) {
+              <span class="name">data</span> <span class="operator">=</span> <span class="name">JSON</span>.<span class="name">stringify</span>(<span class="name">data</span>);
+          }
+          <span class="name">channel</span>.<span class="name">transport</span>.<span class="name">send</span>(<span class="name">data</span>);
+      }
+
+      this.<span class="name">transport</span>.<span class="name">onmessage</span> <span class="operator">=</span> <span class="keyword">function</span>(<span class="name">message</span>)
+      {
+          var <span class="name">data</span> = <span class="name">message</span>.<span class="name">data</span>;
+          <span class="keyword">if</span> (typeof <span class="name">data</span> <span class="operator">===</span> <span class="string">&quot;string&quot;</span>) {
+              <span class="name">data</span> <span class="operator">=</span> <span class="name">JSON</span>.<span class="name">parse</span>(<span class="name">data</span>);
+          }
+          <span class="keyword">switch</span> (<span class="name">data</span>.<span class="name">type</span>) {
+              <span class="keyword">case</span> <span class="name">QWebChannelMessageTypes</span>.<span class="name">signal</span>:
+                  <span class="name">channel</span>.<span class="name">handleSignal</span>(<span class="name">data</span>);
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="name">QWebChannelMessageTypes</span>.<span class="name">response</span>:
+                  <span class="name">channel</span>.<span class="name">handleResponse</span>(<span class="name">data</span>);
+                  <span class="keyword">break</span>;
+              <span class="keyword">case</span> <span class="name">QWebChannelMessageTypes</span>.<span class="name">propertyUpdate</span>:
+                  <span class="name">channel</span>.<span class="name">handlePropertyUpdate</span>(<span class="name">data</span>);
+                  <span class="keyword">break</span>;
+              <span class="keyword">default</span>:
+                  <span class="name">console</span>.<span class="name">error</span>(<span class="string">&quot;invalid message received:&quot;</span>, <span class="name">message</span>.<span class="name">data</span>);
+                  <span class="keyword">break</span>;
+          }
+      }
+
+      this.<span class="name">execCallbacks</span> <span class="operator">=</span> {};
+      this.<span class="name">execId</span> <span class="operator">=</span> <span class="number">0</span>;
+      this.<span class="name">exec</span> <span class="operator">=</span> <span class="keyword">function</span>(<span class="name">data</span>, callback)
+      {
+          <span class="keyword">if</span> (!<span class="name">callback</span>) {
+              <span class="comment">// if no callback is given, send directly</span>
+              <span class="name">channel</span>.<span class="name">send</span>(<span class="name">data</span>);
+              <span class="keyword">return</span>;
+          }
+          <span class="keyword">if</span> (<span class="name">channel</span>.<span class="name">execId</span> <span class="operator">===</span> <span class="name">Number</span>.<span class="name">MAX_VALUE</span>) {
+              <span class="comment">// wrap</span>
+              <span class="name">channel</span>.<span class="name">execId</span> <span class="operator">=</span> <span class="name">Number</span>.<span class="name">MIN_VALUE</span>;
+          }
+          <span class="keyword">if</span> (<span class="name">data</span>.<span class="name">hasOwnProperty</span>(<span class="string">&quot;id&quot;</span>)) {
+              <span class="name">console</span>.<span class="name">error</span>(<span class="string">&quot;Cannot exec message with property id: &quot;</span> <span class="operator">+</span> <span class="name">JSON</span>.<span class="name">stringify</span>(<span class="name">data</span>));
+              <span class="keyword">return</span>;
+          }
+          <span class="name">data</span>.<span class="name">id</span> <span class="operator">=</span> channel.execId++;
+          <span class="name">channel</span>.<span class="name">execCallbacks</span>[<span class="name">data</span>.<span class="name">id</span>] <span class="operator">=</span> <span class="name">callback</span>;
+          <span class="name">channel</span>.<span class="name">send</span>(<span class="name">data</span>);
+      };
+
+      this.<span class="name">objects</span> <span class="operator">=</span> {};
+
+      this.<span class="name">handleSignal</span> <span class="operator">=</span> <span class="keyword">function</span>(<span class="name">message</span>)
+      {
+          var <span class="name">object</span> = <span class="name">channel</span>.<span class="name">objects</span>[<span class="name">message</span>.<span class="name">object</span>];
+          <span class="keyword">if</span> (<span class="name">object</span>) {
+              <span class="name">object</span>.<span class="name">signalEmitted</span>(<span class="name">message</span>.<span class="name">signal</span>, <span class="name">message</span>.<span class="name">args</span>);
+          } <span class="keyword">else</span> {
+              <span class="name">console</span>.<span class="name">warn</span>(<span class="string">&quot;Unhandled signal: &quot;</span> <span class="operator">+</span> <span class="name">message</span>.<span class="name">object</span> <span class="operator">+</span> <span class="string">&quot;::&quot;</span> <span class="operator">+</span> <span class="name">message</span>.<span class="name">signal</span>);
+          }
+      }
+
+      this.<span class="name">handleResponse</span> <span class="operator">=</span> <span class="keyword">function</span>(<span class="name">message</span>)
+      {
+          <span class="keyword">if</span> (!<span class="name">message</span>.<span class="name">hasOwnProperty</span>(<span class="string">&quot;id&quot;</span>)) {
+              <span class="name">console</span>.<span class="name">error</span>(<span class="string">&quot;Invalid response message received: &quot;</span>, <span class="name">JSON</span>.<span class="name">stringify</span>(<span class="name">message</span>));
+              <span class="keyword">return</span>;
+          }
+          <span class="name">channel</span>.<span class="name">execCallbacks</span>[<span class="name">message</span>.<span class="name">id</span>](<span class="name">message</span>.<span class="name">data</span>);
+          delete <span class="name">channel</span>.<span class="name">execCallbacks</span>[<span class="name">message</span>.<span class="name">id</span>];
+      }
+
+      this.<span class="name">handlePropertyUpdate</span> <span class="operator">=</span> <span class="keyword">function</span>(<span class="name">message</span>)
+      {
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> in <span class="name">message</span>.<span class="name">data</span>) {
+              var <span class="name">data</span> = <span class="name">message</span>.<span class="name">data</span>[<span class="name">i</span>];
+              var <span class="name">object</span> = <span class="name">channel</span>.<span class="name">objects</span>[<span class="name">data</span>.<span class="name">object</span>];
+              <span class="keyword">if</span> (<span class="name">object</span>) {
+                  <span class="name">object</span>.<span class="name">propertyUpdate</span>(<span class="name">data</span>.<span class="name">signals</span>, <span class="name">data</span>.<span class="name">properties</span>);
+              } <span class="keyword">else</span> {
+                  <span class="name">console</span>.<span class="name">warn</span>(<span class="string">&quot;Unhandled property update: &quot;</span> <span class="operator">+</span> <span class="name">data</span>.<span class="name">object</span> <span class="operator">+</span> <span class="string">&quot;::&quot;</span> <span class="operator">+</span> <span class="name">data</span>.<span class="name">signal</span>);
+              }
+          }
+          <span class="name">channel</span>.<span class="name">exec</span>({type: <span class="name">QWebChannelMessageTypes</span>.<span class="name">idle</span>});
+      }
+
+      this.<span class="name">debug</span> <span class="operator">=</span> <span class="keyword">function</span>(<span class="name">message</span>)
+      {
+          <span class="name">channel</span>.<span class="name">send</span>({type: <span class="name">QWebChannelMessageTypes</span>.<span class="name">debug</span>, data: <span class="name">message</span>});
+      };
+
+      <span class="name">channel</span>.<span class="name">exec</span>({type: <span class="name">QWebChannelMessageTypes</span>.<span class="name">init</span>}, <span class="keyword">function</span>(<span class="name">data</span>) {
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">objectName</span> in <span class="name">data</span>) {
+              var <span class="name">object</span> = new <span class="name">QObject</span>(<span class="name">objectName</span>, <span class="name">data</span>[<span class="name">objectName</span>], <span class="name">channel</span>);
+          }
+          <span class="comment">// now unwrap properties, which might reference other registered objects</span>
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">objectName</span> in <span class="name">channel</span>.<span class="name">objects</span>) {
+              <span class="name">channel</span>.<span class="name">objects</span>[<span class="name">objectName</span>].<span class="name">unwrapProperties</span>();
+          }
+          <span class="keyword">if</span> (<span class="name">initCallback</span>) {
+              <span class="name">initCallback</span>(<span class="name">channel</span>);
+          }
+          <span class="name">channel</span>.<span class="name">exec</span>({type: <span class="name">QWebChannelMessageTypes</span>.<span class="name">idle</span>});
+      });
+  };
+
+  <span class="keyword">function</span> <span class="name">QObject</span>(<span class="name">name</span>, data, webChannel)
+  {
+      this.<span class="name">__id__</span> <span class="operator">=</span> <span class="name">name</span>;
+      <span class="name">webChannel</span>.<span class="name">objects</span>[<span class="name">name</span>] <span class="operator">=</span> this;
+
+      <span class="comment">// List of callbacks that get invoked upon signal emission</span>
+      this.<span class="name">__objectSignals__</span> <span class="operator">=</span> {};
+
+      <span class="comment">// Cache of all properties, updated when a notify signal is emitted</span>
+      this.<span class="name">__propertyCache__</span> <span class="operator">=</span> {};
+
+      var <span class="name">object</span> = this;
+
+      <span class="comment">// ----------------------------------------------------------------------</span>
+
+      this.<span class="name">unwrapQObject</span> <span class="operator">=</span> <span class="keyword">function</span>(<span class="name">response</span>)
+      {
+          <span class="keyword">if</span> (<span class="name">response</span> <span class="operator">instanceof</span> <span class="name">Array</span>) {
+              <span class="comment">// support list of objects</span>
+              var <span class="name">ret</span> = new <span class="name">Array</span>(<span class="name">response</span>.<span class="name">length</span>);
+              <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">response</span>.<span class="name">length</span>; ++<span class="name">i</span>) {
+                  <span class="name">ret</span>[<span class="name">i</span>] <span class="operator">=</span> <span class="name">object</span>.<span class="name">unwrapQObject</span>(<span class="name">response</span>[<span class="name">i</span>]);
+              }
+              <span class="keyword">return</span> <span class="name">ret</span>;
+          }
+          <span class="keyword">if</span> (!<span class="name">response</span>
+              <span class="operator">||</span> !<span class="name">response</span>[<span class="string">&quot;__QObject*__&quot;</span>]
+              <span class="operator">||</span> <span class="name">response</span>.<span class="name">id</span> <span class="operator">===</span> <span class="name">undefined</span>) {
+              <span class="keyword">return</span> <span class="name">response</span>;
+          }
+
+          var <span class="name">objectId</span> = <span class="name">response</span>.<span class="name">id</span>;
+          <span class="keyword">if</span> (<span class="name">webChannel</span>.<span class="name">objects</span>[<span class="name">objectId</span>])
+              <span class="keyword">return</span> <span class="name">webChannel</span>.<span class="name">objects</span>[<span class="name">objectId</span>];
+
+          <span class="keyword">if</span> (!<span class="name">response</span>.<span class="name">data</span>) {
+              <span class="name">console</span>.<span class="name">error</span>(<span class="string">&quot;Cannot unwrap unknown QObject &quot;</span> <span class="operator">+</span> <span class="name">objectId</span> <span class="operator">+</span> <span class="string">&quot; without data.&quot;</span>);
+              <span class="keyword">return</span>;
+          }
+
+          var <span class="name">qObject</span> = new <span class="name">QObject</span>( <span class="name">objectId</span>, <span class="name">response</span>.<span class="name">data</span>, <span class="name">webChannel</span> );
+          <span class="name">qObject</span>.<span class="name">destroyed</span>.<span class="name">connect</span>(<span class="keyword">function</span>() {
+              <span class="keyword">if</span> (<span class="name">webChannel</span>.<span class="name">objects</span>[<span class="name">objectId</span>] <span class="operator">===</span> <span class="name">qObject</span>) {
+                  delete <span class="name">webChannel</span>.<span class="name">objects</span>[<span class="name">objectId</span>];
+                  <span class="comment">// reset the now deleted QObject to an empty {} object</span>
+                  <span class="comment">// just assigning {} though would not have the desired effect, but the</span>
+                  <span class="comment">// below also ensures all external references will see the empty map</span>
+                  <span class="comment">// NOTE: this detour is necessary to workaround QTBUG-40021</span>
+                  var <span class="name">propertyNames</span> = [];
+                  <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">propertyName</span> in <span class="name">qObject</span>) {
+                      <span class="name">propertyNames</span>.<span class="name">push</span>(<span class="name">propertyName</span>);
+                  }
+                  <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">idx</span> in <span class="name">propertyNames</span>) {
+                      delete <span class="name">qObject</span>[<span class="name">propertyNames</span>[<span class="name">idx</span>]];
+                  }
+              }
+          });
+          <span class="comment">// here we are already initialized, and thus must directly unwrap the properties</span>
+          <span class="name">qObject</span>.<span class="name">unwrapProperties</span>();
+          <span class="keyword">return</span> <span class="name">qObject</span>;
+      }
+
+      this.<span class="name">unwrapProperties</span> <span class="operator">=</span> <span class="keyword">function</span>()
+      {
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">propertyIdx</span> in <span class="name">object</span>.<span class="name">__propertyCache__</span>) {
+              <span class="name">object</span>.<span class="name">__propertyCache__</span>[<span class="name">propertyIdx</span>] <span class="operator">=</span> <span class="name">object</span>.<span class="name">unwrapQObject</span>(<span class="name">object</span>.<span class="name">__propertyCache__</span>[<span class="name">propertyIdx</span>]);
+          }
+      }
+
+      <span class="keyword">function</span> <span class="name">addSignal</span>(<span class="name">signalData</span>, isPropertyNotifySignal)
+      {
+          var <span class="name">signalName</span> = <span class="name">signalData</span>[<span class="number">0</span>];
+          var <span class="name">signalIndex</span> = <span class="name">signalData</span>[<span class="number">1</span>];
+          <span class="name">object</span>[<span class="name">signalName</span>] <span class="operator">=</span> {
+              connect: <span class="keyword">function</span>(<span class="name">callback</span>) {
+                  <span class="keyword">if</span> (typeof(<span class="name">callback</span>) <span class="operator">!==</span> <span class="string">&quot;function&quot;</span>) {
+                      <span class="name">console</span>.<span class="name">error</span>(<span class="string">&quot;Bad callback given to connect to signal &quot;</span> <span class="operator">+</span> <span class="name">signalName</span>);
+                      <span class="keyword">return</span>;
+                  }
+
+                  <span class="name">object</span>.<span class="name">__objectSignals__</span>[<span class="name">signalIndex</span>] <span class="operator">=</span> <span class="name">object</span>.<span class="name">__objectSignals__</span>[<span class="name">signalIndex</span>] <span class="operator">||</span> [];
+                  <span class="name">object</span>.<span class="name">__objectSignals__</span>[<span class="name">signalIndex</span>].<span class="name">push</span>(<span class="name">callback</span>);
+
+                  <span class="keyword">if</span> (!<span class="name">isPropertyNotifySignal</span> <span class="operator">&amp;&amp;</span> <span class="name">signalName</span> <span class="operator">!==</span> <span class="string">&quot;destroyed&quot;</span>) {
+                      <span class="comment">// only required for &quot;pure&quot; signals, handled separately for properties in propertyUpdate</span>
+                      <span class="comment">// also note that we always get notified about the destroyed signal</span>
+                      <span class="name">webChannel</span>.<span class="name">exec</span>({
+                          type: <span class="name">QWebChannelMessageTypes</span>.<span class="name">connectToSignal</span>,
+                          object: <span class="name">object</span>.<span class="name">__id__</span>,
+                          signal: <span class="name">signalIndex</span>
+                      });
+                  }
+              },
+              disconnect: <span class="keyword">function</span>(<span class="name">callback</span>) {
+                  <span class="keyword">if</span> (typeof(<span class="name">callback</span>) <span class="operator">!==</span> <span class="string">&quot;function&quot;</span>) {
+                      <span class="name">console</span>.<span class="name">error</span>(<span class="string">&quot;Bad callback given to disconnect from signal &quot;</span> <span class="operator">+</span> <span class="name">signalName</span>);
+                      <span class="keyword">return</span>;
+                  }
+                  <span class="name">object</span>.<span class="name">__objectSignals__</span>[<span class="name">signalIndex</span>] <span class="operator">=</span> <span class="name">object</span>.<span class="name">__objectSignals__</span>[<span class="name">signalIndex</span>] <span class="operator">||</span> [];
+                  var <span class="name">idx</span> = <span class="name">object</span>.<span class="name">__objectSignals__</span>[<span class="name">signalIndex</span>].<span class="name">indexOf</span>(<span class="name">callback</span>);
+                  <span class="keyword">if</span> (<span class="name">idx</span> <span class="operator">===</span> -<span class="number">1</span>) {
+                      <span class="name">console</span>.<span class="name">error</span>(<span class="string">&quot;Cannot find connection of signal &quot;</span> <span class="operator">+</span> <span class="name">signalName</span> <span class="operator">+</span> <span class="string">&quot; to &quot;</span> <span class="operator">+</span> <span class="name">callback</span>.<span class="name">name</span>);
+                      <span class="keyword">return</span>;
+                  }
+                  <span class="name">object</span>.<span class="name">__objectSignals__</span>[<span class="name">signalIndex</span>].<span class="name">splice</span>(<span class="name">idx</span>, <span class="number">1</span>);
+                  <span class="keyword">if</span> (!<span class="name">isPropertyNotifySignal</span> <span class="operator">&amp;&amp;</span> <span class="name">object</span>.<span class="name">__objectSignals__</span>[<span class="name">signalIndex</span>].<span class="name">length</span> <span class="operator">===</span> <span class="number">0</span>) {
+                      <span class="comment">// only required for &quot;pure&quot; signals, handled separately for properties in propertyUpdate</span>
+                      <span class="name">webChannel</span>.<span class="name">exec</span>({
+                          type: <span class="name">QWebChannelMessageTypes</span>.<span class="name">disconnectFromSignal</span>,
+                          object: <span class="name">object</span>.<span class="name">__id__</span>,
+                          signal: <span class="name">signalIndex</span>
+                      });
+                  }
+              }
+          };
+      }
+
+      <span class="comment">/**
+       * Invokes all callbacks for the given signalname. Also works for property notify callbacks.
+       */</span>
+      <span class="keyword">function</span> <span class="name">invokeSignalCallbacks</span>(<span class="name">signalName</span>, signalArgs)
+      {
+          var <span class="name">connections</span> = <span class="name">object</span>.<span class="name">__objectSignals__</span>[<span class="name">signalName</span>];
+          <span class="keyword">if</span> (<span class="name">connections</span>) {
+              <span class="name">connections</span>.<span class="name">forEach</span>(<span class="keyword">function</span>(<span class="name">callback</span>) {
+                  <span class="name">callback</span>.<span class="name">apply</span>(<span class="name">callback</span>, <span class="name">signalArgs</span>);
+              });
+          }
+      }
+
+      this.<span class="name">propertyUpdate</span> <span class="operator">=</span> <span class="keyword">function</span>(<span class="name">signals</span>, propertyMap)
+      {
+          <span class="comment">// update property cache</span>
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">propertyIndex</span> in <span class="name">propertyMap</span>) {
+              var <span class="name">propertyValue</span> = <span class="name">propertyMap</span>[<span class="name">propertyIndex</span>];
+              <span class="name">object</span>.<span class="name">__propertyCache__</span>[<span class="name">propertyIndex</span>] <span class="operator">=</span> <span class="name">propertyValue</span>;
+          }
+
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">signalName</span> in <span class="name">signals</span>) {
+              <span class="comment">// Invoke all callbacks, as signalEmitted() does not. This ensures the</span>
+              <span class="comment">// property cache is updated before the callbacks are invoked.</span>
+              <span class="name">invokeSignalCallbacks</span>(<span class="name">signalName</span>, <span class="name">signals</span>[<span class="name">signalName</span>]);
+          }
+      }
+
+      this.<span class="name">signalEmitted</span> <span class="operator">=</span> <span class="keyword">function</span>(<span class="name">signalName</span>, signalArgs)
+      {
+          <span class="name">invokeSignalCallbacks</span>(<span class="name">signalName</span>, <span class="name">signalArgs</span>);
+      }
+
+      <span class="keyword">function</span> <span class="name">addMethod</span>(<span class="name">methodData</span>)
+      {
+          var <span class="name">methodName</span> = <span class="name">methodData</span>[<span class="number">0</span>];
+          var <span class="name">methodIdx</span> = <span class="name">methodData</span>[<span class="number">1</span>];
+          <span class="name">object</span>[<span class="name">methodName</span>] <span class="operator">=</span> <span class="keyword">function</span>() {
+              var <span class="name">args</span> = [];
+              var <span class="name">callback</span>;
+              <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">arguments</span>.<span class="name">length</span>; ++<span class="name">i</span>) {
+                  <span class="keyword">if</span> (typeof <span class="name">arguments</span>[<span class="name">i</span>] <span class="operator">===</span> <span class="string">&quot;function&quot;</span>)
+                      <span class="name">callback</span> <span class="operator">=</span> <span class="name">arguments</span>[<span class="name">i</span>];
+                  <span class="keyword">else</span>
+                      <span class="name">args</span>.<span class="name">push</span>(<span class="name">arguments</span>[<span class="name">i</span>]);
+              }
+
+              <span class="name">webChannel</span>.<span class="name">exec</span>({
+                  &quot;type&quot;: <span class="name">QWebChannelMessageTypes</span>.<span class="name">invokeMethod</span>,
+                  &quot;object&quot;: <span class="name">object</span>.<span class="name">__id__</span>,
+                  &quot;method&quot;: <span class="name">methodIdx</span>,
+                  &quot;args&quot;: <span class="name">args</span>
+              }, <span class="keyword">function</span>(<span class="name">response</span>) {
+                  <span class="keyword">if</span> (<span class="name">response</span> <span class="operator">!==</span> <span class="name">undefined</span>) {
+                      var <span class="name">result</span> = <span class="name">object</span>.<span class="name">unwrapQObject</span>(<span class="name">response</span>);
+                      <span class="keyword">if</span> (<span class="name">callback</span>) {
+                          (<span class="name">callback</span>)(<span class="name">result</span>);
+                      }
+                  }
+              });
+          };
+      }
+
+      <span class="keyword">function</span> <span class="name">bindGetterSetter</span>(<span class="name">propertyInfo</span>)
+      {
+          var <span class="name">propertyIndex</span> = <span class="name">propertyInfo</span>[<span class="number">0</span>];
+          var <span class="name">propertyName</span> = <span class="name">propertyInfo</span>[<span class="number">1</span>];
+          var <span class="name">notifySignalData</span> = <span class="name">propertyInfo</span>[<span class="number">2</span>];
+          <span class="comment">// initialize property cache with current value</span>
+          <span class="comment">// NOTE: if this is an object, it is not directly unwrapped as it might</span>
+          <span class="comment">// reference other QObject that we do not know yet</span>
+          <span class="name">object</span>.<span class="name">__propertyCache__</span>[<span class="name">propertyIndex</span>] <span class="operator">=</span> <span class="name">propertyInfo</span>[<span class="number">3</span>];
+
+          <span class="keyword">if</span> (<span class="name">notifySignalData</span>) {
+              <span class="keyword">if</span> (<span class="name">notifySignalData</span>[<span class="number">0</span>] <span class="operator">===</span> <span class="number">1</span>) {
+                  <span class="comment">// signal name is optimized away, reconstruct the actual name</span>
+                  <span class="name">notifySignalData</span>[<span class="number">0</span>] <span class="operator">=</span> <span class="name">propertyName</span> <span class="operator">+</span> <span class="string">&quot;Changed&quot;</span>;
+              }
+              <span class="name">addSignal</span>(<span class="name">notifySignalData</span>, <span class="number">true</span>);
+          }
+
+          <span class="name">Object</span>.<span class="name">defineProperty</span>(<span class="name">object</span>, <span class="name">propertyName</span>, {
+              configurable: <span class="number">true</span>,
+              get: <span class="keyword">function</span> () {
+                  var <span class="name">propertyValue</span> = <span class="name">object</span>.<span class="name">__propertyCache__</span>[<span class="name">propertyIndex</span>];
+                  <span class="keyword">if</span> (<span class="name">propertyValue</span> <span class="operator">===</span> <span class="name">undefined</span>) {
+                      <span class="comment">// This shouldn't happen</span>
+                      <span class="name">console</span>.<span class="name">warn</span>(<span class="string">&quot;Undefined value in property cache for property \&quot;&quot;</span> <span class="operator">+</span> <span class="name">propertyName</span> <span class="operator">+</span> <span class="string">&quot;\&quot; in object &quot;</span> <span class="operator">+</span> <span class="name">object</span>.<span class="name">__id__</span>);
+                  }
+
+                  <span class="keyword">return</span> <span class="name">propertyValue</span>;
+              },
+              set: <span class="keyword">function</span>(<span class="name">value</span>) {
+                  <span class="keyword">if</span> (<span class="name">value</span> <span class="operator">===</span> <span class="name">undefined</span>) {
+                      <span class="name">console</span>.<span class="name">warn</span>(<span class="string">&quot;Property setter for &quot;</span> <span class="operator">+</span> <span class="name">propertyName</span> <span class="operator">+</span> <span class="string">&quot; called with undefined value!&quot;</span>);
+                      <span class="keyword">return</span>;
+                  }
+                  <span class="name">object</span>.<span class="name">__propertyCache__</span>[<span class="name">propertyIndex</span>] <span class="operator">=</span> <span class="name">value</span>;
+                  <span class="name">webChannel</span>.<span class="name">exec</span>({
+                      &quot;type&quot;: <span class="name">QWebChannelMessageTypes</span>.<span class="name">setProperty</span>,
+                      &quot;object&quot;: <span class="name">object</span>.<span class="name">__id__</span>,
+                      &quot;property&quot;: <span class="name">propertyIndex</span>,
+                      &quot;value&quot;: <span class="name">value</span>
+                  });
+              }
+          });
+
+      }
+
+      <span class="comment">// ----------------------------------------------------------------------</span>
+
+      <span class="name">data</span>.<span class="name">methods</span>.<span class="name">forEach</span>(<span class="name">addMethod</span>);
+
+      <span class="name">data</span>.<span class="name">properties</span>.<span class="name">forEach</span>(<span class="name">bindGetterSetter</span>);
+
+      <span class="name">data</span>.<span class="name">signals</span>.<span class="name">forEach</span>(<span class="keyword">function</span>(<span class="name">signal</span>) { <span class="name">addSignal</span>(<span class="name">signal</span>, <span class="number">false</span>); });
+
+      <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">name</span> in <span class="name">data</span>.<span class="name">enums</span>) {
+          <span class="name">object</span>[<span class="name">name</span>] <span class="operator">=</span> <span class="name">data</span>.<span class="name">enums</span>[<span class="name">name</span>];
+      }
+  }
+
+  <span class="comment">//required for use with nodejs</span>
+  <span class="keyword">if</span> (typeof <span class="name">module</span> <span class="operator">===</span> <span class="string">'object'</span>) {
+      <span class="name">module</span>.<span class="name">exports</span> <span class="operator">=</span> {
+          QWebChannel: <span class="name">QWebChannel</span>
+      };
+  }
+
+</pre>
+</div>
+<!-- @@@webenginewidgets/markdowneditor/resources/qwebchannel.js -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

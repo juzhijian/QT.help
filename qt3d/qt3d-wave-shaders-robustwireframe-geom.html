@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>robustwireframe.geom Example File | Qt 3D 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-wave-example.html">Qt 3D: Wave QML Example</a></td><td >robustwireframe.geom Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">robustwireframe.geom Example File</h1>
+<span class="subtitle">wave/shaders/robustwireframe.geom</span>
+<!-- $$$wave/shaders/robustwireframe.geom-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  #version 330 core
+
+  layout( triangles ) in;
+  layout( triangle_strip, max_vertices = 3 ) out;
+
+  in EyeSpaceVertex {
+      vec3 position;
+      vec3 normal;
+  } gs_in[];
+
+  out WireframeVertex {
+      vec3 position;
+      vec3 normal;
+      noperspective vec4 edgeA;
+      noperspective vec4 edgeB;
+      flat int configuration;
+  } gs_out;
+
+  uniform mat4 viewportMatrix;
+
+  const int infoA[]  = int[]( 0, 0, 0, 0, 1, 1, 2 );
+  const int infoB[]  = int[]( 1, 1, 2, 0, 2, 1, 2 );
+  const int infoAd[] = int[]( 2, 2, 1, 1, 0, 0, 0 );
+  const int infoBd[] = int[]( 2, 2, 1, 2, 0, 2, 1 );
+
+  vec2 transformToViewport( const in vec4 p )
+  {
+      return vec2( viewportMatrix * ( p / p.w ) );
+  }
+
+  void main()
+  {
+      gs_out.configuration = int(gl_in[0].gl_Position.z &lt; 0) * int(4)
+             + int(gl_in[1].gl_Position.z &lt; 0) * int(2)
+             + int(gl_in[2].gl_Position.z &lt; 0);
+
+      // If all vertices are behind us, cull the primitive
+      if (gs_out.configuration == 7)
+          return;
+
+      // Transform each vertex into viewport space
+      vec2 p[3];
+      p[0] = transformToViewport( gl_in[0].gl_Position );
+      p[1] = transformToViewport( gl_in[1].gl_Position );
+      p[2] = transformToViewport( gl_in[2].gl_Position );
+
+      if (gs_out.configuration == 0)
+      {
+          // Common configuration where all vertices are within the viewport
+          gs_out.edgeA = vec4(0.0);
+          gs_out.edgeB = vec4(0.0);
+
+          // Calculate lengths of 3 edges of triangle
+          float a = length( p[1] - p[2] );
+          float b = length( p[2] - p[0] );
+          float c = length( p[1] - p[0] );
+
+          // Calculate internal angles using the cosine rule
+          float alpha = acos( ( b * b + c * c - a * a ) / ( 2.0 * b * c ) );
+          float beta = acos( ( a * a + c * c - b * b ) / ( 2.0 * a * c ) );
+
+          // Calculate the perpendicular distance of each vertex from the opposing edge
+          float ha = abs( c * sin( beta ) );
+          float hb = abs( c * sin( alpha ) );
+          float hc = abs( b * sin( alpha ) );
+
+          // Now add this perpendicular distance as a per-vertex property in addition to
+          // the position and normal calculated in the vertex shader.
+
+          // Vertex 0 (a)
+          gs_out.edgeA = vec4( ha, 0.0, 0.0, 0.0 );
+          gs_out.normal = gs_in[0].normal;
+          gs_out.position = gs_in[0].position;
+          gl_Position = gl_in[0].gl_Position;
+          EmitVertex();
+
+          // Vertex 1 (b)
+          gs_out.edgeA = vec4( 0.0, hb, 0.0, 0.0 );
+          gs_out.normal = gs_in[1].normal;
+          gs_out.position = gs_in[1].position;
+          gl_Position = gl_in[1].gl_Position;
+          EmitVertex();
+
+          // Vertex 2 (c)
+          gs_out.edgeA = vec4( 0.0, 0.0, hc, 0.0 );
+          gs_out.normal = gs_in[2].normal;
+          gs_out.position = gs_in[2].position;
+          gl_Position = gl_in[2].gl_Position;
+          EmitVertex();
+
+          // Finish the primitive off
+          EndPrimitive();
+      }
+      else
+      {
+          // Viewport projection breaks down for one or two vertices.
+          // Caclulate what we can here and defer rest to fragment shader.
+          // Since this is coherent for the entire primitive the conditional
+          // in the fragment shader is still cheap as all concurrent
+          // fragment shader invocations will take the same code path.
+
+          // Copy across the viewport-space points for the (up to) two vertices
+          // in the viewport
+          gs_out.edgeA.xy = p[infoA[gs_out.configuration]];
+          gs_out.edgeB.xy = p[infoB[gs_out.configuration]];
+
+          // Copy across the viewport-space edge vectors for the (up to) two vertices
+          // in the viewport
+          gs_out.edgeA.zw = normalize( gs_out.edgeA.xy - p[ infoAd[gs_out.configuration] ] );
+          gs_out.edgeB.zw = normalize( gs_out.edgeB.xy - p[ infoBd[gs_out.configuration] ] );
+
+          // Pass through the other vertex attributes
+          gs_out.normal = gs_in[0].normal;
+          gs_out.position = gs_in[0].position;
+          gl_Position = gl_in[0].gl_Position;
+          EmitVertex();
+
+          gs_out.normal = gs_in[1].normal;
+          gs_out.position = gs_in[1].position;
+          gl_Position = gl_in[1].gl_Position;
+          EmitVertex();
+
+          gs_out.normal = gs_in[2].normal;
+          gs_out.position = gs_in[2].position;
+          gl_Position = gl_in[2].gl_Position;
+          EmitVertex();
+
+          // Finish the primitive off
+          EndPrimitive();
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@wave/shaders/robustwireframe.geom -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

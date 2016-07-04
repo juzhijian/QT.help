@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>scanner.qml Example File | Qt Bluetooth 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtbluetooth-index.html">Qt Bluetooth</a></td><td ><a href="qtbluetooth-scanner-example.html">QML Bluetooth Scanner Example</a></td><td >scanner.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">scanner.qml Example File</h1>
+<span class="subtitle">scanner/scanner.qml</span>
+<!-- $$$scanner/scanner.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Copyright (C) 2013 BlackBerry Limited. All rights reserved.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the QtBluetooth module.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.0
+  import QtBluetooth 5.2
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">top</span>
+
+      property <span class="type"><a href="qml-qtbluetooth-bluetoothservice.html">BluetoothService</a></span> <span class="name">currentService</span>
+
+      <span class="type"><a href="qml-qtbluetooth-bluetoothdiscoverymodel.html">BluetoothDiscoveryModel</a></span> {
+          <span class="name">id</span>: <span class="name">btModel</span>
+          <span class="name">running</span>: <span class="number">true</span>
+          <span class="name">discoveryMode</span>: <span class="name">BluetoothDiscoveryModel</span>.<span class="name">DeviceDiscovery</span>
+          <span class="name">onDiscoveryModeChanged</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Discovery mode: &quot;</span> <span class="operator">+</span> <span class="name">discoveryMode</span>)
+          <span class="name">onServiceDiscovered</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Found new service &quot;</span> <span class="operator">+</span> <span class="name">service</span>.<span class="name">deviceAddress</span> <span class="operator">+</span> <span class="string">&quot; &quot;</span> <span class="operator">+</span> <span class="name">service</span>.<span class="name">deviceName</span> <span class="operator">+</span> <span class="string">&quot; &quot;</span> <span class="operator">+</span> <span class="name">service</span>.<span class="name">serviceName</span>);
+          <span class="name">onDeviceDiscovered</span>: <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;New device: &quot;</span> <span class="operator">+</span> <span class="name">device</span>)
+          <span class="name">onErrorChanged</span>: {
+                  <span class="keyword">switch</span> (<span class="name">btModel</span>.<span class="name">error</span>) {
+                  <span class="keyword">case</span> <span class="name">BluetoothDiscoveryModel</span>.<span class="name">PoweredOffError</span>:
+                      <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Error: Bluetooth device not turned on&quot;</span>); <span class="keyword">break</span>;
+                  <span class="keyword">case</span> <span class="name">BluetoothDiscoveryModel</span>.<span class="name">InputOutputError</span>:
+                      <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Error: Bluetooth I/O Error&quot;</span>); <span class="keyword">break</span>;
+                  <span class="keyword">case</span> <span class="name">BluetoothDiscoveryModel</span>.<span class="name">InvalidBluetoothAdapterError</span>:
+                      <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Error: Invalid Bluetooth Adapter Error&quot;</span>); <span class="keyword">break</span>;
+                  <span class="keyword">case</span> <span class="name">BluetoothDiscoveryModel</span>.<span class="name">NoError</span>:
+                      <span class="keyword">break</span>;
+                  <span class="keyword">default</span>:
+                      <span class="name">console</span>.<span class="name">log</span>(<span class="string">&quot;Error: Unknown Error&quot;</span>); <span class="keyword">break</span>;
+                  }
+          }
+     }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">busy</span>
+
+          <span class="name">width</span>: <span class="name">top</span>.<span class="name">width</span> <span class="operator">*</span> <span class="number">0.7</span>;
+          <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+          <span class="name">anchors</span>.top: <span class="name">top</span>.<span class="name">top</span>;
+          <span class="name">height</span>: <span class="name">text</span>.<span class="name">height</span><span class="operator">*</span><span class="number">1.2</span>;
+          <span class="name">radius</span>: <span class="number">5</span>
+          <span class="name">color</span>: <span class="string">&quot;#1c56f3&quot;</span>
+          <span class="name">visible</span>: <span class="name">btModel</span>.<span class="name">running</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+              <span class="name">id</span>: <span class="name">text</span>
+              <span class="name">text</span>: <span class="string">&quot;Scanning&quot;</span>
+              <span class="name">font</span>.bold: <span class="number">true</span>
+              <span class="name">font</span>.pointSize: <span class="number">20</span>
+              <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+          }
+
+          SequentialAnimation on <span class="name">color</span> {
+              <span class="name">id</span>: <span class="name">busyThrobber</span>
+              <span class="type"><a href="../qtquick/qml-qtquick-coloranimation.html">ColorAnimation</a></span> { <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutSine</span>; <span class="name">from</span>: <span class="string">&quot;#1c56f3&quot;</span>; <span class="name">to</span>: <span class="string">&quot;white&quot;</span>; <span class="name">duration</span>: <span class="number">1000</span>; }
+              <span class="type"><a href="../qtquick/qml-qtquick-coloranimation.html">ColorAnimation</a></span> { <span class="name">easing</span>.type: <span class="name">Easing</span>.<span class="name">InOutSine</span>; <span class="name">to</span>: <span class="string">&quot;#1c56f3&quot;</span>; <span class="name">from</span>: <span class="string">&quot;white&quot;</span>; <span class="name">duration</span>: <span class="number">1000</span> }
+              <span class="name">loops</span>: <span class="name">Animation</span>.<span class="name">Infinite</span>
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-listview.html">ListView</a></span> {
+          <span class="name">id</span>: <span class="name">mainList</span>
+          <span class="name">width</span>: <span class="name">top</span>.<span class="name">width</span>
+          <span class="name">anchors</span>.top: <span class="name">busy</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.bottom: <span class="name">buttonGroup</span>.<span class="name">top</span>
+          <span class="name">anchors</span>.bottomMargin: <span class="number">10</span>
+          <span class="name">anchors</span>.topMargin: <span class="number">10</span>
+          <span class="name">clip</span>: <span class="number">true</span>
+
+          <span class="name">model</span>: <span class="name">btModel</span>
+          <span class="name">delegate</span>: <span class="name">Rectangle</span> {
+              <span class="name">id</span>: <span class="name">btDelegate</span>
+              <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+              <span class="name">height</span>: <span class="name">column</span>.<span class="name">height</span> <span class="operator">+</span> <span class="number">10</span>
+
+              property <span class="type">bool</span> <span class="name">expended</span>: <span class="number">false</span>;
+              <span class="name">clip</span>: <span class="number">true</span>
+              <span class="type"><a href="../qtquick/qml-qtquick-image.html">Image</a></span> {
+                  <span class="name">id</span>: <span class="name">bticon</span>
+                  <span class="name">source</span>: <span class="string">&quot;qrc:/default.png&quot;</span>;
+                  <span class="name">width</span>: <span class="name">bttext</span>.<span class="name">height</span>;
+                  <span class="name">height</span>: <span class="name">bttext</span>.<span class="name">height</span>;
+                  <span class="name">anchors</span>.top: <span class="name">parent</span>.<span class="name">top</span>
+                  <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+                  <span class="name">anchors</span>.margins: <span class="number">5</span>
+              }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-column.html">Column</a></span> {
+                  <span class="name">id</span>: <span class="name">column</span>
+                  <span class="name">anchors</span>.left: <span class="name">bticon</span>.<span class="name">right</span>
+                  <span class="name">anchors</span>.leftMargin: <span class="number">5</span>
+                  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                      <span class="name">id</span>: <span class="name">bttext</span>
+                      <span class="name">text</span>: <span class="name">deviceName</span> ? <span class="name">deviceName</span> : <span class="name">name</span>
+                      <span class="name">font</span>.family: <span class="string">&quot;FreeSerif&quot;</span>
+                      <span class="name">font</span>.pointSize: <span class="number">16</span>
+                  }
+
+                  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                      <span class="name">id</span>: <span class="name">details</span>
+                      <span class="keyword">function</span> <span class="name">get_details</span>(<span class="name">s</span>) {
+                          <span class="keyword">if</span> (<span class="name">btModel</span>.<span class="name">discoveryMode</span> <span class="operator">==</span> <span class="name">BluetoothDiscoveryModel</span>.<span class="name">DeviceDiscovery</span>) {
+                              <span class="comment">//We are doing a device discovery</span>
+                              var <span class="name">str</span> = <span class="string">&quot;Address: &quot;</span> <span class="operator">+</span> <span class="name">remoteAddress</span>;
+                              <span class="keyword">return</span> <span class="name">str</span>;
+                          } <span class="keyword">else</span> {
+                              var <span class="name">str</span> = <span class="string">&quot;Address: &quot;</span> <span class="operator">+</span> <span class="name">s</span>.<span class="name">deviceAddress</span>;
+                              <span class="keyword">if</span> (<span class="name">s</span>.<span class="name">serviceName</span>) { <span class="name">str</span> <span class="operator">+=</span> <span class="string">&quot;&lt;br&gt;Service: &quot;</span> <span class="operator">+</span> <span class="name">s</span>.<span class="name">serviceName</span>; }
+                              <span class="keyword">if</span> (<span class="name">s</span>.<span class="name">serviceDescription</span>) { <span class="name">str</span> <span class="operator">+=</span> <span class="string">&quot;&lt;br&gt;Description: &quot;</span> <span class="operator">+</span> <span class="name">s</span>.<span class="name">serviceDescription</span>; }
+                              <span class="keyword">if</span> (<span class="name">s</span>.<span class="name">serviceProtocol</span>) { <span class="name">str</span> <span class="operator">+=</span> <span class="string">&quot;&lt;br&gt;Protocol: &quot;</span> <span class="operator">+</span> <span class="name">s</span>.<span class="name">serviceProtocol</span>; }
+                              <span class="keyword">return</span> <span class="name">str</span>;
+                          }
+                      }
+                      <span class="name">visible</span>: <span class="name">opacity</span> <span class="operator">!==</span> <span class="number">0</span>
+                      <span class="name">opacity</span>: <span class="name">btDelegate</span>.<span class="name">expended</span> ? <span class="number">1</span> : <span class="number">0.0</span>
+                      <span class="name">text</span>: <span class="name">get_details</span>(<span class="name">service</span>)
+                      <span class="name">font</span>.family: <span class="string">&quot;FreeSerif&quot;</span>
+                      <span class="name">font</span>.pointSize: <span class="number">14</span>
+                      Behavior on <span class="name">opacity</span> {
+                          <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">duration</span>: <span class="number">200</span>}
+                      }
+                  }
+              }
+              Behavior on <span class="name">height</span> { <span class="type"><a href="../qtquick/qml-qtquick-numberanimation.html">NumberAnimation</a></span> { <span class="name">duration</span>: <span class="number">200</span>} }
+
+              <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+                  <span class="name">anchors</span>.fill: <span class="name">parent</span>
+                  <span class="name">onClicked</span>: <span class="name">btDelegate</span>.<span class="name">expended</span> <span class="operator">=</span> !<span class="name">btDelegate</span>.<span class="name">expended</span>
+              }
+          }
+          <span class="name">focus</span>: <span class="number">true</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-row.html">Row</a></span> {
+          <span class="name">id</span>: <span class="name">buttonGroup</span>
+          property <span class="type">var</span> <span class="name">activeButton</span>: <span class="name">devButton</span>
+
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+          <span class="name">anchors</span>.bottomMargin: <span class="number">5</span>
+          <span class="name">spacing</span>: <span class="number">10</span>
+
+          <span class="type">Button</span> {
+              <span class="name">id</span>: <span class="name">fdButton</span>
+              <span class="name">width</span>: <span class="name">top</span>.<span class="name">width</span><span class="operator">/</span><span class="number">3</span><span class="operator">*</span><span class="number">0.9</span>
+              <span class="comment">//mdButton has longest text</span>
+              <span class="name">height</span>: <span class="name">mdButton</span>.<span class="name">height</span>
+              <span class="name">text</span>: <span class="string">&quot;Full Discovery&quot;</span>
+              <span class="name">onClicked</span>: <span class="name">btModel</span>.<span class="name">discoveryMode</span> <span class="operator">=</span> <span class="name">BluetoothDiscoveryModel</span>.<span class="name">FullServiceDiscovery</span>
+          }
+          <span class="type">Button</span> {
+              <span class="name">id</span>: <span class="name">mdButton</span>
+              <span class="name">width</span>: <span class="name">top</span>.<span class="name">width</span><span class="operator">/</span><span class="number">3</span><span class="operator">*</span><span class="number">0.9</span>
+              <span class="name">text</span>: <span class="string">&quot;Minimal Discovery&quot;</span>
+              <span class="name">onClicked</span>: <span class="name">btModel</span>.<span class="name">discoveryMode</span> <span class="operator">=</span> <span class="name">BluetoothDiscoveryModel</span>.<span class="name">MinimalServiceDiscovery</span>
+          }
+          <span class="type">Button</span> {
+              <span class="name">id</span>: <span class="name">devButton</span>
+              <span class="name">width</span>: <span class="name">top</span>.<span class="name">width</span><span class="operator">/</span><span class="number">3</span><span class="operator">*</span><span class="number">0.9</span>
+              <span class="comment">//mdButton has longest text</span>
+              <span class="name">height</span>: <span class="name">mdButton</span>.<span class="name">height</span>
+              <span class="name">text</span>: <span class="string">&quot;Device Discovery&quot;</span>
+              <span class="name">onClicked</span>: <span class="name">btModel</span>.<span class="name">discoveryMode</span> <span class="operator">=</span> <span class="name">BluetoothDiscoveryModel</span>.<span class="name">DeviceDiscovery</span>
+          }
+      }
+
+  }
+
+</pre>
+</div>
+<!-- @@@scanner/scanner.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

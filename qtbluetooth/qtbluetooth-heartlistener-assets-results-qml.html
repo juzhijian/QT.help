@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>results.qml Example File | Qt Bluetooth 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtbluetooth-index.html">Qt Bluetooth</a></td><td ><a href="qtbluetooth-heartlistener-example.html">Bluetooth Low Energy Heart Listener Example</a></td><td >results.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">results.qml Example File</h1>
+<span class="subtitle">heartlistener/assets/results.qml</span>
+<!-- $$$heartlistener/assets/results.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/***************************************************************************
+  **
+  ** Copyright (C) 2014 BlackBerry Limited. All rights reserved.
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the QtBluetooth module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.0
+  import &quot;draw.js&quot; as DrawGraph
+
+  <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">results</span>
+      <span class="name">color</span>: <span class="string">&quot;#F0EBED&quot;</span>
+
+      <span class="name">Component</span>.onCompleted:  <span class="name">heartRate</span>.<span class="name">obtainResults</span>()
+
+      <span class="keyword">function</span> <span class="name">getTime</span>() {
+          var <span class="name">t</span> = <span class="name">heartRate</span>.<span class="name">time</span>;
+          var <span class="name">min</span> = <span class="name">Math</span>.<span class="name">floor</span>(<span class="name">t</span><span class="operator">/</span><span class="number">60</span>);
+          var <span class="name">sec</span> = <span class="name">t</span><span class="operator">%</span><span class="number">60</span>;
+          var <span class="name">r</span> = <span class="name">min</span> <span class="operator">+</span> <span class="string">&quot; min &quot;</span> <span class="operator">+</span> <span class="name">sec</span> <span class="operator">+</span> <span class="string">&quot; sec &quot;</span>;
+          <span class="keyword">return</span> <span class="name">r</span>;
+      }
+
+      <span class="keyword">function</span> <span class="name">drawGraph</span>() {
+          var <span class="name">b</span> = <span class="name">plot</span>.<span class="name">height</span><span class="operator">/</span><span class="number">200</span>;
+          var <span class="name">ctx</span> = <span class="name">canvas1</span>.<span class="name">getContext</span>(<span class="string">'2d'</span>);
+          <span class="name">ctx</span>.<span class="name">beginPath</span>()
+          <span class="name">ctx</span>.<span class="name">moveTo</span>(<span class="number">10</span>, <span class="name">plot</span>.<span class="name">height</span><span class="operator">-</span> (<span class="name">b</span><span class="operator">*</span><span class="number">60</span>))
+          var <span class="name">size</span> = <span class="name">heartRate</span>.<span class="name">measurementsSize</span>();
+          var <span class="name">difference</span> = (<span class="name">plot</span>.<span class="name">width</span><span class="operator">-</span><span class="name">topbar</span>.<span class="name">width</span>)<span class="operator">/</span><span class="name">size</span>;
+
+          <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span><span class="operator">&lt;</span> <span class="name">size</span>; i++) {
+              var <span class="name">value</span> = <span class="name">heartRate</span>.<span class="name">measurements</span>(<span class="name">i</span>);
+              <span class="keyword">if</span> (<span class="name">i</span> <span class="operator">==</span> <span class="number">0</span>) {
+                  <span class="name">ctx</span>.<span class="name">moveTo</span>(<span class="number">10</span><span class="operator">+</span><span class="number">2</span>, (<span class="name">plot</span>.<span class="name">height</span><span class="operator">-</span> (<span class="name">value</span><span class="operator">*</span><span class="name">b</span>) <span class="operator">+</span> <span class="number">2</span>));
+                  <span class="name">ctx</span>.<span class="name">rect</span>((<span class="number">10</span> <span class="operator">+</span> <span class="name">i</span><span class="operator">*</span><span class="name">difference</span>), (<span class="name">plot</span>.<span class="name">height</span><span class="operator">-</span> (<span class="name">value</span><span class="operator">*</span><span class="name">b</span>)), <span class="number">4</span>, <span class="number">4</span>);
+
+              }
+              <span class="keyword">else</span> {
+                  <span class="name">ctx</span>.<span class="name">lineTo</span>((<span class="number">10</span><span class="operator">+</span><span class="number">2</span> <span class="operator">+</span> <span class="name">i</span><span class="operator">*</span><span class="name">difference</span>), (<span class="name">plot</span>.<span class="name">height</span><span class="operator">-</span> (<span class="name">value</span><span class="operator">*</span><span class="name">b</span>) <span class="operator">+</span> <span class="number">2</span>));
+                  <span class="name">ctx</span>.<span class="name">rect</span>((<span class="number">10</span> <span class="operator">+</span> <span class="name">i</span><span class="operator">*</span><span class="name">difference</span>), (<span class="name">plot</span>.<span class="name">height</span><span class="operator">-</span> (<span class="name">value</span><span class="operator">*</span><span class="name">b</span>)), <span class="number">4</span>, <span class="number">4</span>);
+              }
+
+          }
+          <span class="name">ctx</span>.<span class="name">fillStyle</span> <span class="operator">=</span> <span class="string">&quot;#3870BA&quot;</span>
+          <span class="name">ctx</span>.<span class="name">fill</span>()
+          <span class="name">ctx</span>.<span class="name">strokeStyle</span> <span class="operator">=</span> <span class="string">&quot;#3870BA&quot;</span>
+          <span class="name">ctx</span>.<span class="name">stroke</span>()
+          <span class="name">ctx</span>.<span class="name">closePath</span>()
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">res</span>
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+          <span class="name">anchors</span>.top: <span class="name">parent</span>.<span class="name">top</span>
+          <span class="name">height</span>: <span class="number">80</span>
+          <span class="name">color</span>: <span class="string">&quot;#F0EBED&quot;</span>
+          <span class="name">border</span>.color: <span class="string">&quot;#3870BA&quot;</span>
+          <span class="name">border</span>.width: <span class="number">2</span>
+          <span class="name">radius</span>: <span class="number">10</span>
+          <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+              <span class="name">id</span>: <span class="name">restText</span>
+              <span class="name">color</span>: <span class="string">&quot;#3870BA&quot;</span>
+              <span class="name">font</span>.pixelSize: <span class="number">34</span>
+              <span class="name">anchors</span>.centerIn: <span class="name">parent</span>
+              <span class="name">text</span>: <span class="string">&quot;Results&quot;</span>
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+          <span class="name">id</span>: <span class="name">topbar</span>
+          <span class="name">text</span>: <span class="string">&quot;200&quot;</span>
+          <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+          <span class="name">anchors</span>.top: <span class="name">res</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.rightMargin: <span class="number">4</span>
+          <span class="name">color</span>: <span class="string">&quot;#3870BA&quot;</span>
+          <span class="name">z</span>: <span class="number">50</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">level</span>
+          <span class="name">anchors</span>.left: <span class="name">topbar</span>.<span class="name">right</span>
+
+          <span class="name">anchors</span>.top: <span class="name">res</span>.<span class="name">bottom</span>
+          <span class="name">height</span>: ((<span class="name">results</span>.<span class="name">height</span> <span class="operator">-</span>(<span class="name">res</span>.<span class="name">height</span> <span class="operator">+</span> <span class="name">menuLast</span>.<span class="name">height</span> <span class="operator">+</span> <span class="name">start</span>.<span class="name">height</span> ))<span class="operator">/</span><span class="number">2</span>)
+          <span class="name">width</span>: <span class="number">3</span>
+          <span class="name">color</span>: <span class="string">&quot;#3870BA&quot;</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+          <span class="name">id</span>: <span class="name">middlebar</span>
+          <span class="name">anchors</span>.verticalCenter: <span class="name">level</span>.<span class="name">verticalCenter</span>
+          <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+          <span class="name">text</span>: <span class="string">&quot;100&quot;</span>
+          <span class="name">color</span>: <span class="string">&quot;#3870BA&quot;</span>
+          <span class="name">z</span>: <span class="number">50</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span>{
+          <span class="name">id</span>: <span class="name">downlevel</span>
+          <span class="name">anchors</span>.bottom: <span class="name">cover</span>.<span class="name">top</span>
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+          <span class="name">anchors</span>.left: <span class="name">level</span>.<span class="name">right</span>
+          <span class="name">height</span>: <span class="number">3</span>
+          <span class="name">color</span>: <span class="string">&quot;#3870BA&quot;</span>
+          <span class="name">z</span>: <span class="number">50</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">plot</span>
+          <span class="name">anchors</span>.left: <span class="name">level</span>.<span class="name">right</span>
+          <span class="name">anchors</span>.leftMargin: <span class="number">15</span>
+          <span class="name">width</span>: <span class="name">results</span>.<span class="name">width</span>
+          <span class="name">height</span>: ((<span class="name">parent</span>.<span class="name">height</span><span class="operator">-</span>(<span class="name">res</span>.<span class="name">height</span><span class="operator">+</span><span class="name">menuLast</span>.<span class="name">height</span><span class="operator">+</span><span class="name">start</span>.<span class="name">height</span>))<span class="operator">/</span><span class="number">2</span>)
+
+          <span class="name">anchors</span>.top: <span class="name">res</span>.<span class="name">bottom</span>
+          <span class="name">color</span>: <span class="string">&quot;#F0EBED&quot;</span>
+          <span class="type"><a href="../qtquick/qml-qtquick-canvas.html">Canvas</a></span> {
+              <span class="name">id</span>: <span class="name">canvas1</span>
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">z</span>: <span class="number">150</span>
+              <span class="name">onPaint</span>: <span class="name">drawGraph</span>()
+          }
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+          <span class="name">id</span>: <span class="name">cover</span>
+          <span class="name">anchors</span>.top: <span class="name">plot</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.bottom: <span class="name">menuLast</span>.<span class="name">top</span>
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+          <span class="name">height</span>: ((<span class="name">parent</span>.<span class="name">height</span><span class="operator">-</span>(<span class="name">res</span>.<span class="name">height</span><span class="operator">+</span><span class="name">menuLast</span>.<span class="name">height</span><span class="operator">+</span><span class="name">start</span>.<span class="name">height</span>))<span class="operator">/</span><span class="number">2</span>)
+          <span class="name">color</span>: <span class="string">&quot;#F0EBED&quot;</span>
+          <span class="name">radius</span>: <span class="number">10</span>
+          <span class="name">border</span>.color: <span class="string">&quot;#3870BA&quot;</span>
+          <span class="name">border</span>.width: <span class="number">2</span>
+
+          <span class="type"><a href="../qtquick/qml-qtquick-flickable.html">Flickable</a></span> {
+              <span class="name">id</span>: <span class="name">scroll</span>
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">anchors</span>.margins: <span class="number">5</span>
+              <span class="name">clip</span>: <span class="number">true</span>
+              <span class="name">contentWidth</span>: <span class="name">parent</span>.<span class="name">width</span>
+              <span class="name">contentHeight</span>: <span class="name">stresult</span>.<span class="name">height</span>
+
+              <span class="type"><a href="../qtquick/qml-qtquick-rectangle.html">Rectangle</a></span> {
+                  <span class="name">id</span>: <span class="name">stresult</span>
+                  <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+                  <span class="name">height</span>: (<span class="name">results</span>.<span class="name">height</span> <span class="operator">-</span> (<span class="name">res</span>.<span class="name">height</span> <span class="operator">+</span> <span class="name">menuLast</span>.<span class="name">height</span> <span class="operator">+</span> <span class="name">start</span>.<span class="name">height</span> <span class="operator">-</span> <span class="number">100</span>))
+                  <span class="name">color</span>: <span class="string">&quot;#F0EBED&quot;</span>
+                  <span class="name">radius</span>: <span class="number">10</span>
+
+                  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                      <span class="name">id</span>: <span class="name">averageHR</span>
+                      <span class="name">font</span>.pixelSize: <span class="number">30</span>;
+                      <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+                      <span class="name">anchors</span>.top: <span class="name">parent</span>.<span class="name">top</span>
+
+                      <span class="name">color</span>: <span class="string">&quot;#3870BA&quot;</span>
+                      <span class="name">text</span>: <span class="string">&quot;Average Heart Rate&quot;</span>
+                  }
+
+                  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                      <span class="name">id</span>: <span class="name">averageHRt</span>
+                      <span class="name">font</span>.pixelSize: <span class="number">40</span>; <span class="name">font</span>.bold: <span class="number">true</span>
+                      <span class="name">anchors</span>.top: <span class="name">averageHR</span>.<span class="name">bottom</span>
+                      <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+                      <span class="name">anchors</span>.topMargin: <span class="number">10</span>
+                      <span class="name">color</span>: <span class="string">&quot;#3870BA&quot;</span>
+                      <span class="name">text</span>: <span class="name">heartRate</span>.<span class="name">average</span>
+                  }
+
+                  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                      <span class="name">id</span>: <span class="name">time</span>
+                      <span class="name">font</span>.pixelSize: <span class="number">30</span>;
+                      <span class="name">anchors</span>.top: <span class="name">averageHRt</span>.<span class="name">bottom</span>
+                      <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+                      <span class="name">anchors</span>.topMargin: <span class="number">10</span>
+                      <span class="name">color</span>: <span class="string">&quot;#3870BA&quot;</span>
+                      <span class="name">text</span>: <span class="string">&quot;Seconds measured:&quot;</span>
+                  }
+
+                  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                      <span class="name">id</span>: <span class="name">timet</span>
+                      <span class="name">font</span>.pixelSize:  <span class="number">40</span>; <span class="name">font</span>.bold: <span class="number">true</span>
+                      <span class="name">anchors</span>.top: <span class="name">time</span>.<span class="name">bottom</span>
+                      <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+                      <span class="name">anchors</span>.topMargin: <span class="number">10</span>
+                      <span class="name">color</span>: <span class="string">&quot;#3870BA&quot;</span>
+                      <span class="name">text</span>: <span class="name">getTime</span>()
+                  }
+                  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                      <span class="name">id</span>: <span class="name">maxi</span>
+                      <span class="name">font</span>.pixelSize:  <span class="number">30</span>;
+                      <span class="name">anchors</span>.top: <span class="name">timet</span>.<span class="name">bottom</span>
+                      <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+                      <span class="name">anchors</span>.topMargin: <span class="number">20</span>
+                      <span class="name">color</span>: <span class="string">&quot;#3870BA&quot;</span>
+                      <span class="name">text</span>: <span class="string">&quot;  Max  ||  Min &quot;</span>
+                  }
+
+                  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                      <span class="name">id</span>: <span class="name">mini</span>
+                      <span class="name">font</span>.pixelSize:  <span class="number">40</span>; <span class="name">font</span>.bold: <span class="number">true</span>
+                      <span class="name">anchors</span>.top:<span class="name">maxi</span>.<span class="name">bottom</span>
+                      <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+                      <span class="name">anchors</span>.topMargin: <span class="number">10</span>
+                      <span class="name">color</span>: <span class="string">&quot;#3870BA&quot;</span>
+                      <span class="name">text</span>: <span class="string">&quot; &quot;</span> <span class="operator">+</span> <span class="name">heartRate</span>.<span class="name">maxHR</span> <span class="operator">+</span> <span class="string">&quot; || &quot;</span> <span class="operator">+</span> <span class="name">heartRate</span>.<span class="name">minHR</span>
+                  }
+
+                  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                      <span class="name">id</span>: <span class="name">calories</span>
+                      <span class="name">font</span>.pixelSize:  <span class="number">30</span>;
+                      <span class="name">anchors</span>.top: <span class="name">mini</span>.<span class="name">bottom</span>
+                      <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+                      <span class="name">anchors</span>.topMargin: <span class="number">10</span>
+                      <span class="name">color</span>: <span class="string">&quot;#3870BA&quot;</span>
+                      <span class="name">text</span>: <span class="string">&quot;  Calories &quot;</span>
+                  }
+
+                  <span class="type"><a href="../qtquick/qml-qtquick-text.html">Text</a></span> {
+                      <span class="name">id</span>: <span class="name">caloriestext</span>
+                      <span class="name">font</span>.pixelSize:  <span class="number">40</span>; <span class="name">font</span>.bold: <span class="number">true</span>
+                      <span class="name">anchors</span>.top:<span class="name">calories</span>.<span class="name">bottom</span>
+                      <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+                      <span class="name">anchors</span>.topMargin: <span class="number">10</span>
+                      <span class="name">color</span>: <span class="string">&quot;#3870BA&quot;</span>
+                      <span class="name">text</span>: <span class="name">heartRate</span>.<span class="name">calories</span>.<span class="name">toFixed</span>(<span class="number">3</span>)
+                  }
+              }
+          }
+      }
+
+      <span class="type">Button</span> {
+          <span class="name">id</span>:<span class="name">menuLast</span>
+          <span class="name">buttonWidth</span>: <span class="name">parent</span>.<span class="name">width</span>
+          <span class="name">buttonHeight</span>: <span class="number">0.1</span><span class="operator">*</span><span class="name">parent</span>.<span class="name">height</span>
+          <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+          <span class="name">anchors</span>.bottom: <span class="name">start</span>.<span class="name">top</span>
+          <span class="name">text</span>: <span class="string">&quot;Menu&quot;</span>
+          <span class="name">onButtonClick</span>: { <span class="name">pageLoader</span>.<span class="name">source</span><span class="operator">=</span><span class="string">&quot;main.qml&quot;</span>}
+      }
+
+      <span class="type">Button</span> {
+          <span class="name">id</span>:<span class="name">start</span>
+          <span class="name">buttonWidth</span>: <span class="name">parent</span>.<span class="name">width</span>
+          <span class="name">buttonHeight</span>: <span class="number">0.1</span><span class="operator">*</span><span class="name">parent</span>.<span class="name">height</span>
+          <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">text</span>: <span class="string">&quot;Start Monitoring&quot;</span>
+          <span class="name">onButtonClick</span>: {
+              <span class="name">heartRate</span>.<span class="name">connectToService</span>(<span class="name">heartRate</span>.<span class="name">deviceAddress</span>());
+              <span class="name">pageLoader</span>.<span class="name">source</span><span class="operator">=</span><span class="string">&quot;monitor.qml&quot;</span>;
+          }
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@heartlistener/assets/results.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

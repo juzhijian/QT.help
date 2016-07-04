@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mainwindow.cpp Example File | Qt NFC 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtnfc-index.html">Qt NFC</a></td><td ><a href="qtnfc-ndefeditor-example.html">NDEF Editor Example</a></td><td >mainwindow.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mainwindow.cpp Example File</h1>
+<span class="subtitle">ndefeditor/mainwindow.cpp</span>
+<!-- $$$ndefeditor/mainwindow.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the QtNfc module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;mainwindow.h&quot;</span>
+  <span class="preprocessor">#include &quot;ui_mainwindow.h&quot;</span>
+
+  <span class="preprocessor">#include &quot;textrecordeditor.h&quot;</span>
+  <span class="preprocessor">#include &quot;urirecordeditor.h&quot;</span>
+  <span class="preprocessor">#include &quot;mimeimagerecordeditor.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtCore/QTime&gt;</span>
+  <span class="preprocessor">#include &lt;QMenu&gt;</span>
+  <span class="preprocessor">#include &lt;QVBoxLayout&gt;</span>
+  <span class="preprocessor">#include &lt;QFrame&gt;</span>
+  <span class="preprocessor">#include &lt;QLabel&gt;</span>
+  <span class="preprocessor">#include &lt;QFileDialog&gt;</span>
+
+  <span class="preprocessor">#include &lt;qnearfieldmanager.h&gt;</span>
+  <span class="preprocessor">#include &lt;qnearfieldtarget.h&gt;</span>
+  <span class="preprocessor">#include &lt;qndefrecord.h&gt;</span>
+  <span class="preprocessor">#include &lt;qndefnfctextrecord.h&gt;</span>
+  <span class="preprocessor">#include &lt;qndefnfcurirecord.h&gt;</span>
+  <span class="preprocessor">#include &lt;qndefmessage.h&gt;</span>
+
+  <span class="preprocessor">#include &lt;QtCore/QDebug&gt;</span>
+
+  <span class="keyword">class</span> EmptyRecordLabel : <span class="keyword">public</span> <span class="type">QLabel</span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      EmptyRecordLabel() : <span class="type">QLabel</span>(tr(<span class="string">&quot;Empty Record&quot;</span>)) { }
+      <span class="operator">~</span>EmptyRecordLabel() { }
+
+      <span class="type">void</span> setRecord(<span class="keyword">const</span> <span class="type"><a href="qndefrecord.html">QNdefRecord</a></span> <span class="operator">&amp;</span>record)
+      {
+          Q_UNUSED(record);
+      }
+
+      <span class="type"><a href="qndefrecord.html">QNdefRecord</a></span> record() <span class="keyword">const</span>
+      {
+          <span class="keyword">return</span> <span class="type"><a href="qndefrecord.html">QNdefRecord</a></span>();
+      }
+  };
+
+  <span class="keyword">class</span> UnknownRecordLabel : <span class="keyword">public</span> <span class="type">QLabel</span>
+  {
+      Q_OBJECT
+
+  <span class="keyword">public</span>:
+      UnknownRecordLabel() : <span class="type">QLabel</span>(tr(<span class="string">&quot;Unknown Record Type&quot;</span>)) { }
+      <span class="operator">~</span>UnknownRecordLabel() { }
+
+      <span class="type">void</span> setRecord(<span class="keyword">const</span> <span class="type"><a href="qndefrecord.html">QNdefRecord</a></span> <span class="operator">&amp;</span>record) { m_record <span class="operator">=</span> record; }
+      <span class="type"><a href="qndefrecord.html">QNdefRecord</a></span> record() <span class="keyword">const</span> { <span class="keyword">return</span> m_record; }
+
+  <span class="keyword">private</span>:
+      <span class="type"><a href="qndefrecord.html">QNdefRecord</a></span> m_record;
+  };
+
+  <span class="keyword">template</span> <span class="operator">&lt;</span><span class="keyword">typename</span> T<span class="operator">&gt;</span>
+  <span class="type">void</span> addRecord(Ui<span class="operator">::</span>MainWindow <span class="operator">*</span>ui<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qndefrecord.html">QNdefRecord</a></span> <span class="operator">&amp;</span>record <span class="operator">=</span> <span class="type"><a href="qndefrecord.html">QNdefRecord</a></span>())
+  {
+      <span class="type">QVBoxLayout</span> <span class="operator">*</span>vbox <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type">QVBoxLayout</span> <span class="operator">*</span><span class="operator">&gt;</span>(ui<span class="operator">-</span><span class="operator">&gt;</span>scrollAreaWidgetContents<span class="operator">-</span><span class="operator">&gt;</span>layout());
+      <span class="keyword">if</span> (<span class="operator">!</span>vbox)
+          <span class="keyword">return</span>;
+
+      <span class="keyword">if</span> (<span class="operator">!</span>vbox<span class="operator">-</span><span class="operator">&gt;</span>isEmpty()) {
+          <span class="type">QFrame</span> <span class="operator">*</span>hline <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QFrame</span>;
+          hline<span class="operator">-</span><span class="operator">&gt;</span>setFrameShape(<span class="type">QFrame</span><span class="operator">::</span>HLine);
+          hline<span class="operator">-</span><span class="operator">&gt;</span>setObjectName(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;line-spacer&quot;</span>));
+
+          vbox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(hline);
+      }
+
+      T <span class="operator">*</span>recordEditor <span class="operator">=</span> <span class="keyword">new</span> T;
+      recordEditor<span class="operator">-</span><span class="operator">&gt;</span>setObjectName(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;record-editor&quot;</span>));
+
+      <span class="keyword">if</span> (<span class="operator">!</span>record<span class="operator">.</span>isEmpty())
+          recordEditor<span class="operator">-</span><span class="operator">&gt;</span>setRecord(record);
+
+      vbox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(recordEditor);
+  }
+
+  MainWindow<span class="operator">::</span>MainWindow(<span class="type">QWidget</span> <span class="operator">*</span>parent)
+  :   <span class="type">QMainWindow</span>(parent)<span class="operator">,</span> ui(<span class="keyword">new</span> Ui<span class="operator">::</span>MainWindow)<span class="operator">,</span> m_touchAction(NoAction)
+  {
+      ui<span class="operator">-</span><span class="operator">&gt;</span>setupUi(<span class="keyword">this</span>);
+
+      <span class="type">QMenu</span> <span class="operator">*</span>addRecordMenu <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QMenu</span>(<span class="keyword">this</span>);
+      addRecordMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;NFC Text Record&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(addNfcTextRecord()));
+      addRecordMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;NFC URI Record&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(addNfcUriRecord()));
+      addRecordMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;MIME Image Record&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(addMimeImageRecord()));
+      addRecordMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Empty Record&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(addEmptyRecord()));
+      ui<span class="operator">-</span><span class="operator">&gt;</span>addRecord<span class="operator">-</span><span class="operator">&gt;</span>setMenu(addRecordMenu);
+
+      <span class="type">QVBoxLayout</span> <span class="operator">*</span>vbox <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QVBoxLayout</span>;
+      ui<span class="operator">-</span><span class="operator">&gt;</span>scrollAreaWidgetContents<span class="operator">-</span><span class="operator">&gt;</span>setLayout(vbox);
+
+      m_manager <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qnearfieldmanager.html">QNearFieldManager</a></span>(<span class="keyword">this</span>);
+      connect(m_manager<span class="operator">,</span> SIGNAL(targetDetected(<span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">*</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(targetDetected(<span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">*</span>)));
+      connect(m_manager<span class="operator">,</span> SIGNAL(targetLost(<span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">*</span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(targetLost(<span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">*</span>)));
+  }
+
+  MainWindow<span class="operator">::</span><span class="operator">~</span>MainWindow()
+  {
+      <span class="keyword">delete</span> ui;
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>addNfcTextRecord()
+  {
+      addRecord<span class="operator">&lt;</span>TextRecordEditor<span class="operator">&gt;</span>(ui);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>addNfcUriRecord()
+  {
+      addRecord<span class="operator">&lt;</span>UriRecordEditor<span class="operator">&gt;</span>(ui);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>addMimeImageRecord()
+  {
+      addRecord<span class="operator">&lt;</span>MimeImageRecordEditor<span class="operator">&gt;</span>(ui);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>addEmptyRecord()
+  {
+      addRecord<span class="operator">&lt;</span>EmptyRecordLabel<span class="operator">&gt;</span>(ui);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>loadMessage()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> filename <span class="operator">=</span> <span class="type">QFileDialog</span><span class="operator">::</span>getOpenFileName(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Select NDEF Message&quot;</span>));
+      <span class="keyword">if</span> (filename<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(filename);
+      <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly))
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> ndef <span class="operator">=</span> file<span class="operator">.</span>readAll();
+
+      ndefMessageRead(<span class="type"><a href="qndefmessage.html">QNdefMessage</a></span><span class="operator">::</span>fromByteArray(ndef));
+
+      file<span class="operator">.</span>close();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>saveMessage()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> filename <span class="operator">=</span> <span class="type">QFileDialog</span><span class="operator">::</span>getSaveFileName(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Select NDEF Message&quot;</span>));
+      <span class="keyword">if</span> (filename<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> file(filename);
+      <span class="keyword">if</span> (<span class="operator">!</span>file<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>WriteOnly))
+          <span class="keyword">return</span>;
+
+      file<span class="operator">.</span>write(ndefMessage()<span class="operator">.</span>toByteArray());
+
+      file<span class="operator">.</span>close();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>touchReceive()
+  {
+      ui<span class="operator">-</span><span class="operator">&gt;</span>status<span class="operator">-</span><span class="operator">&gt;</span>setStyleSheet(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;background: blue&quot;</span>));
+
+      m_touchAction <span class="operator">=</span> ReadNdef;
+
+      m_manager<span class="operator">-</span><span class="operator">&gt;</span>setTargetAccessModes(<span class="type"><a href="qnearfieldmanager.html">QNearFieldManager</a></span><span class="operator">::</span>NdefReadTargetAccess);
+      m_manager<span class="operator">-</span><span class="operator">&gt;</span>startTargetDetection();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>touchStore()
+  {
+      ui<span class="operator">-</span><span class="operator">&gt;</span>status<span class="operator">-</span><span class="operator">&gt;</span>setStyleSheet(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;background: yellow&quot;</span>));
+
+      m_touchAction <span class="operator">=</span> WriteNdef;
+
+      m_manager<span class="operator">-</span><span class="operator">&gt;</span>setTargetAccessModes(<span class="type"><a href="qnearfieldmanager.html">QNearFieldManager</a></span><span class="operator">::</span>NdefWriteTargetAccess);
+      m_manager<span class="operator">-</span><span class="operator">&gt;</span>startTargetDetection();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>targetDetected(<span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span> <span class="operator">*</span>target)
+  {
+      <span class="keyword">switch</span> (m_touchAction) {
+      <span class="keyword">case</span> NoAction:
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> ReadNdef:
+          connect(target<span class="operator">,</span> SIGNAL(ndefMessageRead(<span class="type"><a href="qndefmessage.html">QNdefMessage</a></span>))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(ndefMessageRead(<span class="type"><a href="qndefmessage.html">QNdefMessage</a></span>)));
+          connect(target<span class="operator">,</span> SIGNAL(error(<span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>Error<span class="operator">,</span><span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>RequestId))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(targetError(<span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>Error<span class="operator">,</span><span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>RequestId)));
+
+          m_request <span class="operator">=</span> target<span class="operator">-</span><span class="operator">&gt;</span>readNdefMessages();
+          <span class="keyword">if</span> (<span class="operator">!</span>m_request<span class="operator">.</span>isValid()) <span class="comment">// cannot read messages</span>
+              targetError(<span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>NdefReadError<span class="operator">,</span> m_request);
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> WriteNdef:
+          connect(target<span class="operator">,</span> SIGNAL(ndefMessagesWritten())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(ndefMessageWritten()));
+          connect(target<span class="operator">,</span> SIGNAL(error(<span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>Error<span class="operator">,</span><span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>RequestId))<span class="operator">,</span>
+                  <span class="keyword">this</span><span class="operator">,</span> SLOT(targetError(<span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>Error<span class="operator">,</span><span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>RequestId)));
+
+          m_request <span class="operator">=</span> target<span class="operator">-</span><span class="operator">&gt;</span>writeNdefMessages(<span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qndefmessage.html">QNdefMessage</a></span><span class="operator">&gt;</span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> ndefMessage());
+          <span class="keyword">if</span> (<span class="operator">!</span>m_request<span class="operator">.</span>isValid()) <span class="comment">// cannot write messages</span>
+              targetError(<span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>NdefWriteError<span class="operator">,</span> m_request);
+          <span class="keyword">break</span>;
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>targetLost(<span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span> <span class="operator">*</span>target)
+  {
+      target<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>ndefMessageRead(<span class="keyword">const</span> <span class="type"><a href="qndefmessage.html">QNdefMessage</a></span> <span class="operator">&amp;</span>message)
+  {
+      clearMessage();
+
+      foreach (<span class="keyword">const</span> <span class="type"><a href="qndefrecord.html">QNdefRecord</a></span> <span class="operator">&amp;</span>record<span class="operator">,</span> message) {
+          <span class="keyword">if</span> (record<span class="operator">.</span>isRecordType<span class="operator">&lt;</span><span class="type"><a href="qndefnfctextrecord.html">QNdefNfcTextRecord</a></span><span class="operator">&gt;</span>()) {
+              addRecord<span class="operator">&lt;</span>TextRecordEditor<span class="operator">&gt;</span>(ui<span class="operator">,</span> record);
+          } <span class="keyword">else</span> <span class="keyword">if</span> (record<span class="operator">.</span>isRecordType<span class="operator">&lt;</span><span class="type"><a href="qndefnfcurirecord.html">QNdefNfcUriRecord</a></span><span class="operator">&gt;</span>()) {
+              addRecord<span class="operator">&lt;</span>UriRecordEditor<span class="operator">&gt;</span>(ui<span class="operator">,</span> record);
+          } <span class="keyword">else</span> <span class="keyword">if</span> (record<span class="operator">.</span>typeNameFormat() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qndefrecord.html">QNdefRecord</a></span><span class="operator">::</span>Mime <span class="operator">&amp;</span><span class="operator">&amp;</span>
+                     record<span class="operator">.</span>type()<span class="operator">.</span>startsWith(<span class="string">&quot;image/&quot;</span>)) {
+              addRecord<span class="operator">&lt;</span>MimeImageRecordEditor<span class="operator">&gt;</span>(ui<span class="operator">,</span> record);
+          } <span class="keyword">else</span> <span class="keyword">if</span> (record<span class="operator">.</span>isEmpty()) {
+              addRecord<span class="operator">&lt;</span>EmptyRecordLabel<span class="operator">&gt;</span>(ui);
+          } <span class="keyword">else</span> {
+              addRecord<span class="operator">&lt;</span>UnknownRecordLabel<span class="operator">&gt;</span>(ui<span class="operator">,</span> record);
+          }
+      }
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>status<span class="operator">-</span><span class="operator">&gt;</span>setStyleSheet(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>());
+      m_manager<span class="operator">-</span><span class="operator">&gt;</span>setTargetAccessModes(<span class="type"><a href="qnearfieldmanager.html">QNearFieldManager</a></span><span class="operator">::</span>NoTargetAccess);
+      m_manager<span class="operator">-</span><span class="operator">&gt;</span>stopTargetDetection();
+      m_request <span class="operator">=</span> <span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>RequestId();
+      ui<span class="operator">-</span><span class="operator">&gt;</span>statusBar<span class="operator">-</span><span class="operator">&gt;</span>clearMessage();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>ndefMessageWritten()
+  {
+      ui<span class="operator">-</span><span class="operator">&gt;</span>status<span class="operator">-</span><span class="operator">&gt;</span>setStyleSheet(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>());
+      m_manager<span class="operator">-</span><span class="operator">&gt;</span>setTargetAccessModes(<span class="type"><a href="qnearfieldmanager.html">QNearFieldManager</a></span><span class="operator">::</span>NoTargetAccess);
+      m_manager<span class="operator">-</span><span class="operator">&gt;</span>stopTargetDetection();
+      m_request <span class="operator">=</span> <span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>RequestId();
+      ui<span class="operator">-</span><span class="operator">&gt;</span>statusBar<span class="operator">-</span><span class="operator">&gt;</span>clearMessage();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>targetError(<span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>Error error<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>RequestId <span class="operator">&amp;</span>id)
+  {
+      Q_UNUSED(error);
+      Q_UNUSED(id);
+
+      <span class="keyword">if</span> (m_request <span class="operator">=</span><span class="operator">=</span> id) {
+          <span class="keyword">switch</span> (error) {
+          <span class="keyword">case</span> <span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>NoError:
+              ui<span class="operator">-</span><span class="operator">&gt;</span>statusBar<span class="operator">-</span><span class="operator">&gt;</span>clearMessage();
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>UnsupportedError:
+              ui<span class="operator">-</span><span class="operator">&gt;</span>statusBar<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;Unsupported tag&quot;</span>));
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>TargetOutOfRangeError:
+              ui<span class="operator">-</span><span class="operator">&gt;</span>statusBar<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;Tag removed from field&quot;</span>));
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>NoResponseError:
+              ui<span class="operator">-</span><span class="operator">&gt;</span>statusBar<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;No response from tag&quot;</span>));
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>ChecksumMismatchError:
+              ui<span class="operator">-</span><span class="operator">&gt;</span>statusBar<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;Checksum mismatch&quot;</span>));
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>InvalidParametersError:
+              ui<span class="operator">-</span><span class="operator">&gt;</span>statusBar<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;Invalid parameters&quot;</span>));
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>NdefReadError:
+              ui<span class="operator">-</span><span class="operator">&gt;</span>statusBar<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;NDEF read error&quot;</span>));
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>NdefWriteError:
+              ui<span class="operator">-</span><span class="operator">&gt;</span>statusBar<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;NDEF write error&quot;</span>));
+              <span class="keyword">break</span>;
+          <span class="keyword">default</span>:
+              ui<span class="operator">-</span><span class="operator">&gt;</span>statusBar<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;Unknown error&quot;</span>));
+          }
+
+          ui<span class="operator">-</span><span class="operator">&gt;</span>status<span class="operator">-</span><span class="operator">&gt;</span>setStyleSheet(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>());
+          m_manager<span class="operator">-</span><span class="operator">&gt;</span>setTargetAccessModes(<span class="type"><a href="qnearfieldmanager.html">QNearFieldManager</a></span><span class="operator">::</span>NoTargetAccess);
+          m_manager<span class="operator">-</span><span class="operator">&gt;</span>stopTargetDetection();
+          m_request <span class="operator">=</span> <span class="type"><a href="qnearfieldtarget.html">QNearFieldTarget</a></span><span class="operator">::</span>RequestId();
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>clearMessage()
+  {
+      <span class="type">QWidget</span> <span class="operator">*</span>scrollArea <span class="operator">=</span> ui<span class="operator">-</span><span class="operator">&gt;</span>scrollAreaWidgetContents;
+
+      <a href="../qtcore/qtalgorithms.html#qDeleteAll">qDeleteAll</a>(scrollArea<span class="operator">-</span><span class="operator">&gt;</span>findChildren<span class="operator">&lt;</span><span class="type">QWidget</span> <span class="operator">*</span><span class="operator">&gt;</span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;line-spacer&quot;</span>)));
+      <a href="../qtcore/qtalgorithms.html#qDeleteAll">qDeleteAll</a>(scrollArea<span class="operator">-</span><span class="operator">&gt;</span>findChildren<span class="operator">&lt;</span><span class="type">QWidget</span> <span class="operator">*</span><span class="operator">&gt;</span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;record-editor&quot;</span>)));
+  }
+
+  <span class="type"><a href="qndefmessage.html">QNdefMessage</a></span> MainWindow<span class="operator">::</span>ndefMessage() <span class="keyword">const</span>
+  {
+      <span class="type">QVBoxLayout</span> <span class="operator">*</span>vbox <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type">QVBoxLayout</span> <span class="operator">*</span><span class="operator">&gt;</span>(ui<span class="operator">-</span><span class="operator">&gt;</span>scrollAreaWidgetContents<span class="operator">-</span><span class="operator">&gt;</span>layout());
+      <span class="keyword">if</span> (<span class="operator">!</span>vbox)
+          <span class="keyword">return</span> <span class="type"><a href="qndefmessage.html">QNdefMessage</a></span>();
+
+      <span class="type"><a href="qndefmessage.html">QNdefMessage</a></span> message;
+
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> vbox<span class="operator">-</span><span class="operator">&gt;</span>count(); <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="type">QWidget</span> <span class="operator">*</span>widget <span class="operator">=</span> vbox<span class="operator">-</span><span class="operator">&gt;</span>itemAt(i)<span class="operator">-</span><span class="operator">&gt;</span>widget();
+
+          <span class="keyword">if</span> (TextRecordEditor <span class="operator">*</span>editor <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span>TextRecordEditor <span class="operator">*</span><span class="operator">&gt;</span>(widget)) {
+              message<span class="operator">.</span>append(editor<span class="operator">-</span><span class="operator">&gt;</span>record());
+          } <span class="keyword">else</span> <span class="keyword">if</span> (UriRecordEditor <span class="operator">*</span>editor <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span>UriRecordEditor <span class="operator">*</span><span class="operator">&gt;</span>(widget)) {
+              message<span class="operator">.</span>append(editor<span class="operator">-</span><span class="operator">&gt;</span>record());
+          } <span class="keyword">else</span> <span class="keyword">if</span> (MimeImageRecordEditor <span class="operator">*</span>editor <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span>MimeImageRecordEditor <span class="operator">*</span><span class="operator">&gt;</span>(widget)) {
+              message<span class="operator">.</span>append(editor<span class="operator">-</span><span class="operator">&gt;</span>record());
+          } <span class="keyword">else</span> <span class="keyword">if</span> (qobject_cast<span class="operator">&lt;</span>EmptyRecordLabel <span class="operator">*</span><span class="operator">&gt;</span>(widget)) {
+              message<span class="operator">.</span>append(<span class="type"><a href="qndefrecord.html">QNdefRecord</a></span>());
+          } <span class="keyword">else</span> <span class="keyword">if</span> (UnknownRecordLabel <span class="operator">*</span>label <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span>UnknownRecordLabel <span class="operator">*</span><span class="operator">&gt;</span>(widget)) {
+              message<span class="operator">.</span>append(label<span class="operator">-</span><span class="operator">&gt;</span>record());
+          }
+      }
+
+      <span class="keyword">return</span> message;
+  }
+
+  <span class="preprocessor">#include &quot;mainwindow.moc&quot;</span>
+
+</pre>
+</div>
+<!-- @@@ndefeditor/mainwindow.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

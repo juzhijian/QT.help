@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>main.cpp Example File | Qt Windows Extras 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwinextras-index.html">Qt Windows Extras</a></td><td ><a href="qtwinextras-iconextractor-example.html">Icon Extractor</a></td><td >main.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">main.cpp Example File</h1>
+<span class="subtitle">iconextractor/main.cpp</span>
+<!-- $$$iconextractor/main.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the QtWinExtras module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtWin&gt;</span>
+
+  <span class="preprocessor">#include &lt;QGuiApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QScopedArrayPointer&gt;</span>
+  <span class="preprocessor">#include &lt;QStringList&gt;</span>
+  <span class="preprocessor">#include &lt;QPixmap&gt;</span>
+  <span class="preprocessor">#include &lt;QImage&gt;</span>
+  <span class="preprocessor">#include &lt;QFileInfo&gt;</span>
+  <span class="preprocessor">#include &lt;QDir&gt;</span>
+  <span class="preprocessor">#include &lt;iostream&gt;</span>
+
+  <span class="comment">/* This example demonstrates the Windows-specific image conversion
+   * functions. */</span>
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span> <span class="operator">*</span>argv<span class="operator">[</span><span class="operator">]</span>)
+  {
+      <span class="type"><a href="../qtgui/qguiapplication.html">QGuiApplication</a></span> a(argc<span class="operator">,</span> argv);
+
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> arguments <span class="operator">=</span> <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>arguments();
+      arguments<span class="operator">.</span>pop_front();
+      <span class="keyword">const</span> bool large <span class="operator">=</span> <span class="operator">!</span>arguments<span class="operator">.</span>isEmpty() <span class="operator">&amp;</span><span class="operator">&amp;</span> arguments<span class="operator">.</span>front() <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;-l&quot;</span>;
+      <span class="keyword">if</span> (large)
+          arguments<span class="operator">.</span>pop_front();
+      <span class="keyword">if</span> (arguments<span class="operator">.</span>size() <span class="operator">&lt;</span> <span class="number">1</span>) {
+          std<span class="operator">::</span>cout <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Usage: iconextractor [OPTIONS] FILE [IMAGE_FILE_FOLDER]\n\n&quot;</span>
+                       <span class="string">&quot;Extracts Windows icons from executables, DLL or icon files\n&quot;</span>
+                       <span class="string">&quot;and writes them out as numbered .png-files.\n\n&quot;</span>
+                       <span class="string">&quot;Options: -l    Extract large icons.\n\n&quot;</span>
+                       <span class="string">&quot;Based on Qt &quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> QT_VERSION_STR <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;\n&quot;</span>;
+          <span class="keyword">return</span> <span class="number">1</span>;
+      }
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> sourceFile <span class="operator">=</span> arguments<span class="operator">.</span>at(<span class="number">0</span>);
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> imageFileRoot <span class="operator">=</span> arguments<span class="operator">.</span>size() <span class="operator">&gt;</span> <span class="number">1</span> <span class="operator">?</span> arguments<span class="operator">.</span>at(<span class="number">1</span>) : <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>currentPath();
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span> imageFileRootInfo(imageFileRoot);
+      <span class="keyword">if</span> (<span class="operator">!</span>imageFileRootInfo<span class="operator">.</span>isDir()) {
+          std<span class="operator">::</span>cerr <span class="operator">&lt;</span><span class="operator">&lt;</span> imageFileRoot<span class="operator">.</span>toStdString() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot; is not a directory.\n&quot;</span>;
+          <span class="keyword">return</span> <span class="number">1</span>;
+      }
+
+      <span class="keyword">const</span> UINT iconCount <span class="operator">=</span> ExtractIconEx((<span class="keyword">wchar_t</span> <span class="operator">*</span>)sourceFile<span class="operator">.</span>utf16()<span class="operator">,</span> <span class="operator">-</span><span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span>);
+      <span class="keyword">if</span> (<span class="operator">!</span>iconCount) {
+          std<span class="operator">::</span>cerr <span class="operator">&lt;</span><span class="operator">&lt;</span> sourceFile<span class="operator">.</span>toStdString() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot; does not appear to contain icons.\n&quot;</span>;
+          <span class="keyword">return</span> <span class="number">1</span>;
+      }
+
+      <span class="type"><a href="../qtcore/qscopedarraypointer.html">QScopedArrayPointer</a></span><span class="operator">&lt;</span>HICON<span class="operator">&gt;</span> icons(<span class="keyword">new</span> HICON<span class="operator">[</span>iconCount<span class="operator">]</span>);
+      <span class="keyword">const</span> UINT extractedIconCount <span class="operator">=</span> large <span class="operator">?</span>
+          ExtractIconEx((<span class="keyword">wchar_t</span> <span class="operator">*</span>)sourceFile<span class="operator">.</span>utf16()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> icons<span class="operator">.</span>data()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> iconCount) :
+          ExtractIconEx((<span class="keyword">wchar_t</span> <span class="operator">*</span>)sourceFile<span class="operator">.</span>utf16()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> icons<span class="operator">.</span>data()<span class="operator">,</span> iconCount);
+      <span class="keyword">if</span> (<span class="operator">!</span>extractedIconCount) {
+          qErrnoWarning(<span class="string">&quot;Failed to extract icons from %s&quot;</span><span class="operator">,</span> <a href="../qtcore/qtglobal.html#qPrintable">qPrintable</a>(sourceFile));
+          <span class="keyword">return</span> <span class="number">1</span>;
+      }
+
+      std<span class="operator">::</span>cout <span class="operator">&lt;</span><span class="operator">&lt;</span> sourceFile<span class="operator">.</span>toStdString() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot; contains &quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> extractedIconCount <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot; icon(s).\n&quot;</span>;
+
+      imageFileRoot <span class="operator">=</span> imageFileRootInfo<span class="operator">.</span>absoluteFilePath() <span class="operator">+</span> QLatin1Char(<span class="char">'/'</span>) <span class="operator">+</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span>(sourceFile)<span class="operator">.</span>baseName();
+      <span class="keyword">for</span> (UINT i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> extractedIconCount; <span class="operator">+</span><span class="operator">+</span>i) {
+          <span class="keyword">const</span> <span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span> pixmap <span class="operator">=</span> <span class="type"><a href="qtwin.html">QtWin</a></span><span class="operator">::</span>fromHICON(icons<span class="operator">[</span>i<span class="operator">]</span>);
+          <span class="keyword">if</span> (pixmap<span class="operator">.</span>isNull()) {
+              std<span class="operator">::</span>cerr <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Error converting icons.\n&quot;</span>;
+              <span class="keyword">return</span> <span class="number">1</span>;
+          }
+          <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>fromLatin1(<span class="string">&quot;%1%2.png&quot;</span>)<span class="operator">.</span>arg(imageFileRoot)
+              <span class="operator">.</span>arg(i<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">10</span><span class="operator">,</span> QLatin1Char(<span class="char">'0'</span>));
+          <span class="keyword">if</span> (<span class="operator">!</span>pixmap<span class="operator">.</span>save(fileName)) {
+              std<span class="operator">::</span>cerr <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Error writing image file &quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> fileName<span class="operator">.</span>toStdString() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;.\n&quot;</span>;
+              <span class="keyword">return</span> <span class="number">1</span>;
+          }
+          std<span class="operator">::</span>cout <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;Wrote image file &quot;</span>
+                    <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(fileName)<span class="operator">.</span>toStdString() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;.\n&quot;</span>;
+      }
+      <span class="keyword">return</span> <span class="number">0</span>;
+  }
+
+</pre>
+</div>
+<!-- @@@iconextractor/main.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mainwindow.cpp Example File | Qt Assistant Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtassistant-index.html">Qt Assistant Manual</a></td><td ><a href="qtassistant-simpletextviewer-example.html">Simple Text Viewer Example</a></td><td >mainwindow.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mainwindow.cpp Example File</h1>
+<span class="subtitle">simpletextviewer/mainwindow.cpp</span>
+<!-- $$$simpletextviewer/mainwindow.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtCore/QLibraryInfo&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QAction&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QMenu&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QMenuBar&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QMessageBox&gt;</span>
+
+  <span class="preprocessor">#include &quot;mainwindow.h&quot;</span>
+  <span class="preprocessor">#include &quot;findfiledialog.h&quot;</span>
+  <span class="preprocessor">#include &quot;assistant.h&quot;</span>
+  <span class="preprocessor">#include &quot;textedit.h&quot;</span>
+
+  <span class="comment">// ![0]</span>
+  MainWindow<span class="operator">::</span>MainWindow()
+  {
+      assistant <span class="operator">=</span> <span class="keyword">new</span> Assistant;
+  <span class="comment">// ![0]</span>
+      textViewer <span class="operator">=</span> <span class="keyword">new</span> TextEdit;
+      textViewer<span class="operator">-</span><span class="operator">&gt;</span>setContents(<span class="type">QLibraryInfo</span><span class="operator">::</span>location(<span class="type">QLibraryInfo</span><span class="operator">::</span>ExamplesPath)
+              <span class="operator">+</span> QLatin1String(<span class="string">&quot;/assistant/simpletextviewer/documentation/intro.html&quot;</span>));
+      setCentralWidget(textViewer);
+
+      createActions();
+      createMenus();
+
+      setWindowTitle(tr(<span class="string">&quot;Simple Text Viewer&quot;</span>));
+      resize(<span class="number">750</span><span class="operator">,</span> <span class="number">400</span>);
+  <span class="comment">// ![1]</span>
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>closeEvent(<span class="type">QCloseEvent</span> <span class="operator">*</span>)
+  {
+      <span class="keyword">delete</span> assistant;
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>about()
+  {
+      <span class="type">QMessageBox</span><span class="operator">::</span>about(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;About Simple Text Viewer&quot;</span>)<span class="operator">,</span>
+                         tr(<span class="string">&quot;This example demonstrates how to use\n&quot;</span>
+                            <span class="string">&quot;Qt Assistant as help system for your\n&quot;</span>
+                            <span class="string">&quot;own application.&quot;</span>));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>showDocumentation()
+  {
+      assistant<span class="operator">-</span><span class="operator">&gt;</span>showDocumentation(<span class="string">&quot;index.html&quot;</span>);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>open()
+  {
+      FindFileDialog dialog(textViewer<span class="operator">,</span> assistant);
+      dialog<span class="operator">.</span>exec();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>createActions()
+  {
+      assistantAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QAction</span>(tr(<span class="string">&quot;Help Contents&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      assistantAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type">QKeySequence</span><span class="operator">::</span>HelpContents);
+      connect(assistantAct<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(showDocumentation()));
+
+      openAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QAction</span>(tr(<span class="string">&quot;&amp;Open...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      openAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type">QKeySequence</span><span class="operator">::</span>Open);
+      connect(openAct<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(open()));
+
+      clearAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QAction</span>(tr(<span class="string">&quot;&amp;Clear&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      clearAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(tr(<span class="string">&quot;Ctrl+C&quot;</span>));
+      connect(clearAct<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> textViewer<span class="operator">,</span> SLOT(clear()));
+
+      exitAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QAction</span>(tr(<span class="string">&quot;E&amp;xit&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      exitAct<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type">QKeySequence</span><span class="operator">::</span>Quit);
+      connect(exitAct<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(close()));
+
+      aboutAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QAction</span>(tr(<span class="string">&quot;&amp;About&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(aboutAct<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(about()));
+
+      aboutQtAct <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QAction</span>(tr(<span class="string">&quot;About &amp;Qt&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      connect(aboutQtAct<span class="operator">,</span> SIGNAL(triggered())<span class="operator">,</span> qApp<span class="operator">,</span> SLOT(aboutQt()));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>createMenus()
+  {
+      fileMenu <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QMenu</span>(tr(<span class="string">&quot;&amp;File&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(openAct);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(clearAct);
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(exitAct);
+
+      helpMenu <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QMenu</span>(tr(<span class="string">&quot;&amp;Help&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(assistantAct);
+      helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(aboutAct);
+      helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(aboutQtAct);
+
+      menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(fileMenu);
+      menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(helpMenu);
+  }
+
+</pre>
+</div>
+<!-- @@@simpletextviewer/mainwindow.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

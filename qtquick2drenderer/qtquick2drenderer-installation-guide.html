@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtquick2drenderer-installation-guide.qdoc -->
+  <title>Installation Guide | Qt Quick 2D Renderer 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt Quick 2D Renderer</a></td><td >Installation Guide</td>        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+  <link rel="prev" href="index.html" />
+  <link rel="next" href="qtquick2drenderer-limitations.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="index.html">Qt Quick 2D Renderer</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qtquick2drenderer-limitations.html">Limitations</a>
+</p><p/>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#providing-the-opengl-dependency">Providing the OpenGL Dependency</a></li>
+<li class="level1"><a href="#how-to-use-the-opengl-dummy-libraries">How to use the OpenGL Dummy Libraries</a></li>
+<li class="level2"><a href="#prerequisites">Prerequisites</a></li>
+<li class="level2"><a href="#how-to-build-the-opengl-dummy-libraries">How to build the OpenGL Dummy Libraries</a></li>
+<li class="level2"><a href="#installation-of-files">Installation of Files</a></li>
+<li class="level1"><a href="#building-qt">Building Qt</a></li>
+<li class="level1"><a href="#building-qt-quick-2d-renderer">Building Qt Quick 2D Renderer</a></li>
+<li class="level1"><a href="#deployment">Deployment</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Installation Guide</h1>
+<span class="subtitle"></span>
+<!-- $$$qtquick2drenderer-installation-guide.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>The building of Qt Quick 2D Renderer is complicated by the fact that Qt Quick 2 always requires OpenGL support regardless of whether it is being used or not. You will need to build Qt with support for OpenGL even if the target system does not support it. If you have a Qt build that already supports OpenGL, you can skip to <a href="qtquick2drenderer-installation-guide.html#building-renderer">Building Qt Quick 2D Renderer</a>.</p>
+<a name="providing-the-opengl-dependency"></a>
+<h2 id="providing-the-opengl-dependency">Providing the OpenGL Dependency</h2>
+<p>Qt Quick 2D Renderer works in such a way that it renders the Qt Quick 2 scene graph with QPainter, instead of using hardware acceleration via the OpenGL API. However, Qt Quick 2 still assumes that OpenGL is always available. With Qt Quick 2D Renderer we can avoid making OpenGL calls, but that does not change the fact that QtQuick 2 requires the OpenGL development headers to be available at build-time and will link against OpenGL libraries at run-time.</p>
+<p>The solution is to provide a dummy OpenGL library and development headers to build Qt against. In this way you can build Qt with virtual OpenGL support and get access to the QtQuick 2 APIs. You should have no problems using Qt Quick 2D Renderer provided that you use a platform plugin that does not make calls to EGL or OpenGL commands, and that you refrain from using APIs that access OpenGL directly.</p>
+<a name="how-to-use-the-opengl-dummy-libraries"></a>
+<h2 id="how-to-use-the-opengl-dummy-libraries">How to use the OpenGL Dummy Libraries</h2>
+<p>The OpenGL dummy libraries provide both headers and shared object files containing the symbols for both OpenGL and EGL. The headers get copied into your INCLUDE path, and the shared object files get copied into your LIB path in both the sysroot, as well as in the target image distributed on the device. The library that is generated contains all the symbols needed to link an application as if you had support for OpenGL and EGL. It is important to make sure that you do not call any of these symbols in your application.</p>
+<a name="prerequisites"></a>
+<h3 >Prerequisites</h3>
+<p>Three elements are required:</p>
+<ol class="1" type="1"><li>Toolchain to cross compile code for your device.</li>
+<li>Sysroot containing development headers and shared objects to link against when building applications.</li>
+<li>Target image intended to be deployed to your device.</li>
+</ol>
+<a name="how-to-build-the-opengl-dummy-libraries"></a>
+<h3 >How to build the OpenGL Dummy Libraries</h3>
+<p>Set up your build environment by defining where your compiler and sysroot are located:</p>
+<pre class="cpp">
+
+  export CC=/opt/arm-toolchain/usr/bin/arm-linux-gnueabi-g++
+  export SYSROOT=/opt/device-name/sysroot/
+
+</pre>
+<p>Run the build script inside the client-dummy directory:</p>
+<pre class="cpp">
+
+  cd client-dummy
+  ./build-gcc.sh
+
+</pre>
+<p>That should generate two files: <code>libEGL.so</code>, <code>libGLESv2.so</code></p>
+<a name="installation-of-files"></a>
+<h3 >Installation of Files</h3>
+<p>Copy the include folder to the /usr/include folder in your sysroot. This installs the OpenGL/EGL headers:</p>
+<pre class="cpp">
+
+  cp -r 3rdparty/include/* ${SYSROOT}/usr/include/
+
+</pre>
+<p>Copy <code>libEGL.so</code> and <code>libGLESv2.so</code> to the /usr/lib folder in your sysroot:</p>
+<pre class="cpp">
+
+  cp src/lib*.so ${SYSROOT}/usr/lib/
+
+</pre>
+<p>Copy the <code>libEGL.so</code> and <code>libGLESv2.so</code> libraries to the target device image as well.</p>
+<a name="building-qt"></a>
+<h2 id="building-qt">Building Qt</h2>
+<p>When configuring Qt, make sure to append <code>-opengl es2</code> to your configure arguments.</p>
+<a name="building-renderer"></a><a name="building-qt-quick-2d-renderer"></a>
+<h2 id="building-qt-quick-2d-renderer">Building Qt Quick 2D Renderer</h2>
+<p>Build Qt Quick 2D Renderer like any other Qt module:</p>
+<pre class="cpp">
+
+  qmake
+  make
+  make install
+
+</pre>
+<a name="deployment"></a>
+<h2 id="deployment">Deployment</h2>
+<p>Now, when you deploy your Qt build to the device, it will depend on the dummy libs <code>libEGL.so</code> and <code>libGLESv2.so</code>, but as long as you are using the Qt Quick 2D Renderer plugin you will be able to use Qt Quick 2 without actually making any OpenGL or EGL calls.</p>
+</div>
+<!-- @@@qtquick2drenderer-installation-guide.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="index.html">Qt Quick 2D Renderer</a>
+<span class="naviSeparator">  &#9702;  </span>
+<a class="nextPage" href="qtquick2drenderer-limitations.html">Limitations</a>
+</p>
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- planets.qdoc -->
+  <title>Planets Example | Qt Canvas 3D 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcanvas3d-index.html">Qt Canvas 3D</a></td><td >Planets Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#qt-quick-implementation">Qt Quick Implementation</a></li>
+<li class="level1"><a href="#the-javascript-code">The JavaScript Code</a></li>
+<li class="level1"><a href="#handling-the-mouse-events">Handling the Mouse Events</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Planets Example</h1>
+<span class="subtitle"></span>
+<!-- $$$threejs/planets-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Planets example demonstrates how to implement an application that combines the use of three.js library-based <a href="qml-qtcanvas3d-canvas3d.html">Canvas3D</a> rendering with Qt Quick 2D elements. The example shows the eight planets of our Solar System with the Sun.</p>
+<p class="centerAlign"><img src="images/planets-example.jpg" alt="" /></p><p>The planets are rotating around the Sun based on their orbit at a given time. The rotation starts at 2000 Jan 0.0 UT. The planet positions are calculated based on the formulas found here: <a href="http://www.stjarnhimlen.se/comp/ppcomp.html">http://www.stjarnhimlen.se/comp/ppcomp.html</a> and <a href="http://www.davidcolarusso.com/astro/">http://www.davidcolarusso.com/astro/</a>.</p>
+<a name="qt-quick-implementation"></a>
+<h2 id="qt-quick-implementation">Qt Quick Implementation</h2>
+<p>The Qt Quick Implementation <a href="qtcanvas3d-threejs-planets-planets-qml.html">planets.qml</a> of the example renders the 3D content using <a href="qml-qtcanvas3d-canvas3d.html">Canvas3D</a> type. The type calls JavaScript code that uses <code>three.js</code> to initialize, paint, and resize the 3D view.</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtcanvas3d-canvas3d.html">Canvas3D</a></span> {
+      <span class="name">id</span>: <span class="name">canvas3d</span>
+      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+      <span class="name">onInitializeGL</span>: {
+          <span class="name">GLCode</span>.<span class="name">initializeGL</span>(<span class="name">canvas3d</span>, <span class="name">eventSource</span>, <span class="name">mainview</span>);
+      }
+      <span class="name">onPaintGL</span>: {
+          <span class="name">GLCode</span>.<span class="name">paintGL</span>(<span class="name">canvas3d</span>);
+          <span class="name">fpsDisplay</span>.<span class="name">fps</span> <span class="operator">=</span> <span class="name">canvas3d</span>.<span class="name">fps</span>;
+      }
+
+      <span class="name">onResizeGL</span>: {
+          <span class="name">GLCode</span>.<span class="name">onResizeGL</span>(<span class="name">canvas3d</span>);
+      }
+      <span class="type">ControlEventSource</span> {
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">focus</span>: <span class="number">true</span>
+          <span class="name">id</span>: <span class="name">eventSource</span>
+      }
+  }
+
+</pre>
+<p>The planet related information is stored into <code>ListModel</code>. The selection buttons for the planets and the information sheet are created based on the model. The 2D elements, selection buttons and sliders, are implemented in the QML side.</p>
+<p>The selection buttons change the <code>focusedPlanet</code> property of the mainview. As the property changes the planet information is updated and the camera is animated to the new position. The camera position and the camera look at point are updated based on values that are animated on QML side.</p>
+<pre class="qml">
+
+  <span class="name">onFocusedPlanetChanged</span>: {
+      <span class="keyword">if</span> (<span class="name">focusedPlanet</span> <span class="operator">==</span> <span class="number">100</span>) {
+          <span class="name">info</span>.<span class="name">opacity</span> <span class="operator">=</span> <span class="number">0</span>;
+          <span class="name">updatePlanetInfo</span>();
+      } <span class="keyword">else</span> {
+          <span class="name">updatePlanetInfo</span>();
+          <span class="name">info</span>.<span class="name">opacity</span> <span class="operator">=</span> <span class="number">0.5</span>;
+      }
+
+      <span class="name">GLCode</span>.<span class="name">prepareFocusedPlanetAnimation</span>();
+
+      <span class="name">lookAtOffsetAnimation</span>.<span class="name">restart</span>();
+      <span class="name">cameraOffsetAnimation</span>.<span class="name">restart</span>();
+  }
+
+</pre>
+<p>The sliders are used to adjust the rotation speed, the planet size, and the viewing distance. When the slider value changes, JavaScript code is called to adjust the given property. For example, changing the value of the &quot;Viewing Distance&quot; slider calls the <code>setCameraDistence()</code> method.</p>
+<pre class="qml">
+
+  <span class="name">onValueChanged</span>: <span class="name">GLCode</span>.<span class="name">setCameraDistance</span>(<span class="name">value</span>);
+
+</pre>
+<a name="the-javascript-code"></a>
+<h2 id="the-javascript-code">The JavaScript Code</h2>
+<p>The JavaScript side of the implementation, <a href="qtcanvas3d-threejs-planets-planets-js.html">planets.js</a>, is done using a version of <code>three.js</code> that is ported for <a href="qtcanvas3d-index.html">Qt Canvas 3D</a>: <a href="https://github.com/tronlec/three.js">three.js</a>.</p>
+<p>The <code>initializeGL()</code> method creates the camera and the scene. It also adds the lights to the scene and creates the planet meshes. The <a href="qml-qtcanvas3d-canvas3d.html">Canvas3D</a> renderer needs to be created at initialization phase too.</p>
+<p>Planet texture maps are Copyright (c) by James Hastings-Trew <a href="http://planetpixelemporium.com/planets.html">http://planetpixelemporium.com/planets.html</a> used with permission. To calculate the ring geometry for the planets with rings, the <code>_RingGeometry()</code> method from <a href="https://github.com/jeromeetienne/threex.planets">three.xplanets</a> extension is used.</p>
+<p>The scene is rendered in <code>paintGL()</code> method. That is also the place where the positions for all of the planets are calculated. The planets are rotated based on their axial tilt and their sidereal rotation period. In the <code>paintGL()</code> method the camera position and look at point are updated based on the focused planet.</p>
+<p>For more information on how to use <code>three.js</code> the documentation is available here: <a href="http://threejs.org/docs/">three.js/docs</a></p>
+<a name="handling-the-mouse-events"></a>
+<h2 id="handling-the-mouse-events">Handling the Mouse Events</h2>
+<p>In order to handle the mouse event in JavaScript code the <a href="qml-qtcanvas3d-canvas3d.html">Canvas3D</a> type has to include the <code>ControlEventSource</code> type.</p>
+<pre class="qml">
+
+  <span class="type">ControlEventSource</span> {
+      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+      <span class="name">focus</span>: <span class="number">true</span>
+      <span class="name">id</span>: <span class="name">eventSource</span>
+  }
+
+</pre>
+<p>This type is then passed to the JavaScript code on initialization.</p>
+<pre class="qml">
+
+  <span class="name">onInitializeGL</span>: {
+      <span class="name">GLCode</span>.<span class="name">initializeGL</span>(<span class="name">canvas3d</span>, <span class="name">eventSource</span>, <span class="name">mainview</span>);
+  }
+
+</pre>
+<p>On JavaScript code in the <code>initializeGL()</code> method the <code>eventSource</code> object is saved to a global variable. In this example <code>mouseDown</code> event is connected to the <code>onDocumentMouseDown()</code> method.</p>
+<pre class="js">
+
+  <span class="name">eventSource</span>.<span class="name">mouseDown</span>.<span class="name">connect</span>(<span class="name">onDocumentMouseDown</span>);
+
+</pre>
+<p>Based on the mouse position variables passed to <code>onDocumentMouseDown()</code> method, it's checked if the event takes place on top of a planet or not. The focused planet is changed according to the mouse position.</p>
+<p>Files:</p>
+<ul>
+<li><a href="qtcanvas3d-threejs-planets-fpsdisplay-qml.html">threejs/planets/FpsDisplay.qml</a></li>
+<li><a href="qtcanvas3d-threejs-planets-infosheet-qml.html">threejs/planets/InfoSheet.qml</a></li>
+<li><a href="qtcanvas3d-threejs-planets-planetbutton-qml.html">threejs/planets/PlanetButton.qml</a></li>
+<li><a href="qtcanvas3d-threejs-planets-styledslider-qml.html">threejs/planets/StyledSlider.qml</a></li>
+<li><a href="qtcanvas3d-threejs-planets-planets-js.html">threejs/planets/planets.js</a></li>
+<li><a href="qtcanvas3d-threejs-planets-planets-qml.html">threejs/planets/planets.qml</a></li>
+<li><a href="qtcanvas3d-threejs-planets-main-cpp.html">threejs/planets/main.cpp</a></li>
+<li><a href="qtcanvas3d-threejs-planets-planets-pro.html">threejs/planets/planets.pro</a></li>
+<li><a href="qtcanvas3d-threejs-planets-planets-qrc.html">threejs/planets/planets.qrc</a></li>
+</ul>
+<p>Images:</p>
+<ul>
+<li><a href="images/used-in-examples/threejs/planets/images/earth.png">threejs/planets/images/earth.png</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/earthbump1k.jpg">threejs/planets/images/earthbump1k.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/earthcloudmapcolortrans.png">threejs/planets/images/earthcloudmapcolortrans.png</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/earthmap1k.jpg">threejs/planets/images/earthmap1k.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/earthspec1k.jpg">threejs/planets/images/earthspec1k.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/galaxy_starfield.png">threejs/planets/images/galaxy_starfield.png</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/jupiter.png">threejs/planets/images/jupiter.png</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/jupitermap.jpg">threejs/planets/images/jupitermap.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/mars.png">threejs/planets/images/mars.png</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/marsbump1k.jpg">threejs/planets/images/marsbump1k.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/marsmap1k.jpg">threejs/planets/images/marsmap1k.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/mercury.png">threejs/planets/images/mercury.png</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/mercurybump.jpg">threejs/planets/images/mercurybump.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/mercurymap.jpg">threejs/planets/images/mercurymap.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/moonbump1k.jpg">threejs/planets/images/moonbump1k.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/moonmap1k.jpg">threejs/planets/images/moonmap1k.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/neptune.png">threejs/planets/images/neptune.png</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/neptunemap.jpg">threejs/planets/images/neptunemap.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/plutobump1k.jpg">threejs/planets/images/plutobump1k.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/plutomap1k.jpg">threejs/planets/images/plutomap1k.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/saturn.png">threejs/planets/images/saturn.png</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/saturnmap.jpg">threejs/planets/images/saturnmap.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/saturnringcolortrans.png">threejs/planets/images/saturnringcolortrans.png</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/sun.png">threejs/planets/images/sun.png</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/sunmap.jpg">threejs/planets/images/sunmap.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/uranus.png">threejs/planets/images/uranus.png</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/uranusmap.jpg">threejs/planets/images/uranusmap.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/uranusringcolortrans.png">threejs/planets/images/uranusringcolortrans.png</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/venus.png">threejs/planets/images/venus.png</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/venusbump.jpg">threejs/planets/images/venusbump.jpg</a></li>
+<li><a href="images/used-in-examples/threejs/planets/images/venusmap.jpg">threejs/planets/images/venusmap.jpg</a></li>
+</ul>
+</div>
+<!-- @@@threejs/planets -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

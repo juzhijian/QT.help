@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- texturesurface.qdoc -->
+  <title>Textured Surface Example | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td >Textured Surface Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#texture-to-a-surface-series">Texture to a surface series</a></li>
+<li class="level1"><a href="#topographic-surface-series">Topographic surface series</a></li>
+<li class="level1"><a href="#use-custom-input-handler-to-enable-zooming-and-panning">Use custom input handler to enable zooming and panning</a></li>
+<li class="level1"><a href="#highlight-an-area-of-the-surface">Highlight an area of the surface</a></li>
+<li class="level1"><a href="#a-gradient-to-the-highlight-series">A gradient to the highlight series</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Textured Surface Example</h1>
+<span class="subtitle"></span>
+<!-- $$$texturesurface-description -->
+<div class="descr"> <a name="details"></a>
+<p>The textured surface example shows how to add an image as a texture for a surface. The example shows also how to:</p>
+<ul>
+<li>Create a surface series from an image</li>
+<li>Use custom input handler to enable zooming and panning</li>
+<li>Highlight an area of the surface</li>
+</ul>
+<p class="centerAlign"><img src="images/texturesurface-example.png" alt="" /></p><a name="texture-to-a-surface-series"></a>
+<h2 id="texture-to-a-surface-series">Texture to a surface series</h2>
+<p>The image to be set as a texture to a surface can be set using <a href="qsurface3dseries.html#textureFile-prop">QSurface3DSeries::setTextureFile</a>(). In this example we have added a check box to control if the texture is set or not. The following code extract is for reacting to the check box selections. The image in this example is read from the resource file where it is as a JPG file. Setting an empty file with the method clears the texture, and the surface uses the gradients or colors from the theme.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> SurfaceGraph<span class="operator">::</span>toggleSurfaceTexture(bool enable)
+  {
+      <span class="keyword">if</span> (enable)
+          m_topography<span class="operator">-</span><span class="operator">&gt;</span>setTextureFile(<span class="string">&quot;:/maps/maptexture&quot;</span>);
+      <span class="keyword">else</span>
+          m_topography<span class="operator">-</span><span class="operator">&gt;</span>setTextureFile(<span class="string">&quot;&quot;</span>);
+  }
+
+</pre>
+<a name="topographic-surface-series"></a>
+<h2 id="topographic-surface-series">Topographic surface series</h2>
+<p>The topographic data for this example is obtained from National Land Survey of Finland. It provides a product called <code>Elevation Model 2 m</code>, which was suitable for our needs. We selected Levi fell to be shown. The accuracy of the data was well beyond our needs and therefore it is compressed and encoded into a PNG file. The height value from the original ASCII data is encoded into RGB format using a multiplier, which you will see later on a code extract. The multiplier is calculated simply by dividing the largest 24 bit value with the highest point in Finland.</p>
+<p>Qt Data Visualization has a special proxy for height map image files, but it converts only one byte values. So to utilize the bigger accuracy on the data from National Land Survey of Finland, we read the data from the PNG file and decode it into <a href="qsurface3dseries.html">QSurface3DSeries</a>. The following code samples show how this is done.</p>
+<p>First the encoding multiplier.</p>
+<pre class="cpp">
+
+  <span class="comment">// Value used to encode height data as RGB value on PNG file</span>
+  <span class="keyword">const</span> <span class="type">float</span> packingFactor <span class="operator">=</span> <span class="number">11983.0f</span>;
+
+</pre>
+<p>And then the actual decoding.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> heightMapImage(file);
+      <span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span> <span class="operator">*</span>bits <span class="operator">=</span> heightMapImage<span class="operator">.</span>bits();
+      <span class="type">int</span> imageHeight <span class="operator">=</span> heightMapImage<span class="operator">.</span>height();
+      <span class="type">int</span> imageWidth <span class="operator">=</span> heightMapImage<span class="operator">.</span>width();
+      <span class="type">int</span> widthBits <span class="operator">=</span> imageWidth <span class="operator">*</span> <span class="number">4</span>;
+      <span class="type">float</span> stepX <span class="operator">=</span> width <span class="operator">/</span> <span class="type">float</span>(imageWidth);
+      <span class="type">float</span> stepZ <span class="operator">=</span> height <span class="operator">/</span> <span class="type">float</span>(imageHeight);
+
+      <span class="type">QSurfaceDataArray</span> <span class="operator">*</span>dataArray <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QSurfaceDataArray</span>;
+      dataArray<span class="operator">-</span><span class="operator">&gt;</span>reserve(imageHeight);
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> imageHeight; i<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="type">int</span> p <span class="operator">=</span> i <span class="operator">*</span> widthBits;
+          <span class="type">float</span> z <span class="operator">=</span> height <span class="operator">-</span> <span class="type">float</span>(i) <span class="operator">*</span> stepZ;
+          <span class="type">QSurfaceDataRow</span> <span class="operator">*</span>newRow <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QSurfaceDataRow</span>(imageWidth);
+          <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> imageWidth; j<span class="operator">+</span><span class="operator">+</span>) {
+              <span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span> aa <span class="operator">=</span> bits<span class="operator">[</span>p <span class="operator">+</span> <span class="number">0</span><span class="operator">]</span>;
+              <span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span> rr <span class="operator">=</span> bits<span class="operator">[</span>p <span class="operator">+</span> <span class="number">1</span><span class="operator">]</span>;
+              <span class="type"><a href="../qtcore/qtglobal.html#uchar-typedef">uchar</a></span> gg <span class="operator">=</span> bits<span class="operator">[</span>p <span class="operator">+</span> <span class="number">2</span><span class="operator">]</span>;
+              <span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span> color <span class="operator">=</span> <span class="type"><a href="../qtcore/qtglobal.html#uint-typedef">uint</a></span>((gg <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">16</span>) <span class="operator">+</span> (rr <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="number">8</span>) <span class="operator">+</span> aa);
+              <span class="type">float</span> y <span class="operator">=</span> <span class="type">float</span>(color) <span class="operator">/</span> packingFactor;
+              (<span class="operator">*</span>newRow)<span class="operator">[</span>j<span class="operator">]</span><span class="operator">.</span>setPosition(QVector3D(<span class="type">float</span>(j) <span class="operator">*</span> stepX<span class="operator">,</span> y<span class="operator">,</span> z));
+              p <span class="operator">=</span> p <span class="operator">+</span> <span class="number">4</span>;
+          }
+          <span class="operator">*</span>dataArray <span class="operator">&lt;</span><span class="operator">&lt;</span> newRow;
+      }
+
+      dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>resetArray(dataArray);
+
+</pre>
+<a name="use-custom-input-handler-to-enable-zooming-and-panning"></a>
+<h2 id="use-custom-input-handler-to-enable-zooming-and-panning">Use custom input handler to enable zooming and panning</h2>
+<p>For the panning the implementation is similar to the <a href="qtdatavisualization-draggableaxes-example.html">Axis Range Dragging With Labels Example</a>. The difference is that in this example we follow only dragging of X and Z axis and we don't allow dragging the surface outside the graph. The control for this is very simple and done as on the following example for the X axis.</p>
+<pre class="cpp">
+
+      <span class="keyword">case</span> StateDraggingX:
+          distance <span class="operator">=</span> (move<span class="operator">.</span>x() <span class="operator">*</span> xMulX <span class="operator">-</span> move<span class="operator">.</span>y() <span class="operator">*</span> xMulY) <span class="operator">*</span> m_speedModifier;
+          m_axisXMinValue <span class="operator">-</span><span class="operator">=</span> distance;
+          m_axisXMaxValue <span class="operator">-</span><span class="operator">=</span> distance;
+          <span class="keyword">if</span> (m_axisXMinValue <span class="operator">&lt;</span> m_areaMinValue) {
+              <span class="type">float</span> dist <span class="operator">=</span> m_axisXMaxValue <span class="operator">-</span> m_axisXMinValue;
+              m_axisXMinValue <span class="operator">=</span> m_areaMinValue;
+              m_axisXMaxValue <span class="operator">=</span> m_axisXMinValue <span class="operator">+</span> dist;
+          }
+          <span class="keyword">if</span> (m_axisXMaxValue <span class="operator">&gt;</span> m_areaMaxValue) {
+              <span class="type">float</span> dist <span class="operator">=</span> m_axisXMaxValue <span class="operator">-</span> m_axisXMinValue;
+              m_axisXMaxValue <span class="operator">=</span> m_areaMaxValue;
+              m_axisXMinValue <span class="operator">=</span> m_axisXMaxValue <span class="operator">-</span> dist;
+          }
+          m_axisX<span class="operator">-</span><span class="operator">&gt;</span>setRange(m_axisXMinValue<span class="operator">,</span> m_axisXMaxValue);
+          <span class="keyword">break</span>;
+
+</pre>
+<p>For the zooming we catch the <code>wheelEvent</code> and adjust the X and Y axis ranges according to delta value on <a href="../qtgui/qwheelevent.html">QWheelEvent</a>. The Y axis is also adjusted so that the aspect ratio between Y axis and XZ plane stays the same, and we don't get silly looking graph with height exaggerated too much.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> CustomInputHandler<span class="operator">::</span>wheelEvent(<span class="type"><a href="../qtgui/qwheelevent.html">QWheelEvent</a></span> <span class="operator">*</span>event)
+  {
+      <span class="type">float</span> delta <span class="operator">=</span> <span class="type">float</span>(event<span class="operator">-</span><span class="operator">&gt;</span>delta());
+
+      m_axisXMinValue <span class="operator">+</span><span class="operator">=</span> delta;
+      m_axisXMaxValue <span class="operator">-</span><span class="operator">=</span> delta;
+      m_axisZMinValue <span class="operator">+</span><span class="operator">=</span> delta;
+      m_axisZMaxValue <span class="operator">-</span><span class="operator">=</span> delta;
+      checkConstraints();
+
+      <span class="type">float</span> y <span class="operator">=</span> (m_axisXMaxValue <span class="operator">-</span> m_axisXMinValue) <span class="operator">*</span> m_aspectRatio;
+
+      m_axisX<span class="operator">-</span><span class="operator">&gt;</span>setRange(m_axisXMinValue<span class="operator">,</span> m_axisXMaxValue);
+      m_axisY<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="number">100.0f</span><span class="operator">,</span> y);
+      m_axisZ<span class="operator">-</span><span class="operator">&gt;</span>setRange(m_axisZMinValue<span class="operator">,</span> m_axisZMaxValue);
+  }
+
+</pre>
+<p>In this case we want to control the zoom level so that it won't get too near to or far from the surface. For instance, if the value for the X axis gets below the allowed, i.e&#x2e; zooming gets too far, the value is set to the minimum allowed value. If the range is going to below the range minimum, both ends of the axis are adjusted so that the range stays at the limit.</p>
+<pre class="cpp">
+
+      <span class="keyword">if</span> (m_axisXMinValue <span class="operator">&lt;</span> m_areaMinValue)
+          m_axisXMinValue <span class="operator">=</span> m_areaMinValue;
+      <span class="keyword">if</span> (m_axisXMaxValue <span class="operator">&gt;</span> m_areaMaxValue)
+          m_axisXMaxValue <span class="operator">=</span> m_areaMaxValue;
+      <span class="comment">// Don't allow too much zoom in</span>
+      <span class="keyword">if</span> ((m_axisXMaxValue <span class="operator">-</span> m_axisXMinValue) <span class="operator">&lt;</span> m_axisXMinRange) {
+          <span class="type">float</span> adjust <span class="operator">=</span> (m_axisXMinRange <span class="operator">-</span> (m_axisXMaxValue <span class="operator">-</span> m_axisXMinValue)) <span class="operator">/</span> <span class="number">2.0f</span>;
+          m_axisXMinValue <span class="operator">-</span><span class="operator">=</span> adjust;
+          m_axisXMaxValue <span class="operator">+</span><span class="operator">=</span> adjust;
+      }
+
+</pre>
+<a name="highlight-an-area-of-the-surface"></a>
+<h2 id="highlight-an-area-of-the-surface">Highlight an area of the surface</h2>
+<p>The main idea on creating a highlight on the surface is to create a copy of the series and add a bit of offset to the y value. On this example the class <code>HighlightSeries</code> implements the creation of the copy on its <code>handlePositionChange</code> method. Firstly the <code>HighlightSeries</code> needs to get the pointer to the original series and then it starts to listen the <a href="qsurface3dseries.html#selectedPoint-prop">QSurface3DSeries::selectedPointChanged</a> signal.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> HighlightSeries<span class="operator">::</span>setTopographicSeries(TopographicSeries <span class="operator">*</span>series)
+  {
+      m_topographicSeries <span class="operator">=</span> series;
+      m_srcWidth <span class="operator">=</span> m_topographicSeries<span class="operator">-</span><span class="operator">&gt;</span>dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>array()<span class="operator">-</span><span class="operator">&gt;</span>at(<span class="number">0</span>)<span class="operator">-</span><span class="operator">&gt;</span>size();
+      m_srcHeight <span class="operator">=</span> m_topographicSeries<span class="operator">-</span><span class="operator">&gt;</span>dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>array()<span class="operator">-</span><span class="operator">&gt;</span>size();
+
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(m_topographicSeries<span class="operator">,</span> <span class="operator">&amp;</span>QSurface3DSeries<span class="operator">::</span>selectedPointChanged<span class="operator">,</span>
+                       <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>HighlightSeries<span class="operator">::</span>handlePositionChange);
+  }
+
+</pre>
+<p>When the signal arrives, first thing is to check that the position is valid. Then the ranges for the copied area are calculated and checked that they stay within the bounds. Finally we simply fill the data array of the highlight series with the range from the data array of topography series.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> HighlightSeries<span class="operator">::</span>handlePositionChange(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <span class="operator">&amp;</span>position)
+  {
+      m_position <span class="operator">=</span> position;
+
+      <span class="keyword">if</span> (position <span class="operator">=</span><span class="operator">=</span> invalidSelectionPosition()) {
+          setVisible(<span class="keyword">false</span>);
+
+          <span class="keyword">return</span>;
+      }
+
+      <span class="type">int</span> halfWidth <span class="operator">=</span> m_width <span class="operator">/</span> <span class="number">2</span>;
+      <span class="type">int</span> halfHeight <span class="operator">=</span> m_height <span class="operator">/</span> <span class="number">2</span>;
+
+      <span class="type">int</span> startX <span class="operator">=</span> position<span class="operator">.</span>y() <span class="operator">-</span> halfWidth;
+      <span class="keyword">if</span> (startX <span class="operator">&lt;</span> <span class="number">0</span> )
+          startX <span class="operator">=</span> <span class="number">0</span>;
+      <span class="type">int</span> endX <span class="operator">=</span> position<span class="operator">.</span>y() <span class="operator">+</span> halfWidth;
+      <span class="keyword">if</span> (endX <span class="operator">&gt;</span> (m_srcWidth <span class="operator">-</span> <span class="number">1</span>))
+          endX <span class="operator">=</span> m_srcWidth <span class="operator">-</span> <span class="number">1</span>;
+      <span class="type">int</span> startZ <span class="operator">=</span> position<span class="operator">.</span>x() <span class="operator">-</span> halfHeight;
+      <span class="keyword">if</span> (startZ <span class="operator">&lt;</span> <span class="number">0</span> )
+          startZ <span class="operator">=</span> <span class="number">0</span>;
+      <span class="type">int</span> endZ <span class="operator">=</span> position<span class="operator">.</span>x() <span class="operator">+</span> halfHeight;
+      <span class="keyword">if</span> (endZ <span class="operator">&gt;</span> (m_srcHeight <span class="operator">-</span> <span class="number">1</span>))
+          endZ <span class="operator">=</span> m_srcHeight <span class="operator">-</span> <span class="number">1</span>;
+
+      <span class="type"><a href="qsurfacedataproxy.html">QSurfaceDataProxy</a></span> <span class="operator">*</span>srcProxy <span class="operator">=</span> m_topographicSeries<span class="operator">-</span><span class="operator">&gt;</span>dataProxy();
+      <span class="keyword">const</span> <span class="type">QSurfaceDataArray</span> <span class="operator">&amp;</span>srcArray <span class="operator">=</span> <span class="operator">*</span>srcProxy<span class="operator">-</span><span class="operator">&gt;</span>array();
+
+      <span class="type">QSurfaceDataArray</span> <span class="operator">*</span>dataArray <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QSurfaceDataArray</span>;
+      dataArray<span class="operator">-</span><span class="operator">&gt;</span>reserve(endZ <span class="operator">-</span> startZ);
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> startZ; i <span class="operator">&lt;</span> endZ; i<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="type">QSurfaceDataRow</span> <span class="operator">*</span>newRow <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QSurfaceDataRow</span>(endX <span class="operator">-</span> startX);
+          <span class="type">QSurfaceDataRow</span> <span class="operator">*</span>srcRow <span class="operator">=</span> srcArray<span class="operator">.</span>at(i);
+          <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> startX<span class="operator">,</span> p <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> endX; j<span class="operator">+</span><span class="operator">+</span><span class="operator">,</span> p<span class="operator">+</span><span class="operator">+</span>) {
+              QVector3D pos <span class="operator">=</span> srcRow<span class="operator">-</span><span class="operator">&gt;</span>at(j)<span class="operator">.</span>position();
+              (<span class="operator">*</span>newRow)<span class="operator">[</span>p<span class="operator">]</span><span class="operator">.</span>setPosition(QVector3D(pos<span class="operator">.</span>x()<span class="operator">,</span> pos<span class="operator">.</span>y() <span class="operator">+</span> <span class="number">0.1f</span><span class="operator">,</span> pos<span class="operator">.</span>z()));
+          }
+          <span class="operator">*</span>dataArray <span class="operator">&lt;</span><span class="operator">&lt;</span> newRow;
+      }
+
+      dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>resetArray(dataArray);
+      setVisible(<span class="keyword">true</span>);
+  }
+
+</pre>
+<a name="a-gradient-to-the-highlight-series"></a>
+<h2 id="a-gradient-to-the-highlight-series">A gradient to the highlight series</h2>
+<p>Since the <code>HighlightSeries</code> is <a href="qsurface3dseries.html">QSurface3DSeries</a>, we can use all the decoration methods series can have. In this example we added a gradient to emphasize the elevation. Because the suitable gradient style depends on the range of the Y axis and we change the range when zooming, we need to adjust the gradient color positions as the range change.</p>
+<p>For the gradient color positions we define proportional values.</p>
+<pre class="cpp">
+
+  <span class="keyword">const</span> <span class="type">float</span> darkRedPos <span class="operator">=</span> <span class="number">1.0f</span>;
+  <span class="keyword">const</span> <span class="type">float</span> redPos <span class="operator">=</span> <span class="number">0.8f</span>;
+  <span class="keyword">const</span> <span class="type">float</span> yellowPos <span class="operator">=</span> <span class="number">0.6f</span>;
+  <span class="keyword">const</span> <span class="type">float</span> greenPos <span class="operator">=</span> <span class="number">0.4f</span>;
+  <span class="keyword">const</span> <span class="type">float</span> darkGreenPos <span class="operator">=</span> <span class="number">0.2f</span>;
+
+</pre>
+<p>The gradient modification is done on <code>handleGradientChange</code> method and we connect it to react to changes on Y axis.</p>
+<pre class="cpp">
+
+      <span class="type"><a href="../qtcore/qobject.html">QObject</a></span><span class="operator">::</span>connect(m_graph<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">,</span> <span class="operator">&amp;</span>QValue3DAxis<span class="operator">::</span>maxChanged<span class="operator">,</span>
+                       m_highlight<span class="operator">,</span> <span class="operator">&amp;</span>HighlightSeries<span class="operator">::</span>handleGradientChange);
+
+</pre>
+<p>When a change on Y axis max value happens, we calculate the gradient color positions.</p>
+<pre class="cpp">
+
+  <span class="type">void</span> HighlightSeries<span class="operator">::</span>handleGradientChange(<span class="type">float</span> value)
+  {
+      <span class="type">float</span> ratio <span class="operator">=</span> m_minHeight <span class="operator">/</span> value;
+
+      <span class="type"><a href="../qtgui/qlineargradient.html">QLinearGradient</a></span> gr;
+      gr<span class="operator">.</span>setColorAt(<span class="number">0.0f</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black);
+      gr<span class="operator">.</span>setColorAt(darkGreenPos <span class="operator">*</span> ratio<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>darkGreen);
+      gr<span class="operator">.</span>setColorAt(greenPos <span class="operator">*</span> ratio<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>green);
+      gr<span class="operator">.</span>setColorAt(yellowPos <span class="operator">*</span> ratio<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>yellow);
+      gr<span class="operator">.</span>setColorAt(redPos <span class="operator">*</span> ratio<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>red);
+      gr<span class="operator">.</span>setColorAt(darkRedPos <span class="operator">*</span> ratio<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>darkRed);
+
+      setBaseGradient(gr);
+      setColorStyle(<span class="type"><a href="q3dtheme.html">Q3DTheme</a></span><span class="operator">::</span>ColorStyleRangeGradient);
+  }
+
+</pre>
+<p>Files:</p>
+<ul>
+<li><a href="qtdatavisualization-texturesurface-custominputhandler-cpp.html">texturesurface/custominputhandler.cpp</a></li>
+<li><a href="qtdatavisualization-texturesurface-custominputhandler-h.html">texturesurface/custominputhandler.h</a></li>
+<li><a href="qtdatavisualization-texturesurface-highlightseries-cpp.html">texturesurface/highlightseries.cpp</a></li>
+<li><a href="qtdatavisualization-texturesurface-highlightseries-h.html">texturesurface/highlightseries.h</a></li>
+<li><a href="qtdatavisualization-texturesurface-surfacegraph-cpp.html">texturesurface/surfacegraph.cpp</a></li>
+<li><a href="qtdatavisualization-texturesurface-surfacegraph-h.html">texturesurface/surfacegraph.h</a></li>
+<li><a href="qtdatavisualization-texturesurface-topographicseries-cpp.html">texturesurface/topographicseries.cpp</a></li>
+<li><a href="qtdatavisualization-texturesurface-topographicseries-h.html">texturesurface/topographicseries.h</a></li>
+<li><a href="qtdatavisualization-texturesurface-main-cpp.html">texturesurface/main.cpp</a></li>
+<li><a href="qtdatavisualization-texturesurface-texturedsurface-qrc.html">texturesurface/texturedsurface.qrc</a></li>
+<li><a href="qtdatavisualization-texturesurface-texturesurface-pro.html">texturesurface/texturesurface.pro</a></li>
+</ul>
+</div>
+<!-- @@@texturesurface -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

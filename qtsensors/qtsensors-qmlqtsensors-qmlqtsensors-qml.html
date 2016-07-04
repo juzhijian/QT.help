@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>qmlqtsensors.qml Example File | Qt Sensors 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtsensors-index.html">Qt Sensors</a></td><td ><a href="qtsensors-qmlqtsensors-example.html">Qt Sensors - QML example</a></td><td >qmlqtsensors.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">qmlqtsensors.qml Example File</h1>
+<span class="subtitle">qmlqtsensors/qmlqtsensors.qml</span>
+<!-- $$$qmlqtsensors/qmlqtsensors.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the QtSensors module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="comment">/* Layout
+                                                                                    mainWnd
+                                                                                   /
+  ---------------------------------------------------------------------------------
+  |--------------------------------------------------------------------------------
+  ||                                  labelTitle                                  |
+  |--------------------------------------------------------------------------------
+  |-------------------------------------------------------------------------------- &lt;---- tiltLine
+  |--------------------------------------------------------------------------------
+  ||                                  labelTilt                                   |
+  |--------------------------------------------------------------------------------
+  |         / accuracyRect                               / speedRect
+  |-------------------------------------------||----------------------------------|
+  || Accuracy &lt;----- textAccuracy             || Speed &lt;-----textSpeed            |
+  ||  value   &lt;- textAccuracyValue            ||  value    &lt;- textSpeedValue      |
+  || ----------------- ------------------     || --------------- ---------------- |
+  || | accuracyLower | | accuracyHigher |     || | speedLower  | | speedHigher  | |
+  || ----------------- ------------------     || --------------- ---------------- |
+  |------------------------------------------ ||----------------------------------|
+  | -----------
+  | |Calibrate|    &lt;------------------ calibrate
+  | -----------
+  | ---------
+  | |Degree |    &lt;-------------------- useRadian                   X Rotation: 0  &lt;------------------ xrottext
+  | ---------
+  | ---------
+  | |Start  |    &lt;-------------------- tiltStart                   Y Rotation: 0  &lt;------------------ yrottext
+  | ---------
+  |-------------------------------------------------------------------------------- &lt;---- ambientlightLine
+  |--------------------------------------------------------------------------------
+  ||                                  labelAmbientLight                           |
+  |--------------------------------------------------------------------------------
+  | ---------
+  | |Start  |    &lt;-------------------- ablStart                    Ambient light: -  &lt;--------------- abltext
+  | ---------
+  |-------------------------------------------------------------------------------- &lt;---- proximityLine
+  |--------------------------------------------------------------------------------
+  ||                                  labelProximityLight                           |
+  |--------------------------------------------------------------------------------
+  | ---------
+  | |Start  |    &lt;-------------------- proxiStart                  Proximity: -  &lt;--------------- proxitext
+  | ---------
+  ------------------------------------------------------------------------------
+  */</span>
+
+  <span class="comment">//Import the declarative plugins</span>
+  import QtQuick 2.0
+  import &quot;components&quot;
+
+  import QtSensors 5.0
+
+  <span class="type">ApplicationWindow</span> {
+
+      <span class="comment">// Sensor types used</span>
+      <span class="type"><a href="qml-qtsensors-tiltsensor.html">TiltSensor</a></span> {
+          <span class="name">id</span>: <span class="name">tilt</span>
+          <span class="name">active</span>: <span class="number">false</span>
+      }
+
+      <span class="type"><a href="qml-qtsensors-ambientlightsensor.html">AmbientLightSensor</a></span> {
+          <span class="name">id</span>: <span class="name">ambientlight</span>
+          <span class="name">active</span>: <span class="number">false</span>
+          <span class="name">onReadingChanged</span>: {
+              <span class="keyword">if</span> (<span class="name">reading</span>.<span class="name">lightLevel</span> <span class="operator">==</span> <span class="name">AmbientLightReading</span>.<span class="name">Dark</span>)
+                  <span class="name">ambientlighttext</span>.<span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Ambient light: Dark&quot;</span>;
+              <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">reading</span>.<span class="name">lightLevel</span> <span class="operator">==</span> <span class="name">AmbientLightReading</span>.<span class="name">Twilight</span>)
+                  <span class="name">ambientlighttext</span>.<span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Ambient light: Twilight&quot;</span>;
+              <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">reading</span>.<span class="name">lightLevel</span> <span class="operator">==</span> <span class="name">AmbientLightReading</span>.<span class="name">Light</span>)
+                  <span class="name">ambientlighttext</span>.<span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Ambient light: Light&quot;</span>;
+              <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">reading</span>.<span class="name">lightLevel</span> <span class="operator">==</span> <span class="name">AmbientLightReading</span>.<span class="name">Bright</span>)
+                  <span class="name">ambientlighttext</span>.<span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Ambient light: Bright&quot;</span>;
+              <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">reading</span>.<span class="name">lightLevel</span> <span class="operator">==</span> <span class="name">AmbientLightReading</span>.<span class="name">Sunny</span>)
+                  <span class="name">ambientlighttext</span>.<span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Ambient light: Sunny&quot;</span>;
+              <span class="keyword">else</span>
+                  <span class="name">ambientlighttext</span>.<span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Ambient light: Unknown&quot;</span>;
+          }
+      }
+
+      <span class="type"><a href="qml-qtsensors-proximitysensor.html">ProximitySensor</a></span> {
+          <span class="name">id</span>: <span class="name">proxi</span>
+          <span class="name">active</span>: <span class="number">false</span>
+      }
+
+      <span class="type">Column</span> {
+          <span class="name">spacing</span>: <span class="number">10</span>
+          <span class="name">anchors</span>.fill: <span class="name">parent</span>
+          <span class="name">anchors</span>.margins: <span class="number">5</span>
+
+          <span class="type">Text</span> {
+              <span class="name">id</span>: <span class="name">labelTitle</span>
+              <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+              <span class="name">horizontalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignHCenter</span>
+              <span class="name">font</span>.pixelSize: <span class="number">30</span>
+              <span class="name">font</span>.bold: <span class="number">true</span>
+              <span class="name">text</span>: <span class="string">&quot;QML QtSensors&quot;</span>
+          }
+
+          <span class="comment">// Tilt region</span>
+          <span class="type">Divider</span> { <span class="name">label</span>: <span class="string">&quot;TiltSensor&quot;</span> }
+
+          <span class="type">Row</span> {
+              <span class="name">spacing</span>: <span class="number">20</span>
+              <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+              <span class="name">anchors</span>.margins: <span class="number">5</span>
+              <span class="type">Button</span> {
+                  <span class="name">id</span>: <span class="name">calibrate</span>
+                  <span class="name">height</span>: <span class="number">30</span>
+                  <span class="name">width</span>: <span class="number">80</span>
+                  <span class="name">text</span>: <span class="string">&quot;Calibrate&quot;</span>
+                  <span class="name">onClicked</span>: <span class="name">tilt</span>.<span class="name">calibrate</span>();
+              }
+              <span class="type">Text</span> {
+                  <span class="name">id</span>: <span class="name">xrottext</span>
+                  <span class="name">height</span>: <span class="number">30</span>
+                  <span class="name">verticalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignVCenter</span>
+                  <span class="name">text</span>: <span class="string">&quot;X Rotation: &quot;</span> <span class="operator">+</span> (<span class="name">tilt</span>.<span class="name">reading</span> ? <span class="name">tilt</span>.<span class="name">reading</span>.<span class="name">xRotation</span>.<span class="name">toFixed</span>(<span class="number">2</span>) <span class="operator">+</span> <span class="string">&quot;°&quot;</span> : <span class="string">&quot;Unknown&quot;</span>)
+              }
+          }
+          <span class="type">Row</span> {
+              <span class="name">spacing</span>: <span class="number">20</span>
+              <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+              <span class="name">anchors</span>.margins: <span class="number">5</span>
+              <span class="type">Button</span> {
+                  <span class="name">id</span>: <span class="name">tiltStart</span>
+                  <span class="name">height</span>: <span class="number">30</span>
+                  <span class="name">width</span>: <span class="number">80</span>
+                  <span class="name">text</span>: <span class="name">tilt</span>.<span class="name">active</span> ? <span class="string">&quot;Stop&quot;</span> : <span class="string">&quot;Start&quot;</span>
+                  <span class="name">onClicked</span>: {
+                      <span class="name">tilt</span>.<span class="name">active</span> <span class="operator">=</span> (<span class="name">tiltStart</span>.<span class="name">text</span> <span class="operator">===</span> <span class="string">&quot;Start&quot;</span>);
+                  }
+              }
+              <span class="type">Text</span> {
+                  <span class="name">id</span>: <span class="name">yrottext</span>
+                  <span class="name">height</span>: <span class="number">30</span>
+                  <span class="name">verticalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignVCenter</span>
+                  <span class="name">text</span>: <span class="string">&quot;Y Rotation: &quot;</span> <span class="operator">+</span> (<span class="name">tilt</span>.<span class="name">reading</span> ? <span class="name">tilt</span>.<span class="name">reading</span>.<span class="name">yRotation</span>.<span class="name">toFixed</span>(<span class="number">2</span>) <span class="operator">+</span> <span class="string">&quot;°&quot;</span> : <span class="string">&quot;Unknown&quot;</span>)
+              }
+          }
+
+          <span class="type">Divider</span> { <span class="name">label</span>: <span class="string">&quot;AmbientLightSensor&quot;</span> }
+
+          <span class="type">Row</span> {
+              <span class="name">spacing</span>: <span class="number">20</span>
+              <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+              <span class="name">anchors</span>.margins: <span class="number">5</span>
+
+              <span class="type">Button</span>{
+                  <span class="name">id</span>: <span class="name">ambientlightStart</span>
+                  <span class="name">height</span>: <span class="number">30</span>
+                  <span class="name">width</span>: <span class="number">80</span>
+                  <span class="name">text</span>: <span class="name">ambientlight</span>.<span class="name">active</span> ? <span class="string">&quot;Stop&quot;</span> : <span class="string">&quot;Start&quot;</span>
+                  <span class="name">onClicked</span>: {
+                      <span class="name">ambientlight</span>.<span class="name">active</span> <span class="operator">=</span> (<span class="name">ambientlightStart</span>.<span class="name">text</span> <span class="operator">===</span> <span class="string">&quot;Start&quot;</span> ? <span class="number">true</span> : <span class="number">false</span>);
+                  }
+              }
+
+              <span class="type">Text</span> {
+                  <span class="name">id</span>: <span class="name">ambientlighttext</span>
+                  <span class="name">height</span>: <span class="number">30</span>
+                  <span class="name">verticalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignVCenter</span>
+                  <span class="name">text</span>: <span class="string">&quot;Ambient light: Unknown&quot;</span>
+              }
+          }
+
+          <span class="comment">// Proximity region</span>
+          <span class="type">Divider</span> { <span class="name">label</span>: <span class="string">&quot;ProximitySensor&quot;</span> }
+
+          <span class="type">Row</span> {
+              <span class="name">spacing</span>: <span class="number">20</span>
+              <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+              <span class="name">anchors</span>.margins: <span class="number">5</span>
+
+              <span class="type">Button</span> {
+                  <span class="name">id</span>: <span class="name">proxiStart</span>
+                  <span class="name">height</span>: <span class="number">30</span>
+                  <span class="name">width</span>: <span class="number">80</span>
+                  <span class="name">text</span>: <span class="name">proxi</span>.<span class="name">active</span> ? <span class="string">&quot;Stop&quot;</span> : <span class="string">&quot;Start&quot;</span>
+
+                  <span class="name">onClicked</span>: {
+                      <span class="name">proxi</span>.<span class="name">active</span> <span class="operator">=</span> (<span class="name">proxiStart</span>.<span class="name">text</span> <span class="operator">===</span> <span class="string">&quot;Start&quot;</span>  ? <span class="number">true</span>: <span class="number">false</span>);
+                  }
+              }
+
+              <span class="type">Text</span> {
+                  <span class="name">id</span>: <span class="name">proxitext</span>
+                  <span class="name">height</span>: <span class="number">30</span>
+                  <span class="name">verticalAlignment</span>: <span class="name">Text</span>.<span class="name">AlignVCenter</span>
+                  <span class="name">text</span>: <span class="string">&quot;Proximity: &quot;</span> <span class="operator">+</span>
+                        (<span class="name">proxi</span>.<span class="name">active</span> ? (<span class="name">proxi</span>.<span class="name">reading</span>.<span class="name">near</span> ? <span class="string">&quot;Near&quot;</span> : <span class="string">&quot;Far&quot;</span>) : <span class="string">&quot;Unknown&quot;</span>)
+              }
+          }
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@qmlqtsensors/qmlqtsensors.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>widgetgallery.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-widgets-styles-example.html">Styles Example</a></td><td >widgetgallery.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">widgetgallery.cpp Example File</h1>
+<span class="subtitle">widgets/styles/widgetgallery.cpp</span>
+<!-- $$$widgets/styles/widgetgallery.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+
+  <span class="preprocessor">#include &quot;norwegianwoodstyle.h&quot;</span>
+  <span class="preprocessor">#include &quot;widgetgallery.h&quot;</span>
+
+  WidgetGallery<span class="operator">::</span>WidgetGallery(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qdialog.html">QDialog</a></span>(parent)
+  {
+      originalPalette <span class="operator">=</span> <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>palette();
+
+      styleComboBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcombobox.html">QComboBox</a></span>;
+      styleComboBox<span class="operator">-</span><span class="operator">&gt;</span>addItem(<span class="string">&quot;NorwegianWood&quot;</span>);
+      styleComboBox<span class="operator">-</span><span class="operator">&gt;</span>addItems(<span class="type"><a href="qstylefactory.html">QStyleFactory</a></span><span class="operator">::</span>keys());
+
+      styleLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;&amp;Style:&quot;</span>));
+      styleLabel<span class="operator">-</span><span class="operator">&gt;</span>setBuddy(styleComboBox);
+
+      useStylePaletteCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;&amp;Use style's standard palette&quot;</span>));
+      useStylePaletteCheckBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+      disableWidgetsCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;&amp;Disable widgets&quot;</span>));
+
+      createTopLeftGroupBox();
+      createTopRightGroupBox();
+      createBottomLeftTabWidget();
+      createBottomRightGroupBox();
+      createProgressBar();
+
+      connect(styleComboBox<span class="operator">,</span> SIGNAL(activated(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(changeStyle(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>)));
+      connect(useStylePaletteCheckBox<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(changePalette()));
+      connect(disableWidgetsCheckBox<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span>
+              topLeftGroupBox<span class="operator">,</span> SLOT(setDisabled(bool)));
+      connect(disableWidgetsCheckBox<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span>
+              topRightGroupBox<span class="operator">,</span> SLOT(setDisabled(bool)));
+      connect(disableWidgetsCheckBox<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span>
+              bottomLeftTabWidget<span class="operator">,</span> SLOT(setDisabled(bool)));
+      connect(disableWidgetsCheckBox<span class="operator">,</span> SIGNAL(toggled(bool))<span class="operator">,</span>
+              bottomRightGroupBox<span class="operator">,</span> SLOT(setDisabled(bool)));
+
+      <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>topLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span>;
+      topLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(styleLabel);
+      topLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(styleComboBox);
+      topLayout<span class="operator">-</span><span class="operator">&gt;</span>addStretch(<span class="number">1</span>);
+      topLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(useStylePaletteCheckBox);
+      topLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(disableWidgetsCheckBox);
+
+      <span class="type"><a href="qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>mainLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(topLayout<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span>);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(topLeftGroupBox<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(topRightGroupBox<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(bottomLeftTabWidget<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">0</span>);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(bottomRightGroupBox<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">1</span>);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(progressBar<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span>);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>setRowStretch(<span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>setRowStretch(<span class="number">2</span><span class="operator">,</span> <span class="number">1</span>);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>setColumnStretch(<span class="number">0</span><span class="operator">,</span> <span class="number">1</span>);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>setColumnStretch(<span class="number">1</span><span class="operator">,</span> <span class="number">1</span>);
+      setLayout(mainLayout);
+
+      setWindowTitle(tr(<span class="string">&quot;Styles&quot;</span>));
+      changeStyle(<span class="string">&quot;NorwegianWood&quot;</span>);
+  }
+
+  <span class="type">void</span> WidgetGallery<span class="operator">::</span>changeStyle(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>styleName)
+  {
+      <span class="keyword">if</span> (styleName <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;NorwegianWood&quot;</span>) {
+          <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>setStyle(<span class="keyword">new</span> NorwegianWoodStyle);
+      } <span class="keyword">else</span> {
+          <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>setStyle(<span class="type"><a href="qstylefactory.html">QStyleFactory</a></span><span class="operator">::</span>create(styleName));
+      }
+      changePalette();
+  }
+
+  <span class="type">void</span> WidgetGallery<span class="operator">::</span>changePalette()
+  {
+      <span class="keyword">if</span> (useStylePaletteCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked())
+          <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>setPalette(<span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>style()<span class="operator">-</span><span class="operator">&gt;</span>standardPalette());
+      <span class="keyword">else</span>
+          <span class="type"><a href="qapplication.html">QApplication</a></span><span class="operator">::</span>setPalette(originalPalette);
+  }
+
+  <span class="type">void</span> WidgetGallery<span class="operator">::</span>advanceProgressBar()
+  {
+      <span class="type">int</span> curVal <span class="operator">=</span> progressBar<span class="operator">-</span><span class="operator">&gt;</span>value();
+      <span class="type">int</span> maxVal <span class="operator">=</span> progressBar<span class="operator">-</span><span class="operator">&gt;</span>maximum();
+      progressBar<span class="operator">-</span><span class="operator">&gt;</span>setValue(curVal <span class="operator">+</span> (maxVal <span class="operator">-</span> curVal) <span class="operator">/</span> <span class="number">100</span>);
+  }
+
+  <span class="type">void</span> WidgetGallery<span class="operator">::</span>createTopLeftGroupBox()
+  {
+      topLeftGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Group 1&quot;</span>));
+
+      radioButton1 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>(tr(<span class="string">&quot;Radio button 1&quot;</span>));
+      radioButton2 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>(tr(<span class="string">&quot;Radio button 2&quot;</span>));
+      radioButton3 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qradiobutton.html">QRadioButton</a></span>(tr(<span class="string">&quot;Radio button 3&quot;</span>));
+      radioButton1<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+      checkBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Tri-state check box&quot;</span>));
+      checkBox<span class="operator">-</span><span class="operator">&gt;</span>setTristate(<span class="keyword">true</span>);
+      checkBox<span class="operator">-</span><span class="operator">&gt;</span>setCheckState(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>PartiallyChecked);
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(radioButton1);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(radioButton2);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(radioButton3);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(checkBox);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addStretch(<span class="number">1</span>);
+      topLeftGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(layout);
+  }
+
+  <span class="type">void</span> WidgetGallery<span class="operator">::</span>createTopRightGroupBox()
+  {
+      topRightGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Group 2&quot;</span>));
+
+      defaultPushButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;Default Push Button&quot;</span>));
+      defaultPushButton<span class="operator">-</span><span class="operator">&gt;</span>setDefault(<span class="keyword">true</span>);
+
+      togglePushButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;Toggle Push Button&quot;</span>));
+      togglePushButton<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      togglePushButton<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+      flatPushButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qpushbutton.html">QPushButton</a></span>(tr(<span class="string">&quot;Flat Push Button&quot;</span>));
+      flatPushButton<span class="operator">-</span><span class="operator">&gt;</span>setFlat(<span class="keyword">true</span>);
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(defaultPushButton);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(togglePushButton);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(flatPushButton);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addStretch(<span class="number">1</span>);
+      topRightGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(layout);
+  }
+
+  <span class="type">void</span> WidgetGallery<span class="operator">::</span>createBottomLeftTabWidget()
+  {
+      bottomLeftTabWidget <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtabwidget.html">QTabWidget</a></span>;
+      bottomLeftTabWidget<span class="operator">-</span><span class="operator">&gt;</span>setSizePolicy(<span class="type"><a href="qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>Preferred<span class="operator">,</span>
+                                         <span class="type"><a href="qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>Ignored);
+
+      <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>tab1 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qwidget.html">QWidget</a></span>;
+      tableWidget <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtablewidget.html">QTableWidget</a></span>(<span class="number">10</span><span class="operator">,</span> <span class="number">10</span>);
+
+      <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>tab1hbox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span>;
+      tab1hbox<span class="operator">-</span><span class="operator">&gt;</span>setMargin(<span class="number">5</span>);
+      tab1hbox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(tableWidget);
+      tab1<span class="operator">-</span><span class="operator">&gt;</span>setLayout(tab1hbox);
+
+      <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>tab2 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qwidget.html">QWidget</a></span>;
+      textEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtextedit.html">QTextEdit</a></span>;
+
+      textEdit<span class="operator">-</span><span class="operator">&gt;</span>setPlainText(tr(<span class="string">&quot;Twinkle, twinkle, little star,\n&quot;</span>
+                                <span class="string">&quot;How I wonder what you are.\n&quot;</span>
+                                <span class="string">&quot;Up above the world so high,\n&quot;</span>
+                                <span class="string">&quot;Like a diamond in the sky.\n&quot;</span>
+                                <span class="string">&quot;Twinkle, twinkle, little star,\n&quot;</span>
+                                <span class="string">&quot;How I wonder what you are!\n&quot;</span>));
+
+      <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>tab2hbox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span>;
+      tab2hbox<span class="operator">-</span><span class="operator">&gt;</span>setMargin(<span class="number">5</span>);
+      tab2hbox<span class="operator">-</span><span class="operator">&gt;</span>addWidget(textEdit);
+      tab2<span class="operator">-</span><span class="operator">&gt;</span>setLayout(tab2hbox);
+
+      bottomLeftTabWidget<span class="operator">-</span><span class="operator">&gt;</span>addTab(tab1<span class="operator">,</span> tr(<span class="string">&quot;&amp;Table&quot;</span>));
+      bottomLeftTabWidget<span class="operator">-</span><span class="operator">&gt;</span>addTab(tab2<span class="operator">,</span> tr(<span class="string">&quot;Text &amp;Edit&quot;</span>));
+  }
+
+  <span class="type">void</span> WidgetGallery<span class="operator">::</span>createBottomRightGroupBox()
+  {
+      bottomRightGroupBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgroupbox.html">QGroupBox</a></span>(tr(<span class="string">&quot;Group 3&quot;</span>));
+      bottomRightGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      bottomRightGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setChecked(<span class="keyword">true</span>);
+
+      lineEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlineedit.html">QLineEdit</a></span>(<span class="string">&quot;s3cRe7&quot;</span>);
+      lineEdit<span class="operator">-</span><span class="operator">&gt;</span>setEchoMode(<span class="type"><a href="qlineedit.html">QLineEdit</a></span><span class="operator">::</span>Password);
+
+      spinBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qspinbox.html">QSpinBox</a></span>(bottomRightGroupBox);
+      spinBox<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="number">50</span>);
+
+      dateTimeEdit <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qdatetimeedit.html">QDateTimeEdit</a></span>(bottomRightGroupBox);
+      dateTimeEdit<span class="operator">-</span><span class="operator">&gt;</span>setDateTime(<span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span><span class="operator">::</span>currentDateTime());
+
+      slider <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qslider.html">QSlider</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal<span class="operator">,</span> bottomRightGroupBox);
+      slider<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="number">40</span>);
+
+      scrollBar <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qscrollbar.html">QScrollBar</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal<span class="operator">,</span> bottomRightGroupBox);
+      scrollBar<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="number">60</span>);
+
+      dial <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qdial.html">QDial</a></span>(bottomRightGroupBox);
+      dial<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="number">30</span>);
+      dial<span class="operator">-</span><span class="operator">&gt;</span>setNotchesVisible(<span class="keyword">true</span>);
+
+      <span class="type"><a href="qgridlayout.html">QGridLayout</a></span> <span class="operator">*</span>layout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(lineEdit<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(spinBox<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(dateTimeEdit<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(slider<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(scrollBar<span class="operator">,</span> <span class="number">4</span><span class="operator">,</span> <span class="number">0</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(dial<span class="operator">,</span> <span class="number">3</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">1</span>);
+      layout<span class="operator">-</span><span class="operator">&gt;</span>setRowStretch(<span class="number">5</span><span class="operator">,</span> <span class="number">1</span>);
+      bottomRightGroupBox<span class="operator">-</span><span class="operator">&gt;</span>setLayout(layout);
+  }
+
+  <span class="type">void</span> WidgetGallery<span class="operator">::</span>createProgressBar()
+  {
+      progressBar <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qprogressbar.html">QProgressBar</a></span>;
+      progressBar<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="number">0</span><span class="operator">,</span> <span class="number">10000</span>);
+      progressBar<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="number">0</span>);
+
+      <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span> <span class="operator">*</span>timer <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qtimer.html">QTimer</a></span>(<span class="keyword">this</span>);
+      connect(timer<span class="operator">,</span> SIGNAL(timeout())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(advanceProgressBar()));
+      timer<span class="operator">-</span><span class="operator">&gt;</span>start(<span class="number">1000</span>);
+  }
+
+</pre>
+</div>
+<!-- @@@widgets/styles/widgetgallery.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

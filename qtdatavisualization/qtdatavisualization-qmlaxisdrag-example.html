@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qmlaxisdrag.qdoc -->
+  <title>Qt Quick 2 Axis Dragging Example | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td >Qt Quick 2 Axis Dragging Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#overriding-default-input-handling">Overriding default input handling</a></li>
+<li class="level1"><a href="#translating-mouse-movement-to-axis-range-change">Translating mouse movement to axis range change</a></li>
+<li class="level1"><a href="#other-features">Other features</a></li>
+<li class="level1"><a href="#example-contents">Example contents</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Quick 2 Axis Dragging Example</h1>
+<span class="subtitle"></span>
+<!-- $$$qmlaxisdrag-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Qt Quick 2 axis dragging example concentrates on showing how to implement axis range changing by dragging axis labels in QML. It also gives a quick peek to two other new features in Qt Data Visualization 1.1: orthographic projection and dynamic custom item handling.</p>
+<p class="centerAlign"><img src="images/qmlaxisdrag-example.png" alt="" /></p><a name="overriding-default-input-handling"></a>
+<h2 id="overriding-default-input-handling">Overriding default input handling</h2>
+<p>First we deactivate the default input handling mechanism by setting the active input handler of <a href="qml-qtdatavisualization-scatter3d.html">Scatter3D</a> graph to <code>null</code>:</p>
+<pre class="qml">
+
+  <span class="type"><a href="qml-qtdatavisualization-scatter3d.html">Scatter3D</a></span> {
+      <span class="name">id</span>: <span class="name">scatterGraph</span>
+      <span class="name">inputHandler</span>: <span class="number">null</span>
+      ...
+
+</pre>
+<p>Then we add a <a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a> and set it to fill the parent, which is the same <code>Item</code> our <code>scatterGraph</code> is contained in. We also set it to accept only left mouse button presses, as in this example we are not interested in other buttons:</p>
+<pre class="qml">
+
+  <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+      <span class="name">anchors</span>.fill: <span class="name">parent</span>
+      <span class="name">hoverEnabled</span>: <span class="number">true</span>
+      <span class="name">acceptedButtons</span>: <span class="name">Qt</span>.<span class="name">LeftButton</span>
+      ...
+
+</pre>
+<p>Then we need to listen to mouse presses, and when caught, send a selection query to the graph:</p>
+<pre class="qml">
+
+  <span class="name">onPressed</span>: {
+      <span class="name">scatterGraph</span>.<span class="name">scene</span>.<span class="name">selectionQueryPosition</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">point</span>(<span class="name">mouse</span>.<span class="name">x</span>, <span class="name">mouse</span>.<span class="name">y</span>);
+  }
+
+</pre>
+<p>Current mouse position, that will be needed for move distance calculation, is caught in <code>onPositionChanged</code>:</p>
+<pre class="qml">
+
+  <span class="name">onPositionChanged</span>: {
+      <span class="name">currentMouseX</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">x</span>;
+      <span class="name">currentMouseY</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">y</span>;
+      ...
+
+</pre>
+<p>At the end of <code>onPositionChanged</code>, we'll save the previous mouse position for move distance calculation that will be introduced later:</p>
+<pre class="qml">
+
+  ...
+  <span class="name">previousMouseX</span> <span class="operator">=</span> <span class="name">currentMouseX</span>;
+  <span class="name">previousMouseY</span> <span class="operator">=</span> <span class="name">currentMouseY</span>;
+  }
+
+</pre>
+<a name="translating-mouse-movement-to-axis-range-change"></a>
+<h2 id="translating-mouse-movement-to-axis-range-change">Translating mouse movement to axis range change</h2>
+<p>in <code>scatterGraph</code> we will need to listen to <code>onSelectedElementChanged</code> signal. The signal is emitted after the selection query has been made in the <code>onPressed</code> of <code>inputArea</code>. We set the element type into a property we defined (<code>property int selectedAxisLabel: -1</code>) in our main component, since it is of a type we are interested in:</p>
+<pre class="qml">
+
+  <span class="name">onSelectedElementChanged</span>: {
+      <span class="keyword">if</span> (<span class="name">selectedElement</span> <span class="operator">&gt;=</span> <span class="name">AbstractGraph3D</span>.<span class="name">ElementAxisXLabel</span>
+              <span class="operator">&amp;&amp;</span> <span class="name">selectedElement</span> <span class="operator">&lt;=</span> <span class="name">AbstractGraph3D</span>.<span class="name">ElementAxisZLabel</span>)
+          <span class="name">selectedAxisLabel</span> <span class="operator">=</span> <span class="name">selectedElement</span>
+      <span class="keyword">else</span>
+          <span class="name">selectedAxisLabel</span> <span class="operator">=</span> -<span class="number">1</span>
+  }
+
+</pre>
+<p>Then, back in the <code>onPositionChanged</code> of <code>inputArea</code>, we check if a mouse button is pressed and if we have a current axis label selection. If the conditions are met, we'll call the function that does the conversion from mouse movement to axis range update:</p>
+<pre class="qml">
+
+  ...
+  <span class="keyword">if</span> (<span class="name">pressed</span> <span class="operator">&amp;&amp;</span> <span class="name">selectedAxisLabel</span> <span class="operator">!=</span> -<span class="number">1</span>)
+      <span class="name">dragAxis</span>();
+  ...
+
+</pre>
+<p>The conversion is easy in this case, as we have a fixed camera rotation. We can use some precalculated values, calculate mouse move distance, and apply the values to the selected axis range:</p>
+<pre class="qml">
+
+  <span class="keyword">function</span> <span class="name">dragAxis</span>() {
+      <span class="comment">// Do nothing if previous mouse position is uninitialized</span>
+      <span class="keyword">if</span> (<span class="name">previousMouseX</span> <span class="operator">===</span> -<span class="number">1</span>)
+          <span class="keyword">return</span>
+
+      <span class="comment">// Directional drag multipliers based on rotation. Camera is locked to 45 degrees, so we</span>
+      <span class="comment">// can use one precalculated value instead of calculating xx, xy, zx and zy individually</span>
+      var <span class="name">cameraMultiplier</span> = <span class="number">0.70710678</span>
+
+      <span class="comment">// Calculate the mouse move amount</span>
+      var <span class="name">moveX</span> = <span class="name">currentMouseX</span> <span class="operator">-</span> <span class="name">previousMouseX</span>
+      var <span class="name">moveY</span> = <span class="name">currentMouseY</span> <span class="operator">-</span> <span class="name">previousMouseY</span>
+
+      <span class="comment">// Adjust axes</span>
+      <span class="keyword">switch</span> (<span class="name">selectedAxisLabel</span>) {
+      <span class="keyword">case</span> <span class="name">AbstractGraph3D</span>.<span class="name">ElementAxisXLabel</span>:
+          var <span class="name">distance</span> = ((<span class="name">moveX</span> <span class="operator">-</span> <span class="name">moveY</span>) <span class="operator">*</span> <span class="name">cameraMultiplier</span>) <span class="operator">/</span> <span class="name">dragSpeedModifier</span>
+          <span class="comment">// Check if we need to change min or max first to avoid invalid ranges</span>
+          <span class="keyword">if</span> (<span class="name">distance</span> <span class="operator">&gt;</span> <span class="number">0</span>) {
+              <span class="name">scatterGraph</span>.<span class="name">axisX</span>.<span class="name">min</span> <span class="operator">-=</span> <span class="name">distance</span>
+              <span class="name">scatterGraph</span>.<span class="name">axisX</span>.<span class="name">max</span> <span class="operator">-=</span> <span class="name">distance</span>
+          } <span class="keyword">else</span> {
+              <span class="name">scatterGraph</span>.<span class="name">axisX</span>.<span class="name">max</span> <span class="operator">-=</span> <span class="name">distance</span>
+              <span class="name">scatterGraph</span>.<span class="name">axisX</span>.<span class="name">min</span> <span class="operator">-=</span> <span class="name">distance</span>
+          }
+          <span class="keyword">break</span>
+      <span class="keyword">case</span> <span class="name">AbstractGraph3D</span>.<span class="name">ElementAxisYLabel</span>:
+          <span class="name">distance</span> <span class="operator">=</span> <span class="name">moveY</span> <span class="operator">/</span> <span class="name">dragSpeedModifier</span>
+          <span class="comment">// Check if we need to change min or max first to avoid invalid ranges</span>
+          <span class="keyword">if</span> (<span class="name">distance</span> <span class="operator">&gt;</span> <span class="number">0</span>) {
+              <span class="name">scatterGraph</span>.<span class="name">axisY</span>.<span class="name">max</span> <span class="operator">+=</span> <span class="name">distance</span>
+              <span class="name">scatterGraph</span>.<span class="name">axisY</span>.<span class="name">min</span> <span class="operator">+=</span> <span class="name">distance</span>
+          } <span class="keyword">else</span> {
+              <span class="name">scatterGraph</span>.<span class="name">axisY</span>.<span class="name">min</span> <span class="operator">+=</span> <span class="name">distance</span>
+              <span class="name">scatterGraph</span>.<span class="name">axisY</span>.<span class="name">max</span> <span class="operator">+=</span> <span class="name">distance</span>
+          }
+          <span class="keyword">break</span>
+      <span class="keyword">case</span> <span class="name">AbstractGraph3D</span>.<span class="name">ElementAxisZLabel</span>:
+          <span class="name">distance</span> <span class="operator">=</span> ((<span class="name">moveX</span> <span class="operator">+</span> <span class="name">moveY</span>) <span class="operator">*</span> <span class="name">cameraMultiplier</span>) <span class="operator">/</span> <span class="name">dragSpeedModifier</span>
+          <span class="comment">// Check if we need to change min or max first to avoid invalid ranges</span>
+          <span class="keyword">if</span> (<span class="name">distance</span> <span class="operator">&gt;</span> <span class="number">0</span>) {
+              <span class="name">scatterGraph</span>.<span class="name">axisZ</span>.<span class="name">max</span> <span class="operator">+=</span> <span class="name">distance</span>
+              <span class="name">scatterGraph</span>.<span class="name">axisZ</span>.<span class="name">min</span> <span class="operator">+=</span> <span class="name">distance</span>
+          } <span class="keyword">else</span> {
+              <span class="name">scatterGraph</span>.<span class="name">axisZ</span>.<span class="name">min</span> <span class="operator">+=</span> <span class="name">distance</span>
+              <span class="name">scatterGraph</span>.<span class="name">axisZ</span>.<span class="name">max</span> <span class="operator">+=</span> <span class="name">distance</span>
+          }
+          <span class="keyword">break</span>
+      }
+  }
+
+</pre>
+<p>For a more sophisticated conversion from mouse movement to axis range update, see <a href="qtdatavisualization-draggableaxes-example.html">this example</a>.</p>
+<a name="other-features"></a>
+<h2 id="other-features">Other features</h2>
+<p>The example also demonstrates how to use orthographic projection and how to update properties of a custom item on the fly.</p>
+<p>Orthographic projection is very simple. You'll just need to change <code>orthoProjection</code> property of <code>scatterGraph</code>. In this example we have a button for toggling it on and off:</p>
+<pre class="qml">
+
+  <span class="type">NewButton</span> {
+      <span class="name">id</span>: <span class="name">orthoToggle</span>
+      <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">3</span>
+      <span class="name">text</span>: <span class="string">&quot;Display Orthographic&quot;</span>
+      <span class="name">anchors</span>.left: <span class="name">rangeToggle</span>.<span class="name">right</span>
+      <span class="name">onClicked</span>: {
+          <span class="keyword">if</span> (<span class="name">scatterGraph</span>.<span class="name">orthoProjection</span>) {
+              <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Display Orthographic&quot;</span>;
+              <span class="name">scatterGraph</span>.<span class="name">orthoProjection</span> <span class="operator">=</span> <span class="number">false</span>
+              <span class="comment">// Orthographic projection disables shadows, so we need to switch them back on</span>
+              <span class="name">scatterGraph</span>.<span class="name">shadowQuality</span> <span class="operator">=</span> <span class="name">AbstractGraph3D</span>.<span class="name">ShadowQualityLow</span>
+          } <span class="keyword">else</span> {
+              <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Display Perspective&quot;</span>;
+              <span class="name">scatterGraph</span>.<span class="name">orthoProjection</span> <span class="operator">=</span> <span class="number">true</span>
+          }
+      }
+  }
+
+</pre>
+<p>For custom items, first we'll add one in the <code>customItemList</code> of <code>scatterGraph</code>:</p>
+<pre class="qml">
+
+  <span class="name">customItemList</span>: [
+      <span class="type"><a href="qml-qtdatavisualization-custom3ditem.html">Custom3DItem</a></span> {
+          <span class="name">id</span>: <span class="name">qtCube</span>
+          <span class="name">meshFile</span>: <span class="string">&quot;:/mesh/cube&quot;</span>
+          <span class="name">textureFile</span>: <span class="string">&quot;:/texture/texture&quot;</span>
+          <span class="name">position</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">0.65</span>,<span class="number">0.35</span>,<span class="number">0.65</span>)
+          <span class="name">scaling</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">0.3</span>,<span class="number">0.3</span>,<span class="number">0.3</span>)
+      }
+  ]
+
+</pre>
+<p>We have implemented a timer to add, remove, and rotate all the items in the graph, and we'll use the same timer for rotating the custom item:</p>
+<pre class="qml">
+
+  <span class="name">onTriggered</span>: {
+      <span class="name">rotationAngle</span> <span class="operator">=</span> <span class="name">rotationAngle</span> <span class="operator">+</span> <span class="number">1</span>
+      <span class="name">qtCube</span>.<span class="name">setRotationAxisAndAngle</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>), <span class="name">rotationAngle</span>)
+      ...
+
+</pre>
+<a name="example-contents"></a>
+<h2 id="example-contents">Example contents</h2>
+<p>Files:</p>
+<ul>
+<li><a href="qtdatavisualization-qmlaxisdrag-qml-qmlaxisdrag-newbutton-qml.html">qmlaxisdrag/qml/qmlaxisdrag/NewButton.qml</a></li>
+<li><a href="qtdatavisualization-qmlaxisdrag-qml-qmlaxisdrag-main-qml.html">qmlaxisdrag/qml/qmlaxisdrag/main.qml</a></li>
+<li><a href="qtdatavisualization-qmlaxisdrag-main-cpp.html">qmlaxisdrag/main.cpp</a></li>
+<li><a href="qtdatavisualization-qmlaxisdrag-qmlaxisdrag-pro.html">qmlaxisdrag/qmlaxisdrag.pro</a></li>
+<li><a href="qtdatavisualization-qmlaxisdrag-qmlaxisdrag-qrc.html">qmlaxisdrag/qmlaxisdrag.qrc</a></li>
+</ul>
+</div>
+<!-- @@@qmlaxisdrag -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

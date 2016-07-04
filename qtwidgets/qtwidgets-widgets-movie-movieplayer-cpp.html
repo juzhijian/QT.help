@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>movieplayer.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-widgets-movie-example.html">Movie Example</a></td><td >movieplayer.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">movieplayer.cpp Example File</h1>
+<span class="subtitle">widgets/movie/movieplayer.cpp</span>
+<!-- $$$widgets/movie/movieplayer.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+
+  <span class="preprocessor">#include &quot;movieplayer.h&quot;</span>
+
+  MoviePlayer<span class="operator">::</span>MoviePlayer(<span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qwidget.html">QWidget</a></span>(parent)
+  {
+      movie <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtgui/qmovie.html">QMovie</a></span>(<span class="keyword">this</span>);
+      movie<span class="operator">-</span><span class="operator">&gt;</span>setCacheMode(<span class="type"><a href="../qtgui/qmovie.html">QMovie</a></span><span class="operator">::</span>CacheAll);
+
+      movieLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;No movie loaded&quot;</span>));
+      movieLabel<span class="operator">-</span><span class="operator">&gt;</span>setAlignment(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>AlignCenter);
+      movieLabel<span class="operator">-</span><span class="operator">&gt;</span>setSizePolicy(<span class="type"><a href="qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>Ignored<span class="operator">,</span> <span class="type"><a href="qsizepolicy.html">QSizePolicy</a></span><span class="operator">::</span>Ignored);
+      movieLabel<span class="operator">-</span><span class="operator">&gt;</span>setBackgroundRole(<span class="type"><a href="../qtgui/qpalette.html">QPalette</a></span><span class="operator">::</span>Dark);
+      movieLabel<span class="operator">-</span><span class="operator">&gt;</span>setAutoFillBackground(<span class="keyword">true</span>);
+
+      currentMovieDirectory <span class="operator">=</span> <span class="string">&quot;movies&quot;</span>;
+
+      createControls();
+      createButtons();
+
+      connect(movie<span class="operator">,</span> SIGNAL(frameChanged(<span class="type">int</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(updateFrameSlider()));
+      connect(movie<span class="operator">,</span> SIGNAL(stateChanged(<span class="type"><a href="../qtgui/qmovie.html">QMovie</a></span><span class="operator">::</span>MovieState))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(updateButtons()));
+      connect(fitCheckBox<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(fitToWindow()));
+      connect(frameSlider<span class="operator">,</span> SIGNAL(valueChanged(<span class="type">int</span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(goToFrame(<span class="type">int</span>)));
+      connect(speedSpinBox<span class="operator">,</span> SIGNAL(valueChanged(<span class="type">int</span>))<span class="operator">,</span>
+              movie<span class="operator">,</span> SLOT(setSpeed(<span class="type">int</span>)));
+
+      mainLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(movieLabel);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(controlsLayout);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(buttonsLayout);
+      setLayout(mainLayout);
+
+      updateFrameSlider();
+      updateButtons();
+
+      setWindowTitle(tr(<span class="string">&quot;Movie Player&quot;</span>));
+      resize(<span class="number">400</span><span class="operator">,</span> <span class="number">400</span>);
+  }
+
+  <span class="type">void</span> MoviePlayer<span class="operator">::</span>open()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getOpenFileName(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Open a Movie&quot;</span>)<span class="operator">,</span>
+                                 currentMovieDirectory);
+      <span class="keyword">if</span> (<span class="operator">!</span>fileName<span class="operator">.</span>isEmpty())
+          openFile(fileName);
+  }
+
+  <span class="type">void</span> MoviePlayer<span class="operator">::</span>openFile(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      currentMovieDirectory <span class="operator">=</span> <span class="type"><a href="../qtcore/qfileinfo.html">QFileInfo</a></span>(fileName)<span class="operator">.</span>path();
+
+      movie<span class="operator">-</span><span class="operator">&gt;</span>stop();
+      movieLabel<span class="operator">-</span><span class="operator">&gt;</span>setMovie(movie);
+      movie<span class="operator">-</span><span class="operator">&gt;</span>setFileName(fileName);
+      movie<span class="operator">-</span><span class="operator">&gt;</span>start();
+
+      updateFrameSlider();
+      updateButtons();
+  }
+
+  <span class="type">void</span> MoviePlayer<span class="operator">::</span>goToFrame(<span class="type">int</span> frame)
+  {
+      movie<span class="operator">-</span><span class="operator">&gt;</span>jumpToFrame(frame);
+  }
+
+  <span class="type">void</span> MoviePlayer<span class="operator">::</span>fitToWindow()
+  {
+      movieLabel<span class="operator">-</span><span class="operator">&gt;</span>setScaledContents(fitCheckBox<span class="operator">-</span><span class="operator">&gt;</span>isChecked());
+  }
+
+  <span class="type">void</span> MoviePlayer<span class="operator">::</span>updateFrameSlider()
+  {
+      bool hasFrames <span class="operator">=</span> (movie<span class="operator">-</span><span class="operator">&gt;</span>currentFrameNumber() <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span>);
+
+      <span class="keyword">if</span> (hasFrames) {
+          <span class="keyword">if</span> (movie<span class="operator">-</span><span class="operator">&gt;</span>frameCount() <span class="operator">&gt;</span> <span class="number">0</span>) {
+              frameSlider<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(movie<span class="operator">-</span><span class="operator">&gt;</span>frameCount() <span class="operator">-</span> <span class="number">1</span>);
+          } <span class="keyword">else</span> {
+              <span class="keyword">if</span> (movie<span class="operator">-</span><span class="operator">&gt;</span>currentFrameNumber() <span class="operator">&gt;</span> frameSlider<span class="operator">-</span><span class="operator">&gt;</span>maximum())
+                  frameSlider<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(movie<span class="operator">-</span><span class="operator">&gt;</span>currentFrameNumber());
+          }
+          frameSlider<span class="operator">-</span><span class="operator">&gt;</span>setValue(movie<span class="operator">-</span><span class="operator">&gt;</span>currentFrameNumber());
+      } <span class="keyword">else</span> {
+          frameSlider<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(<span class="number">0</span>);
+      }
+      frameLabel<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(hasFrames);
+      frameSlider<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(hasFrames);
+  }
+
+  <span class="type">void</span> MoviePlayer<span class="operator">::</span>updateButtons()
+  {
+      playButton<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(movie<span class="operator">-</span><span class="operator">&gt;</span>isValid() <span class="operator">&amp;</span><span class="operator">&amp;</span> movie<span class="operator">-</span><span class="operator">&gt;</span>frameCount() <span class="operator">!</span><span class="operator">=</span> <span class="number">1</span>
+                             <span class="operator">&amp;</span><span class="operator">&amp;</span> movie<span class="operator">-</span><span class="operator">&gt;</span>state() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtgui/qmovie.html">QMovie</a></span><span class="operator">::</span>NotRunning);
+      pauseButton<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(movie<span class="operator">-</span><span class="operator">&gt;</span>state() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtgui/qmovie.html">QMovie</a></span><span class="operator">::</span>NotRunning);
+      pauseButton<span class="operator">-</span><span class="operator">&gt;</span>setChecked(movie<span class="operator">-</span><span class="operator">&gt;</span>state() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtgui/qmovie.html">QMovie</a></span><span class="operator">::</span>Paused);
+      stopButton<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(movie<span class="operator">-</span><span class="operator">&gt;</span>state() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtgui/qmovie.html">QMovie</a></span><span class="operator">::</span>NotRunning);
+  }
+
+  <span class="type">void</span> MoviePlayer<span class="operator">::</span>createControls()
+  {
+      fitCheckBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qcheckbox.html">QCheckBox</a></span>(tr(<span class="string">&quot;Fit to Window&quot;</span>));
+
+      frameLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Current frame:&quot;</span>));
+
+      frameSlider <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qslider.html">QSlider</a></span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal);
+      frameSlider<span class="operator">-</span><span class="operator">&gt;</span>setTickPosition(<span class="type"><a href="qslider.html">QSlider</a></span><span class="operator">::</span>TicksBelow);
+      frameSlider<span class="operator">-</span><span class="operator">&gt;</span>setTickInterval(<span class="number">10</span>);
+
+      speedLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Speed:&quot;</span>));
+
+      speedSpinBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qspinbox.html">QSpinBox</a></span>;
+      speedSpinBox<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="number">1</span><span class="operator">,</span> <span class="number">9999</span>);
+      speedSpinBox<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="number">100</span>);
+      speedSpinBox<span class="operator">-</span><span class="operator">&gt;</span>setSuffix(tr(<span class="string">&quot;%&quot;</span>));
+
+      controlsLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgridlayout.html">QGridLayout</a></span>;
+      controlsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(fitCheckBox<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span>);
+      controlsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(frameLabel<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">0</span>);
+      controlsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(frameSlider<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">2</span>);
+      controlsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(speedLabel<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">0</span>);
+      controlsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(speedSpinBox<span class="operator">,</span> <span class="number">2</span><span class="operator">,</span> <span class="number">1</span>);
+  }
+
+  <span class="type">void</span> MoviePlayer<span class="operator">::</span>createButtons()
+  {
+      <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> iconSize(<span class="number">36</span><span class="operator">,</span> <span class="number">36</span>);
+
+      openButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtoolbutton.html">QToolButton</a></span>;
+      openButton<span class="operator">-</span><span class="operator">&gt;</span>setIcon(style()<span class="operator">-</span><span class="operator">&gt;</span>standardIcon(<span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>SP_DialogOpenButton));
+      openButton<span class="operator">-</span><span class="operator">&gt;</span>setIconSize(iconSize);
+      openButton<span class="operator">-</span><span class="operator">&gt;</span>setToolTip(tr(<span class="string">&quot;Open File&quot;</span>));
+      connect(openButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(open()));
+
+      playButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtoolbutton.html">QToolButton</a></span>;
+      playButton<span class="operator">-</span><span class="operator">&gt;</span>setIcon(style()<span class="operator">-</span><span class="operator">&gt;</span>standardIcon(<span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>SP_MediaPlay));
+      playButton<span class="operator">-</span><span class="operator">&gt;</span>setIconSize(iconSize);
+      playButton<span class="operator">-</span><span class="operator">&gt;</span>setToolTip(tr(<span class="string">&quot;Play&quot;</span>));
+      connect(playButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> movie<span class="operator">,</span> SLOT(start()));
+
+      pauseButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtoolbutton.html">QToolButton</a></span>;
+      pauseButton<span class="operator">-</span><span class="operator">&gt;</span>setCheckable(<span class="keyword">true</span>);
+      pauseButton<span class="operator">-</span><span class="operator">&gt;</span>setIcon(style()<span class="operator">-</span><span class="operator">&gt;</span>standardIcon(<span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>SP_MediaPause));
+      pauseButton<span class="operator">-</span><span class="operator">&gt;</span>setIconSize(iconSize);
+      pauseButton<span class="operator">-</span><span class="operator">&gt;</span>setToolTip(tr(<span class="string">&quot;Pause&quot;</span>));
+      connect(pauseButton<span class="operator">,</span> SIGNAL(clicked(bool))<span class="operator">,</span> movie<span class="operator">,</span> SLOT(setPaused(bool)));
+
+      stopButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtoolbutton.html">QToolButton</a></span>;
+      stopButton<span class="operator">-</span><span class="operator">&gt;</span>setIcon(style()<span class="operator">-</span><span class="operator">&gt;</span>standardIcon(<span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>SP_MediaStop));
+      stopButton<span class="operator">-</span><span class="operator">&gt;</span>setIconSize(iconSize);
+      stopButton<span class="operator">-</span><span class="operator">&gt;</span>setToolTip(tr(<span class="string">&quot;Stop&quot;</span>));
+      connect(stopButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> movie<span class="operator">,</span> SLOT(stop()));
+
+      quitButton <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtoolbutton.html">QToolButton</a></span>;
+      quitButton<span class="operator">-</span><span class="operator">&gt;</span>setIcon(style()<span class="operator">-</span><span class="operator">&gt;</span>standardIcon(<span class="type"><a href="qstyle.html">QStyle</a></span><span class="operator">::</span>SP_DialogCloseButton));
+      quitButton<span class="operator">-</span><span class="operator">&gt;</span>setIconSize(iconSize);
+      quitButton<span class="operator">-</span><span class="operator">&gt;</span>setToolTip(tr(<span class="string">&quot;Quit&quot;</span>));
+      connect(quitButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(close()));
+
+      buttonsLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span>;
+      buttonsLayout<span class="operator">-</span><span class="operator">&gt;</span>addStretch();
+      buttonsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(openButton);
+      buttonsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(playButton);
+      buttonsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(pauseButton);
+      buttonsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(stopButton);
+      buttonsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(quitButton);
+      buttonsLayout<span class="operator">-</span><span class="operator">&gt;</span>addStretch();
+  }
+
+</pre>
+</div>
+<!-- @@@widgets/movie/movieplayer.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

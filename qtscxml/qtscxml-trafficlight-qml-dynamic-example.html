@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- trafficlight-qml-dynamic.qdoc -->
+  <title>Qt SCXML Traffic Light QML Example (Dynamic) | Qt SCXML 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtscxml-index.html">Qt SCXML</a></td><td >Qt SCXML Traffic Light QML Example (Dynamic)</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#running-the-example">Running the Example</a></li>
+<li class="level1"><a href="#dynamically-loading-the-state-machine">Dynamically Loading the State Machine</a></li>
+<li class="level1"><a href="#connecting-to-states">Connecting to States</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt SCXML Traffic Light QML Example (Dynamic)</h1>
+<span class="subtitle"></span>
+<!-- $$$trafficlight-qml-dynamic-description -->
+<div class="descr"> <a name="details"></a>
+<p class="centerAlign"><img src="images/trafficlight.png" alt="" /></p><p><i>Traffic Light QML Example (Dynamic)</i> demonstrates how to connect to the active properties of a state in a dynamically loaded state machine.</p>
+<p>The UI is created using Qt Quick.</p>
+<a name="running-the-example"></a>
+<h2 id="running-the-example">Running the Example</h2>
+<p>To run the example from <a href="http://doc.qt.io/qtcreator/index.html">Qt Creator</a>, open the <b>Welcome</b> mode and select the example from <b>Examples</b>. For more information, visit <a href="http://doc.qt.io/qtcreator/creator-build-example-application.html">Building and Running an Example</a>.</p>
+<a name="dynamically-loading-the-state-machine"></a>
+<h2 id="dynamically-loading-the-state-machine">Dynamically Loading the State Machine</h2>
+<p>We link against the Qt SCXML module by adding the following line to the example <i>.pro</i> file:</p>
+<pre class="qml">
+
+  QT += qml scxml
+
+</pre>
+<p>We dynamically create the state machine in the main QML file:</p>
+<pre class="qml">
+
+  import QtScxml 5.7 as Scxml
+
+  <span class="type">TrafficLight</span> {
+      <span class="type"><a href="scxml-qmlmodule.html">Scxml</a></span>.StateMachineLoader {
+          <span class="name">id</span>: <span class="name">loader</span>
+          <span class="name">filename</span>: <span class="string">&quot;qrc:///statemachine.scxml&quot;</span>
+      }
+
+      <span class="name">stateMachine</span>: <span class="name">loader</span>.<span class="name">stateMachine</span>
+  }
+
+</pre>
+<a name="connecting-to-states"></a>
+<h2 id="connecting-to-states">Connecting to States</h2>
+<p>In the SCXML file, we specify states for each light: red, yellow, and green. In the <code>&lt;onentry&gt;</code> element, we specify the event to send when entering the state and the delay in seconds before sending the event. In the <code>&lt;transition&gt;</code> element, we specify the event that triggers the transition to the state specified by the <code>target</code> attribute:</p>
+<pre class="qml">
+
+          &lt;state id=&quot;red&quot;&gt;
+              &lt;onentry&gt;
+                  &lt;send event=&quot;startGoingGreen&quot; delay=&quot;3s&quot;/&gt;
+              &lt;/onentry&gt;
+              &lt;transition event=&quot;startGoingGreen&quot; target=&quot;redGoingGreen&quot;/&gt;
+          &lt;/state&gt;
+
+          &lt;state id=&quot;yellow&quot; initial=&quot;greenGoingRed&quot;&gt;
+              &lt;state id=&quot;redGoingGreen&quot;&gt;
+                  &lt;onentry&gt;
+                      &lt;send event=&quot;goGreen&quot; delay=&quot;1s&quot;/&gt;
+                  &lt;/onentry&gt;
+                  &lt;transition event=&quot;goGreen&quot; target=&quot;green&quot;/&gt;
+              &lt;/state&gt;
+
+              &lt;state id=&quot;greenGoingRed&quot;&gt;
+                  &lt;onentry&gt;
+                      &lt;send event=&quot;goRed&quot; delay=&quot;1s&quot;/&gt;
+                  &lt;/onentry&gt;
+                  &lt;transition event=&quot;goRed&quot; target=&quot;red&quot;/&gt;
+              &lt;/state&gt;
+          &lt;/state&gt;
+
+          &lt;state id=&quot;green&quot;&gt;
+              &lt;onentry&gt;
+                  &lt;send event=&quot;startGoingRed&quot; delay=&quot;3s&quot;/&gt;
+              &lt;/onentry&gt;
+              &lt;transition event=&quot;startGoingRed&quot; target=&quot;greenGoingRed&quot;/&gt;
+          &lt;/state&gt;
+
+</pre>
+<p>We connect to the states as follows:</p>
+<pre class="qml">
+
+          <span class="type">Image</span> {
+              <span class="name">id</span>: <span class="name">redLight</span>
+              <span class="name">x</span>: (<span class="name">lights</span>.<span class="name">width</span> <span class="operator">-</span> <span class="name">width</span>) <span class="operator">/</span> <span class="number">2</span>
+              <span class="name">y</span>: <span class="number">40</span>
+              <span class="name">source</span>: <span class="string">&quot;qrc:///red.png&quot;</span>
+              <span class="name">visible</span>: <span class="name">stateMachine</span>.<span class="name">red</span> <span class="operator">||</span> <span class="name">stateMachine</span>.<span class="name">redGoingGreen</span>
+          }
+
+          <span class="type">Image</span> {
+              <span class="name">id</span>: <span class="name">yellowLight</span>
+              <span class="name">x</span>: (<span class="name">lights</span>.<span class="name">width</span> <span class="operator">-</span> <span class="name">width</span>) <span class="operator">/</span> <span class="number">2</span>
+              <span class="name">y</span>: <span class="number">135</span>
+              <span class="name">source</span>: <span class="string">&quot;qrc:///yellow.png&quot;</span>
+              <span class="name">visible</span>: <span class="name">stateMachine</span>.<span class="name">yellow</span> <span class="operator">||</span> <span class="name">stateMachine</span>.<span class="name">blinking</span>
+          }
+
+          <span class="type">Image</span> {
+              <span class="name">id</span>: <span class="name">greenLight</span>
+              <span class="name">x</span>: (<span class="name">lights</span>.<span class="name">width</span> <span class="operator">-</span> <span class="name">width</span>) <span class="operator">/</span> <span class="number">2</span>
+              <span class="name">y</span>: <span class="number">230</span>
+              <span class="name">source</span>: <span class="string">&quot;qrc:///green.png&quot;</span>
+              <span class="name">visible</span>: <span class="name">stateMachine</span>.<span class="name">green</span>
+          }
+
+</pre>
+<p>Files:</p>
+<ul>
+<li><a href="qtscxml-trafficlight-qml-dynamic-trafficlight-qml-dynamic-cpp.html">trafficlight-qml-dynamic/trafficlight-qml-dynamic.cpp</a></li>
+<li><a href="qtscxml-trafficlight-qml-dynamic-trafficlight-qml-dynamic-qml.html">trafficlight-qml-dynamic/trafficlight-qml-dynamic.qml</a></li>
+<li><a href="qtscxml-trafficlight-qml-dynamic-trafficlight-qml-dynamic-pro.html">trafficlight-qml-dynamic/trafficlight-qml-dynamic.pro</a></li>
+<li><a href="qtscxml-trafficlight-qml-dynamic-trafficlight-qml-dynamic-qrc.html">trafficlight-qml-dynamic/trafficlight-qml-dynamic.qrc</a></li>
+</ul>
+</div>
+<!-- @@@trafficlight-qml-dynamic -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

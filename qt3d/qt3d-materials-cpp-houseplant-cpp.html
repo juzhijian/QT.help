@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>houseplant.cpp Example File | Qt 3D 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-materials-cpp-example.html">Qt 3D: Materials C++ Example</a></td><td >houseplant.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">houseplant.cpp Example File</h1>
+<span class="subtitle">materials-cpp/houseplant.cpp</span>
+<!-- $$$materials-cpp/houseplant.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2014 Klaralvdalens Datakonsult AB (KDAB).
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt3D module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;houseplant.h&quot;</span>
+  <span class="preprocessor">#include &lt;Qt3DRender/qtexture.h&gt;</span>
+
+  <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>potNames<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> {
+      <span class="string">&quot;cross&quot;</span><span class="operator">,</span>
+      <span class="string">&quot;square&quot;</span><span class="operator">,</span>
+      <span class="string">&quot;triangle&quot;</span><span class="operator">,</span>
+      <span class="string">&quot;sphere&quot;</span>
+  };
+
+  <span class="keyword">const</span> <span class="type">char</span> <span class="operator">*</span>plantNames<span class="operator">[</span><span class="operator">]</span> <span class="operator">=</span> {
+      <span class="string">&quot;bamboo&quot;</span><span class="operator">,</span>
+      <span class="string">&quot;palm&quot;</span><span class="operator">,</span>
+      <span class="string">&quot;pine&quot;</span><span class="operator">,</span>
+      <span class="string">&quot;spikes&quot;</span><span class="operator">,</span>
+      <span class="string">&quot;shrub&quot;</span>
+  };
+
+  HousePlant<span class="operator">::</span>HousePlant(<span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QNode</span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qt3dcore-module.html">Qt3DCore</a></span><span class="operator">::</span><span class="type">QEntity</span>(parent)
+      <span class="operator">,</span> m_pot(<span class="keyword">new</span> RenderableEntity(<span class="keyword">this</span>))
+      <span class="operator">,</span> m_plant(<span class="keyword">new</span> RenderableEntity(m_pot))
+      <span class="operator">,</span> m_cover(<span class="keyword">new</span> RenderableEntity(m_pot))
+      <span class="operator">,</span> m_potMaterial(<span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QNormalDiffuseMapMaterial</span>())
+      <span class="operator">,</span> m_plantMaterial(<span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QNormalDiffuseMapAlphaMaterial</span>())
+      <span class="operator">,</span> m_coverMaterial(<span class="keyword">new</span> <span class="type">Qt3DExtras</span><span class="operator">::</span><span class="type">QNormalDiffuseMapMaterial</span>())
+      <span class="operator">,</span> m_potImage(<span class="keyword">new</span> <span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QTextureImage</span>())
+      <span class="operator">,</span> m_potNormalImage(<span class="keyword">new</span> <span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QTextureImage</span>())
+      <span class="operator">,</span> m_plantImage(<span class="keyword">new</span> <span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QTextureImage</span>())
+      <span class="operator">,</span> m_plantNormalImage(<span class="keyword">new</span> <span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QTextureImage</span>())
+      <span class="operator">,</span> m_coverImage(<span class="keyword">new</span> <span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QTextureImage</span>())
+      <span class="operator">,</span> m_coverNormalImage(<span class="keyword">new</span> <span class="type"><a href="qt3drender-module.html">Qt3DRender</a></span><span class="operator">::</span><span class="type">QTextureImage</span>())
+      <span class="operator">,</span> m_plantType(Bamboo)
+      <span class="operator">,</span> m_potShape(Cross)
+  {
+      m_pot<span class="operator">-</span><span class="operator">&gt;</span>transform()<span class="operator">-</span><span class="operator">&gt;</span>setScale(<span class="number">0.03f</span>);
+      m_pot<span class="operator">-</span><span class="operator">&gt;</span>addComponent(m_potMaterial);
+      m_plant<span class="operator">-</span><span class="operator">&gt;</span>addComponent(m_plantMaterial);
+      m_cover<span class="operator">-</span><span class="operator">&gt;</span>addComponent(m_coverMaterial);
+
+      m_potMaterial<span class="operator">-</span><span class="operator">&gt;</span>diffuse()<span class="operator">-</span><span class="operator">&gt;</span>addTextureImage(m_potImage);
+      m_potMaterial<span class="operator">-</span><span class="operator">&gt;</span>normal()<span class="operator">-</span><span class="operator">&gt;</span>addTextureImage(m_potNormalImage);
+      m_plantMaterial<span class="operator">-</span><span class="operator">&gt;</span>diffuse()<span class="operator">-</span><span class="operator">&gt;</span>addTextureImage(m_plantImage);
+      m_plantMaterial<span class="operator">-</span><span class="operator">&gt;</span>normal()<span class="operator">-</span><span class="operator">&gt;</span>addTextureImage(m_plantNormalImage);
+      m_coverMaterial<span class="operator">-</span><span class="operator">&gt;</span>diffuse()<span class="operator">-</span><span class="operator">&gt;</span>addTextureImage(m_coverImage);
+      m_coverMaterial<span class="operator">-</span><span class="operator">&gt;</span>normal()<span class="operator">-</span><span class="operator">&gt;</span>addTextureImage(m_coverNormalImage);
+
+      updatePlantType();
+      updatePotShape();
+
+      m_coverImage<span class="operator">-</span><span class="operator">&gt;</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/assets/houseplants/cover.webp&quot;</span>)));
+      m_coverNormalImage<span class="operator">-</span><span class="operator">&gt;</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/assets/houseplants/cover_normal.webp&quot;</span>)));
+      m_potImage<span class="operator">-</span><span class="operator">&gt;</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/assets/houseplants/pot.webp&quot;</span>)));
+      m_potNormalImage<span class="operator">-</span><span class="operator">&gt;</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/assets/houseplants/pot_normal.webp&quot;</span>)));
+
+      m_potMaterial<span class="operator">-</span><span class="operator">&gt;</span>setShininess(<span class="number">10.0f</span>);
+      m_potMaterial<span class="operator">-</span><span class="operator">&gt;</span>setSpecular(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span><span class="operator">::</span>fromRgbF(<span class="number">0.75f</span><span class="operator">,</span> <span class="number">0.75f</span><span class="operator">,</span> <span class="number">0.75f</span><span class="operator">,</span> <span class="number">1.0f</span>));
+
+      m_plantMaterial<span class="operator">-</span><span class="operator">&gt;</span>setShininess(<span class="number">10.0f</span>);
+
+      m_coverMaterial<span class="operator">-</span><span class="operator">&gt;</span>setSpecular(<span class="type"><a href="../qtgui/qcolor.html">QColor</a></span><span class="operator">::</span>fromRgbF(<span class="number">0.05f</span><span class="operator">,</span> <span class="number">0.05f</span><span class="operator">,</span> <span class="number">0.05f</span><span class="operator">,</span> <span class="number">1.0f</span>));
+      m_coverMaterial<span class="operator">-</span><span class="operator">&gt;</span>setShininess(<span class="number">5.0f</span>);
+  }
+
+  HousePlant<span class="operator">::</span><span class="operator">~</span>HousePlant()
+  {
+  }
+
+  <span class="type">void</span> HousePlant<span class="operator">::</span>setPotShape(HousePlant<span class="operator">::</span>PotShape shape)
+  {
+      <span class="keyword">if</span> (shape <span class="operator">!</span><span class="operator">=</span> m_potShape) {
+          m_potShape <span class="operator">=</span> shape;
+          updatePotShape();
+      }
+  }
+
+  <span class="type">void</span> HousePlant<span class="operator">::</span>setPlantType(HousePlant<span class="operator">::</span>Plant plant)
+  {
+      <span class="keyword">if</span> (plant <span class="operator">!</span><span class="operator">=</span> m_plantType) {
+          m_plantType <span class="operator">=</span> plant;
+          updatePlantType();
+      }
+  }
+
+  HousePlant<span class="operator">::</span>PotShape HousePlant<span class="operator">::</span>potShape() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_potShape;
+  }
+
+  HousePlant<span class="operator">::</span>Plant HousePlant<span class="operator">::</span>plantType() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_plantType;
+  }
+
+  <span class="type">void</span> HousePlant<span class="operator">::</span>setPosition(<span class="keyword">const</span> QVector3D <span class="operator">&amp;</span>pos)
+  {
+      m_pot<span class="operator">-</span><span class="operator">&gt;</span>transform()<span class="operator">-</span><span class="operator">&gt;</span>setTranslation(pos);
+  }
+
+  <span class="type">void</span> HousePlant<span class="operator">::</span>setScale(<span class="type">float</span> scale)
+  {
+      m_pot<span class="operator">-</span><span class="operator">&gt;</span>transform()<span class="operator">-</span><span class="operator">&gt;</span>setScale(scale);
+  }
+
+  QVector3D HousePlant<span class="operator">::</span>position() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_pot<span class="operator">-</span><span class="operator">&gt;</span>transform()<span class="operator">-</span><span class="operator">&gt;</span>translation();
+  }
+
+  <span class="type">float</span> HousePlant<span class="operator">::</span>scale() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_pot<span class="operator">-</span><span class="operator">&gt;</span>transform()<span class="operator">-</span><span class="operator">&gt;</span>scale();
+  }
+
+  <span class="type">void</span> HousePlant<span class="operator">::</span>updatePotShape()
+  {
+      m_pot<span class="operator">-</span><span class="operator">&gt;</span>mesh()<span class="operator">-</span><span class="operator">&gt;</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/assets/houseplants/&quot;</span>) <span class="operator">+</span> potNames<span class="operator">[</span>m_potShape<span class="operator">]</span> <span class="operator">+</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;-pot.obj&quot;</span>)));
+      m_plant<span class="operator">-</span><span class="operator">&gt;</span>mesh()<span class="operator">-</span><span class="operator">&gt;</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/assets/houseplants/&quot;</span>) <span class="operator">+</span> potNames<span class="operator">[</span>m_potShape<span class="operator">]</span> <span class="operator">+</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;-&quot;</span>) <span class="operator">+</span> plantNames<span class="operator">[</span>m_plantType<span class="operator">]</span> <span class="operator">+</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;.obj&quot;</span>)));
+  }
+
+  <span class="type">void</span> HousePlant<span class="operator">::</span>updatePlantType()
+  {
+      m_plant<span class="operator">-</span><span class="operator">&gt;</span>mesh()<span class="operator">-</span><span class="operator">&gt;</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/assets/houseplants/&quot;</span>) <span class="operator">+</span> potNames<span class="operator">[</span>m_potShape<span class="operator">]</span> <span class="operator">+</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;-&quot;</span>) <span class="operator">+</span> plantNames<span class="operator">[</span>m_plantType<span class="operator">]</span> <span class="operator">+</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;.obj&quot;</span>)));
+
+      m_plantImage<span class="operator">-</span><span class="operator">&gt;</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/assets/houseplants/&quot;</span>) <span class="operator">+</span> plantNames<span class="operator">[</span>m_plantType<span class="operator">]</span> <span class="operator">+</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;.webp&quot;</span>)));
+      m_plantNormalImage<span class="operator">-</span><span class="operator">&gt;</span>setSource(<span class="type"><a href="../qtcore/qurl.html">QUrl</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;qrc:/assets/houseplants/&quot;</span>) <span class="operator">+</span> plantNames<span class="operator">[</span>m_plantType<span class="operator">]</span> <span class="operator">+</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;_normal.webp&quot;</span>)));
+  }
+
+</pre>
+</div>
+<!-- @@@materials-cpp/houseplant.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

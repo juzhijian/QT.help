@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- windows.qdoc -->
+  <title>Qt for Windows - Requirements | Qt 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="index.html">Qt 5.7</a></td><td >Qt for Windows - Requirements</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#libraries">Libraries</a></li>
+<li class="level2"><a href="#icu">ICU</a></li>
+<li class="level1"><a href="#graphics-drivers">Graphics Drivers</a></li>
+<li class="level2"><a href="#dynamically-loading-graphics-drivers">Dynamically Loading Graphics Drivers</a></li>
+<li class="level1"><a href="#building-from-source">Building from Source</a></li>
+<li class="level1"><a href="#sdks-and-compilers">SDKs and Compilers</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt for Windows - Requirements</h1>
+<span class="subtitle"></span>
+<!-- $$$windows-requirements.html-description -->
+<div class="descr"> <a name="details"></a>
+<p>This page describes the required libraries and environment for <a href="windows-support.html">Qt for Windows</a>.</p>
+<a name="libraries"></a>
+<h2 id="libraries">Libraries</h2>
+<p>The following third-party libraries may be used when running Qt 5 applications on Windows.</p>
+<ul>
+<li><a href="http://site.icu-project.org/">ICU</a>: Qt 5 can make use of the ICU library for enhanced UNICODE and Globalization support (see <a href="../qtcore/qtextcodec.html">QTextCodec</a>, <a href="../qtcore/qcollator.html#setNumericMode">QCollator::setNumericMode</a>()).<p>At compile time, the <i>include</i> and <i>lib</i> folders of the ICU installation must be appended to the <code>INCLUDE</code> and <code>LIB</code> environment variables. At run-time, the ICU DLLs need to be found by copying the DLLs to the application folder or by adding the <i>bin</i> folder of the ICU installation to the <code>PATH</code> environment variable.</p>
+</li>
+<li><a href="http://code.google.com/p/angleproject/">ANGLE</a>: This library converts OpenGL ES 2.0 API calls to DirectX 11 or DirectX 9 calls (depending on availability), removing the need to install graphics drivers on the target machines.</li>
+</ul>
+<p>Support for Secure Sockets Layer (SSL) communication is provided by the <a href="http://www.openssl.org/">OpenSSL Toolkit</a>, which must be obtained separately. See <a href="../qtnetwork/ssl.html">Secure Sockets Layer (SSL) Classes</a> for instructions on building Qt with SSL support.</p>
+<a name="icu"></a>
+<h3 >ICU</h3>
+<p>From Qt 5.3 and onwards, configure does not link Qt Core against ICU libraries anymore by default. This reduces the size of a self-contained application package considerably.</p>
+<p>Letting Qt Core utilize the ICU libraries however has following advantages:</p>
+<ul>
+<li>Behavior matches other platforms more closely.</li>
+<li>Extended set of text codecs (see <a href="../qtcore/qtextcodec.html">QTextCodec</a>).</li>
+<li><a href="../qtcore/qlocale.html#toUpper">QLocale::toUpper</a>(), <a href="../qtcore/qlocale.html#toLower">QLocale::toLower</a>() always use case conversion rules specific to the locale.</li>
+<li><a href="../qtcore/qcollator.html#setNumericMode">QCollator::setNumericMode</a>() does work consistently on all Windows versions.</li>
+</ul>
+<p>To explicitly enable the use of ICU in Qt Core, pass <code>-icu</code> to <code>configure</code>:</p>
+<pre class="cpp">
+
+  configure <span class="operator">-</span>icu
+
+</pre>
+<a name="graphics-drivers"></a>
+<h2 id="graphics-drivers">Graphics Drivers</h2>
+<p>For <a href="../qtquick/qtquick-index.html">Qt Quick</a> 2 to work, a graphics driver that provides OpenGL 2.1 or higher is required. The default driver from Windows is OpenGL 1.1&#x2e; Qt includes a version of the <a href="http://code.google.com/p/angleproject/">ANGLE</a> project which is included from the Windows Qt installers. ANGLE implements the OpenGL ES 2.0 API on top of DirectX 11 or DirectX 9. ANGLE requires that the DirectX SDK is installed when building Qt.</p>
+<p>ANGLE chooses the render backend depending on availability. DirectX 11 is usually preferable. However, some graphics cards may not fully support it. For these cases, the environment variable <code>QT_ANGLE_PLATFORM</code> (introduced in Qt 5.4) can be used to control the render backend. Possible values are <code>d3d11</code>, <code>d3d9</code> and <code>warp</code>.</p>
+<p>To use a custom version of ANGLE, set the <code>ANGLE_DIR</code> environment variable to point to the ANGLE source tree before building Qt.</p>
+<p>If you installed additional OpenGL drivers from your hardware vendor, then you may want to consider using this version of OpenGL instead of ANGLE. To use OpenGL, pass the command line options <code>-opengl desktop</code> to the configure script.</p>
+<pre class="cpp">
+
+  configure <span class="operator">-</span>opengl desktop
+
+</pre>
+<p>To use an OpenGL ES 2.0 emulator instead of ANGLE, use the configure options: <code>-opengl es2 -no-angle</code>.</p>
+<pre class="cpp">
+
+  configure <span class="operator">-</span>opengl es2 <span class="operator">-</span>no<span class="operator">-</span>angle
+
+</pre>
+<a name="dynamically-loading-graphics-drivers"></a>
+<h3 >Dynamically Loading Graphics Drivers</h3>
+<p>In addition to the build time configuration, Qt supports choosing and loading the OpenGL implementation at runtime. To use this mode, pass <code>-opengl dynamic</code> to the configure script.</p>
+<pre class="cpp">
+
+  configure <span class="operator">-</span>opengl dynamic
+
+</pre>
+<p><b>Note: </b>As of Qt 5.5 this is the configuration used by the official, pre-built binary packages of Qt. It is strongly recommended to use it also in custom builds, especially for Qt binaries that are deployed alongside applications.</p><p><b>Note: </b>Combining <code>-opengl dynamic</code> with <code>-static</code> is also possible, but be aware that ANGLE will not be statically linked into the applications in this case, it will still be built as a shared library.</p><p>This configuration is the most flexible because no dependencies or assumptions are hardcoded about the OpenGL implementation during build time. It allows robust application deployment. When a given environment fails to provide a proper OpenGL 2.0 implementation, it will fall back automatically to ANGLE. This fallback will be completely transparent to the application, and will allow Qt Quick or other OpenGL code to function by translating to Direct3D. Such a fallback could, for example, take place on a Windows 7 PC with no additional graphics drivers installed. On other machines, where there is sufficient OpenGL support, the normal desktop OpenGL drivers will be used. Additionally, pure software-based OpenGL implementations may be available as additional fallbacks in the future, allowing running Qt Quick applications without a GPU.</p>
+<p>When configured with <code>-opengl dynamic</code>, neither Qt nor the applications built using <code>qmake</code> will link to the opengl32 (standard desktop OpenGL) or libGLESv2 (ANGLE) libraries. Instead, the appropriate library is chosen at runtime. By default, Qt will determine whether the system's opengl32.dll provides OpenGL 2 functions. If these are present, opengl32.dll is used, otherwise the ANGLE libraries will be used. In case the ANGLE libraries are missing or initialization fails for some reason, an additional fallback is attempted by trying to load <code>opengl32sw.dll</code>. See below for details.</p>
+<p>The loading mechanism can be configured through the <code>QT_OPENGL</code> environment variable and the following application attributes:</p>
+<ul>
+<li><code>Qt::AA_UseDesktopOpenGL</code> Equivalent to setting <code>QT_OPENGL</code> to <code>desktop</code>.</li>
+<li><code>Qt::AA_UseOpenGLES</code> Equivalent to setting <code>QT_OPENGL</code> to <code>angle</code>.</li>
+<li><code>Qt::AA_UseSoftwareOpenGL</code> Equivalent to setting <code>QT_OPENGL</code> to <code>software</code>.</li>
+</ul>
+<p>When a certain configuration is requested explicitly, no checks are done at application startup, that is, the system-provided opengl32.dll will not be examined.</p>
+<p>The dynamic loading has a significant impact on applications that contain native OpenGL calls: they may fail to link since <code>qmake</code> no longer automatically adds opengl32.lib or libglesv2.lib. Instead, applications are expected to use the OpenGL functions via the <a href="../qtgui/qopenglfunctions.html">QOpenGLFunctions</a> class. Thus the direct dependency on the OpenGL library is removed and all calls will be routed during runtime to the implementation chosen by Qt.</p>
+<p>Applications that require a certain OpenGL implementation (for example, desktop OpenGL due to relying on features provided by OpenGL 3.0 or higher) should set the application attributes <code>Qt::AA_UseOpenGLES</code> or <code>Qt::AA_UseDesktopOpenGL</code> before instantiating <a href="../qtgui/qguiapplication.html">QGuiApplication</a> or <a href="../qtwidgets/qapplication.html">QApplication</a>. When these attributes are set, no other OpenGL implementations are considered. Additionally, if they wish to, such applications are free to make direct OpenGL function calls by adding opengl32.lib to their .pro project files: <i>LIBS += opengl32.lib</i> (Visual Studio) or <i>LIBS += -lopengl32</i> (<a href="http://www.mingw.org/">MinGW</a>). The result is, from the application's perspective, equivalent to the <code>-opengl desktop</code> build configuration of Qt.</p>
+<p><code>Qt::AA_UseSoftwareOpenGL</code> is special in the sense that it will try to load an OpenGL implementation with a non-standard name. The default name is <code>opengl32sw.dll</code>. This allows shipping a software-only OpenGL implementation, for example a build of <a href="http://www.mesa3d.org/llvmpipe.html">Mesa with llvmpipe</a>, under this name. If necessary, the filename can be overridden by setting the <code>QT_OPENGL_DLL</code> environment variable.</p>
+<p>It is possible to provide a JSON-format configuration file specifying which OpenGL implementation to use depending on the graphics card and driver version. The location is given by the environment variable <code>QT_OPENGL_BUGLIST</code>. Relative paths are resolved using <code>QLibraryInfo::SettingsPath</code> or <code>QStandardPaths::ConfigLocation</code>. The file utilizes the format of the driver bug list used in <a href="http://www.chromium.org/Home">The Chromium Projects</a>. It consists of a list of entries each of which specifies a set of conditions and a list of feature keywords. Typically, device id and vendor id are used to match a specific graphics card. They can be found in the output of the <code>qtdiag</code> or <code>dxdiag</code> tool.</p>
+<p>The following feature keywords are relevant for choosing the OpenGL implementation:</p>
+<ul>
+<li><code>disable_desktopgl</code> - Disables OpenGL. This ensures that Qt does not attempt to use regular OpenGL (opengl32.dll), and that it starts with ANGLE right away. This is useful to prevent bad OpenGL drivers from crashing the application.</li>
+<li><code>disable_angle</code> - Disables ANGLE. Ensures that Qt does not attempt to use ANGLE (and so Direct3D).</li>
+<li><code>disable_d3d11</code> - Disables the D3D11 rasterizer in ANGLE. Instead, the next D3D rendering option is tried first. The default order is: D3D11, D3D9, WARP, reference implementation.</li>
+<li><code>disable_d3d9</code> - Disables the D3D9 rasterizer in ANGLE</li>
+<li><code>disable_rotation</code> - Forces the application to run in landscape orientation always. It applies to OpengGL only and has no effect when using ANGLE or Software OpenGL implementations. This is intended for drivers that have issues with rotation. This feature keyword was introduced in Qt 5.6&#x2e;</li>
+</ul>
+<p>A sample file looks like:</p>
+<pre class="cpp">
+
+  {
+  &quot;entries&quot;: [
+  {
+    &quot;id&quot;: 1,
+    &quot;description&quot;: &quot;Disable D3D11 on older nVidia drivers&quot;,
+    &quot;os&quot;: {
+      &quot;type&quot;: &quot;win&quot;
+    },
+    &quot;vendor_id&quot;: &quot;0x10de&quot;,
+    &quot;device_id&quot;: [&quot;0x0DE9&quot;],
+    &quot;driver_version&quot;: {
+      &quot;op&quot;: &quot;&lt;=&quot;,
+      &quot;value&quot;: &quot;8.17.12.6973&quot;
+    },
+    &quot;features&quot;: [
+      &quot;disable_d3d11&quot;
+    ]
+  },
+  ..&#x2e;
+
+</pre>
+<p>When <code>QT_OPENGL_BUGLIST</code> is not specified, a built-in list will be used. This typically includes some older, less-capable graphics cards with <code>disable_desktopgl</code> set, in order to prevent Qt from using their unstable desktop OpenGL implementations and instead fall back to ANGLE right away.</p>
+<p>In practice the most common combinations are expected to be the following:</p>
+<ul>
+<li><code>disable_desktopgl</code> - In case the system provides OpenGL 2.0 or newer, but the driver is known to be unstable and prone to crash.</li>
+<li><code>disable_desktopgl</code>, disable_angle - When no accelerated path is desired. This ensures that the only option Qt tries is the sofware rasterizer (opengl32sw.dll). Can be useful in virtual machines and applications that are deployed on a wide range of old systems.</li>
+<li><code>disable_d3d11</code>, disable_d3d9 - When the accelerated D3D options are known to be unstable and WARP is desired (when available). Can be useful in virtual machines.</li>
+</ul>
+<p>The supported keys for matching a given card or driver are the following. Note that some of these are specific to Qt.</p>
+<ul>
+<li><code>os.type</code> - Operating system: <code>win</code>, <code>linux</code>, <code>macosx</code>, <code>android</code></li>
+<li><code>os.version</code> - Kernel version</li>
+<li><code>os.release</code> - Specifies a list of operating system releases on Windows: <code>xp</code>, <code>vista</code>, <code>7</code>, <code>8</code>, <code>8.1</code>, <code>10</code>.</li>
+<li><code>vendor_id</code> - Vendor from the adapter identifier</li>
+<li><code>device_id</code> - List of PCI device IDs.</li>
+<li><code>driver_version</code> - Driver version from the adapter identifier</li>
+<li><code>driver_description</code> - Matches when the value is a substring of the driver description from the adapter identifier</li>
+<li><code>gl_vendor</code> - Matches when the value is a substring of the <code>GL_VENDOR</code> string</li>
+</ul>
+<a name="building-from-source"></a>
+<h2 id="building-from-source">Building from Source</h2>
+<p>These tools are not needed to run Qt 5 applications, but they are required for building Qt 5 from source.</p>
+<ul>
+<li><a href="http://www.activestate.com/Products/activeperl/index.mhtml">ActivePerl</a> - Install a recent version of <a href="http://www.activestate.com/Products/activeperl/index.mhtml">ActivePerl</a> (<a href="http://www.activestate.com/activeperl">download page</a>) and add the installation location to your <code>PATH</code>.</li>
+<li>Python - Install Python from the <a href="http://www.python.org/download/">here</a> and add the installation location to your PATH.</li>
+</ul>
+<p><b>Note: </b>Please make sure that the <code>perl</code> executable from <a href="http://www.activestate.com/Products/activeperl/index.mhtml">ActivePerl</a> is found in the path before the perl executable provided by msysgit, since the latter is outdated.</p><p>ANGLE depends on these extra tools from the <a href="http://gnuwin32.sourceforge.net/packages.html">GnuWin32</a> and <a href="http://sourceforge.net/projects/winflexbison/">Win flex-bison</a> projects, which are provided for your convenience in the <i>gnuwin32/bin</i> folder:</p>
+<ul>
+<li><a href="http://gnuwin32.sourceforge.net/downlinks/gperf.php">GPerf</a></li>
+<li><a href="http://sourceforge.net/projects/winflexbison/files/win_flex_bison-2.5.5.zip/download">Bison, Flex</a></li>
+</ul>
+<p>The <i>gnuwin32/bin</i> folder should be added to the <code>PATH</code> variable.</p>
+<p><b>Note: </b>If you are building qtbase outside of qt5.git, you will need to download <i>win_bison</i> and <i>win_flex</i> from the link above and rename them to <i>bison</i> and <i>flex</i>.</p><p>For instructions for building the Qt 5 source, read the <a href="windows-building.html">Qt for Windows - Building from Source</a> page.</p>
+<a name="sdks-and-compilers"></a>
+<h2 id="sdks-and-compilers">SDKs and Compilers</h2>
+<p>A Windows SDK is required to develop Qt applications on Windows.</p>
+<ul>
+<li>Windows SDK 8 (with Visual Studio 2012 Express). As of Windows 8, the SDK no longer ships with a complete command-line build environment. You must install a compiler and build environment separately. If you require a complete development environment that includes compilers and a build environment, you can download Visual Studio 2012 Express, which includes the appropriate components of the Windows SDK. (<a href="http://msdn.microsoft.com/en-us/windows/desktop/hh852363.aspx">Download page</a>)</li>
+<li>Windows SDK 7.1&#x2e; Note that, as of 16.3&#x2e;2012, if you use this SDK with Visual Studio 2010, installing the SDK requires installing the following packages in this order (see <i>readme.html</i> provided with the service pack):<ol class="1" type="1"><li>Install Visual Studio 2010</li>
+<li>Install Windows SDK 7.1</li>
+<li>Install Visual Studio 2010 SP1</li>
+<li>Install Visual C++ 2010 SP1 Compiler Update for the Windows SDK 7.1</li>
+</ol>
+</li>
+<li>Windows SDK 7.</li>
+<li>A <a href="http://www.mingw.org/">MinGW</a> toolchain with g++ version 4.7 or higher. Qt 5 is tested regularly with a <a href="http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/4.9.1/threads-posix/dwarf/i686-4.9.1-release-posix-dwarf-rt_v3-rev2.7z/download">32 bit gcc 4.9&#x2e;1 toolchain</a> from the <a href="http://mingw-w64.sourceforge.net/">MinGW-w64</a> project.</li>
+</ul>
+<p>For the most up-to-date information about the <a href="../qtwebengine/qtwebengine-overview.html#qt-webengine">Qt WebEngine</a> dependencies, see the <a href="http://wiki.qt.io/QtWebEngineOnWindows">Qt WebEngine</a> wiki for Windows.</p>
+</div>
+<!-- @@@windows-requirements.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

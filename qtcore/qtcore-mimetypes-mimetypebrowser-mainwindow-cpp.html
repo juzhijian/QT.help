@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mainwindow.cpp Example File | Qt Core 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-mimetypes-mimetypebrowser-example.html">MIME Type Browser Example</a></td><td >mainwindow.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mainwindow.cpp Example File</h1>
+<span class="subtitle">mimetypes/mimetypebrowser/mainwindow.cpp</span>
+<!-- $$$mimetypes/mimetypebrowser/mainwindow.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;mainwindow.h&quot;</span>
+  <span class="preprocessor">#include &quot;mimetypemodel.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QAction&gt;</span>
+  <span class="preprocessor">#include &lt;QApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QFileDialog&gt;</span>
+  <span class="preprocessor">#include &lt;QInputDialog&gt;</span>
+  <span class="preprocessor">#include &lt;QMenu&gt;</span>
+  <span class="preprocessor">#include &lt;QMenuBar&gt;</span>
+  <span class="preprocessor">#include &lt;QMessageBox&gt;</span>
+  <span class="preprocessor">#include &lt;QPlainTextEdit&gt;</span>
+  <span class="preprocessor">#include &lt;QSplitter&gt;</span>
+  <span class="preprocessor">#include &lt;QStatusBar&gt;</span>
+  <span class="preprocessor">#include &lt;QTextEdit&gt;</span>
+  <span class="preprocessor">#include &lt;QTreeView&gt;</span>
+
+  <span class="preprocessor">#include &lt;QFileInfo&gt;</span>
+  <span class="preprocessor">#include &lt;QItemSelectionModel&gt;</span>
+  <span class="preprocessor">#include &lt;QMimeDatabase&gt;</span>
+  <span class="preprocessor">#include &lt;QMimeType&gt;</span>
+
+  MainWindow<span class="operator">::</span>MainWindow(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtwidgets/qmainwindow.html">QMainWindow</a></span>(parent)
+      <span class="operator">,</span> m_model(<span class="keyword">new</span> MimetypeModel(<span class="keyword">this</span>))
+      <span class="operator">,</span> m_treeView(<span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtreeview.html">QTreeView</a></span>)
+      <span class="operator">,</span> m_detailsText(<span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtextedit.html">QTextEdit</a></span>)
+      <span class="operator">,</span> m_findIndex(<span class="number">0</span>)
+  {
+      setWindowTitle(tr(<span class="string">&quot;Qt Mime Database Browser&quot;</span>));
+
+      <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>fileMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;File&quot;</span>));
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>detectFileAction <span class="operator">=</span>
+          fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Detect File Type...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>detectFile);
+      detectFileAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Open);
+
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>exitAction <span class="operator">=</span> fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;E&amp;xit&quot;</span>)<span class="operator">,</span> qApp<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span><span class="operator">::</span>closeAllWindows);
+      exitAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Quit);
+
+      <span class="type"><a href="../qtwidgets/qmenu.html">QMenu</a></span> <span class="operator">*</span>findMenu <span class="operator">=</span> menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;Edit&quot;</span>));
+      <span class="type"><a href="../qtwidgets/qaction.html">QAction</a></span> <span class="operator">*</span>findAction <span class="operator">=</span>
+          findMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Find...&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>find);
+      findAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Find);
+      m_findNextAction <span class="operator">=</span> findMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Find &amp;Next&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>findNext);
+      m_findNextAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>FindNext);
+      m_findPreviousAction <span class="operator">=</span> findMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;Find &amp;Previous&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>findPrevious);
+      m_findPreviousAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>FindPrevious);
+
+      menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(tr(<span class="string">&quot;&amp;About&quot;</span>))<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;About Qt&quot;</span>)<span class="operator">,</span> qApp<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtwidgets/qapplication.html">QApplication</a></span><span class="operator">::</span>aboutQt);
+
+      <span class="type"><a href="../qtwidgets/qsplitter.html">QSplitter</a></span> <span class="operator">*</span>centralSplitter <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qsplitter.html">QSplitter</a></span>;
+      setCentralWidget(centralSplitter);
+      m_treeView <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qtreeview.html">QTreeView</a></span>;
+      m_treeView<span class="operator">-</span><span class="operator">&gt;</span>setUniformRowHeights(<span class="keyword">true</span>);
+      m_treeView<span class="operator">-</span><span class="operator">&gt;</span>setModel(m_model);
+
+      <span class="keyword">const</span> <span class="keyword">auto</span> items <span class="operator">=</span> m_model<span class="operator">-</span><span class="operator">&gt;</span>findItems(<span class="string">&quot;application/octet-stream&quot;</span><span class="operator">,</span> <span class="type"><a href="qt.html">Qt</a></span><span class="operator">::</span>MatchContains <span class="operator">|</span> <span class="type"><a href="qt.html">Qt</a></span><span class="operator">::</span>MatchFixedString <span class="operator">|</span> <span class="type"><a href="qt.html">Qt</a></span><span class="operator">::</span>MatchRecursive);
+      <span class="keyword">if</span> (<span class="operator">!</span>items<span class="operator">.</span>isEmpty())
+          m_treeView<span class="operator">-</span><span class="operator">&gt;</span>expand(m_model<span class="operator">-</span><span class="operator">&gt;</span>indexFromItem(items<span class="operator">.</span>constFirst()));
+
+      connect(m_treeView<span class="operator">-</span><span class="operator">&gt;</span>selectionModel()<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qitemselectionmodel.html">QItemSelectionModel</a></span><span class="operator">::</span>currentChanged<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>currentChanged);
+      centralSplitter<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_treeView);
+      m_detailsText<span class="operator">-</span><span class="operator">&gt;</span>setReadOnly(<span class="keyword">true</span>);
+      centralSplitter<span class="operator">-</span><span class="operator">&gt;</span>addWidget(m_detailsText);
+
+      updateFindActions();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>currentChanged(<span class="keyword">const</span> <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index)
+  {
+      <span class="keyword">if</span> (index<span class="operator">.</span>isValid())
+          m_detailsText<span class="operator">-</span><span class="operator">&gt;</span>setText(MimetypeModel<span class="operator">::</span>formatMimeTypeInfo(m_model<span class="operator">-</span><span class="operator">&gt;</span>mimeType(index)));
+      <span class="keyword">else</span>
+          m_detailsText<span class="operator">-</span><span class="operator">&gt;</span>clear();
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>selectAndGoTo(<span class="keyword">const</span> <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index)
+  {
+      m_treeView<span class="operator">-</span><span class="operator">&gt;</span>scrollTo(index<span class="operator">,</span> <span class="type"><a href="../qtwidgets/qabstractitemview.html">QAbstractItemView</a></span><span class="operator">::</span>PositionAtCenter);
+      m_treeView<span class="operator">-</span><span class="operator">&gt;</span>setCurrentIndex(index);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>detectFile()
+  {
+      <span class="keyword">const</span> <span class="type"><a href="qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="../qtwidgets/qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getOpenFileName(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Choose File&quot;</span>));
+      <span class="keyword">if</span> (fileName<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+      <span class="type"><a href="qmimedatabase.html">QMimeDatabase</a></span> mimeDatabase;
+      <span class="keyword">const</span> <span class="type"><a href="qfileinfo.html">QFileInfo</a></span> fi(fileName);
+      <span class="keyword">const</span> <span class="type"><a href="qmimetype.html">QMimeType</a></span> mimeType <span class="operator">=</span> mimeDatabase<span class="operator">.</span>mimeTypeForFile(fi);
+      <span class="keyword">const</span> <span class="type"><a href="qmodelindex.html">QModelIndex</a></span> index <span class="operator">=</span> mimeType<span class="operator">.</span>isValid()
+          <span class="operator">?</span> m_model<span class="operator">-</span><span class="operator">&gt;</span>indexForMimeType(mimeType<span class="operator">.</span>name()) : <span class="type"><a href="qmodelindex.html">QModelIndex</a></span>();
+      <span class="keyword">if</span> (index<span class="operator">.</span>isValid()) {
+          statusBar()<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;\&quot;%1\&quot; is of type \&quot;%2\&quot;&quot;</span>)<span class="operator">.</span>arg(fi<span class="operator">.</span>fileName()<span class="operator">,</span> mimeType<span class="operator">.</span>name()));
+          selectAndGoTo(index);
+      } <span class="keyword">else</span> {
+          <span class="type"><a href="../qtwidgets/qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Unknown File Type&quot;</span>)<span class="operator">,</span>
+                                   tr(<span class="string">&quot;The type of %1 could not be determined.&quot;</span>)
+                                   <span class="operator">.</span>arg(<span class="type"><a href="qdir.html">QDir</a></span><span class="operator">::</span>toNativeSeparators(fileName)));
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>updateFindActions()
+  {
+      <span class="keyword">const</span> bool findNextPreviousEnabled <span class="operator">=</span> m_findMatches<span class="operator">.</span>size() <span class="operator">&gt;</span> <span class="number">1</span>;
+      m_findNextAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(findNextPreviousEnabled);
+      m_findPreviousAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(findNextPreviousEnabled);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>findPrevious()
+  {
+      <span class="keyword">if</span> (<span class="operator">-</span><span class="operator">-</span>m_findIndex <span class="operator">&lt;</span> <span class="number">0</span>)
+          m_findIndex <span class="operator">=</span> m_findMatches<span class="operator">.</span>size() <span class="operator">-</span> <span class="number">1</span>;
+      <span class="keyword">if</span> (m_findIndex <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span>)
+          selectAndGoTo(m_findMatches<span class="operator">.</span>at(m_findIndex));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>findNext()
+  {
+      <span class="keyword">if</span> (<span class="operator">+</span><span class="operator">+</span>m_findIndex <span class="operator">&gt;</span><span class="operator">=</span> m_findMatches<span class="operator">.</span>size())
+          m_findIndex <span class="operator">=</span> <span class="number">0</span>;
+      <span class="keyword">if</span> (m_findIndex <span class="operator">&lt;</span> m_findMatches<span class="operator">.</span>size())
+          selectAndGoTo(m_findMatches<span class="operator">.</span>at(m_findIndex));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>find()
+  {
+      <span class="type"><a href="../qtwidgets/qinputdialog.html">QInputDialog</a></span> inputDialog(<span class="keyword">this</span>);
+      inputDialog<span class="operator">.</span>setWindowTitle(tr(<span class="string">&quot;Find&quot;</span>));
+      inputDialog<span class="operator">.</span>setLabelText(tr(<span class="string">&quot;Text:&quot;</span>));
+      <span class="keyword">if</span> (inputDialog<span class="operator">.</span>exec() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted)
+          <span class="keyword">return</span>;
+      <span class="keyword">const</span> <span class="type"><a href="qstring.html">QString</a></span> value <span class="operator">=</span> inputDialog<span class="operator">.</span>textValue()<span class="operator">.</span>trimmed();
+      <span class="keyword">if</span> (value<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+
+      m_findMatches<span class="operator">.</span>clear();
+      m_findIndex <span class="operator">=</span> <span class="number">0</span>;
+      foreach (<span class="keyword">const</span> <span class="type"><a href="../qtgui/qstandarditem.html">QStandardItem</a></span> <span class="operator">*</span>item<span class="operator">,</span> m_model<span class="operator">-</span><span class="operator">&gt;</span>findItems(value<span class="operator">,</span> <span class="type"><a href="qt.html">Qt</a></span><span class="operator">::</span>MatchContains <span class="operator">|</span> <span class="type"><a href="qt.html">Qt</a></span><span class="operator">::</span>MatchFixedString <span class="operator">|</span> <span class="type"><a href="qt.html">Qt</a></span><span class="operator">::</span>MatchRecursive))
+          m_findMatches<span class="operator">.</span>append(m_model<span class="operator">-</span><span class="operator">&gt;</span>indexFromItem(item));
+      statusBar()<span class="operator">-</span><span class="operator">&gt;</span>showMessage(tr(<span class="string">&quot;%n mime types match \&quot;%1\&quot;.&quot;</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> m_findMatches<span class="operator">.</span>size())<span class="operator">.</span>arg(value));
+      updateFindActions();
+      <span class="keyword">if</span> (<span class="operator">!</span>m_findMatches<span class="operator">.</span>isEmpty())
+          selectAndGoTo(m_findMatches<span class="operator">.</span>constFirst());
+  }
+
+</pre>
+</div>
+<!-- @@@mimetypes/mimetypebrowser/mainwindow.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

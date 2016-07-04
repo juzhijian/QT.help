@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- framebuffer.qdoc -->
+  <title>Framebuffer Example | Qt Canvas 3D 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcanvas3d-index.html">Qt Canvas 3D</a></td><td >Framebuffer Example</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#preparing-the-framebuffer">Preparing the Framebuffer</a></li>
+<li class="level1"><a href="#creating-the-texture">Creating the Texture</a></li>
+<li class="level1"><a href="#rendering-into-the-framebuffer">Rendering into the Framebuffer</a></li>
+<li class="level1"><a href="#using-the-framebuffer-as-a-texture">Using the Framebuffer as a Texture</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Framebuffer Example</h1>
+<span class="subtitle"></span>
+<!-- $$$framebuffer-description -->
+<div class="descr"> <a name="details"></a>
+<p>The Framebuffer Example shows how to render into a framebuffer, create a texture of it, and apply the texture to an object in normal on-screen rendering.</p>
+<p>The example has a moving and rotating cube, which has another textured cube drawn into it via the framebuffer object. The cube in the framebuffer can be rotated using <a href="../qtquickcontrols/qml-qtquick-controls-slider.html">Slider</a>s from <a href="../qtquickcontrols/qtquickcontrols-index.html">Qt Quick Controls</a>.</p>
+<p class="centerAlign"><img src="images/framebuffer-example.png" alt="" /></p><a name="preparing-the-framebuffer"></a>
+<h2 id="preparing-the-framebuffer">Preparing the Framebuffer</h2>
+<p>We first define the variables we need for the render-to-texture framebuffer:</p>
+<pre class="js">
+
+  var <span class="name">rttFramebuffer</span>;
+  var <span class="name">rttTexture</span>;
+  var <span class="name">rttWidth</span> = <span class="number">512</span>;
+  var <span class="name">rttHeight</span> = <span class="number">512</span>;
+
+</pre>
+<p>Then, in the <code>initializeGL</code> function, we create the framebuffer object:</p>
+<pre class="js">
+
+  <span class="comment">// Create the framebuffer object</span>
+  <span class="name">rttFramebuffer</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createFramebuffer</span>();
+  <span class="name">rttFramebuffer</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;OffscreenRenderTarget&quot;</span>;
+  <span class="name">gl</span>.<span class="name">bindFramebuffer</span>(<span class="name">gl</span>.<span class="name">FRAMEBUFFER</span>, <span class="name">rttFramebuffer</span>);
+
+</pre>
+<a name="creating-the-texture"></a>
+<h2 id="creating-the-texture">Creating the Texture</h2>
+<p>After the creation of the framebuffer, we create the texture:</p>
+<pre class="js">
+
+  <span class="comment">// Create the texture</span>
+  <span class="name">rttTexture</span> <span class="operator">=</span> <span class="name">gl</span>.<span class="name">createTexture</span>();
+  <span class="name">rttTexture</span>.<span class="name">name</span> <span class="operator">=</span> <span class="string">&quot;OffscreenRenderTargetTexture&quot;</span>;
+  <span class="name">gl</span>.<span class="name">bindTexture</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">rttTexture</span>);
+  <span class="name">gl</span>.<span class="name">texParameteri</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">gl</span>.<span class="name">TEXTURE_MAG_FILTER</span>, <span class="name">gl</span>.<span class="name">LINEAR</span>);
+  <span class="name">gl</span>.<span class="name">texParameteri</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">gl</span>.<span class="name">TEXTURE_MIN_FILTER</span>, <span class="name">gl</span>.<span class="name">LINEAR_MIPMAP_NEAREST</span>);
+  <span class="name">gl</span>.<span class="name">texImage2D</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="number">0</span>,
+                <span class="name">gl</span>.<span class="name">RGBA</span>, <span class="name">rttWidth</span>, <span class="name">rttHeight</span>,
+                <span class="number">0</span>, <span class="name">gl</span>.<span class="name">RGBA</span>, <span class="name">gl</span>.<span class="name">UNSIGNED_BYTE</span>,
+                <span class="number">null</span>);
+  <span class="name">gl</span>.<span class="name">generateMipmap</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>);
+
+</pre>
+<p>Then we need to bind the texture as a color attachment, create and bind a render buffer, and bind the depth attachment:</p>
+<pre class="js">
+
+  <span class="comment">// Bind the texture as color attachment, create and bind a depth buffer</span>
+  <span class="name">gl</span>.<span class="name">framebufferTexture2D</span>(<span class="name">gl</span>.<span class="name">FRAMEBUFFER</span>,
+                          <span class="name">gl</span>.<span class="name">COLOR_ATTACHMENT0</span>,
+                          <span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">rttTexture</span>, <span class="number">0</span>);
+  var <span class="name">renderbuffer</span> = <span class="name">gl</span>.<span class="name">createRenderbuffer</span>();
+  <span class="name">gl</span>.<span class="name">bindRenderbuffer</span>(<span class="name">gl</span>.<span class="name">RENDERBUFFER</span>, <span class="name">renderbuffer</span>);
+  <span class="name">gl</span>.<span class="name">renderbufferStorage</span>(<span class="name">gl</span>.<span class="name">RENDERBUFFER</span>,
+                         <span class="name">gl</span>.<span class="name">DEPTH_COMPONENT16</span>,
+                         <span class="name">rttWidth</span>, <span class="name">rttHeight</span>);
+  <span class="name">gl</span>.<span class="name">framebufferRenderbuffer</span>(<span class="name">gl</span>.<span class="name">FRAMEBUFFER</span>,
+                             <span class="name">gl</span>.<span class="name">DEPTH_ATTACHMENT</span>,
+                             <span class="name">gl</span>.<span class="name">RENDERBUFFER</span>, <span class="name">renderbuffer</span>);
+
+</pre>
+<a name="rendering-into-the-framebuffer"></a>
+<h2 id="rendering-into-the-framebuffer">Rendering into the Framebuffer</h2>
+<p>In <code>paintGL</code> function, we first need to draw the scene into the framebuffer. We start by binding the framebuffer object and setting a viewport:</p>
+<pre class="js">
+
+  <span class="comment">// bind the FBO and setup viewport</span>
+  <span class="name">gl</span>.<span class="name">bindFramebuffer</span>(<span class="name">gl</span>.<span class="name">FRAMEBUFFER</span>, <span class="name">rttFramebuffer</span>);
+  <span class="name">gl</span>.<span class="name">viewport</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="name">rttWidth</span>, <span class="name">rttHeight</span>);
+
+</pre>
+<p>Then, we need to bind the loaded texture we want to use in rendering into the framebuffer object:</p>
+<pre class="js">
+
+  <span class="comment">// Bind the loaded texture</span>
+  <span class="name">gl</span>.<span class="name">bindTexture</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">cubeTexture</span>);
+
+</pre>
+<p>And then we can draw the textured cube into the framebuffer:</p>
+<pre class="js">
+
+  <span class="comment">// Draw the cube to the FBO</span>
+  <span class="name">gl</span>.<span class="name">drawElements</span>(<span class="name">gl</span>.<span class="name">TRIANGLES</span>, <span class="number">36</span>, <span class="name">gl</span>.<span class="name">UNSIGNED_SHORT</span>, <span class="number">0</span>);
+
+</pre>
+<a name="using-the-framebuffer-as-a-texture"></a>
+<h2 id="using-the-framebuffer-as-a-texture">Using the Framebuffer as a Texture</h2>
+<p>First, we bind the render-to-texture right after drawing, and generate mipmaps:</p>
+<pre class="js">
+
+  <span class="comment">// Bind the render-to-texture and generate mipmaps</span>
+  <span class="name">gl</span>.<span class="name">bindTexture</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>, <span class="name">rttTexture</span>);
+  <span class="name">gl</span>.<span class="name">generateMipmap</span>(<span class="name">gl</span>.<span class="name">TEXTURE_2D</span>);
+
+</pre>
+<p>Then we need to bind the default framebuffer (screen), and set up the viewport:</p>
+<pre class="js">
+
+  <span class="comment">// Bind default framebuffer and setup viewport accordingly</span>
+  <span class="name">gl</span>.<span class="name">bindFramebuffer</span>(<span class="name">gl</span>.<span class="name">FRAMEBUFFER</span>, <span class="number">0</span>);
+  <span class="name">gl</span>.<span class="name">viewport</span>(<span class="number">0</span>, <span class="number">0</span>,
+              <span class="name">canvas</span>.<span class="name">width</span> <span class="operator">*</span> <span class="name">canvas</span>.<span class="name">devicePixelRatio</span>,
+              <span class="name">canvas</span>.<span class="name">height</span> <span class="operator">*</span> <span class="name">canvas</span>.<span class="name">devicePixelRatio</span>);
+
+</pre>
+<p>And finally, we draw the on-screen view:</p>
+<pre class="js">
+
+  <span class="comment">// Draw the on-screen cube</span>
+  <span class="name">gl</span>.<span class="name">drawElements</span>(<span class="name">gl</span>.<span class="name">TRIANGLES</span>, <span class="number">36</span>, <span class="name">gl</span>.<span class="name">UNSIGNED_SHORT</span>, <span class="number">0</span>);
+
+</pre>
+<p>Files:</p>
+<ul>
+<li><a href="qtcanvas3d-framebuffer-qml-framebuffer-framebuffer-js.html">framebuffer/qml/framebuffer/framebuffer.js</a></li>
+<li><a href="qtcanvas3d-framebuffer-qml-framebuffer-main-qml.html">framebuffer/qml/framebuffer/main.qml</a></li>
+<li><a href="qtcanvas3d-framebuffer-main-cpp.html">framebuffer/main.cpp</a></li>
+<li><a href="qtcanvas3d-framebuffer-framebuffer-pro.html">framebuffer/framebuffer.pro</a></li>
+<li><a href="qtcanvas3d-framebuffer-framebuffer-qrc.html">framebuffer/framebuffer.qrc</a></li>
+</ul>
+</div>
+<!-- @@@framebuffer -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

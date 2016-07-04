@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>graph.cpp Example File | Qt Quick 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-scenegraph-graph-example.html">Scene Graph - Graph</a></td><td >graph.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">graph.cpp Example File</h1>
+<span class="subtitle">scenegraph/graph/graph.cpp</span>
+<!-- $$$scenegraph/graph/graph.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;graph.h&quot;</span>
+
+  <span class="preprocessor">#include &quot;noisynode.h&quot;</span>
+  <span class="preprocessor">#include &quot;gridnode.h&quot;</span>
+  <span class="preprocessor">#include &quot;linenode.h&quot;</span>
+
+  Graph<span class="operator">::</span>Graph()
+      : m_samplesChanged(<span class="keyword">false</span>)
+      <span class="operator">,</span> m_geometryChanged(<span class="keyword">false</span>)
+  {
+      setFlag(ItemHasContents<span class="operator">,</span> <span class="keyword">true</span>);
+  }
+
+  <span class="type">void</span> Graph<span class="operator">::</span>appendSample(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> value)
+  {
+      m_samples <span class="operator">&lt;</span><span class="operator">&lt;</span> value;
+      m_samplesChanged <span class="operator">=</span> <span class="keyword">true</span>;
+      update();
+  }
+
+  <span class="type">void</span> Graph<span class="operator">::</span>removeFirstSample()
+  {
+      m_samples<span class="operator">.</span>removeFirst();
+      m_samplesChanged <span class="operator">=</span> <span class="keyword">true</span>;
+      update();
+  }
+
+  <span class="type">void</span> Graph<span class="operator">::</span>geometryChanged(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> <span class="operator">&amp;</span>newGeometry<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> <span class="operator">&amp;</span>oldGeometry)
+  {
+      m_geometryChanged <span class="operator">=</span> <span class="keyword">true</span>;
+      update();
+      <span class="type"><a href="qquickitem.html">QQuickItem</a></span><span class="operator">::</span>geometryChanged(newGeometry<span class="operator">,</span> oldGeometry);
+  }
+
+  <span class="keyword">class</span> GraphNode : <span class="keyword">public</span> <span class="type"><a href="qsgnode.html">QSGNode</a></span>
+  {
+  <span class="keyword">public</span>:
+      NoisyNode <span class="operator">*</span>background;
+      GridNode <span class="operator">*</span>grid;
+      LineNode <span class="operator">*</span>line;
+      LineNode <span class="operator">*</span>shadow;
+  };
+
+  <span class="type"><a href="qsgnode.html">QSGNode</a></span> <span class="operator">*</span>Graph<span class="operator">::</span>updatePaintNode(<span class="type"><a href="qsgnode.html">QSGNode</a></span> <span class="operator">*</span>oldNode<span class="operator">,</span> UpdatePaintNodeData <span class="operator">*</span>)
+  {
+      GraphNode <span class="operator">*</span>n<span class="operator">=</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span>GraphNode <span class="operator">*</span><span class="operator">&gt;</span>(oldNode);
+
+      <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> rect <span class="operator">=</span> boundingRect();
+
+      <span class="keyword">if</span> (rect<span class="operator">.</span>isEmpty()) {
+          <span class="keyword">delete</span> n;
+          <span class="keyword">return</span> <span class="number">0</span>;
+      }
+
+      <span class="keyword">if</span> (<span class="operator">!</span>n) {
+          n <span class="operator">=</span> <span class="keyword">new</span> GraphNode();
+
+          n<span class="operator">-</span><span class="operator">&gt;</span>background <span class="operator">=</span> <span class="keyword">new</span> NoisyNode(window());
+          n<span class="operator">-</span><span class="operator">&gt;</span>grid <span class="operator">=</span> <span class="keyword">new</span> GridNode();
+          n<span class="operator">-</span><span class="operator">&gt;</span>line <span class="operator">=</span> <span class="keyword">new</span> LineNode(<span class="number">10</span><span class="operator">,</span> <span class="number">0.5</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="string">&quot;steelblue&quot;</span>));
+          n<span class="operator">-</span><span class="operator">&gt;</span>shadow <span class="operator">=</span> <span class="keyword">new</span> LineNode(<span class="number">20</span><span class="operator">,</span> <span class="number">0.2</span><span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span><span class="operator">::</span>fromRgbF(<span class="number">0.2</span><span class="operator">,</span> <span class="number">0.2</span><span class="operator">,</span> <span class="number">0.2</span><span class="operator">,</span> <span class="number">0.4</span>));
+
+          n<span class="operator">-</span><span class="operator">&gt;</span>appendChildNode(n<span class="operator">-</span><span class="operator">&gt;</span>background);
+          n<span class="operator">-</span><span class="operator">&gt;</span>appendChildNode(n<span class="operator">-</span><span class="operator">&gt;</span>grid);
+          n<span class="operator">-</span><span class="operator">&gt;</span>appendChildNode(n<span class="operator">-</span><span class="operator">&gt;</span>shadow);
+          n<span class="operator">-</span><span class="operator">&gt;</span>appendChildNode(n<span class="operator">-</span><span class="operator">&gt;</span>line);
+      }
+
+      <span class="keyword">if</span> (m_geometryChanged) {
+          n<span class="operator">-</span><span class="operator">&gt;</span>background<span class="operator">-</span><span class="operator">&gt;</span>setRect(rect);
+          n<span class="operator">-</span><span class="operator">&gt;</span>grid<span class="operator">-</span><span class="operator">&gt;</span>setRect(rect);
+      }
+
+      <span class="keyword">if</span> (m_geometryChanged <span class="operator">|</span><span class="operator">|</span> m_samplesChanged) {
+          n<span class="operator">-</span><span class="operator">&gt;</span>line<span class="operator">-</span><span class="operator">&gt;</span>updateGeometry(rect<span class="operator">,</span> m_samples);
+          <span class="comment">// We don't need to calculate the geometry twice, so just steal it from the other one...</span>
+          n<span class="operator">-</span><span class="operator">&gt;</span>shadow<span class="operator">-</span><span class="operator">&gt;</span>setGeometry(n<span class="operator">-</span><span class="operator">&gt;</span>line<span class="operator">-</span><span class="operator">&gt;</span>geometry());
+      }
+
+      m_geometryChanged <span class="operator">=</span> <span class="keyword">false</span>;
+      m_samplesChanged <span class="operator">=</span> <span class="keyword">false</span>;
+
+      <span class="keyword">return</span> n;
+  }
+
+</pre>
+</div>
+<!-- @@@scenegraph/graph/graph.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

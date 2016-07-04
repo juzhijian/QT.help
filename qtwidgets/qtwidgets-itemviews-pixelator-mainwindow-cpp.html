@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mainwindow.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-itemviews-pixelator-example.html">Pixelator Example</a></td><td >mainwindow.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mainwindow.cpp Example File</h1>
+<span class="subtitle">itemviews/pixelator/mainwindow.cpp</span>
+<!-- $$$itemviews/pixelator/mainwindow.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;imagemodel.h&quot;</span>
+  <span class="preprocessor">#include &quot;mainwindow.h&quot;</span>
+  <span class="preprocessor">#include &quot;pixeldelegate.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets&gt;</span>
+  <span class="preprocessor">#ifndef QT_NO_PRINTER</span>
+  <span class="preprocessor">#include &lt;QPrinter&gt;</span>
+  <span class="preprocessor">#include &lt;QPrintDialog&gt;</span>
+  <span class="preprocessor">#endif</span>
+
+  MainWindow<span class="operator">::</span>MainWindow()
+  {
+      currentPath <span class="operator">=</span> <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>homePath();
+      model <span class="operator">=</span> <span class="keyword">new</span> ImageModel(<span class="keyword">this</span>);
+
+      <span class="type"><a href="qwidget.html">QWidget</a></span> <span class="operator">*</span>centralWidget <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qwidget.html">QWidget</a></span>;
+
+      view <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qtableview.html">QTableView</a></span>;
+      view<span class="operator">-</span><span class="operator">&gt;</span>setShowGrid(<span class="keyword">false</span>);
+      view<span class="operator">-</span><span class="operator">&gt;</span>horizontalHeader()<span class="operator">-</span><span class="operator">&gt;</span>hide();
+      view<span class="operator">-</span><span class="operator">&gt;</span>verticalHeader()<span class="operator">-</span><span class="operator">&gt;</span>hide();
+      view<span class="operator">-</span><span class="operator">&gt;</span>horizontalHeader()<span class="operator">-</span><span class="operator">&gt;</span>setMinimumSectionSize(<span class="number">1</span>);
+      view<span class="operator">-</span><span class="operator">&gt;</span>verticalHeader()<span class="operator">-</span><span class="operator">&gt;</span>setMinimumSectionSize(<span class="number">1</span>);
+      view<span class="operator">-</span><span class="operator">&gt;</span>setModel(model);
+
+      PixelDelegate <span class="operator">*</span>delegate <span class="operator">=</span> <span class="keyword">new</span> PixelDelegate(<span class="keyword">this</span>);
+      view<span class="operator">-</span><span class="operator">&gt;</span>setItemDelegate(delegate);
+
+      <span class="type"><a href="qlabel.html">QLabel</a></span> <span class="operator">*</span>pixelSizeLabel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qlabel.html">QLabel</a></span>(tr(<span class="string">&quot;Pixel size:&quot;</span>));
+      <span class="type"><a href="qspinbox.html">QSpinBox</a></span> <span class="operator">*</span>pixelSizeSpinBox <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qspinbox.html">QSpinBox</a></span>;
+      pixelSizeSpinBox<span class="operator">-</span><span class="operator">&gt;</span>setMinimum(<span class="number">4</span>);
+      pixelSizeSpinBox<span class="operator">-</span><span class="operator">&gt;</span>setMaximum(<span class="number">32</span>);
+      pixelSizeSpinBox<span class="operator">-</span><span class="operator">&gt;</span>setValue(<span class="number">12</span>);
+
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>fileMenu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmenu.html">QMenu</a></span>(tr(<span class="string">&quot;&amp;File&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>openAction <span class="operator">=</span> fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Open...&quot;</span>));
+      openAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Open);
+
+      printAction <span class="operator">=</span> fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;Print...&quot;</span>));
+      printAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">false</span>);
+      printAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcut(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Print);
+
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>quitAction <span class="operator">=</span> fileMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;E&amp;xit&quot;</span>));
+      quitAction<span class="operator">-</span><span class="operator">&gt;</span>setShortcuts(<span class="type"><a href="../qtgui/qkeysequence.html">QKeySequence</a></span><span class="operator">::</span>Quit);
+
+      <span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>helpMenu <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qmenu.html">QMenu</a></span>(tr(<span class="string">&quot;&amp;Help&quot;</span>)<span class="operator">,</span> <span class="keyword">this</span>);
+      <span class="type"><a href="qaction.html">QAction</a></span> <span class="operator">*</span>aboutAction <span class="operator">=</span> helpMenu<span class="operator">-</span><span class="operator">&gt;</span>addAction(tr(<span class="string">&quot;&amp;About&quot;</span>));
+
+      menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(fileMenu);
+      menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addSeparator();
+      menuBar()<span class="operator">-</span><span class="operator">&gt;</span>addMenu(helpMenu);
+
+      connect(openAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>chooseImage);
+      connect(printAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>printImage);
+      connect(quitAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> qApp<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>quit);
+      connect(aboutAction<span class="operator">,</span> <span class="operator">&amp;</span><span class="type"><a href="qaction.html">QAction</a></span><span class="operator">::</span>triggered<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>showAboutBox);
+      <span class="keyword">typedef</span> <span class="type">void</span> (<span class="type"><a href="qspinbox.html">QSpinBox</a></span><span class="operator">::</span><span class="operator">*</span><span class="type">QSpinBoxIntSignal</span>)(<span class="type">int</span>);
+      connect(pixelSizeSpinBox<span class="operator">,</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type">QSpinBoxIntSignal</span><span class="operator">&gt;</span>(<span class="operator">&amp;</span><span class="type"><a href="qspinbox.html">QSpinBox</a></span><span class="operator">::</span>valueChanged)<span class="operator">,</span>
+              delegate<span class="operator">,</span> <span class="operator">&amp;</span>PixelDelegate<span class="operator">::</span>setPixelSize);
+      connect(pixelSizeSpinBox<span class="operator">,</span> <span class="keyword">static_cast</span><span class="operator">&lt;</span><span class="type">QSpinBoxIntSignal</span><span class="operator">&gt;</span>(<span class="operator">&amp;</span><span class="type"><a href="qspinbox.html">QSpinBox</a></span><span class="operator">::</span>valueChanged)<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> <span class="operator">&amp;</span>MainWindow<span class="operator">::</span>updateView);
+
+      <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span> <span class="operator">*</span>controlsLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qhboxlayout.html">QHBoxLayout</a></span>;
+      controlsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(pixelSizeLabel);
+      controlsLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(pixelSizeSpinBox);
+      controlsLayout<span class="operator">-</span><span class="operator">&gt;</span>addStretch(<span class="number">1</span>);
+
+      <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span> <span class="operator">*</span>mainLayout <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qvboxlayout.html">QVBoxLayout</a></span>;
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addWidget(view);
+      mainLayout<span class="operator">-</span><span class="operator">&gt;</span>addLayout(controlsLayout);
+      centralWidget<span class="operator">-</span><span class="operator">&gt;</span>setLayout(mainLayout);
+
+      setCentralWidget(centralWidget);
+
+      setWindowTitle(tr(<span class="string">&quot;Pixelator&quot;</span>));
+      resize(<span class="number">640</span><span class="operator">,</span> <span class="number">480</span>);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>chooseImage()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> fileName <span class="operator">=</span> <span class="type"><a href="qfiledialog.html">QFileDialog</a></span><span class="operator">::</span>getOpenFileName(<span class="keyword">this</span><span class="operator">,</span>
+          tr(<span class="string">&quot;Choose an image&quot;</span>)<span class="operator">,</span> currentPath<span class="operator">,</span> <span class="string">&quot;*&quot;</span>);
+
+      <span class="keyword">if</span> (<span class="operator">!</span>fileName<span class="operator">.</span>isEmpty())
+          openImage(fileName);
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>openImage(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>fileName)
+  {
+      <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> image;
+
+      <span class="keyword">if</span> (image<span class="operator">.</span>load(fileName)) {
+          model<span class="operator">-</span><span class="operator">&gt;</span>setImage(image);
+          <span class="keyword">if</span> (<span class="operator">!</span>fileName<span class="operator">.</span>startsWith(<span class="string">&quot;:/&quot;</span>)) {
+              currentPath <span class="operator">=</span> fileName;
+              setWindowTitle(tr(<span class="string">&quot;%1 - Pixelator&quot;</span>)<span class="operator">.</span>arg(currentPath));
+          }
+
+          printAction<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(<span class="keyword">true</span>);
+          updateView();
+      }
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>printImage()
+  {
+  <span class="preprocessor">#if !defined(QT_NO_PRINTER) &amp;&amp; !defined(QT_NO_PRINTDIALOG)</span>
+      <span class="keyword">if</span> (model<span class="operator">-</span><span class="operator">&gt;</span>rowCount(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>())<span class="operator">*</span>model<span class="operator">-</span><span class="operator">&gt;</span>columnCount(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>()) <span class="operator">&gt;</span> <span class="number">90000</span>) {
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>StandardButton answer;
+          answer <span class="operator">=</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>question(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Large Image Size&quot;</span>)<span class="operator">,</span>
+                  tr(<span class="string">&quot;The printed image may be very large. Are you sure that &quot;</span>
+                     <span class="string">&quot;you want to print it?&quot;</span>)<span class="operator">,</span>
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Yes <span class="operator">|</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>No);
+          <span class="keyword">if</span> (answer <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>No)
+              <span class="keyword">return</span>;
+      }
+
+      <span class="type">QPrinter</span> printer(<span class="type">QPrinter</span><span class="operator">::</span>HighResolution);
+
+      <span class="type">QPrintDialog</span> dlg(<span class="operator">&amp;</span>printer<span class="operator">,</span> <span class="keyword">this</span>);
+      dlg<span class="operator">.</span>setWindowTitle(tr(<span class="string">&quot;Print Image&quot;</span>));
+
+      <span class="keyword">if</span> (dlg<span class="operator">.</span>exec() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="qdialog.html">QDialog</a></span><span class="operator">::</span>Accepted) {
+          <span class="keyword">return</span>;
+      }
+
+      <span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span> painter;
+      painter<span class="operator">.</span>begin(<span class="operator">&amp;</span>printer);
+
+      <span class="type">int</span> rows <span class="operator">=</span> model<span class="operator">-</span><span class="operator">&gt;</span>rowCount(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>());
+      <span class="type">int</span> columns <span class="operator">=</span> model<span class="operator">-</span><span class="operator">&gt;</span>columnCount(<span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>());
+      <span class="type">int</span> sourceWidth <span class="operator">=</span> (columns <span class="operator">+</span> <span class="number">1</span>) <span class="operator">*</span> ItemSize;
+      <span class="type">int</span> sourceHeight <span class="operator">=</span> (rows <span class="operator">+</span> <span class="number">1</span>) <span class="operator">*</span> ItemSize;
+
+      painter<span class="operator">.</span>save();
+
+      <span class="type">double</span> xscale <span class="operator">=</span> printer<span class="operator">.</span>pageRect()<span class="operator">.</span>width() <span class="operator">/</span> <span class="type">double</span>(sourceWidth);
+      <span class="type">double</span> yscale <span class="operator">=</span> printer<span class="operator">.</span>pageRect()<span class="operator">.</span>height() <span class="operator">/</span> <span class="type">double</span>(sourceHeight);
+      <span class="type">double</span> scale <span class="operator">=</span> <a href="../qtcore/qtglobal.html#qMin">qMin</a>(xscale<span class="operator">,</span> yscale);
+
+      painter<span class="operator">.</span>translate(printer<span class="operator">.</span>paperRect()<span class="operator">.</span>x() <span class="operator">+</span> printer<span class="operator">.</span>pageRect()<span class="operator">.</span>width() <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span>
+                        printer<span class="operator">.</span>paperRect()<span class="operator">.</span>y() <span class="operator">+</span> printer<span class="operator">.</span>pageRect()<span class="operator">.</span>height() <span class="operator">/</span> <span class="number">2</span>);
+      painter<span class="operator">.</span>scale(scale<span class="operator">,</span> scale);
+      painter<span class="operator">.</span>translate(<span class="operator">-</span>sourceWidth <span class="operator">/</span> <span class="number">2</span><span class="operator">,</span> <span class="operator">-</span>sourceHeight <span class="operator">/</span> <span class="number">2</span>);
+
+      <span class="type"><a href="qstyleoptionviewitem.html">QStyleOptionViewItem</a></span> option;
+      <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> parent <span class="operator">=</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span>();
+
+      <span class="type"><a href="qprogressdialog.html">QProgressDialog</a></span> progress(tr(<span class="string">&quot;Printing...&quot;</span>)<span class="operator">,</span> tr(<span class="string">&quot;Cancel&quot;</span>)<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> rows<span class="operator">,</span> <span class="keyword">this</span>);
+      progress<span class="operator">.</span>setWindowModality(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ApplicationModal);
+      <span class="type">float</span> y <span class="operator">=</span> ItemSize <span class="operator">/</span> <span class="number">2</span>;
+
+      <span class="keyword">for</span> (<span class="type">int</span> row <span class="operator">=</span> <span class="number">0</span>; row <span class="operator">&lt;</span> rows; <span class="operator">+</span><span class="operator">+</span>row) {
+          progress<span class="operator">.</span>setValue(row);
+          qApp<span class="operator">-</span><span class="operator">&gt;</span>processEvents();
+          <span class="keyword">if</span> (progress<span class="operator">.</span>wasCanceled())
+              <span class="keyword">break</span>;
+
+          <span class="type">float</span> x <span class="operator">=</span> ItemSize <span class="operator">/</span> <span class="number">2</span>;
+
+          <span class="keyword">for</span> (<span class="type">int</span> column <span class="operator">=</span> <span class="number">0</span>; column <span class="operator">&lt;</span> columns; <span class="operator">+</span><span class="operator">+</span>column) {
+              option<span class="operator">.</span>rect <span class="operator">=</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(<span class="type">int</span>(x)<span class="operator">,</span> <span class="type">int</span>(y)<span class="operator">,</span> ItemSize<span class="operator">,</span> ItemSize);
+              view<span class="operator">-</span><span class="operator">&gt;</span>itemDelegate()<span class="operator">-</span><span class="operator">&gt;</span>paint(<span class="operator">&amp;</span>painter<span class="operator">,</span> option<span class="operator">,</span>
+                                          model<span class="operator">-</span><span class="operator">&gt;</span>index(row<span class="operator">,</span> column<span class="operator">,</span> parent));
+              x <span class="operator">=</span> x <span class="operator">+</span> ItemSize;
+          }
+          y <span class="operator">=</span> y <span class="operator">+</span> ItemSize;
+      }
+      progress<span class="operator">.</span>setValue(rows);
+
+      painter<span class="operator">.</span>restore();
+      painter<span class="operator">.</span>end();
+
+      <span class="keyword">if</span> (progress<span class="operator">.</span>wasCanceled()) {
+          <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Printing canceled&quot;</span>)<span class="operator">,</span>
+              tr(<span class="string">&quot;The printing process was canceled.&quot;</span>)<span class="operator">,</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Cancel);
+      }
+  <span class="preprocessor">#else</span>
+      <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>information(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Printing canceled&quot;</span>)<span class="operator">,</span>
+          tr(<span class="string">&quot;Printing is not supported on this Qt build&quot;</span>)<span class="operator">,</span> <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>Cancel);
+  <span class="preprocessor">#endif</span>
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>showAboutBox()
+  {
+      <span class="type"><a href="qmessagebox.html">QMessageBox</a></span><span class="operator">::</span>about(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;About the Pixelator example&quot;</span>)<span class="operator">,</span>
+          tr(<span class="string">&quot;This example demonstrates how a standard view and a custom\n&quot;</span>
+             <span class="string">&quot;delegate can be used to produce a specialized representation\n&quot;</span>
+             <span class="string">&quot;of data in a simple custom model.&quot;</span>));
+  }
+
+  <span class="type">void</span> MainWindow<span class="operator">::</span>updateView()
+  {
+      view<span class="operator">-</span><span class="operator">&gt;</span>resizeColumnsToContents();
+      view<span class="operator">-</span><span class="operator">&gt;</span>resizeRowsToContents();
+  }
+
+</pre>
+</div>
+<!-- @@@itemviews/pixelator/mainwindow.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

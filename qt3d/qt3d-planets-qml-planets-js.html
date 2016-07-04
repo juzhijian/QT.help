@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>planets.js Example File | Qt 3D 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qt3d-index.html">Qt 3D</a></td><td ><a href="qt3d-planets-qml-example.html">Qt 3D: Planets QML Example</a></td><td >planets.js Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">planets.js Example File</h1>
+<span class="subtitle">planets-qml/planets.js</span>
+<!-- $$$planets-qml/planets.js-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="js">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt3D module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  var <span class="name">SUN</span> = <span class="number">0</span>;
+  var <span class="name">MERCURY</span> = <span class="number">1</span>;
+  var <span class="name">VENUS</span> = <span class="number">2</span>;
+  var <span class="name">EARTH</span> = <span class="number">3</span>;
+  var <span class="name">MARS</span> = <span class="number">4</span>;
+  var <span class="name">JUPITER</span> = <span class="number">5</span>;
+  var <span class="name">SATURN</span> = <span class="number">6</span>;
+  var <span class="name">URANUS</span> = <span class="number">7</span>;
+  var <span class="name">NEPTUNE</span> = <span class="number">8</span>;
+  var <span class="name">NUM_SELECTABLE_PLANETS</span> = <span class="number">9</span>;
+  var <span class="name">MOON</span> = <span class="number">9</span>;
+  var <span class="name">SOLAR_SYSTEM</span> = <span class="number">100</span>;
+
+  var <span class="name">planets</span> = []; <span class="comment">// Planet data info</span>
+
+  var <span class="name">solarDistance</span> = <span class="number">2600000</span>;
+  var <span class="name">saturnOuterRadius</span> = <span class="number">120.700</span>;
+  var <span class="name">uranusOuterRadius</span> = <span class="number">40</span>;
+
+  var <span class="name">auScale</span> = <span class="number">149597.870700</span>; <span class="comment">// AU in thousands of kilometers</span>
+
+  <span class="keyword">function</span> <span class="name">loadPlanetData</span>() {
+
+      <span class="comment">// Planet Data</span>
+      <span class="comment">// radius - planet radius</span>
+      <span class="comment">// tilt - planet axis angle</span>
+      <span class="comment">// N1/2 - longitude of the ascending node</span>
+      <span class="comment">// i1/2 - inclination to the ecliptic (plane of the Earth's orbit)</span>
+      <span class="comment">// w1/2 - argument of perihelion</span>
+      <span class="comment">// a1/2 - semi-major axis, or mean distance from Sun</span>
+      <span class="comment">// e1/2 - eccentricity (0=circle, 0-1=ellipse, 1=parabola)</span>
+      <span class="comment">// M1/2 - mean anomaly (0 at perihelion; increases uniformly with time)</span>
+      <span class="comment">// period - sidereal rotation period</span>
+      <span class="comment">// centerOfOrbit - the planet in the center of the orbit</span>
+      <span class="comment">// (orbital elements based on http://www.stjarnhimlen.se/comp/ppcomp.html)</span>
+
+      var <span class="name">sun</span> = { radius: <span class="number">694.439</span>, tilt: <span class="number">63.87</span>, period: <span class="number">25.05</span>, x: <span class="number">0</span>, y: <span class="number">0</span>, z: <span class="number">0</span>,
+          roll: <span class="number">0</span> };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">sun</span>);
+      var <span class="name">mercury</span> = {
+          radius: <span class="number">2.433722</span>, tilt: <span class="number">0.04</span>, N1: <span class="number">48.3313</span>, N2: <span class="number">0.0000324587</span>,
+          i1: <span class="number">7.0047</span>, i2: <span class="number">0.0000000500</span>, w1: <span class="number">29.1241</span>, w2: <span class="number">0.0000101444</span>,
+          a1: <span class="number">0.387098</span>, a2: <span class="number">0</span>, e1: <span class="number">0.205635</span>, e2: <span class="number">0.000000000559</span>,
+          M1: <span class="number">168.6562</span>, M2: <span class="number">4.0923344368</span>, period: <span class="number">58.646</span>, x: <span class="number">0</span>, y: <span class="number">0</span>, z: <span class="number">0</span>,
+          roll: <span class="number">0</span>, centerOfOrbit: <span class="name">SUN</span>
+      };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">mercury</span>);
+      var <span class="name">venus</span> = {
+          radius: <span class="number">6.046079</span>, tilt: <span class="number">177.36</span>, N1: <span class="number">76.6799</span>, N2: <span class="number">0.0000246590</span>,
+          i1: <span class="number">3.3946</span>, i2: <span class="number">0.0000000275</span>, w1: <span class="number">54.8910</span>, w2: <span class="number">0.0000138374</span>,
+          a1: <span class="number">0.723330</span>, a2: <span class="number">0</span>, e1: <span class="number">0.006773</span>, e2: -<span class="number">0.000000001302</span>,
+          M1: <span class="number">48.0052</span>, M2: <span class="number">1.6021302244</span>, period: <span class="number">243.0185</span>, x: <span class="number">0</span>, y: <span class="number">0</span>, z: <span class="number">0</span>,
+          roll: <span class="number">0</span>, centerOfOrbit: <span class="name">SUN</span>
+      };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">venus</span>);
+      var <span class="name">earth</span> = {
+          radius: <span class="number">6.371</span>, tilt: <span class="number">25.44</span>, N1: <span class="number">174.873</span>, N2: <span class="number">0</span>,
+          i1: <span class="number">0.00005</span>, i2: <span class="number">0</span>, w1: <span class="number">102.94719</span>, w2: <span class="number">0</span>,
+          a1: <span class="number">1</span>, a2: <span class="number">0</span>, e1: <span class="number">0.01671022</span>, e2: <span class="number">0</span>,
+          M1: <span class="number">357.529</span>, M2: <span class="number">0.985608</span>, period: <span class="number">0.997</span>, x: <span class="number">0</span>, y: <span class="number">0</span>, z: <span class="number">0</span>,
+          roll: <span class="number">0</span>, centerOfOrbit: <span class="name">SUN</span>
+      };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">earth</span>);
+      var <span class="name">mars</span> = {
+          radius: <span class="number">3.389372</span>, tilt: <span class="number">25.19</span>, N1: <span class="number">49.5574</span>, N2: <span class="number">0.0000211081</span>,
+          i1: <span class="number">1.8497</span>, i2: -<span class="number">0.0000000178</span>, w1: <span class="number">286.5016</span>, w2: <span class="number">0.0000292961</span>,
+          a1: <span class="number">1.523688</span>, a2: <span class="number">0</span>, e1: <span class="number">0.093405</span>, e2: <span class="number">0.000000002516</span>,
+          M1: <span class="number">18.6021</span>, M2: <span class="number">0.5240207766</span>, period: <span class="number">1.025957</span>, x: <span class="number">0</span>, y: <span class="number">0</span>, z: <span class="number">0</span>,
+          roll: <span class="number">0</span>, centerOfOrbit: <span class="name">SUN</span>
+      };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">mars</span>);
+      var <span class="name">jupiter</span> = {
+          radius: <span class="number">71.41254</span>, tilt: <span class="number">3.13</span>, N1: <span class="number">100.4542</span>, N2: <span class="number">0.0000276854</span>,
+          i1: <span class="number">1.3030</span>, i2: -<span class="number">0.0000001557</span>, w1: <span class="number">273.8777</span>, w2: <span class="number">0.0000164505</span>,
+          a1: <span class="number">5.20256</span>, a2: <span class="number">0</span>, e1: <span class="number">0.048498</span>, e2: <span class="number">0.000000004469</span>,
+          M1: <span class="number">19.8950</span>, M2: <span class="number">0.0830853001</span>, period: <span class="number">0.4135</span>, x: <span class="number">0</span>, y: <span class="number">0</span>, z: <span class="number">0</span>,
+          roll: <span class="number">0</span>, centerOfOrbit: <span class="name">SUN</span>
+      };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">jupiter</span>);
+      var <span class="name">saturn</span> = {
+          radius: <span class="number">60.19958</span>, tilt: <span class="number">26.73</span>, N1: <span class="number">113.6634</span>, N2: <span class="number">0.0000238980</span>,
+          i1: <span class="number">2.4886</span>, i2: -<span class="number">0.0000001081</span>, w1: <span class="number">339.3939</span>, w2: <span class="number">0.0000297661</span>,
+          a1: <span class="number">9.55475</span>, a2: <span class="number">0</span>, e1: <span class="number">0.055546</span>, e2: -<span class="number">0.000000009499</span>,
+          M1: <span class="number">316.9670</span>, M2: <span class="number">0.0334442282</span>, period: <span class="number">0.4395</span>, x: <span class="number">0</span>, y: <span class="number">0</span>, z: <span class="number">0</span>,
+          roll: <span class="number">0</span>, centerOfOrbit: <span class="name">SUN</span>
+      };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">saturn</span>);
+      var <span class="name">uranus</span> = {
+          radius: <span class="number">25.5286</span>, tilt: <span class="number">97.77</span>, N1: <span class="number">74.0005</span>, N2: <span class="number">0.000013978</span>,
+          i1: <span class="number">0.7733</span>, i2: <span class="number">0.000000019</span>, w1: <span class="number">96.6612</span>, w2: <span class="number">0.000030565</span>,
+          a1: <span class="number">19.18171</span>, a2: -<span class="number">0.0000000155</span>, e1: <span class="number">0.047318</span>, e2: <span class="number">0.00000000745</span>,
+          M1: <span class="number">142.5905</span>, M2: <span class="number">0.011725806</span>, period: <span class="number">0.71833</span>, x: <span class="number">0</span>, y: <span class="number">0</span>, z: <span class="number">0</span>,
+          roll: <span class="number">0</span>, centerOfOrbit: <span class="name">SUN</span>
+      };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">uranus</span>);
+      var <span class="name">neptune</span> = {
+          radius: <span class="number">24.73859</span>, tilt: <span class="number">28.32</span>, N1: <span class="number">131.7806</span>, N2: <span class="number">0.000030173</span>,
+          i1: <span class="number">1.7700</span>, i2: -<span class="number">0.000000255</span>, w1: <span class="number">272.8461</span>, w2: <span class="number">0.000006027</span>,
+          a1: <span class="number">30.05826</span>, a2: <span class="number">0.00000003313</span>, e1: <span class="number">0.008606</span>, e2: <span class="number">0.00000000215</span>,
+          M1: <span class="number">260.2471</span>, M2: <span class="number">0.005995147</span>, period: <span class="number">0.6713</span>, x: <span class="number">0</span>, y: <span class="number">0</span>, z: <span class="number">0</span>,
+          roll: <span class="number">0</span>, centerOfOrbit: <span class="name">SUN</span>
+      };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">neptune</span>);
+      var <span class="name">moon</span> = {
+          radius: <span class="number">1.5424</span>, tilt: <span class="number">28.32</span>, N1: <span class="number">125.1228</span>, N2: -<span class="number">0.0529538083</span>,
+          i1: <span class="number">5.1454</span>, i2: <span class="number">0</span>, w1: <span class="number">318.0634</span>, w2: <span class="number">0.1643573223</span>,
+          a1: <span class="number">0.273</span>, a2: <span class="number">0</span>, e1: <span class="number">0.054900</span>, e2: <span class="number">0</span>,
+          M1: <span class="number">115.3654</span>, M2: <span class="number">13.0649929509</span>, period: <span class="number">27.321582</span>, x: <span class="number">0</span>, y: <span class="number">0</span>, z: <span class="number">0</span>,
+          roll: <span class="number">0</span>, centerOfOrbit: <span class="name">EARTH</span>
+      };
+      <span class="name">planets</span>.<span class="name">push</span>(<span class="name">moon</span>);
+
+      <span class="keyword">return</span> <span class="name">planets</span>;
+  }
+
+  <span class="keyword">function</span> <span class="name">getOuterRadius</span>(<span class="name">planet</span>) {
+      var <span class="name">outerRadius</span> = <span class="name">solarDistance</span>;
+      <span class="keyword">if</span> (<span class="name">planet</span> <span class="operator">!==</span> <span class="name">SOLAR_SYSTEM</span>) {
+          <span class="name">outerRadius</span> <span class="operator">=</span> <span class="name">planets</span>[<span class="name">planet</span>][<span class="string">&quot;radius&quot;</span>];
+          <span class="keyword">if</span> (<span class="name">planet</span> <span class="operator">===</span> <span class="name">SATURN</span>) {
+              <span class="name">outerRadius</span> <span class="operator">=</span>+ <span class="name">saturnOuterRadius</span>;
+          } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">planet</span> <span class="operator">===</span> <span class="name">URANUS</span>) {
+              <span class="name">outerRadius</span> <span class="operator">=</span>+ <span class="name">uranusOuterRadius</span>;
+          } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">planet</span> <span class="operator">===</span> <span class="name">SUN</span>) {
+              <span class="name">outerRadius</span> <span class="operator">=</span> <span class="name">planets</span>[<span class="name">planet</span>][<span class="string">&quot;radius&quot;</span>] <span class="operator">/</span> <span class="number">100</span>;
+          }
+      }
+
+      <span class="keyword">return</span> <span class="name">outerRadius</span>;
+  }
+
+</pre>
+</div>
+<!-- @@@planets-qml/planets.js -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

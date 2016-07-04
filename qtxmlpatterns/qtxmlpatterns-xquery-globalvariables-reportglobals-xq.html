@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>reportGlobals.xq Example File | Qt XML Patterns 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtxmlpatterns-index.html">Qt XML Patterns</a></td><td ><a href="qtxmlpatterns-xquery-example.html">C++ Source Code Analyzer Example</a></td><td >reportGlobals.xq Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">reportGlobals.xq Example File</h1>
+<span class="subtitle">xquery/globalVariables/reportGlobals.xq</span>
+<!-- $$$xquery/globalVariables/reportGlobals.xq-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  (:
+      This XQuery loads a GCC-XML file and reports the locations of all
+      global variables in the original C++ source. To run the query,
+      use the command line:
+
+      xmlpatterns reportGlobals.xq -param fileToOpen=globals.gccxml -output globals.html
+
+      &quot;fileToOpen=globals.gccxml&quot; binds the file name &quot;globals.gccxml&quot;
+      to the variable &quot;fileToOpen&quot; declared and used below.
+  :)
+
+  declare variable $fileToOpen as xs:anyURI external;
+  declare variable $inDoc as document-node() := doc($fileToOpen);
+
+  (:
+     This function determines whether the typeId is a complex type,
+     e.g. QString. We only check whether it's a class. To be strictly
+     correct, we should check whether the class has a non-synthesized
+     constructor. We accept both mutable and const types.
+  :)
+  declare function local:isComplexType($typeID as xs:string) as xs:boolean
+  {
+      exists($inDoc/GCC_XML/Class[@id = $typeID])
+      or
+      exists($inDoc/GCC_XML/Class[@id = $inDoc/GCC_XML/CvQualifiedType[@id = $typeID]/@type])
+  };
+
+  (:
+     This function determines whether the typeId is a primitive type.
+  :)
+  declare function local:isPrimitive($typeId as xs:string) as xs:boolean
+  {
+      exists($inDoc/GCC_XML/FundamentalType[@id = $typeId])
+  };
+
+  (:
+     This function constructs a line for the report. The line contains
+     a variable name, the source file, and the line number.
+  :)
+  declare function local:location($block as element()) as xs:string
+  {
+      concat($inDoc/GCC_XML/File[@id = $block/@file]/@name, &quot; at line &quot;, $block/@line)
+  };
+
+  (:
+     This function generates the report. Note that it is called once
+     in the &lt;body&gt; element of the &lt;html&gt; output.
+
+     It ignores const variables of simple types but reports all others.
+  :)
+  declare function local:report() as element()+
+  {
+      let $complexVariables as element(Variable)* := $inDoc/GCC_XML/Variable[local:isComplexType(@type)]
+      return if (exists($complexVariables))
+             then (&lt;p xmlns=&quot;http://www.w3.org/1999/xhtml/&quot;&gt;Global variables with complex types:&lt;/p&gt;,
+                   &lt;ol xmlns=&quot;http://www.w3.org/1999/xhtml/&quot;&gt;
+                      {
+                          (: For each Variable in $complexVariables... :)
+                          $complexVariables/&lt;li&gt;&lt;span class=&quot;variableName&quot;&gt;{string(@name)}&lt;/span&gt; in {local:location(.)}&lt;/li&gt;
+                      }
+                   &lt;/ol&gt;)
+             else &lt;p xmlns=&quot;http://www.w3.org/1999/xhtml/&quot;&gt;No complex global variables found.&lt;/p&gt;
+
+      ,
+
+      let $primitiveVariables as element(Variable)+ := $inDoc/GCC_XML/Variable[local:isPrimitive(@type)]
+      return if (exists($primitiveVariables))
+             then (&lt;p xmlns=&quot;http://www.w3.org/1999/xhtml/&quot;&gt;Mutable global variables with primitives types:&lt;/p&gt;,
+                   &lt;ol xmlns=&quot;http://www.w3.org/1999/xhtml/&quot;&gt;
+                      {
+                          (: For each Variable in $complexVariables... :)
+                          $primitiveVariables/&lt;li&gt;&lt;span class=&quot;variableName&quot;&gt;{string(@name)}&lt;/span&gt; in {local:location(.)}&lt;/li&gt;
+                      }
+                   &lt;/ol&gt;)
+             else &lt;p xmlns=&quot;http://www.w3.org/1999/xhtml/&quot;&gt;No mutable primitive global variables found.&lt;/p&gt;
+  };
+
+  (:
+      This is where the &lt;html&gt; report is output. First
+      there is some style stuff, then the &lt;body&gt; element,
+      which contains the call to the \c{local:report()}
+      declared above.
+  :)
+  &lt;html xmlns=&quot;http://www.w3.org/1999/xhtml/&quot; xml:lang=&quot;en&quot; lang=&quot;en&quot;&gt;
+      &lt;head&gt;
+          &lt;title&gt;Global variables report for {$fileToOpen}&lt;/title&gt;
+      &lt;/head&gt;
+      &lt;style type=&quot;text/css&quot;&gt;
+          .details
+          {{
+              text-align: left;
+              font-size: 80%;
+              color: blue
+          }}
+          .variableName
+          {{
+              font-family: courier;
+              color: blue
+          }}
+      &lt;/style&gt;
+
+      &lt;body&gt;
+          &lt;p class=&quot;details&quot;&gt;Start report: {current-dateTime()}&lt;/p&gt;
+          {
+              local:report()
+          }
+          &lt;p class=&quot;details&quot;&gt;End report: {current-dateTime()}&lt;/p&gt;
+      &lt;/body&gt;
+
+  &lt;/html&gt;
+
+</pre>
+</div>
+<!-- @@@xquery/globalVariables/reportGlobals.xq -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

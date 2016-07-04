@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>renderthread.cpp Example File | Qt Core 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcore-index.html">Qt Core</a></td><td ><a href="qtcore-threads-queuedcustomtype-example.html">Queued Custom Type Example</a></td><td >renderthread.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">renderthread.cpp Example File</h1>
+<span class="subtitle">threads/queuedcustomtype/renderthread.cpp</span>
+<!-- $$$threads/queuedcustomtype/renderthread.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;renderthread.h&quot;</span>
+
+  RenderThread<span class="operator">::</span>RenderThread(<span class="type"><a href="qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qthread.html">QThread</a></span>(parent)
+  {
+      m_abort <span class="operator">=</span> <span class="keyword">false</span>;
+  }
+
+  RenderThread<span class="operator">::</span><span class="operator">~</span>RenderThread()
+  {
+      mutex<span class="operator">.</span>lock();
+      m_abort <span class="operator">=</span> <span class="keyword">true</span>;
+      mutex<span class="operator">.</span>unlock();
+
+      wait();
+  }
+
+  <span class="type">void</span> RenderThread<span class="operator">::</span>processImage(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qimage.html">QImage</a></span> <span class="operator">&amp;</span>image)
+  {
+      <span class="keyword">if</span> (image<span class="operator">.</span>isNull())
+          <span class="keyword">return</span>;
+
+      m_image <span class="operator">=</span> image;
+      m_abort <span class="operator">=</span> <span class="keyword">false</span>;
+      start();
+  }
+
+  <span class="type">void</span> RenderThread<span class="operator">::</span>run()
+  {
+      <span class="type">int</span> size <span class="operator">=</span> <a href="qtglobal.html#qMax">qMax</a>(m_image<span class="operator">.</span>width()<span class="operator">/</span><span class="number">20</span><span class="operator">,</span> m_image<span class="operator">.</span>height()<span class="operator">/</span><span class="number">20</span>);
+      <span class="keyword">for</span> (<span class="type">int</span> s <span class="operator">=</span> size; s <span class="operator">&gt;</span> <span class="number">0</span>; <span class="operator">-</span><span class="operator">-</span>s) {
+          <span class="keyword">for</span> (<span class="type">int</span> c <span class="operator">=</span> <span class="number">0</span>; c <span class="operator">&lt;</span> <span class="number">400</span>; <span class="operator">+</span><span class="operator">+</span>c) {
+              <span class="type">int</span> x1 <span class="operator">=</span> <a href="qtglobal.html#qMax">qMax</a>(<span class="number">0</span><span class="operator">,</span> (qrand() <span class="operator">%</span> m_image<span class="operator">.</span>width()) <span class="operator">-</span> s<span class="operator">/</span><span class="number">2</span>);
+              <span class="type">int</span> x2 <span class="operator">=</span> <a href="qtglobal.html#qMin">qMin</a>(x1 <span class="operator">+</span> s<span class="operator">/</span><span class="number">2</span> <span class="operator">+</span> <span class="number">1</span><span class="operator">,</span> m_image<span class="operator">.</span>width());
+              <span class="type">int</span> y1 <span class="operator">=</span> <a href="qtglobal.html#qMax">qMax</a>(<span class="number">0</span><span class="operator">,</span> (qrand() <span class="operator">%</span> m_image<span class="operator">.</span>height()) <span class="operator">-</span> s<span class="operator">/</span><span class="number">2</span>);
+              <span class="type">int</span> y2 <span class="operator">=</span> <a href="qtglobal.html#qMin">qMin</a>(y1 <span class="operator">+</span> s<span class="operator">/</span><span class="number">2</span> <span class="operator">+</span> <span class="number">1</span><span class="operator">,</span> m_image<span class="operator">.</span>height());
+              <span class="type">int</span> n <span class="operator">=</span> <span class="number">0</span>;
+              <span class="type">int</span> red <span class="operator">=</span> <span class="number">0</span>;
+              <span class="type">int</span> green <span class="operator">=</span> <span class="number">0</span>;
+              <span class="type">int</span> blue <span class="operator">=</span> <span class="number">0</span>;
+              <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> y1; i <span class="operator">&lt;</span> y2; <span class="operator">+</span><span class="operator">+</span>i) {
+                  <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> x1; j <span class="operator">&lt;</span> x2; <span class="operator">+</span><span class="operator">+</span>j) {
+                      <span class="type"><a href="../qtgui/qcolor.html#QRgb-typedef">QRgb</a></span> pixel <span class="operator">=</span> m_image<span class="operator">.</span>pixel(j<span class="operator">,</span> i);
+                      red <span class="operator">+</span><span class="operator">=</span> <a href="../qtgui/qcolor.html#qRed">qRed</a>(pixel);
+                      green <span class="operator">+</span><span class="operator">=</span> <a href="../qtgui/qcolor.html#qGreen">qGreen</a>(pixel);
+                      blue <span class="operator">+</span><span class="operator">=</span> <a href="../qtgui/qcolor.html#qBlue">qBlue</a>(pixel);
+                      n <span class="operator">+</span><span class="operator">=</span> <span class="number">1</span>;
+                  }
+              }
+              Block block(<span class="type"><a href="qrect.html">QRect</a></span>(x1<span class="operator">,</span> y1<span class="operator">,</span> x2 <span class="operator">-</span> x1 <span class="operator">+</span> <span class="number">1</span><span class="operator">,</span> y2 <span class="operator">-</span> y1 <span class="operator">+</span> <span class="number">1</span>)<span class="operator">,</span>
+                          <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(red<span class="operator">/</span>n<span class="operator">,</span> green<span class="operator">/</span>n<span class="operator">,</span> blue<span class="operator">/</span>n));
+              <span class="keyword">emit</span> sendBlock(block);
+              <span class="keyword">if</span> (m_abort)
+                  <span class="keyword">return</span>;
+              msleep(<span class="number">10</span>);
+          }
+      }
+  }
+
+  <span class="type">void</span> RenderThread<span class="operator">::</span>stopProcess()
+  {
+      mutex<span class="operator">.</span>lock();
+      m_abort <span class="operator">=</span> <span class="keyword">true</span>;
+      mutex<span class="operator">.</span>unlock();
+  }
+
+</pre>
+</div>
+<!-- @@@threads/queuedcustomtype/renderthread.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

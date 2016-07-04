@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>main.qml Example File | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td ><a href="qtdatavisualization-qmlaxisdrag-example.html">Qt Quick 2 Axis Dragging Example</a></td><td >main.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">main.qml Example File</h1>
+<span class="subtitle">qmlaxisdrag/qml/qmlaxisdrag/main.qml</span>
+<!-- $$$qmlaxisdrag/qml/qmlaxisdrag/main.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Data Visualization module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.1
+  import QtDataVisualization 1.1
+  import &quot;.&quot;
+
+  <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+      <span class="name">id</span>: <span class="name">mainView</span>
+      <span class="name">width</span>: <span class="number">800</span>
+      <span class="name">height</span>: <span class="number">600</span>
+      <span class="name">visible</span>: <span class="number">true</span>
+
+      property <span class="type">int</span> <span class="name">selectedAxisLabel</span>: -<span class="number">1</span>
+      property <span class="type">real</span> <span class="name">dragSpeedModifier</span>: <span class="number">100.0</span>
+      property <span class="type">int</span> <span class="name">currentMouseX</span>: -<span class="number">1</span>
+      property <span class="type">int</span> <span class="name">currentMouseY</span>: -<span class="number">1</span>
+      property <span class="type">int</span> <span class="name">previousMouseX</span>: -<span class="number">1</span>
+      property <span class="type">int</span> <span class="name">previousMouseY</span>: -<span class="number">1</span>
+
+      <span class="type"><a href="../qtqml/qml-qtqml-models-listmodel.html">ListModel</a></span> {
+          <span class="name">id</span>: <span class="name">graphModel</span>
+          <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span>{ <span class="name">xPos</span>: <span class="number">0.0</span>; <span class="name">yPos</span>: <span class="number">0.0</span>; <span class="name">zPos</span>: <span class="number">0.0</span>; <span class="name">rotation</span>: <span class="string">&quot;@0,0,0,0&quot;</span> }
+          <span class="type"><a href="../qtqml/qml-qtqml-models-listelement.html">ListElement</a></span>{ <span class="name">xPos</span>: <span class="number">1.0</span>; <span class="name">yPos</span>: <span class="number">1.0</span>; <span class="name">zPos</span>: <span class="number">1.0</span>; <span class="name">rotation</span>: <span class="string">&quot;@45,1,1,1&quot;</span> }
+      }
+
+      <span class="type"><a href="../qtqml/qml-qtqml-timer.html">Timer</a></span> {
+          <span class="name">id</span>: <span class="name">dataTimer</span>
+          <span class="name">interval</span>: <span class="number">1</span>
+          <span class="name">running</span>: <span class="number">true</span>
+          <span class="name">repeat</span>: <span class="number">true</span>
+          property <span class="type">bool</span> <span class="name">isIncreasing</span>: <span class="number">true</span>
+          property <span class="type">real</span> <span class="name">rotationAngle</span>: <span class="number">0</span>
+
+          <span class="keyword">function</span> <span class="name">generateQuaternion</span>() {
+              <span class="keyword">return</span> <span class="string">&quot;@&quot;</span> <span class="operator">+</span> <span class="name">Math</span>.<span class="name">random</span>() <span class="operator">*</span> <span class="number">360</span> <span class="operator">+</span> <span class="string">&quot;,&quot;</span> <span class="operator">+</span> <span class="name">Math</span>.<span class="name">random</span>() <span class="operator">+</span> <span class="string">&quot;,&quot;</span>
+                      <span class="operator">+</span> <span class="name">Math</span>.<span class="name">random</span>() <span class="operator">+</span> <span class="string">&quot;,&quot;</span> <span class="operator">+</span> <span class="name">Math</span>.<span class="name">random</span>()
+          }
+
+          <span class="keyword">function</span> <span class="name">appendRow</span>() {
+              <span class="name">graphModel</span>.<span class="name">append</span>({&quot;xPos&quot;: <span class="name">Math</span>.<span class="name">random</span>(),
+                                    &quot;yPos&quot;: <span class="name">Math</span>.<span class="name">random</span>(),
+                                    &quot;zPos&quot;: <span class="name">Math</span>.<span class="name">random</span>(),
+                                    &quot;rotation&quot;: <span class="name">generateQuaternion</span>()
+                                });
+          }
+
+          <span class="name">onTriggered</span>: {
+              <span class="name">rotationAngle</span> <span class="operator">=</span> <span class="name">rotationAngle</span> <span class="operator">+</span> <span class="number">1</span>
+              <span class="name">qtCube</span>.<span class="name">setRotationAxisAndAngle</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>), <span class="name">rotationAngle</span>)
+              <span class="name">scatterSeries</span>.<span class="name">setMeshAxisAndAngle</span>(<span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>), <span class="name">rotationAngle</span>)
+              <span class="keyword">if</span> (<span class="name">isIncreasing</span>) {
+                  <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="number">10</span>; i++)
+                      <span class="name">appendRow</span>()
+                  <span class="keyword">if</span> (<span class="name">graphModel</span>.<span class="name">count</span> <span class="operator">&gt;</span> <span class="number">2002</span>) {
+                      <span class="name">scatterGraph</span>.<span class="name">theme</span> <span class="operator">=</span> <span class="name">isabelleTheme</span>
+                      <span class="name">isIncreasing</span> <span class="operator">=</span> <span class="number">false</span>
+                  }
+              } <span class="keyword">else</span> {
+                  <span class="name">graphModel</span>.<span class="name">remove</span>(<span class="number">2</span>, <span class="number">10</span>);
+                  <span class="keyword">if</span> (<span class="name">graphModel</span>.<span class="name">count</span> <span class="operator">==</span> <span class="number">2</span>) {
+                      <span class="name">scatterGraph</span>.<span class="name">theme</span> <span class="operator">=</span> <span class="name">dynamicColorTheme</span>
+                      <span class="name">isIncreasing</span> <span class="operator">=</span> <span class="number">true</span>
+                  }
+              }
+          }
+      }
+
+      <span class="type"><a href="qml-qtdatavisualization-themecolor.html">ThemeColor</a></span> {
+          <span class="name">id</span>: <span class="name">dynamicColor</span>
+          ColorAnimation on <span class="name">color</span> {
+              <span class="name">from</span>: <span class="string">&quot;red&quot;</span>
+              <span class="name">to</span>: <span class="string">&quot;yellow&quot;</span>
+              <span class="name">duration</span>: <span class="number">2000</span>
+              <span class="name">loops</span>: <span class="name">Animation</span>.<span class="name">Infinite</span>
+          }
+      }
+
+      <span class="type"><a href="qml-qtdatavisualization-theme3d.html">Theme3D</a></span> {
+          <span class="name">id</span>: <span class="name">dynamicColorTheme</span>
+          <span class="name">type</span>: <span class="name">Theme3D</span>.<span class="name">ThemeEbony</span>
+          <span class="name">baseColors</span>: [<span class="name">dynamicColor</span>]
+          <span class="name">font</span>.pointSize: <span class="number">50</span>
+          <span class="name">labelBorderEnabled</span>: <span class="number">true</span>
+          <span class="name">labelBackgroundColor</span>: <span class="string">&quot;gold&quot;</span>
+          <span class="name">labelTextColor</span>: <span class="string">&quot;black&quot;</span>
+      }
+
+      <span class="type"><a href="qml-qtdatavisualization-theme3d.html">Theme3D</a></span> {
+          <span class="name">id</span>: <span class="name">isabelleTheme</span>
+          <span class="name">type</span>: <span class="name">Theme3D</span>.<span class="name">ThemeIsabelle</span>
+          <span class="name">font</span>.pointSize: <span class="number">50</span>
+          <span class="name">labelBorderEnabled</span>: <span class="number">true</span>
+          <span class="name">labelBackgroundColor</span>: <span class="string">&quot;gold&quot;</span>
+          <span class="name">labelTextColor</span>: <span class="string">&quot;black&quot;</span>
+      }
+
+      <span class="type"><a href="../qtquick/qml-qtquick-item.html">Item</a></span> {
+          <span class="name">id</span>: <span class="name">dataView</span>
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span>
+          <span class="name">height</span>: <span class="name">parent</span>.<span class="name">height</span>
+
+          <span class="type"><a href="qml-qtdatavisualization-scatter3d.html">Scatter3D</a></span> {
+              <span class="name">id</span>: <span class="name">scatterGraph</span>
+              <span class="name">inputHandler</span>: <span class="number">null</span>
+              <span class="name">width</span>: <span class="name">dataView</span>.<span class="name">width</span>
+              <span class="name">height</span>: <span class="name">dataView</span>.<span class="name">height</span>
+              <span class="name">theme</span>: <span class="name">dynamicColorTheme</span>
+              <span class="name">shadowQuality</span>: <span class="name">AbstractGraph3D</span>.<span class="name">ShadowQualityLow</span>
+              <span class="name">scene</span>.activeCamera.yRotation: <span class="number">45.0</span>
+              <span class="name">scene</span>.activeCamera.xRotation: <span class="number">45.0</span>
+              <span class="name">scene</span>.activeCamera.zoomLevel: <span class="number">75.0</span>
+
+              <span class="type"><a href="qml-qtdatavisualization-scatter3dseries.html">Scatter3DSeries</a></span> {
+                  <span class="name">id</span>: <span class="name">scatterSeries</span>
+                  <span class="name">itemLabelFormat</span>: <span class="string">&quot;X:@xLabel Y:@yLabel Z:@zLabel&quot;</span>
+                  <span class="name">mesh</span>: <span class="name">Abstract3DSeries</span>.<span class="name">MeshCube</span>
+
+                  <span class="type"><a href="qml-qtdatavisualization-itemmodelscatterdataproxy.html">ItemModelScatterDataProxy</a></span> {
+                      <span class="name">itemModel</span>: <span class="name">graphModel</span>
+                      <span class="name">xPosRole</span>: <span class="string">&quot;xPos&quot;</span>
+                      <span class="name">yPosRole</span>: <span class="string">&quot;yPos&quot;</span>
+                      <span class="name">zPosRole</span>: <span class="string">&quot;zPos&quot;</span>
+                      <span class="name">rotationRole</span>: <span class="string">&quot;rotation&quot;</span>
+                  }
+              }
+              <span class="name">customItemList</span>: [
+                  <span class="type"><a href="qml-qtdatavisualization-custom3ditem.html">Custom3DItem</a></span> {
+                      <span class="name">id</span>: <span class="name">qtCube</span>
+                      <span class="name">meshFile</span>: <span class="string">&quot;:/mesh/cube&quot;</span>
+                      <span class="name">textureFile</span>: <span class="string">&quot;:/texture/texture&quot;</span>
+                      <span class="name">position</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">0.65</span>,<span class="number">0.35</span>,<span class="number">0.65</span>)
+                      <span class="name">scaling</span>: <span class="name">Qt</span>.<span class="name">vector3d</span>(<span class="number">0.3</span>,<span class="number">0.3</span>,<span class="number">0.3</span>)
+                  }
+              ]
+              <span class="name">onSelectedElementChanged</span>: {
+                  <span class="keyword">if</span> (<span class="name">selectedElement</span> <span class="operator">&gt;=</span> <span class="name">AbstractGraph3D</span>.<span class="name">ElementAxisXLabel</span>
+                          <span class="operator">&amp;&amp;</span> <span class="name">selectedElement</span> <span class="operator">&lt;=</span> <span class="name">AbstractGraph3D</span>.<span class="name">ElementAxisZLabel</span>)
+                      <span class="name">selectedAxisLabel</span> <span class="operator">=</span> <span class="name">selectedElement</span>
+                  <span class="keyword">else</span>
+                      <span class="name">selectedAxisLabel</span> <span class="operator">=</span> -<span class="number">1</span>
+              }
+          }
+
+          <span class="type"><a href="../qtquick/qml-qtquick-mousearea.html">MouseArea</a></span> {
+              <span class="name">anchors</span>.fill: <span class="name">parent</span>
+              <span class="name">hoverEnabled</span>: <span class="number">true</span>
+              <span class="name">acceptedButtons</span>: <span class="name">Qt</span>.<span class="name">LeftButton</span>
+
+              <span class="name">onPositionChanged</span>: {
+                  <span class="name">currentMouseX</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">x</span>;
+                  <span class="name">currentMouseY</span> <span class="operator">=</span> <span class="name">mouse</span>.<span class="name">y</span>;
+                  <span class="keyword">if</span> (<span class="name">pressed</span> <span class="operator">&amp;&amp;</span> <span class="name">selectedAxisLabel</span> <span class="operator">!=</span> -<span class="number">1</span>)
+                      <span class="name">dragAxis</span>();
+                  <span class="name">previousMouseX</span> <span class="operator">=</span> <span class="name">currentMouseX</span>;
+                  <span class="name">previousMouseY</span> <span class="operator">=</span> <span class="name">currentMouseY</span>;
+              }
+
+              <span class="name">onPressed</span>: {
+                  <span class="name">scatterGraph</span>.<span class="name">scene</span>.<span class="name">selectionQueryPosition</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">point</span>(<span class="name">mouse</span>.<span class="name">x</span>, <span class="name">mouse</span>.<span class="name">y</span>);
+              }
+
+              <span class="name">onReleased</span>: {
+                  <span class="comment">// We need to clear mouse positions and selected axis, because touch devices cannot</span>
+                  <span class="comment">// track position all the time</span>
+                  <span class="name">selectedAxisLabel</span> <span class="operator">=</span> -<span class="number">1</span>
+                  <span class="name">currentMouseX</span> <span class="operator">=</span> -<span class="number">1</span>
+                  <span class="name">currentMouseY</span> <span class="operator">=</span> -<span class="number">1</span>
+                  <span class="name">previousMouseX</span> <span class="operator">=</span> -<span class="number">1</span>
+                  <span class="name">previousMouseY</span> <span class="operator">=</span> -<span class="number">1</span>
+              }
+          }
+      }
+
+      <span class="keyword">function</span> <span class="name">dragAxis</span>() {
+          <span class="comment">// Do nothing if previous mouse position is uninitialized</span>
+          <span class="keyword">if</span> (<span class="name">previousMouseX</span> <span class="operator">===</span> -<span class="number">1</span>)
+              <span class="keyword">return</span>
+
+          <span class="comment">// Directional drag multipliers based on rotation. Camera is locked to 45 degrees, so we</span>
+          <span class="comment">// can use one precalculated value instead of calculating xx, xy, zx and zy individually</span>
+          var <span class="name">cameraMultiplier</span> = <span class="number">0.70710678</span>
+
+          <span class="comment">// Calculate the mouse move amount</span>
+          var <span class="name">moveX</span> = <span class="name">currentMouseX</span> <span class="operator">-</span> <span class="name">previousMouseX</span>
+          var <span class="name">moveY</span> = <span class="name">currentMouseY</span> <span class="operator">-</span> <span class="name">previousMouseY</span>
+
+          <span class="comment">// Adjust axes</span>
+          <span class="keyword">switch</span> (<span class="name">selectedAxisLabel</span>) {
+          <span class="keyword">case</span> <span class="name">AbstractGraph3D</span>.<span class="name">ElementAxisXLabel</span>:
+              var <span class="name">distance</span> = ((<span class="name">moveX</span> <span class="operator">-</span> <span class="name">moveY</span>) <span class="operator">*</span> <span class="name">cameraMultiplier</span>) <span class="operator">/</span> <span class="name">dragSpeedModifier</span>
+              <span class="comment">// Check if we need to change min or max first to avoid invalid ranges</span>
+              <span class="keyword">if</span> (<span class="name">distance</span> <span class="operator">&gt;</span> <span class="number">0</span>) {
+                  <span class="name">scatterGraph</span>.<span class="name">axisX</span>.<span class="name">min</span> <span class="operator">-=</span> <span class="name">distance</span>
+                  <span class="name">scatterGraph</span>.<span class="name">axisX</span>.<span class="name">max</span> <span class="operator">-=</span> <span class="name">distance</span>
+              } <span class="keyword">else</span> {
+                  <span class="name">scatterGraph</span>.<span class="name">axisX</span>.<span class="name">max</span> <span class="operator">-=</span> <span class="name">distance</span>
+                  <span class="name">scatterGraph</span>.<span class="name">axisX</span>.<span class="name">min</span> <span class="operator">-=</span> <span class="name">distance</span>
+              }
+              <span class="keyword">break</span>
+          <span class="keyword">case</span> <span class="name">AbstractGraph3D</span>.<span class="name">ElementAxisYLabel</span>:
+              <span class="name">distance</span> <span class="operator">=</span> <span class="name">moveY</span> <span class="operator">/</span> <span class="name">dragSpeedModifier</span>
+              <span class="comment">// Check if we need to change min or max first to avoid invalid ranges</span>
+              <span class="keyword">if</span> (<span class="name">distance</span> <span class="operator">&gt;</span> <span class="number">0</span>) {
+                  <span class="name">scatterGraph</span>.<span class="name">axisY</span>.<span class="name">max</span> <span class="operator">+=</span> <span class="name">distance</span>
+                  <span class="name">scatterGraph</span>.<span class="name">axisY</span>.<span class="name">min</span> <span class="operator">+=</span> <span class="name">distance</span>
+              } <span class="keyword">else</span> {
+                  <span class="name">scatterGraph</span>.<span class="name">axisY</span>.<span class="name">min</span> <span class="operator">+=</span> <span class="name">distance</span>
+                  <span class="name">scatterGraph</span>.<span class="name">axisY</span>.<span class="name">max</span> <span class="operator">+=</span> <span class="name">distance</span>
+              }
+              <span class="keyword">break</span>
+          <span class="keyword">case</span> <span class="name">AbstractGraph3D</span>.<span class="name">ElementAxisZLabel</span>:
+              <span class="name">distance</span> <span class="operator">=</span> ((<span class="name">moveX</span> <span class="operator">+</span> <span class="name">moveY</span>) <span class="operator">*</span> <span class="name">cameraMultiplier</span>) <span class="operator">/</span> <span class="name">dragSpeedModifier</span>
+              <span class="comment">// Check if we need to change min or max first to avoid invalid ranges</span>
+              <span class="keyword">if</span> (<span class="name">distance</span> <span class="operator">&gt;</span> <span class="number">0</span>) {
+                  <span class="name">scatterGraph</span>.<span class="name">axisZ</span>.<span class="name">max</span> <span class="operator">+=</span> <span class="name">distance</span>
+                  <span class="name">scatterGraph</span>.<span class="name">axisZ</span>.<span class="name">min</span> <span class="operator">+=</span> <span class="name">distance</span>
+              } <span class="keyword">else</span> {
+                  <span class="name">scatterGraph</span>.<span class="name">axisZ</span>.<span class="name">min</span> <span class="operator">+=</span> <span class="name">distance</span>
+                  <span class="name">scatterGraph</span>.<span class="name">axisZ</span>.<span class="name">max</span> <span class="operator">+=</span> <span class="name">distance</span>
+              }
+              <span class="keyword">break</span>
+          }
+      }
+
+      <span class="type">NewButton</span> {
+          <span class="name">id</span>: <span class="name">rangeToggle</span>
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">3</span> <span class="comment">// We're adding 3 buttons and want to divide them equally</span>
+          <span class="name">text</span>: <span class="string">&quot;Use Preset Range&quot;</span>
+          <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+          property <span class="type">bool</span> <span class="name">autoRange</span>: <span class="number">true</span>
+          <span class="name">onClicked</span>: {
+              <span class="keyword">if</span> (<span class="name">autoRange</span>) {
+                  <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Use Automatic Range&quot;</span>
+                  <span class="name">scatterGraph</span>.<span class="name">axisX</span>.<span class="name">min</span> <span class="operator">=</span> <span class="number">0.3</span>
+                  <span class="name">scatterGraph</span>.<span class="name">axisX</span>.<span class="name">max</span> <span class="operator">=</span> <span class="number">0.7</span>
+                  <span class="name">scatterGraph</span>.<span class="name">axisY</span>.<span class="name">min</span> <span class="operator">=</span> <span class="number">0.3</span>
+                  <span class="name">scatterGraph</span>.<span class="name">axisY</span>.<span class="name">max</span> <span class="operator">=</span> <span class="number">0.7</span>
+                  <span class="name">scatterGraph</span>.<span class="name">axisZ</span>.<span class="name">min</span> <span class="operator">=</span> <span class="number">0.3</span>
+                  <span class="name">scatterGraph</span>.<span class="name">axisZ</span>.<span class="name">max</span> <span class="operator">=</span> <span class="number">0.7</span>
+                  <span class="name">autoRange</span> <span class="operator">=</span> <span class="number">false</span>
+                  <span class="name">dragSpeedModifier</span> <span class="operator">=</span> <span class="number">200.0</span>
+              } <span class="keyword">else</span> {
+                  <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Use Preset Range&quot;</span>
+                  <span class="name">autoRange</span> <span class="operator">=</span> <span class="number">true</span>
+                  <span class="name">dragSpeedModifier</span> <span class="operator">=</span> <span class="number">100.0</span>
+              }
+              <span class="name">scatterGraph</span>.<span class="name">axisX</span>.<span class="name">autoAdjustRange</span> <span class="operator">=</span> <span class="name">autoRange</span>
+              <span class="name">scatterGraph</span>.<span class="name">axisY</span>.<span class="name">autoAdjustRange</span> <span class="operator">=</span> <span class="name">autoRange</span>
+              <span class="name">scatterGraph</span>.<span class="name">axisZ</span>.<span class="name">autoAdjustRange</span> <span class="operator">=</span> <span class="name">autoRange</span>
+          }
+      }
+
+      <span class="type">NewButton</span> {
+          <span class="name">id</span>: <span class="name">orthoToggle</span>
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">3</span>
+          <span class="name">text</span>: <span class="string">&quot;Display Orthographic&quot;</span>
+          <span class="name">anchors</span>.left: <span class="name">rangeToggle</span>.<span class="name">right</span>
+          <span class="name">onClicked</span>: {
+              <span class="keyword">if</span> (<span class="name">scatterGraph</span>.<span class="name">orthoProjection</span>) {
+                  <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Display Orthographic&quot;</span>;
+                  <span class="name">scatterGraph</span>.<span class="name">orthoProjection</span> <span class="operator">=</span> <span class="number">false</span>
+                  <span class="comment">// Orthographic projection disables shadows, so we need to switch them back on</span>
+                  <span class="name">scatterGraph</span>.<span class="name">shadowQuality</span> <span class="operator">=</span> <span class="name">AbstractGraph3D</span>.<span class="name">ShadowQualityLow</span>
+              } <span class="keyword">else</span> {
+                  <span class="name">text</span> <span class="operator">=</span> <span class="string">&quot;Display Perspective&quot;</span>;
+                  <span class="name">scatterGraph</span>.<span class="name">orthoProjection</span> <span class="operator">=</span> <span class="number">true</span>
+              }
+          }
+      }
+
+      <span class="type">NewButton</span> {
+          <span class="name">id</span>: <span class="name">exitButton</span>
+          <span class="name">width</span>: <span class="name">parent</span>.<span class="name">width</span> <span class="operator">/</span> <span class="number">3</span>
+          <span class="name">text</span>: <span class="string">&quot;Quit&quot;</span>
+          <span class="name">anchors</span>.left: <span class="name">orthoToggle</span>.<span class="name">right</span>
+          <span class="name">onClicked</span>: <span class="name">Qt</span>.<span class="name">quit</span>(<span class="number">0</span>);
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@qmlaxisdrag/qml/qmlaxisdrag/main.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

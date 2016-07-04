@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>mimeimagerecordeditor.cpp Example File | Qt NFC 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtnfc-index.html">Qt NFC</a></td><td ><a href="qtnfc-ndefeditor-example.html">NDEF Editor Example</a></td><td >mimeimagerecordeditor.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">mimeimagerecordeditor.cpp Example File</h1>
+<span class="subtitle">ndefeditor/mimeimagerecordeditor.cpp</span>
+<!-- $$$ndefeditor/mimeimagerecordeditor.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the QtNfc module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;mimeimagerecordeditor.h&quot;</span>
+  <span class="preprocessor">#include &quot;ui_mimeimagerecordeditor.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QBuffer&gt;</span>
+  <span class="preprocessor">#include &lt;QFileDialog&gt;</span>
+  <span class="preprocessor">#include &lt;QImageReader&gt;</span>
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> imageFormatToMimeType(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> <span class="operator">&amp;</span>format)
+  {
+      <span class="keyword">if</span> (format <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;bmp&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;image/bmp&quot;</span>);
+      <span class="keyword">else</span> <span class="keyword">if</span> (format <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;gif&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;image/gif&quot;</span>);
+      <span class="keyword">else</span> <span class="keyword">if</span> (format <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;jpg&quot;</span> <span class="operator">|</span><span class="operator">|</span> format <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;jpeg&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;image/jpeg&quot;</span>);
+      <span class="keyword">else</span> <span class="keyword">if</span> (format <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;mng&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;video/x-mng&quot;</span>);
+      <span class="keyword">else</span> <span class="keyword">if</span> (format <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;png&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;image/png&quot;</span>);
+      <span class="keyword">else</span> <span class="keyword">if</span> (format <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;pbm&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;image/x-portable-bitmap&quot;</span>);
+      <span class="keyword">else</span> <span class="keyword">if</span> (format <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;pgm&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;image/x-portable-graymap&quot;</span>);
+      <span class="keyword">else</span> <span class="keyword">if</span> (format <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;ppm&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;image/x-portable-pixmap&quot;</span>);
+      <span class="keyword">else</span> <span class="keyword">if</span> (format <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;tiff&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;image/tiff&quot;</span>);
+      <span class="keyword">else</span> <span class="keyword">if</span> (format <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;xbm&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;image/x-xbitmap&quot;</span>);
+      <span class="keyword">else</span> <span class="keyword">if</span> (format <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;xpm&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;image/x-xpixmap&quot;</span>);
+      <span class="keyword">else</span> <span class="keyword">if</span> (format <span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;svg&quot;</span>)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;image/svg+xml&quot;</span>);
+      <span class="keyword">else</span>
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>();
+  }
+
+  MimeImageRecordEditor<span class="operator">::</span>MimeImageRecordEditor(<span class="type">QWidget</span> <span class="operator">*</span>parent) :
+      <span class="type">QWidget</span>(parent)<span class="operator">,</span>
+      ui(<span class="keyword">new</span> Ui<span class="operator">::</span>MimeImageRecordEditor)
+  {
+      ui<span class="operator">-</span><span class="operator">&gt;</span>setupUi(<span class="keyword">this</span>);
+  }
+
+  MimeImageRecordEditor<span class="operator">::</span><span class="operator">~</span>MimeImageRecordEditor()
+  {
+      <span class="keyword">delete</span> ui;
+  }
+
+  <span class="type">void</span> MimeImageRecordEditor<span class="operator">::</span>setRecord(<span class="keyword">const</span> <span class="type"><a href="qndefrecord.html">QNdefRecord</a></span> <span class="operator">&amp;</span>record)
+  {
+      m_record <span class="operator">=</span> record;
+
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> data <span class="operator">=</span> record<span class="operator">.</span>payload();
+      <span class="type"><a href="../qtcore/qbuffer.html">QBuffer</a></span> buffer(<span class="operator">&amp;</span>data);
+      buffer<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly);
+
+      <span class="type">QImageReader</span> reader(<span class="operator">&amp;</span>buffer);
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>mimeImageType<span class="operator">-</span><span class="operator">&gt;</span>setText(imageFormatToMimeType(reader<span class="operator">.</span>format()));
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>mimeImageImage<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(<span class="type">QPixmap</span><span class="operator">::</span>fromImage(reader<span class="operator">.</span>read()));
+      ui<span class="operator">-</span><span class="operator">&gt;</span>mimeImageFile<span class="operator">-</span><span class="operator">&gt;</span>clear();
+  }
+
+  <span class="type"><a href="qndefrecord.html">QNdefRecord</a></span> MimeImageRecordEditor<span class="operator">::</span>record() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_record;
+  }
+
+  <span class="type">void</span> MimeImageRecordEditor<span class="operator">::</span>on_mimeImageOpen_clicked()
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> mimeDataFile <span class="operator">=</span> <span class="type">QFileDialog</span><span class="operator">::</span>getOpenFileName(<span class="keyword">this</span><span class="operator">,</span> tr(<span class="string">&quot;Select Image File&quot;</span>));
+      <span class="keyword">if</span> (mimeDataFile<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> imageFile(mimeDataFile);
+      <span class="keyword">if</span> (<span class="operator">!</span>imageFile<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly)) {
+          ui<span class="operator">-</span><span class="operator">&gt;</span>mimeImageFile<span class="operator">-</span><span class="operator">&gt;</span>clear();
+          ui<span class="operator">-</span><span class="operator">&gt;</span>mimeImageImage<span class="operator">-</span><span class="operator">&gt;</span>clear();
+      }
+
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> imageData <span class="operator">=</span> imageFile<span class="operator">.</span>readAll();
+
+      <span class="type"><a href="../qtcore/qbuffer.html">QBuffer</a></span> buffer(<span class="operator">&amp;</span>imageData);
+      buffer<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly);
+
+      <span class="type">QImageReader</span> reader(<span class="operator">&amp;</span>buffer);
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> mimeType <span class="operator">=</span> imageFormatToMimeType(reader<span class="operator">.</span>format());
+      ui<span class="operator">-</span><span class="operator">&gt;</span>mimeImageType<span class="operator">-</span><span class="operator">&gt;</span>setText(mimeType);
+
+      <span class="type">QImage</span> image <span class="operator">=</span> reader<span class="operator">.</span>read();
+
+      ui<span class="operator">-</span><span class="operator">&gt;</span>mimeImageFile<span class="operator">-</span><span class="operator">&gt;</span>setText(mimeDataFile);
+      ui<span class="operator">-</span><span class="operator">&gt;</span>mimeImageImage<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(<span class="type">QPixmap</span><span class="operator">::</span>fromImage(image));
+
+      m_record<span class="operator">.</span>setTypeNameFormat(<span class="type"><a href="qndefrecord.html">QNdefRecord</a></span><span class="operator">::</span>Mime);
+      m_record<span class="operator">.</span>setType(mimeType<span class="operator">.</span>toLatin1());
+      m_record<span class="operator">.</span>setPayload(imageData);
+  }
+
+</pre>
+</div>
+<!-- @@@ndefeditor/mimeimagerecordeditor.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

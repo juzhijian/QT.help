@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>diagramscene.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-graphicsview-diagramscene-example.html">Diagram Scene Example</a></td><td >diagramscene.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">diagramscene.cpp Example File</h1>
+<span class="subtitle">graphicsview/diagramscene/diagramscene.cpp</span>
+<!-- $$$graphicsview/diagramscene/diagramscene.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;diagramscene.h&quot;</span>
+  <span class="preprocessor">#include &quot;arrow.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QTextCursor&gt;</span>
+  <span class="preprocessor">#include &lt;QGraphicsSceneMouseEvent&gt;</span>
+
+  DiagramScene<span class="operator">::</span>DiagramScene(<span class="type"><a href="qmenu.html">QMenu</a></span> <span class="operator">*</span>itemMenu<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qgraphicsscene.html">QGraphicsScene</a></span>(parent)
+  {
+      myItemMenu <span class="operator">=</span> itemMenu;
+      myMode <span class="operator">=</span> MoveItem;
+      myItemType <span class="operator">=</span> DiagramItem<span class="operator">::</span>Step;
+      line <span class="operator">=</span> <span class="number">0</span>;
+      textItem <span class="operator">=</span> <span class="number">0</span>;
+      myItemColor <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white;
+      myTextColor <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black;
+      myLineColor <span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black;
+  }
+
+  <span class="type">void</span> DiagramScene<span class="operator">::</span>setLineColor(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>color)
+  {
+      myLineColor <span class="operator">=</span> color;
+      <span class="keyword">if</span> (isItemChange(Arrow<span class="operator">::</span>Type)) {
+          Arrow <span class="operator">*</span>item <span class="operator">=</span> qgraphicsitem_cast<span class="operator">&lt;</span>Arrow <span class="operator">*</span><span class="operator">&gt;</span>(selectedItems()<span class="operator">.</span>first());
+          item<span class="operator">-</span><span class="operator">&gt;</span>setColor(myLineColor);
+          update();
+      }
+  }
+
+  <span class="type">void</span> DiagramScene<span class="operator">::</span>setTextColor(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>color)
+  {
+      myTextColor <span class="operator">=</span> color;
+      <span class="keyword">if</span> (isItemChange(DiagramTextItem<span class="operator">::</span>Type)) {
+          DiagramTextItem <span class="operator">*</span>item <span class="operator">=</span> qgraphicsitem_cast<span class="operator">&lt;</span>DiagramTextItem <span class="operator">*</span><span class="operator">&gt;</span>(selectedItems()<span class="operator">.</span>first());
+          item<span class="operator">-</span><span class="operator">&gt;</span>setDefaultTextColor(myTextColor);
+      }
+  }
+
+  <span class="type">void</span> DiagramScene<span class="operator">::</span>setItemColor(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> <span class="operator">&amp;</span>color)
+  {
+      myItemColor <span class="operator">=</span> color;
+      <span class="keyword">if</span> (isItemChange(DiagramItem<span class="operator">::</span>Type)) {
+          DiagramItem <span class="operator">*</span>item <span class="operator">=</span> qgraphicsitem_cast<span class="operator">&lt;</span>DiagramItem <span class="operator">*</span><span class="operator">&gt;</span>(selectedItems()<span class="operator">.</span>first());
+          item<span class="operator">-</span><span class="operator">&gt;</span>setBrush(myItemColor);
+      }
+  }
+
+  <span class="type">void</span> DiagramScene<span class="operator">::</span>setFont(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> <span class="operator">&amp;</span>font)
+  {
+      myFont <span class="operator">=</span> font;
+
+      <span class="keyword">if</span> (isItemChange(DiagramTextItem<span class="operator">::</span>Type)) {
+          <span class="type"><a href="qgraphicstextitem.html">QGraphicsTextItem</a></span> <span class="operator">*</span>item <span class="operator">=</span> qgraphicsitem_cast<span class="operator">&lt;</span>DiagramTextItem <span class="operator">*</span><span class="operator">&gt;</span>(selectedItems()<span class="operator">.</span>first());
+          <span class="comment">//At this point the selection can change so the first selected item might not be a DiagramTextItem</span>
+          <span class="keyword">if</span> (item)
+              item<span class="operator">-</span><span class="operator">&gt;</span>setFont(myFont);
+      }
+  }
+
+  <span class="type">void</span> DiagramScene<span class="operator">::</span>setMode(Mode mode)
+  {
+      myMode <span class="operator">=</span> mode;
+  }
+
+  <span class="type">void</span> DiagramScene<span class="operator">::</span>setItemType(DiagramItem<span class="operator">::</span>DiagramType type)
+  {
+      myItemType <span class="operator">=</span> type;
+  }
+
+  <span class="type">void</span> DiagramScene<span class="operator">::</span>editorLostFocus(DiagramTextItem <span class="operator">*</span>item)
+  {
+      <span class="type"><a href="../qtgui/qtextcursor.html">QTextCursor</a></span> cursor <span class="operator">=</span> item<span class="operator">-</span><span class="operator">&gt;</span>textCursor();
+      cursor<span class="operator">.</span>clearSelection();
+      item<span class="operator">-</span><span class="operator">&gt;</span>setTextCursor(cursor);
+
+      <span class="keyword">if</span> (item<span class="operator">-</span><span class="operator">&gt;</span>toPlainText()<span class="operator">.</span>isEmpty()) {
+          removeItem(item);
+          item<span class="operator">-</span><span class="operator">&gt;</span>deleteLater();
+      }
+  }
+
+  <span class="type">void</span> DiagramScene<span class="operator">::</span>mousePressEvent(<span class="type"><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> <span class="operator">*</span>mouseEvent)
+  {
+      <span class="keyword">if</span> (mouseEvent<span class="operator">-</span><span class="operator">&gt;</span>button() <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftButton)
+          <span class="keyword">return</span>;
+
+      DiagramItem <span class="operator">*</span>item;
+      <span class="keyword">switch</span> (myMode) {
+          <span class="keyword">case</span> InsertItem:
+              item <span class="operator">=</span> <span class="keyword">new</span> DiagramItem(myItemType<span class="operator">,</span> myItemMenu);
+              item<span class="operator">-</span><span class="operator">&gt;</span>setBrush(myItemColor);
+              addItem(item);
+              item<span class="operator">-</span><span class="operator">&gt;</span>setPos(mouseEvent<span class="operator">-</span><span class="operator">&gt;</span>scenePos());
+              <span class="keyword">emit</span> itemInserted(item);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> InsertLine:
+              line <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qgraphicslineitem.html">QGraphicsLineItem</a></span>(<span class="type"><a href="../qtcore/qlinef.html">QLineF</a></span>(mouseEvent<span class="operator">-</span><span class="operator">&gt;</span>scenePos()<span class="operator">,</span>
+                                          mouseEvent<span class="operator">-</span><span class="operator">&gt;</span>scenePos()));
+              line<span class="operator">-</span><span class="operator">&gt;</span>setPen(<span class="type"><a href="../qtgui/qpen.html">QPen</a></span>(myLineColor<span class="operator">,</span> <span class="number">2</span>));
+              addItem(line);
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> InsertText:
+              textItem <span class="operator">=</span> <span class="keyword">new</span> DiagramTextItem();
+              textItem<span class="operator">-</span><span class="operator">&gt;</span>setFont(myFont);
+              textItem<span class="operator">-</span><span class="operator">&gt;</span>setTextInteractionFlags(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>TextEditorInteraction);
+              textItem<span class="operator">-</span><span class="operator">&gt;</span>setZValue(<span class="number">1000.0</span>);
+              connect(textItem<span class="operator">,</span> SIGNAL(lostFocus(DiagramTextItem<span class="operator">*</span>))<span class="operator">,</span>
+                      <span class="keyword">this</span><span class="operator">,</span> SLOT(editorLostFocus(DiagramTextItem<span class="operator">*</span>)));
+              connect(textItem<span class="operator">,</span> SIGNAL(selectedChange(<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span><span class="operator">*</span>))<span class="operator">,</span>
+                      <span class="keyword">this</span><span class="operator">,</span> SIGNAL(itemSelected(<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span><span class="operator">*</span>)));
+              addItem(textItem);
+              textItem<span class="operator">-</span><span class="operator">&gt;</span>setDefaultTextColor(myTextColor);
+              textItem<span class="operator">-</span><span class="operator">&gt;</span>setPos(mouseEvent<span class="operator">-</span><span class="operator">&gt;</span>scenePos());
+              <span class="keyword">emit</span> textInserted(textItem);
+      <span class="keyword">default</span>:
+          ;
+      }
+      <span class="type"><a href="qgraphicsscene.html">QGraphicsScene</a></span><span class="operator">::</span>mousePressEvent(mouseEvent);
+  }
+
+  <span class="type">void</span> DiagramScene<span class="operator">::</span>mouseMoveEvent(<span class="type"><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> <span class="operator">*</span>mouseEvent)
+  {
+      <span class="keyword">if</span> (myMode <span class="operator">=</span><span class="operator">=</span> InsertLine <span class="operator">&amp;</span><span class="operator">&amp;</span> line <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>) {
+          <span class="type"><a href="../qtcore/qlinef.html">QLineF</a></span> newLine(line<span class="operator">-</span><span class="operator">&gt;</span>line()<span class="operator">.</span>p1()<span class="operator">,</span> mouseEvent<span class="operator">-</span><span class="operator">&gt;</span>scenePos());
+          line<span class="operator">-</span><span class="operator">&gt;</span>setLine(newLine);
+      } <span class="keyword">else</span> <span class="keyword">if</span> (myMode <span class="operator">=</span><span class="operator">=</span> MoveItem) {
+          <span class="type"><a href="qgraphicsscene.html">QGraphicsScene</a></span><span class="operator">::</span>mouseMoveEvent(mouseEvent);
+      }
+  }
+
+  <span class="type">void</span> DiagramScene<span class="operator">::</span>mouseReleaseEvent(<span class="type"><a href="qgraphicsscenemouseevent.html">QGraphicsSceneMouseEvent</a></span> <span class="operator">*</span>mouseEvent)
+  {
+      <span class="keyword">if</span> (line <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> myMode <span class="operator">=</span><span class="operator">=</span> InsertLine) {
+          <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span><span class="operator">&gt;</span> startItems <span class="operator">=</span> items(line<span class="operator">-</span><span class="operator">&gt;</span>line()<span class="operator">.</span>p1());
+          <span class="keyword">if</span> (startItems<span class="operator">.</span>count() <span class="operator">&amp;</span><span class="operator">&amp;</span> startItems<span class="operator">.</span>first() <span class="operator">=</span><span class="operator">=</span> line)
+              startItems<span class="operator">.</span>removeFirst();
+          <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span><span class="operator">&gt;</span> endItems <span class="operator">=</span> items(line<span class="operator">-</span><span class="operator">&gt;</span>line()<span class="operator">.</span>p2());
+          <span class="keyword">if</span> (endItems<span class="operator">.</span>count() <span class="operator">&amp;</span><span class="operator">&amp;</span> endItems<span class="operator">.</span>first() <span class="operator">=</span><span class="operator">=</span> line)
+              endItems<span class="operator">.</span>removeFirst();
+
+          removeItem(line);
+          <span class="keyword">delete</span> line;
+
+          <span class="keyword">if</span> (startItems<span class="operator">.</span>count() <span class="operator">&gt;</span> <span class="number">0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> endItems<span class="operator">.</span>count() <span class="operator">&gt;</span> <span class="number">0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span>
+              startItems<span class="operator">.</span>first()<span class="operator">-</span><span class="operator">&gt;</span>type() <span class="operator">=</span><span class="operator">=</span> DiagramItem<span class="operator">::</span>Type <span class="operator">&amp;</span><span class="operator">&amp;</span>
+              endItems<span class="operator">.</span>first()<span class="operator">-</span><span class="operator">&gt;</span>type() <span class="operator">=</span><span class="operator">=</span> DiagramItem<span class="operator">::</span>Type <span class="operator">&amp;</span><span class="operator">&amp;</span>
+              startItems<span class="operator">.</span>first() <span class="operator">!</span><span class="operator">=</span> endItems<span class="operator">.</span>first()) {
+              DiagramItem <span class="operator">*</span>startItem <span class="operator">=</span> qgraphicsitem_cast<span class="operator">&lt;</span>DiagramItem <span class="operator">*</span><span class="operator">&gt;</span>(startItems<span class="operator">.</span>first());
+              DiagramItem <span class="operator">*</span>endItem <span class="operator">=</span> qgraphicsitem_cast<span class="operator">&lt;</span>DiagramItem <span class="operator">*</span><span class="operator">&gt;</span>(endItems<span class="operator">.</span>first());
+              Arrow <span class="operator">*</span>arrow <span class="operator">=</span> <span class="keyword">new</span> Arrow(startItem<span class="operator">,</span> endItem);
+              arrow<span class="operator">-</span><span class="operator">&gt;</span>setColor(myLineColor);
+              startItem<span class="operator">-</span><span class="operator">&gt;</span>addArrow(arrow);
+              endItem<span class="operator">-</span><span class="operator">&gt;</span>addArrow(arrow);
+              arrow<span class="operator">-</span><span class="operator">&gt;</span>setZValue(<span class="operator">-</span><span class="number">1000.0</span>);
+              addItem(arrow);
+              arrow<span class="operator">-</span><span class="operator">&gt;</span>updatePosition();
+          }
+      }
+      line <span class="operator">=</span> <span class="number">0</span>;
+      <span class="type"><a href="qgraphicsscene.html">QGraphicsScene</a></span><span class="operator">::</span>mouseReleaseEvent(mouseEvent);
+  }
+
+  bool DiagramScene<span class="operator">::</span>isItemChange(<span class="type">int</span> type)
+  {
+      foreach (<span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span>item<span class="operator">,</span> selectedItems()) {
+          <span class="keyword">if</span> (item<span class="operator">-</span><span class="operator">&gt;</span>type() <span class="operator">=</span><span class="operator">=</span> type)
+              <span class="keyword">return</span> <span class="keyword">true</span>;
+      }
+      <span class="keyword">return</span> <span class="keyword">false</span>;
+  }
+
+</pre>
+</div>
+<!-- @@@graphicsview/diagramscene/diagramscene.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qtdatavisualization.qdoc -->
+  <title>Qt Data Visualization Data Handling | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td >Qt Data Visualization Data Handling</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#series">Series</a></li>
+<li class="level1"><a href="#data-proxies">Data proxies</a></li>
+<li class="level1"><a href="#item-models-and-data-mapping">Item models and data mapping</a></li>
+<li class="level1"><a href="#other-custom-proxies">Other custom proxies</a></li>
+<li class="level1"><a href="#dealing-with-real-time-data">Dealing with real-time data</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Data Visualization Data Handling</h1>
+<span class="subtitle"></span>
+<!-- $$$qtdatavisualization_data_handling.html-description -->
+<div class="descr"> <a name="details"></a>
+<a name="series"></a>
+<h2 id="series">Series</h2>
+<p>A series is a combination of a logically connected set of data items (handled by a data proxy) and visual properties that describe how the data items should be rendered, such as item meshes and colors. Each visualization type has its own series type. For example, bar graphs use <a href="qbar3dseries.html">QBar3DSeries</a>. All graphs can have multiple series added simultaneously.</p>
+<p>This code snippet shows how to use <a href="qbar3dseries.html">QBar3DSeries</a> to render bars as cylinders and with a gradient instead of a uniform color:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="q3dbars.html">Q3DBars</a></span> graph;
+  QBar3DSeries <span class="operator">*</span>series <span class="operator">=</span> <span class="keyword">new</span> QBar3DSeries;
+  <span class="type"><a href="../qtgui/qlineargradient.html">QLinearGradient</a></span> barGradient(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> <span class="number">100</span>);
+  barGradient<span class="operator">.</span>setColorAt(<span class="number">1.0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>white);
+  barGradient<span class="operator">.</span>setColorAt(<span class="number">0.0</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>black);
+
+  series<span class="operator">-</span><span class="operator">&gt;</span>setBaseGradient(barGradient);
+  series<span class="operator">-</span><span class="operator">&gt;</span>setColorStyle(<span class="type"><a href="q3dtheme.html">Q3DTheme</a></span><span class="operator">::</span>ColorStyleObjectGradient);
+  series<span class="operator">-</span><span class="operator">&gt;</span>setMesh(QAbstract3DSeries<span class="operator">::</span>MeshCylinder);
+
+  graph<span class="operator">-</span><span class="operator">&gt;</span>addSeries(series);
+
+</pre>
+<a name="data-proxies"></a>
+<h2 id="data-proxies">Data proxies</h2>
+<p>The data that users wish to visualize comes in many formats, all of which cannot obviously be directly supported. Therefore, Qt Data Visualization implements data proxies into which user can feed their data in a known format. Each visualization type has a basic proxy type, which takes data in a format suitable for that visualization. For example, the basic proxy for <a href="qbar3dseries.html">QBar3DSeries</a> is <a href="qbardataproxy.html">QBarDataProxy</a>, which stores rows of <a href="qbardataitem.html">QBarDataItem</a> objects. Each <a href="qbardataitem.html">QBarDataItem</a> stores a single bar value. Additional typedefs are provided for <code>QBarDataArray</code> and <code>QBarDataRow</code> containers.</p>
+<p>This code snippet shows how to use basic proxy when your data is stored in some hypothetical <code>myData</code> object:</p>
+<pre class="cpp">
+
+  <span class="type"><a href="q3dbars.html">Q3DBars</a></span> graph;
+  <span class="type"><a href="qbardataproxy.html">QBarDataProxy</a></span> <span class="operator">*</span>newProxy <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qbardataproxy.html">QBarDataProxy</a></span>;
+
+  <span class="type">QBarDataArray</span> <span class="operator">*</span>dataArray <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QBarDataArray</span>;
+  dataArray<span class="operator">-</span><span class="operator">&gt;</span>reserve(<span class="number">10</span>);
+  <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> <span class="number">10</span>; i<span class="operator">+</span><span class="operator">+</span>) {
+      <span class="type">QBarDataRow</span> <span class="operator">*</span>dataRow <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QBarDataRow</span>(<span class="number">5</span>);
+      <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> <span class="number">5</span>; j<span class="operator">+</span><span class="operator">+</span>)
+          (<span class="operator">*</span>dataRow)<span class="operator">[</span>j<span class="operator">]</span><span class="operator">.</span>setValue(myData<span class="operator">-</span><span class="operator">&gt;</span>getValue(i<span class="operator">,</span> j));
+      dataArray<span class="operator">-</span><span class="operator">&gt;</span>append(dataRow);
+  }
+
+  newProxy<span class="operator">-</span><span class="operator">&gt;</span>resetArray(dataArray);
+  graph<span class="operator">-</span><span class="operator">&gt;</span>addSeries(<span class="keyword">new</span> QBar3DSeries(newProxy));
+
+</pre>
+<p><b>Note: </b>Series objects can own only a single proxy at a time. The existing proxy is deleted when another is set to the series. Graphs can contain multiple series, though. If you need to switch back and forth between two different sets of data, it is usually more efficient to store each set in a different series and just change the series, rather than reset the data in one proxy every time you need to switch.</p><a name="item-models-and-data-mapping"></a>
+<h2 id="item-models-and-data-mapping">Item models and data mapping</h2>
+<p>For common use cases, Qt Data Visualization offers specialized proxies. One such case is having data in an item model (<a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a> subclass), which is a common way to store data in Qt applications. Each of the visualization types offers a special proxy class for this purpose, for example, <a href="qitemmodelbardataproxy.html">QItemModelBarDataProxy</a> for <a href="qbar3dseries.html">QBar3DSeries</a>. These proxies are simple to use: just give them a pointer to the item model containing the data and the rules how to map the data into format the basic proxy can digest.</p>
+<p>Mapping works with item model roles. Each data item in the model can have different values for different roles. For example, with <a href="qitemmodelbardataproxy.html">QItemModelBarDataProxy</a> you can specify which role is used to determine which row the item belongs to, which role does the same for columns, and which role specifies the value of the item. When the proxy resolves the data from the model, it uses these mappings to generate the rows and columns of the bar graph.</p>
+<p>Often the item models will have a single role that contains information you want to map to multiple values. A typical example of this is a timestamp field when generating a bar graph with two time related axes, for example years and months. To enable mapping a single item model role to more than one data field, pattern matching and replacing mechanism is provided by item model proxies. You can also use this mechanism to reformat data even in one-to-one mapping cases.</p>
+<p>Depending on the visualization type, proxies may support other functionalities as well, such as <a href="qitemmodelbardataproxy.html">QItemModelBarDataProxy</a> optionally mapping <a href="../qtcore/qabstractitemmodel.html">QAbstractItemModel</a> rows and columns directly into bar graph rows and columns.</p>
+<p>See individual proxy classes for more information and examples about how to use them: <a href="qitemmodelbardataproxy.html">QItemModelBarDataProxy</a>, <a href="qitemmodelscatterdataproxy.html">QItemModelScatterDataProxy</a>, and <a href="qitemmodelsurfacedataproxy.html">QItemModelSurfaceDataProxy</a>.</p>
+<a name="other-custom-proxies"></a>
+<h2 id="other-custom-proxies">Other custom proxies</h2>
+<p><a href="qheightmapsurfacedataproxy.html">QHeightMapSurfaceDataProxy</a> is a specialized proxy for generating a surface graph from a heightmap image. See the <a href="qheightmapsurfacedataproxy.html">QHeightMapSurfaceDataProxy</a> documentation for more information.</p>
+<p>The <a href="qtdatavisualization-customproxy-example.html">Custom Proxy</a> example shows how a custom proxy can be created. It defines a custom data set based on variant lists and an extension of the basic proxy to resolve that data with an associated mapper.</p>
+<a name="dealing-with-real-time-data"></a>
+<h2 id="dealing-with-real-time-data">Dealing with real-time data</h2>
+<p>When you have a data set that updates rapidly, it is important to handle data properly to ensure good performance. Since memory allocation is a costly operation, always use <a href="../qtcore/qlist.html#reserve">QList::reserve</a>() and <a href="../qtcore/qvector.html#resize">QVector::resize</a>() where possible to avoid unnecessary reallocations when constructing the array to give to the proxy. If you need to change the entire data set for each frame, it is in most cases best to reuse the existing array - especially if the array dimensions do not change. If you need to add, insert, remove, or change several rows or items for each frame, it is always more efficient to do it with one method call instead of multiple calls affecting a single row or item each. For example, adding ten rows with a single <a href="qbardataproxy.html#addRows">QBarDataProxy::addRows</a>() call is much more efficient than ten separate <a href="qbardataproxy.html#addRow">QBarDataProxy::addRow</a>() calls.</p>
+<p>Bars renderer is optimized to access only data that is within the data window and thus should not suffer noticeable slowdown even if more data is continually added to the proxy.</p>
+<p>Due to the unsorted nature of the scatter data, any change in the data window ranges requires all data points to be checked for visibility, which can cause increasing slowdown if data is continually added to the proxy. For the best performance with the scatter graphs, only keep the data you need in the proxy.</p>
+<p>Surface data, while on item level similar to scatter data, is already assigned into rows and columns, so the surface renderer can optimize drawing by making the assumption that the data in the rows and columns is sorted along their respective axes. It is not quite as efficient as in the bars case, but nearly so.</p>
+</div>
+<!-- @@@qtdatavisualization_data_handling.html -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

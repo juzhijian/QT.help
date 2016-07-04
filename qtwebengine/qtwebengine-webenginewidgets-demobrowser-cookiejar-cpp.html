@@ -1,0 +1,792 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>cookiejar.cpp Example File | Qt WebEngine 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwebengine-index.html">Qt WebEngine</a></td><td ><a href="qtwebengine-webenginewidgets-demobrowser-example.html">WebEngine Demo Browser Example</a></td><td >cookiejar.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">cookiejar.cpp Example File</h1>
+<span class="subtitle">webenginewidgets/demobrowser/cookiejar.cpp</span>
+<!-- $$$webenginewidgets/demobrowser/cookiejar.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the demonstration applications of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;cookiejar.h&quot;</span>
+
+  <span class="preprocessor">#include &quot;autosaver.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QtCore/QDateTime&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QDir&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QFile&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QMetaEnum&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QSettings&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QUrl&gt;</span>
+
+  <span class="preprocessor">#include &lt;QtWidgets/QCompleter&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QDesktopServices&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QFont&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QFontMetrics&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QHeaderView&gt;</span>
+  <span class="preprocessor">#include &lt;QtGui/QKeyEvent&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QSortFilterProxyModel&gt;</span>
+  <span class="preprocessor">#include &lt;QtNetwork/QNetworkCookie&gt;</span>
+
+  <span class="preprocessor">#include &lt;QWebEngineSettings&gt;</span>
+
+  <span class="preprocessor">#include &lt;QtCore/QDebug&gt;</span>
+
+  <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">unsigned</span> <span class="type">int</span> JAR_VERSION <span class="operator">=</span> <span class="number">23</span>;
+
+  <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> <span class="operator">&amp;</span><span class="keyword">operator</span><span class="operator">&lt;</span><span class="operator">&lt;</span>(<span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> <span class="operator">&amp;</span>stream<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span><span class="operator">&gt;</span> <span class="operator">&amp;</span>list)
+  {
+      stream <span class="operator">&lt;</span><span class="operator">&lt;</span> JAR_VERSION;
+      stream <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qtglobal.html#quint32-typedef">quint32</a></span>(list<span class="operator">.</span>size());
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> list<span class="operator">.</span>size(); <span class="operator">+</span><span class="operator">+</span>i)
+          stream <span class="operator">&lt;</span><span class="operator">&lt;</span> list<span class="operator">.</span>at(i)<span class="operator">.</span>toRawForm();
+      <span class="keyword">return</span> stream;
+  }
+
+  <span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> <span class="operator">&amp;</span><span class="keyword">operator</span><span class="operator">&gt;</span><span class="operator">&gt;</span>(<span class="type"><a href="../qtcore/qdatastream.html">QDataStream</a></span> <span class="operator">&amp;</span>stream<span class="operator">,</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span><span class="operator">&gt;</span> <span class="operator">&amp;</span>list)
+  {
+      list<span class="operator">.</span>clear();
+
+      <span class="type"><a href="../qtcore/qtglobal.html#quint32-typedef">quint32</a></span> version;
+      stream <span class="operator">&gt;</span><span class="operator">&gt;</span> version;
+
+      <span class="keyword">if</span> (version <span class="operator">!</span><span class="operator">=</span> JAR_VERSION)
+          <span class="keyword">return</span> stream;
+
+      <span class="type"><a href="../qtcore/qtglobal.html#quint32-typedef">quint32</a></span> count;
+      stream <span class="operator">&gt;</span><span class="operator">&gt;</span> count;
+      <span class="keyword">for</span> (<span class="type"><a href="../qtcore/qtglobal.html#quint32-typedef">quint32</a></span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> count; <span class="operator">+</span><span class="operator">+</span>i)
+      {
+          <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> value;
+          stream <span class="operator">&gt;</span><span class="operator">&gt;</span> value;
+          <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span><span class="operator">&gt;</span> newCookies <span class="operator">=</span> <span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span><span class="operator">::</span>parseCookies(value);
+          <span class="keyword">if</span> (newCookies<span class="operator">.</span>count() <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> value<span class="operator">.</span>length() <span class="operator">!</span><span class="operator">=</span> <span class="number">0</span>) {
+              <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;CookieJar: Unable to parse saved cookie:&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> value;
+          }
+          <span class="keyword">for</span> (<span class="type">int</span> j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> newCookies<span class="operator">.</span>count(); <span class="operator">+</span><span class="operator">+</span>j)
+              list<span class="operator">.</span>append(newCookies<span class="operator">.</span>at(j));
+          <span class="keyword">if</span> (stream<span class="operator">.</span>atEnd())
+              <span class="keyword">break</span>;
+      }
+      <span class="keyword">return</span> stream;
+  }
+
+  CookieJar<span class="operator">::</span>CookieJar(<span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtnetwork/qnetworkcookiejar.html">QNetworkCookieJar</a></span>(parent)
+      <span class="operator">,</span> m_loaded(<span class="keyword">false</span>)
+      <span class="operator">,</span> m_saveTimer(<span class="keyword">new</span> AutoSaver(<span class="keyword">this</span>))
+      <span class="operator">,</span> m_acceptCookies(AcceptOnlyFromSitesNavigatedTo)
+  {
+  }
+
+  CookieJar<span class="operator">::</span><span class="operator">~</span>CookieJar()
+  {
+      <span class="keyword">if</span> (m_keepCookies <span class="operator">=</span><span class="operator">=</span> KeepUntilExit)
+          clear();
+      m_saveTimer<span class="operator">-</span><span class="operator">&gt;</span>saveIfNeccessary();
+  }
+
+  <span class="type">void</span> CookieJar<span class="operator">::</span>clear()
+  {
+      setAllCookies(<span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span><span class="operator">&gt;</span>());
+      m_saveTimer<span class="operator">-</span><span class="operator">&gt;</span>changeOccurred();
+      <span class="keyword">emit</span> cookiesChanged();
+  }
+
+  <span class="type">void</span> CookieJar<span class="operator">::</span>load()
+  {
+      <span class="keyword">if</span> (m_loaded)
+          <span class="keyword">return</span>;
+      <span class="comment">// load cookies and exceptions</span>
+      <a href="../qtcore/qmetatype.html#qRegisterMetaTypeStreamOperators">qRegisterMetaTypeStreamOperators</a><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span><span class="operator">&gt;</span> <span class="operator">&gt;</span>(<span class="string">&quot;QList&lt;QNetworkCookie&gt;&quot;</span>);
+      <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> cookieSettings(<span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>writableLocation(<span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>DataLocation) <span class="operator">+</span> QLatin1String(<span class="string">&quot;/cookies.ini&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span><span class="operator">::</span>IniFormat);
+      setAllCookies(qvariant_cast<span class="operator">&lt;</span><span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span><span class="operator">&gt;</span> <span class="operator">&gt;</span>(cookieSettings<span class="operator">.</span>value(QLatin1String(<span class="string">&quot;cookies&quot;</span>))));
+      cookieSettings<span class="operator">.</span>beginGroup(QLatin1String(<span class="string">&quot;Exceptions&quot;</span>));
+      m_exceptions_block <span class="operator">=</span> cookieSettings<span class="operator">.</span>value(QLatin1String(<span class="string">&quot;block&quot;</span>))<span class="operator">.</span>toStringList();
+      m_exceptions_allow <span class="operator">=</span> cookieSettings<span class="operator">.</span>value(QLatin1String(<span class="string">&quot;allow&quot;</span>))<span class="operator">.</span>toStringList();
+      m_exceptions_allowForSession <span class="operator">=</span> cookieSettings<span class="operator">.</span>value(QLatin1String(<span class="string">&quot;allowForSession&quot;</span>))<span class="operator">.</span>toStringList();
+      <a href="../qtcore/qtalgorithms-obsolete.html#qSort-2">qSort</a>(m_exceptions_block<span class="operator">.</span>begin()<span class="operator">,</span> m_exceptions_block<span class="operator">.</span>end());
+      <a href="../qtcore/qtalgorithms-obsolete.html#qSort-2">qSort</a>(m_exceptions_allow<span class="operator">.</span>begin()<span class="operator">,</span> m_exceptions_allow<span class="operator">.</span>end());
+      <a href="../qtcore/qtalgorithms-obsolete.html#qSort-2">qSort</a>(m_exceptions_allowForSession<span class="operator">.</span>begin()<span class="operator">,</span> m_exceptions_allowForSession<span class="operator">.</span>end());
+
+      loadSettings();
+  }
+
+  <span class="type">void</span> CookieJar<span class="operator">::</span>loadSettings()
+  {
+      <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> settings;
+      settings<span class="operator">.</span>beginGroup(QLatin1String(<span class="string">&quot;cookies&quot;</span>));
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> value <span class="operator">=</span> settings<span class="operator">.</span>value(QLatin1String(<span class="string">&quot;acceptCookies&quot;</span>)<span class="operator">,</span>
+                          QLatin1String(<span class="string">&quot;AcceptOnlyFromSitesNavigatedTo&quot;</span>))<span class="operator">.</span>toByteArray();
+      <span class="type"><a href="../qtcore/qmetaenum.html">QMetaEnum</a></span> acceptPolicyEnum <span class="operator">=</span> staticMetaObject<span class="operator">.</span>enumerator(staticMetaObject<span class="operator">.</span>indexOfEnumerator(<span class="string">&quot;AcceptPolicy&quot;</span>));
+      m_acceptCookies <span class="operator">=</span> acceptPolicyEnum<span class="operator">.</span>keyToValue(value) <span class="operator">=</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span> <span class="operator">?</span>
+                          AcceptOnlyFromSitesNavigatedTo :
+                          <span class="keyword">static_cast</span><span class="operator">&lt;</span>AcceptPolicy<span class="operator">&gt;</span>(acceptPolicyEnum<span class="operator">.</span>keyToValue(value));
+
+      value <span class="operator">=</span> settings<span class="operator">.</span>value(QLatin1String(<span class="string">&quot;keepCookiesUntil&quot;</span>)<span class="operator">,</span> QLatin1String(<span class="string">&quot;KeepUntilExpire&quot;</span>))<span class="operator">.</span>toByteArray();
+      <span class="type"><a href="../qtcore/qmetaenum.html">QMetaEnum</a></span> keepPolicyEnum <span class="operator">=</span> staticMetaObject<span class="operator">.</span>enumerator(staticMetaObject<span class="operator">.</span>indexOfEnumerator(<span class="string">&quot;KeepPolicy&quot;</span>));
+      m_keepCookies <span class="operator">=</span> keepPolicyEnum<span class="operator">.</span>keyToValue(value) <span class="operator">=</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1</span> <span class="operator">?</span>
+                          KeepUntilExpire :
+                          <span class="keyword">static_cast</span><span class="operator">&lt;</span>KeepPolicy<span class="operator">&gt;</span>(keepPolicyEnum<span class="operator">.</span>keyToValue(value));
+
+      <span class="keyword">if</span> (m_keepCookies <span class="operator">=</span><span class="operator">=</span> KeepUntilExit)
+          setAllCookies(<span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span><span class="operator">&gt;</span>());
+
+      m_loaded <span class="operator">=</span> <span class="keyword">true</span>;
+      <span class="keyword">emit</span> cookiesChanged();
+  }
+
+  <span class="type">void</span> CookieJar<span class="operator">::</span>save()
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          <span class="keyword">return</span>;
+      purgeOldCookies();
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> directory <span class="operator">=</span> <span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>writableLocation(<span class="type"><a href="../qtcore/qstandardpaths.html">QStandardPaths</a></span><span class="operator">::</span>DataLocation);
+      <span class="keyword">if</span> (directory<span class="operator">.</span>isEmpty())
+          directory <span class="operator">=</span> <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>homePath() <span class="operator">+</span> QLatin1String(<span class="string">&quot;/.&quot;</span>) <span class="operator">+</span> <span class="type"><a href="../qtcore/qcoreapplication.html">QCoreApplication</a></span><span class="operator">::</span>applicationName();
+      <span class="keyword">if</span> (<span class="operator">!</span><span class="type"><a href="../qtcore/qfile.html">QFile</a></span><span class="operator">::</span>exists(directory)) {
+          <span class="type"><a href="../qtcore/qdir.html">QDir</a></span> dir;
+          dir<span class="operator">.</span>mkpath(directory);
+      }
+      <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> cookieSettings(directory <span class="operator">+</span> QLatin1String(<span class="string">&quot;/cookies.ini&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span><span class="operator">::</span>IniFormat);
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span><span class="operator">&gt;</span> cookies <span class="operator">=</span> allCookies();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> cookies<span class="operator">.</span>count() <span class="operator">-</span> <span class="number">1</span>; i <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span>; <span class="operator">-</span><span class="operator">-</span>i) {
+          <span class="keyword">if</span> (cookies<span class="operator">.</span>at(i)<span class="operator">.</span>isSessionCookie())
+              cookies<span class="operator">.</span>removeAt(i);
+      }
+      cookieSettings<span class="operator">.</span>setValue(QLatin1String(<span class="string">&quot;cookies&quot;</span>)<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue<span class="operator">&lt;</span><span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span><span class="operator">&gt;</span> <span class="operator">&gt;</span>(cookies));
+      cookieSettings<span class="operator">.</span>beginGroup(QLatin1String(<span class="string">&quot;Exceptions&quot;</span>));
+      cookieSettings<span class="operator">.</span>setValue(QLatin1String(<span class="string">&quot;block&quot;</span>)<span class="operator">,</span> m_exceptions_block);
+      cookieSettings<span class="operator">.</span>setValue(QLatin1String(<span class="string">&quot;allow&quot;</span>)<span class="operator">,</span> m_exceptions_allow);
+      cookieSettings<span class="operator">.</span>setValue(QLatin1String(<span class="string">&quot;allowForSession&quot;</span>)<span class="operator">,</span> m_exceptions_allowForSession);
+
+      <span class="comment">// save cookie settings</span>
+      <span class="type"><a href="../qtcore/qsettings.html">QSettings</a></span> settings;
+      settings<span class="operator">.</span>beginGroup(QLatin1String(<span class="string">&quot;cookies&quot;</span>));
+      <span class="type"><a href="../qtcore/qmetaenum.html">QMetaEnum</a></span> acceptPolicyEnum <span class="operator">=</span> staticMetaObject<span class="operator">.</span>enumerator(staticMetaObject<span class="operator">.</span>indexOfEnumerator(<span class="string">&quot;AcceptPolicy&quot;</span>));
+      settings<span class="operator">.</span>setValue(QLatin1String(<span class="string">&quot;acceptCookies&quot;</span>)<span class="operator">,</span> QLatin1String(acceptPolicyEnum<span class="operator">.</span>valueToKey(m_acceptCookies)));
+
+      <span class="type"><a href="../qtcore/qmetaenum.html">QMetaEnum</a></span> keepPolicyEnum <span class="operator">=</span> staticMetaObject<span class="operator">.</span>enumerator(staticMetaObject<span class="operator">.</span>indexOfEnumerator(<span class="string">&quot;KeepPolicy&quot;</span>));
+      settings<span class="operator">.</span>setValue(QLatin1String(<span class="string">&quot;keepCookiesUntil&quot;</span>)<span class="operator">,</span> QLatin1String(keepPolicyEnum<span class="operator">.</span>valueToKey(m_keepCookies)));
+  }
+
+  <span class="type">void</span> CookieJar<span class="operator">::</span>purgeOldCookies()
+  {
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span><span class="operator">&gt;</span> cookies <span class="operator">=</span> allCookies();
+      <span class="keyword">if</span> (cookies<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+      <span class="type">int</span> oldCount <span class="operator">=</span> cookies<span class="operator">.</span>count();
+      <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> now <span class="operator">=</span> <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span><span class="operator">::</span>currentDateTime();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> cookies<span class="operator">.</span>count() <span class="operator">-</span> <span class="number">1</span>; i <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0</span>; <span class="operator">-</span><span class="operator">-</span>i) {
+          <span class="keyword">if</span> (<span class="operator">!</span>cookies<span class="operator">.</span>at(i)<span class="operator">.</span>isSessionCookie() <span class="operator">&amp;</span><span class="operator">&amp;</span> cookies<span class="operator">.</span>at(i)<span class="operator">.</span>expirationDate() <span class="operator">&lt;</span> now)
+              cookies<span class="operator">.</span>removeAt(i);
+      }
+      <span class="keyword">if</span> (oldCount <span class="operator">=</span><span class="operator">=</span> cookies<span class="operator">.</span>count())
+          <span class="keyword">return</span>;
+      setAllCookies(cookies);
+      <span class="keyword">emit</span> cookiesChanged();
+  }
+
+  <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span><span class="operator">&gt;</span> CookieJar<span class="operator">::</span>cookiesForUrl(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>url) <span class="keyword">const</span>
+  {
+      CookieJar <span class="operator">*</span>that <span class="operator">=</span> <span class="keyword">const_cast</span><span class="operator">&lt;</span>CookieJar<span class="operator">*</span><span class="operator">&gt;</span>(<span class="keyword">this</span>);
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          that<span class="operator">-</span><span class="operator">&gt;</span>load();
+
+      <span class="type"><a href="qwebenginesettings.html">QWebEngineSettings</a></span> <span class="operator">*</span>globalSettings <span class="operator">=</span> <span class="type"><a href="qwebenginesettings.html">QWebEngineSettings</a></span><span class="operator">::</span>globalSettings();
+      <span class="keyword">if</span> (globalSettings<span class="operator">-</span><span class="operator">&gt;</span>testAttribute(<span class="type"><a href="qwebenginesettings.html">QWebEngineSettings</a></span><span class="operator">::</span>PrivateBrowsingEnabled)) {
+          <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span><span class="operator">&gt;</span> noCookies;
+          <span class="keyword">return</span> noCookies;
+      }
+
+      <span class="keyword">return</span> <span class="type"><a href="../qtnetwork/qnetworkcookiejar.html">QNetworkCookieJar</a></span><span class="operator">::</span>cookiesForUrl(url);
+  }
+
+  bool CookieJar<span class="operator">::</span>setCookiesFromUrl(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span><span class="operator">&gt;</span> <span class="operator">&amp;</span>cookieList<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qurl.html">QUrl</a></span> <span class="operator">&amp;</span>url)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          load();
+
+      <span class="type"><a href="qwebenginesettings.html">QWebEngineSettings</a></span> <span class="operator">*</span>globalSettings <span class="operator">=</span> <span class="type"><a href="qwebenginesettings.html">QWebEngineSettings</a></span><span class="operator">::</span>globalSettings();
+      <span class="keyword">if</span> (globalSettings<span class="operator">-</span><span class="operator">&gt;</span>testAttribute(<span class="type"><a href="qwebenginesettings.html">QWebEngineSettings</a></span><span class="operator">::</span>PrivateBrowsingEnabled))
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> host <span class="operator">=</span> url<span class="operator">.</span>host();
+      bool eBlock <span class="operator">=</span> <a href="../qtcore/qtalgorithms-obsolete.html#qBinaryFind-2">qBinaryFind</a>(m_exceptions_block<span class="operator">.</span>begin()<span class="operator">,</span> m_exceptions_block<span class="operator">.</span>end()<span class="operator">,</span> host) <span class="operator">!</span><span class="operator">=</span> m_exceptions_block<span class="operator">.</span>end();
+      bool eAllow <span class="operator">=</span> <a href="../qtcore/qtalgorithms-obsolete.html#qBinaryFind-2">qBinaryFind</a>(m_exceptions_allow<span class="operator">.</span>begin()<span class="operator">,</span> m_exceptions_allow<span class="operator">.</span>end()<span class="operator">,</span> host) <span class="operator">!</span><span class="operator">=</span> m_exceptions_allow<span class="operator">.</span>end();
+      bool eAllowSession <span class="operator">=</span> <a href="../qtcore/qtalgorithms-obsolete.html#qBinaryFind-2">qBinaryFind</a>(m_exceptions_allowForSession<span class="operator">.</span>begin()<span class="operator">,</span> m_exceptions_allowForSession<span class="operator">.</span>end()<span class="operator">,</span> host) <span class="operator">!</span><span class="operator">=</span> m_exceptions_allowForSession<span class="operator">.</span>end();
+
+      bool addedCookies <span class="operator">=</span> <span class="keyword">false</span>;
+      <span class="comment">// pass exceptions</span>
+      bool acceptInitially <span class="operator">=</span> (m_acceptCookies <span class="operator">!</span><span class="operator">=</span> AcceptNever);
+      <span class="keyword">if</span> ((acceptInitially <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>eBlock)
+          <span class="operator">|</span><span class="operator">|</span> (<span class="operator">!</span>acceptInitially <span class="operator">&amp;</span><span class="operator">&amp;</span> (eAllow <span class="operator">|</span><span class="operator">|</span> eAllowSession))) {
+          <span class="comment">// pass url domain == cookie domain</span>
+          <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span> soon <span class="operator">=</span> <span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span><span class="operator">::</span>currentDateTime();
+          soon <span class="operator">=</span> soon<span class="operator">.</span>addDays(<span class="number">90</span>);
+          foreach (<span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span> cookie<span class="operator">,</span> cookieList) {
+              <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span><span class="operator">&gt;</span> lst;
+              <span class="keyword">if</span> (m_keepCookies <span class="operator">=</span><span class="operator">=</span> KeepUntilTimeLimit
+                  <span class="operator">&amp;</span><span class="operator">&amp;</span> <span class="operator">!</span>cookie<span class="operator">.</span>isSessionCookie()
+                  <span class="operator">&amp;</span><span class="operator">&amp;</span> cookie<span class="operator">.</span>expirationDate() <span class="operator">&gt;</span> soon) {
+                      cookie<span class="operator">.</span>setExpirationDate(soon);
+              }
+              lst <span class="operator">+</span><span class="operator">=</span> cookie;
+              <span class="keyword">if</span> (<span class="type"><a href="../qtnetwork/qnetworkcookiejar.html">QNetworkCookieJar</a></span><span class="operator">::</span>setCookiesFromUrl(lst<span class="operator">,</span> url)) {
+                  addedCookies <span class="operator">=</span> <span class="keyword">true</span>;
+              } <span class="keyword">else</span> {
+                  <span class="comment">// finally force it in if wanted</span>
+                  <span class="keyword">if</span> (m_acceptCookies <span class="operator">=</span><span class="operator">=</span> AcceptAlways) {
+                      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span><span class="operator">&gt;</span> cookies <span class="operator">=</span> allCookies();
+                      cookies <span class="operator">+</span><span class="operator">=</span> cookie;
+                      setAllCookies(cookies);
+                      addedCookies <span class="operator">=</span> <span class="keyword">true</span>;
+                  }
+  <span class="preprocessor">#if 0</span>
+                  <span class="keyword">else</span>
+                      <a href="../qtcore/qtglobal.html#qWarning">qWarning</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;setCookiesFromUrl failed&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> url <span class="operator">&lt;</span><span class="operator">&lt;</span> cookieList<span class="operator">.</span>value(<span class="number">0</span>)<span class="operator">.</span>toRawForm();
+  <span class="preprocessor">#endif</span>
+              }
+          }
+      }
+
+      <span class="keyword">if</span> (addedCookies) {
+          m_saveTimer<span class="operator">-</span><span class="operator">&gt;</span>changeOccurred();
+          <span class="keyword">emit</span> cookiesChanged();
+      }
+      <span class="keyword">return</span> addedCookies;
+  }
+
+  CookieJar<span class="operator">::</span>AcceptPolicy CookieJar<span class="operator">::</span>acceptPolicy() <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          (<span class="keyword">const_cast</span><span class="operator">&lt;</span>CookieJar<span class="operator">*</span><span class="operator">&gt;</span>(<span class="keyword">this</span>))<span class="operator">-</span><span class="operator">&gt;</span>load();
+      <span class="keyword">return</span> m_acceptCookies;
+  }
+
+  <span class="type">void</span> CookieJar<span class="operator">::</span>setAcceptPolicy(AcceptPolicy policy)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          load();
+      <span class="keyword">if</span> (policy <span class="operator">=</span><span class="operator">=</span> m_acceptCookies)
+          <span class="keyword">return</span>;
+      m_acceptCookies <span class="operator">=</span> policy;
+      m_saveTimer<span class="operator">-</span><span class="operator">&gt;</span>changeOccurred();
+  }
+
+  CookieJar<span class="operator">::</span>KeepPolicy CookieJar<span class="operator">::</span>keepPolicy() <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          (<span class="keyword">const_cast</span><span class="operator">&lt;</span>CookieJar<span class="operator">*</span><span class="operator">&gt;</span>(<span class="keyword">this</span>))<span class="operator">-</span><span class="operator">&gt;</span>load();
+      <span class="keyword">return</span> m_keepCookies;
+  }
+
+  <span class="type">void</span> CookieJar<span class="operator">::</span>setKeepPolicy(KeepPolicy policy)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          load();
+      <span class="keyword">if</span> (policy <span class="operator">=</span><span class="operator">=</span> m_keepCookies)
+          <span class="keyword">return</span>;
+      m_keepCookies <span class="operator">=</span> policy;
+      m_saveTimer<span class="operator">-</span><span class="operator">&gt;</span>changeOccurred();
+  }
+
+  <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> CookieJar<span class="operator">::</span>blockedCookies() <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          (<span class="keyword">const_cast</span><span class="operator">&lt;</span>CookieJar<span class="operator">*</span><span class="operator">&gt;</span>(<span class="keyword">this</span>))<span class="operator">-</span><span class="operator">&gt;</span>load();
+      <span class="keyword">return</span> m_exceptions_block;
+  }
+
+  <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> CookieJar<span class="operator">::</span>allowedCookies() <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          (<span class="keyword">const_cast</span><span class="operator">&lt;</span>CookieJar<span class="operator">*</span><span class="operator">&gt;</span>(<span class="keyword">this</span>))<span class="operator">-</span><span class="operator">&gt;</span>load();
+      <span class="keyword">return</span> m_exceptions_allow;
+  }
+
+  <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> CookieJar<span class="operator">::</span>allowForSessionCookies() <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          (<span class="keyword">const_cast</span><span class="operator">&lt;</span>CookieJar<span class="operator">*</span><span class="operator">&gt;</span>(<span class="keyword">this</span>))<span class="operator">-</span><span class="operator">&gt;</span>load();
+      <span class="keyword">return</span> m_exceptions_allowForSession;
+  }
+
+  <span class="type">void</span> CookieJar<span class="operator">::</span>setBlockedCookies(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> <span class="operator">&amp;</span>list)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          load();
+      m_exceptions_block <span class="operator">=</span> list;
+      <a href="../qtcore/qtalgorithms-obsolete.html#qSort-2">qSort</a>(m_exceptions_block<span class="operator">.</span>begin()<span class="operator">,</span> m_exceptions_block<span class="operator">.</span>end());
+      m_saveTimer<span class="operator">-</span><span class="operator">&gt;</span>changeOccurred();
+  }
+
+  <span class="type">void</span> CookieJar<span class="operator">::</span>setAllowedCookies(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> <span class="operator">&amp;</span>list)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          load();
+      m_exceptions_allow <span class="operator">=</span> list;
+      <a href="../qtcore/qtalgorithms-obsolete.html#qSort-2">qSort</a>(m_exceptions_allow<span class="operator">.</span>begin()<span class="operator">,</span> m_exceptions_allow<span class="operator">.</span>end());
+      m_saveTimer<span class="operator">-</span><span class="operator">&gt;</span>changeOccurred();
+  }
+
+  <span class="type">void</span> CookieJar<span class="operator">::</span>setAllowForSessionCookies(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> <span class="operator">&amp;</span>list)
+  {
+      <span class="keyword">if</span> (<span class="operator">!</span>m_loaded)
+          load();
+      m_exceptions_allowForSession <span class="operator">=</span> list;
+      <a href="../qtcore/qtalgorithms-obsolete.html#qSort-2">qSort</a>(m_exceptions_allowForSession<span class="operator">.</span>begin()<span class="operator">,</span> m_exceptions_allowForSession<span class="operator">.</span>end());
+      m_saveTimer<span class="operator">-</span><span class="operator">&gt;</span>changeOccurred();
+  }
+
+  CookieModel<span class="operator">::</span>CookieModel(CookieJar <span class="operator">*</span>cookieJar<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qabstracttablemodel.html">QAbstractTableModel</a></span>(parent)
+      <span class="operator">,</span> m_cookieJar(cookieJar)
+  {
+      connect(m_cookieJar<span class="operator">,</span> SIGNAL(cookiesChanged())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(cookiesChanged()));
+      m_cookieJar<span class="operator">-</span><span class="operator">&gt;</span>load();
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> CookieModel<span class="operator">::</span>headerData(<span class="type">int</span> section<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Orientation orientation<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>SizeHintRole) {
+          <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> font;
+          font<span class="operator">.</span>setPointSize(<span class="number">10</span>);
+          <span class="type"><a href="../qtgui/qfontmetrics.html">QFontMetrics</a></span> fm(font);
+          <span class="type">int</span> height <span class="operator">=</span> fm<span class="operator">.</span>height() <span class="operator">+</span> fm<span class="operator">.</span>height()<span class="operator">/</span><span class="number">3</span>;
+          <span class="type">int</span> width <span class="operator">=</span> fm<span class="operator">.</span>width(headerData(section<span class="operator">,</span> orientation<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole)<span class="operator">.</span>toString());
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(width<span class="operator">,</span> height);
+      }
+
+      <span class="keyword">if</span> (orientation <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal) {
+          <span class="keyword">if</span> (role <span class="operator">!</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole)
+              <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+          <span class="keyword">switch</span> (section) {
+              <span class="keyword">case</span> <span class="number">0</span>:
+                  <span class="keyword">return</span> tr(<span class="string">&quot;Website&quot;</span>);
+              <span class="keyword">case</span> <span class="number">1</span>:
+                  <span class="keyword">return</span> tr(<span class="string">&quot;Name&quot;</span>);
+              <span class="keyword">case</span> <span class="number">2</span>:
+                  <span class="keyword">return</span> tr(<span class="string">&quot;Path&quot;</span>);
+              <span class="keyword">case</span> <span class="number">3</span>:
+                  <span class="keyword">return</span> tr(<span class="string">&quot;Secure&quot;</span>);
+              <span class="keyword">case</span> <span class="number">4</span>:
+                  <span class="keyword">return</span> tr(<span class="string">&quot;Expires&quot;</span>);
+              <span class="keyword">case</span> <span class="number">5</span>:
+                  <span class="keyword">return</span> tr(<span class="string">&quot;Contents&quot;</span>);
+              <span class="keyword">default</span>:
+                  <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+          }
+      }
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qabstracttablemodel.html">QAbstractTableModel</a></span><span class="operator">::</span>headerData(section<span class="operator">,</span> orientation<span class="operator">,</span> role);
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> CookieModel<span class="operator">::</span>data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span><span class="operator">&gt;</span> lst;
+      <span class="keyword">if</span> (m_cookieJar)
+          lst <span class="operator">=</span> m_cookieJar<span class="operator">-</span><span class="operator">&gt;</span>allCookies();
+      <span class="keyword">if</span> (index<span class="operator">.</span>row() <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> index<span class="operator">.</span>row() <span class="operator">&gt;</span><span class="operator">=</span> lst<span class="operator">.</span>size())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+      <span class="keyword">switch</span> (role) {
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole:
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole: {
+          <span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span> cookie <span class="operator">=</span> lst<span class="operator">.</span>at(index<span class="operator">.</span>row());
+          <span class="keyword">switch</span> (index<span class="operator">.</span>column()) {
+              <span class="keyword">case</span> <span class="number">0</span>:
+                  <span class="keyword">return</span> cookie<span class="operator">.</span>domain();
+              <span class="keyword">case</span> <span class="number">1</span>:
+                  <span class="keyword">return</span> cookie<span class="operator">.</span>name();
+              <span class="keyword">case</span> <span class="number">2</span>:
+                  <span class="keyword">return</span> cookie<span class="operator">.</span>path();
+              <span class="keyword">case</span> <span class="number">3</span>:
+                  <span class="keyword">return</span> cookie<span class="operator">.</span>isSecure();
+              <span class="keyword">case</span> <span class="number">4</span>:
+                  <span class="keyword">return</span> cookie<span class="operator">.</span>expirationDate();
+              <span class="keyword">case</span> <span class="number">5</span>:
+                  <span class="keyword">return</span> cookie<span class="operator">.</span>value();
+          }
+          }
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>FontRole:{
+          <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> font;
+          font<span class="operator">.</span>setPointSize(<span class="number">10</span>);
+          <span class="keyword">return</span> font;
+          }
+      }
+
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+  }
+
+  <span class="type">int</span> CookieModel<span class="operator">::</span>columnCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> (parent<span class="operator">.</span>isValid()) <span class="operator">?</span> <span class="number">0</span> : <span class="number">6</span>;
+  }
+
+  <span class="type">int</span> CookieModel<span class="operator">::</span>rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> (parent<span class="operator">.</span>isValid() <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>m_cookieJar) <span class="operator">?</span> <span class="number">0</span> : m_cookieJar<span class="operator">-</span><span class="operator">&gt;</span>allCookies()<span class="operator">.</span>count();
+  }
+
+  bool CookieModel<span class="operator">::</span>removeRows(<span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> count<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent)
+  {
+      <span class="keyword">if</span> (parent<span class="operator">.</span>isValid() <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>m_cookieJar)
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+      <span class="type">int</span> lastRow <span class="operator">=</span> row <span class="operator">+</span> count <span class="operator">-</span> <span class="number">1</span>;
+      beginRemoveRows(parent<span class="operator">,</span> row<span class="operator">,</span> lastRow);
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtnetwork/qnetworkcookie.html">QNetworkCookie</a></span><span class="operator">&gt;</span> lst <span class="operator">=</span> m_cookieJar<span class="operator">-</span><span class="operator">&gt;</span>allCookies();
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> lastRow; i <span class="operator">&gt;</span><span class="operator">=</span> row; <span class="operator">-</span><span class="operator">-</span>i) {
+          lst<span class="operator">.</span>removeAt(i);
+      }
+      m_cookieJar<span class="operator">-</span><span class="operator">&gt;</span>setAllCookies(lst);
+      endRemoveRows();
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  <span class="type">void</span> CookieModel<span class="operator">::</span>cookiesChanged()
+  {
+      beginResetModel();
+      endResetModel();
+  }
+
+  CookiesDialog<span class="operator">::</span>CookiesDialog(CookieJar <span class="operator">*</span>cookieJar<span class="operator">,</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent) : <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span>(parent)
+  {
+      setupUi(<span class="keyword">this</span>);
+      setWindowFlags(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Sheet);
+      CookieModel <span class="operator">*</span>model <span class="operator">=</span> <span class="keyword">new</span> CookieModel(cookieJar<span class="operator">,</span> <span class="keyword">this</span>);
+      m_proxyModel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span>(<span class="keyword">this</span>);
+      connect(search<span class="operator">,</span> SIGNAL(textChanged(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span>
+              m_proxyModel<span class="operator">,</span> SLOT(setFilterFixedString(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>)));
+      connect(removeButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> cookiesTable<span class="operator">,</span> SLOT(removeOne()));
+      connect(removeAllButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> cookiesTable<span class="operator">,</span> SLOT(removeAll()));
+      m_proxyModel<span class="operator">-</span><span class="operator">&gt;</span>setSourceModel(model);
+      cookiesTable<span class="operator">-</span><span class="operator">&gt;</span>verticalHeader()<span class="operator">-</span><span class="operator">&gt;</span>hide();
+      cookiesTable<span class="operator">-</span><span class="operator">&gt;</span>setSelectionBehavior(<span class="type"><a href="../qtwidgets/qabstractitemview.html">QAbstractItemView</a></span><span class="operator">::</span>SelectRows);
+      cookiesTable<span class="operator">-</span><span class="operator">&gt;</span>setModel(m_proxyModel);
+      cookiesTable<span class="operator">-</span><span class="operator">&gt;</span>setAlternatingRowColors(<span class="keyword">true</span>);
+      cookiesTable<span class="operator">-</span><span class="operator">&gt;</span>setTextElideMode(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ElideMiddle);
+      cookiesTable<span class="operator">-</span><span class="operator">&gt;</span>setShowGrid(<span class="keyword">false</span>);
+      cookiesTable<span class="operator">-</span><span class="operator">&gt;</span>setSortingEnabled(<span class="keyword">true</span>);
+      <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> f <span class="operator">=</span> font();
+      f<span class="operator">.</span>setPointSize(<span class="number">10</span>);
+      <span class="type"><a href="../qtgui/qfontmetrics.html">QFontMetrics</a></span> fm(f);
+      <span class="type">int</span> height <span class="operator">=</span> fm<span class="operator">.</span>height() <span class="operator">+</span> fm<span class="operator">.</span>height()<span class="operator">/</span><span class="number">3</span>;
+      cookiesTable<span class="operator">-</span><span class="operator">&gt;</span>verticalHeader()<span class="operator">-</span><span class="operator">&gt;</span>setDefaultSectionSize(height);
+      cookiesTable<span class="operator">-</span><span class="operator">&gt;</span>verticalHeader()<span class="operator">-</span><span class="operator">&gt;</span>setMinimumSectionSize(<span class="operator">-</span><span class="number">1</span>);
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> model<span class="operator">-</span><span class="operator">&gt;</span>columnCount(); <span class="operator">+</span><span class="operator">+</span>i){
+          <span class="type">int</span> header <span class="operator">=</span> cookiesTable<span class="operator">-</span><span class="operator">&gt;</span>horizontalHeader()<span class="operator">-</span><span class="operator">&gt;</span>sectionSizeHint(i);
+          <span class="keyword">switch</span> (i) {
+          <span class="keyword">case</span> <span class="number">0</span>:
+              header <span class="operator">=</span> fm<span class="operator">.</span>width(QLatin1String(<span class="string">&quot;averagehost.domain.com&quot;</span>));
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="number">1</span>:
+              header <span class="operator">=</span> fm<span class="operator">.</span>width(QLatin1String(<span class="string">&quot;_session_id&quot;</span>));
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="number">4</span>:
+              header <span class="operator">=</span> fm<span class="operator">.</span>width(<span class="type"><a href="../qtcore/qdatetime.html">QDateTime</a></span><span class="operator">::</span>currentDateTime()<span class="operator">.</span>toString(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LocalDate));
+              <span class="keyword">break</span>;
+          }
+          <span class="type">int</span> buffer <span class="operator">=</span> fm<span class="operator">.</span>width(QLatin1String(<span class="string">&quot;xx&quot;</span>));
+          header <span class="operator">+</span><span class="operator">=</span> buffer;
+          cookiesTable<span class="operator">-</span><span class="operator">&gt;</span>horizontalHeader()<span class="operator">-</span><span class="operator">&gt;</span>resizeSection(i<span class="operator">,</span> header);
+      }
+      cookiesTable<span class="operator">-</span><span class="operator">&gt;</span>horizontalHeader()<span class="operator">-</span><span class="operator">&gt;</span>setStretchLastSection(<span class="keyword">true</span>);
+  }
+
+  CookieExceptionsModel<span class="operator">::</span>CookieExceptionsModel(CookieJar <span class="operator">*</span>cookiejar<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtcore/qabstracttablemodel.html">QAbstractTableModel</a></span>(parent)
+      <span class="operator">,</span> m_cookieJar(cookiejar)
+  {
+      m_allowedCookies <span class="operator">=</span> m_cookieJar<span class="operator">-</span><span class="operator">&gt;</span>allowedCookies();
+      m_blockedCookies <span class="operator">=</span> m_cookieJar<span class="operator">-</span><span class="operator">&gt;</span>blockedCookies();
+      m_sessionCookies <span class="operator">=</span> m_cookieJar<span class="operator">-</span><span class="operator">&gt;</span>allowForSessionCookies();
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> CookieExceptionsModel<span class="operator">::</span>headerData(<span class="type">int</span> section<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Orientation orientation<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>SizeHintRole) {
+          <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> font;
+          font<span class="operator">.</span>setPointSize(<span class="number">10</span>);
+          <span class="type"><a href="../qtgui/qfontmetrics.html">QFontMetrics</a></span> fm(font);
+          <span class="type">int</span> height <span class="operator">=</span> fm<span class="operator">.</span>height() <span class="operator">+</span> fm<span class="operator">.</span>height()<span class="operator">/</span><span class="number">3</span>;
+          <span class="type">int</span> width <span class="operator">=</span> fm<span class="operator">.</span>width(headerData(section<span class="operator">,</span> orientation<span class="operator">,</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole)<span class="operator">.</span>toString());
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(width<span class="operator">,</span> height);
+      }
+
+      <span class="keyword">if</span> (orientation <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Horizontal
+          <span class="operator">&amp;</span><span class="operator">&amp;</span> role <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole) {
+          <span class="keyword">switch</span> (section) {
+              <span class="keyword">case</span> <span class="number">0</span>:
+                  <span class="keyword">return</span> tr(<span class="string">&quot;Website&quot;</span>);
+              <span class="keyword">case</span> <span class="number">1</span>:
+                  <span class="keyword">return</span> tr(<span class="string">&quot;Status&quot;</span>);
+          }
+      }
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qabstracttablemodel.html">QAbstractTableModel</a></span><span class="operator">::</span>headerData(section<span class="operator">,</span> orientation<span class="operator">,</span> role);
+  }
+
+  <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span> CookieExceptionsModel<span class="operator">::</span>data(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>index<span class="operator">,</span> <span class="type">int</span> role) <span class="keyword">const</span>
+  {
+      <span class="keyword">if</span> (index<span class="operator">.</span>row() <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">|</span><span class="operator">|</span> index<span class="operator">.</span>row() <span class="operator">&gt;</span><span class="operator">=</span> rowCount())
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+
+      <span class="keyword">switch</span> (role) {
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>DisplayRole:
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>EditRole: {
+          <span class="type">int</span> row <span class="operator">=</span> index<span class="operator">.</span>row();
+          <span class="keyword">if</span> (row <span class="operator">&lt;</span> m_allowedCookies<span class="operator">.</span>count()) {
+              <span class="keyword">switch</span> (index<span class="operator">.</span>column()) {
+                  <span class="keyword">case</span> <span class="number">0</span>:
+                      <span class="keyword">return</span> m_allowedCookies<span class="operator">.</span>at(row);
+                  <span class="keyword">case</span> <span class="number">1</span>:
+                      <span class="keyword">return</span> tr(<span class="string">&quot;Allow&quot;</span>);
+              }
+          }
+          row <span class="operator">=</span> row <span class="operator">-</span> m_allowedCookies<span class="operator">.</span>count();
+          <span class="keyword">if</span> (row <span class="operator">&lt;</span> m_blockedCookies<span class="operator">.</span>count()) {
+              <span class="keyword">switch</span> (index<span class="operator">.</span>column()) {
+                  <span class="keyword">case</span> <span class="number">0</span>:
+                      <span class="keyword">return</span> m_blockedCookies<span class="operator">.</span>at(row);
+                  <span class="keyword">case</span> <span class="number">1</span>:
+                      <span class="keyword">return</span> tr(<span class="string">&quot;Block&quot;</span>);
+              }
+          }
+          row <span class="operator">=</span> row <span class="operator">-</span> m_blockedCookies<span class="operator">.</span>count();
+          <span class="keyword">if</span> (row <span class="operator">&lt;</span> m_sessionCookies<span class="operator">.</span>count()) {
+              <span class="keyword">switch</span> (index<span class="operator">.</span>column()) {
+                  <span class="keyword">case</span> <span class="number">0</span>:
+                      <span class="keyword">return</span> m_sessionCookies<span class="operator">.</span>at(row);
+                  <span class="keyword">case</span> <span class="number">1</span>:
+                      <span class="keyword">return</span> tr(<span class="string">&quot;Allow For Session&quot;</span>);
+              }
+          }
+          }
+      <span class="keyword">case</span> <span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>FontRole:{
+          <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> font;
+          font<span class="operator">.</span>setPointSize(<span class="number">10</span>);
+          <span class="keyword">return</span> font;
+          }
+      }
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span>();
+  }
+
+  <span class="type">int</span> CookieExceptionsModel<span class="operator">::</span>columnCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> (parent<span class="operator">.</span>isValid()) <span class="operator">?</span> <span class="number">0</span> : <span class="number">2</span>;
+  }
+
+  <span class="type">int</span> CookieExceptionsModel<span class="operator">::</span>rowCount(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> (parent<span class="operator">.</span>isValid() <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>m_cookieJar) <span class="operator">?</span> <span class="number">0</span> : m_allowedCookies<span class="operator">.</span>count() <span class="operator">+</span> m_blockedCookies<span class="operator">.</span>count() <span class="operator">+</span> m_sessionCookies<span class="operator">.</span>count();
+  }
+
+  bool CookieExceptionsModel<span class="operator">::</span>removeRows(<span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> count<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qmodelindex.html">QModelIndex</a></span> <span class="operator">&amp;</span>parent)
+  {
+      <span class="keyword">if</span> (parent<span class="operator">.</span>isValid() <span class="operator">|</span><span class="operator">|</span> <span class="operator">!</span>m_cookieJar)
+          <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      <span class="type">int</span> lastRow <span class="operator">=</span> row <span class="operator">+</span> count <span class="operator">-</span> <span class="number">1</span>;
+      beginRemoveRows(parent<span class="operator">,</span> row<span class="operator">,</span> lastRow);
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> lastRow; i <span class="operator">&gt;</span><span class="operator">=</span> row; <span class="operator">-</span><span class="operator">-</span>i) {
+          <span class="keyword">if</span> (i <span class="operator">&lt;</span> m_allowedCookies<span class="operator">.</span>count()) {
+              m_allowedCookies<span class="operator">.</span>removeAt(row);
+              <span class="keyword">continue</span>;
+          }
+          i <span class="operator">=</span> i <span class="operator">-</span> m_allowedCookies<span class="operator">.</span>count();
+          <span class="keyword">if</span> (i <span class="operator">&lt;</span> m_blockedCookies<span class="operator">.</span>count()) {
+              m_blockedCookies<span class="operator">.</span>removeAt(row);
+              <span class="keyword">continue</span>;
+          }
+          i <span class="operator">=</span> i <span class="operator">-</span> m_blockedCookies<span class="operator">.</span>count();
+          <span class="keyword">if</span> (i <span class="operator">&lt;</span> m_sessionCookies<span class="operator">.</span>count()) {
+              m_sessionCookies<span class="operator">.</span>removeAt(row);
+              <span class="keyword">continue</span>;
+          }
+      }
+      m_cookieJar<span class="operator">-</span><span class="operator">&gt;</span>setAllowedCookies(m_allowedCookies);
+      m_cookieJar<span class="operator">-</span><span class="operator">&gt;</span>setBlockedCookies(m_blockedCookies);
+      m_cookieJar<span class="operator">-</span><span class="operator">&gt;</span>setAllowForSessionCookies(m_sessionCookies);
+      endRemoveRows();
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+  }
+
+  CookiesExceptionsDialog<span class="operator">::</span>CookiesExceptionsDialog(CookieJar <span class="operator">*</span>cookieJar<span class="operator">,</span> <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtwidgets/qdialog.html">QDialog</a></span>(parent)
+      <span class="operator">,</span> m_cookieJar(cookieJar)
+  {
+      setupUi(<span class="keyword">this</span>);
+      setWindowFlags(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>Sheet);
+      connect(removeButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> exceptionTable<span class="operator">,</span> SLOT(removeOne()));
+      connect(removeAllButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> exceptionTable<span class="operator">,</span> SLOT(removeAll()));
+      exceptionTable<span class="operator">-</span><span class="operator">&gt;</span>verticalHeader()<span class="operator">-</span><span class="operator">&gt;</span>hide();
+      exceptionTable<span class="operator">-</span><span class="operator">&gt;</span>setSelectionBehavior(<span class="type"><a href="../qtwidgets/qabstractitemview.html">QAbstractItemView</a></span><span class="operator">::</span>SelectRows);
+      exceptionTable<span class="operator">-</span><span class="operator">&gt;</span>setAlternatingRowColors(<span class="keyword">true</span>);
+      exceptionTable<span class="operator">-</span><span class="operator">&gt;</span>setTextElideMode(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>ElideMiddle);
+      exceptionTable<span class="operator">-</span><span class="operator">&gt;</span>setShowGrid(<span class="keyword">false</span>);
+      exceptionTable<span class="operator">-</span><span class="operator">&gt;</span>setSortingEnabled(<span class="keyword">true</span>);
+      m_exceptionsModel <span class="operator">=</span> <span class="keyword">new</span> CookieExceptionsModel(cookieJar<span class="operator">,</span> <span class="keyword">this</span>);
+      m_proxyModel <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="../qtcore/qsortfilterproxymodel.html">QSortFilterProxyModel</a></span>(<span class="keyword">this</span>);
+      m_proxyModel<span class="operator">-</span><span class="operator">&gt;</span>setSourceModel(m_exceptionsModel);
+      connect(search<span class="operator">,</span> SIGNAL(textChanged(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span>
+              m_proxyModel<span class="operator">,</span> SLOT(setFilterFixedString(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>)));
+      exceptionTable<span class="operator">-</span><span class="operator">&gt;</span>setModel(m_proxyModel);
+
+      CookieModel <span class="operator">*</span>cookieModel <span class="operator">=</span> <span class="keyword">new</span> CookieModel(cookieJar<span class="operator">,</span> <span class="keyword">this</span>);
+      domainLineEdit<span class="operator">-</span><span class="operator">&gt;</span>setCompleter(<span class="keyword">new</span> <span class="type"><a href="../qtwidgets/qcompleter.html">QCompleter</a></span>(cookieModel<span class="operator">,</span> domainLineEdit));
+
+      connect(domainLineEdit<span class="operator">,</span> SIGNAL(textChanged(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>))<span class="operator">,</span>
+              <span class="keyword">this</span><span class="operator">,</span> SLOT(textChanged(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>)));
+      connect(blockButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(block()));
+      connect(allowButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(allow()));
+      connect(allowForSessionButton<span class="operator">,</span> SIGNAL(clicked())<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(allowForSession()));
+
+      <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> f <span class="operator">=</span> font();
+      f<span class="operator">.</span>setPointSize(<span class="number">10</span>);
+      <span class="type"><a href="../qtgui/qfontmetrics.html">QFontMetrics</a></span> fm(f);
+      <span class="type">int</span> height <span class="operator">=</span> fm<span class="operator">.</span>height() <span class="operator">+</span> fm<span class="operator">.</span>height()<span class="operator">/</span><span class="number">3</span>;
+      exceptionTable<span class="operator">-</span><span class="operator">&gt;</span>verticalHeader()<span class="operator">-</span><span class="operator">&gt;</span>setDefaultSectionSize(height);
+      exceptionTable<span class="operator">-</span><span class="operator">&gt;</span>verticalHeader()<span class="operator">-</span><span class="operator">&gt;</span>setMinimumSectionSize(<span class="operator">-</span><span class="number">1</span>);
+      <span class="keyword">for</span> (<span class="type">int</span> i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> m_exceptionsModel<span class="operator">-</span><span class="operator">&gt;</span>columnCount(); <span class="operator">+</span><span class="operator">+</span>i){
+          <span class="type">int</span> header <span class="operator">=</span> exceptionTable<span class="operator">-</span><span class="operator">&gt;</span>horizontalHeader()<span class="operator">-</span><span class="operator">&gt;</span>sectionSizeHint(i);
+          <span class="keyword">switch</span> (i) {
+          <span class="keyword">case</span> <span class="number">0</span>:
+              header <span class="operator">=</span> fm<span class="operator">.</span>width(QLatin1String(<span class="string">&quot;averagebiglonghost.domain.com&quot;</span>));
+              <span class="keyword">break</span>;
+          <span class="keyword">case</span> <span class="number">1</span>:
+              header <span class="operator">=</span> fm<span class="operator">.</span>width(QLatin1String(<span class="string">&quot;Allow For Session&quot;</span>));
+              <span class="keyword">break</span>;
+          }
+          <span class="type">int</span> buffer <span class="operator">=</span> fm<span class="operator">.</span>width(QLatin1String(<span class="string">&quot;xx&quot;</span>));
+          header <span class="operator">+</span><span class="operator">=</span> buffer;
+          exceptionTable<span class="operator">-</span><span class="operator">&gt;</span>horizontalHeader()<span class="operator">-</span><span class="operator">&gt;</span>resizeSection(i<span class="operator">,</span> header);
+      }
+  }
+
+  <span class="type">void</span> CookiesExceptionsDialog<span class="operator">::</span>textChanged(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>text)
+  {
+      bool enabled <span class="operator">=</span> <span class="operator">!</span>text<span class="operator">.</span>isEmpty();
+      blockButton<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(enabled);
+      allowButton<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(enabled);
+      allowForSessionButton<span class="operator">-</span><span class="operator">&gt;</span>setEnabled(enabled);
+  }
+
+  <span class="type">void</span> CookiesExceptionsDialog<span class="operator">::</span>block()
+  {
+      <span class="keyword">if</span> (domainLineEdit<span class="operator">-</span><span class="operator">&gt;</span>text()<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+      m_exceptionsModel<span class="operator">-</span><span class="operator">&gt;</span>m_blockedCookies<span class="operator">.</span>append(domainLineEdit<span class="operator">-</span><span class="operator">&gt;</span>text());
+      m_cookieJar<span class="operator">-</span><span class="operator">&gt;</span>setBlockedCookies(m_exceptionsModel<span class="operator">-</span><span class="operator">&gt;</span>m_blockedCookies);
+      m_exceptionsModel<span class="operator">-</span><span class="operator">&gt;</span>beginResetModel();
+      m_exceptionsModel<span class="operator">-</span><span class="operator">&gt;</span>endResetModel();
+  }
+
+  <span class="type">void</span> CookiesExceptionsDialog<span class="operator">::</span>allow()
+  {
+      <span class="keyword">if</span> (domainLineEdit<span class="operator">-</span><span class="operator">&gt;</span>text()<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+      m_exceptionsModel<span class="operator">-</span><span class="operator">&gt;</span>m_allowedCookies<span class="operator">.</span>append(domainLineEdit<span class="operator">-</span><span class="operator">&gt;</span>text());
+      m_cookieJar<span class="operator">-</span><span class="operator">&gt;</span>setAllowedCookies(m_exceptionsModel<span class="operator">-</span><span class="operator">&gt;</span>m_allowedCookies);
+      m_exceptionsModel<span class="operator">-</span><span class="operator">&gt;</span>beginResetModel();
+      m_exceptionsModel<span class="operator">-</span><span class="operator">&gt;</span>endResetModel();
+  }
+
+  <span class="type">void</span> CookiesExceptionsDialog<span class="operator">::</span>allowForSession()
+  {
+      <span class="keyword">if</span> (domainLineEdit<span class="operator">-</span><span class="operator">&gt;</span>text()<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span>;
+      m_exceptionsModel<span class="operator">-</span><span class="operator">&gt;</span>m_sessionCookies<span class="operator">.</span>append(domainLineEdit<span class="operator">-</span><span class="operator">&gt;</span>text());
+      m_cookieJar<span class="operator">-</span><span class="operator">&gt;</span>setAllowForSessionCookies(m_exceptionsModel<span class="operator">-</span><span class="operator">&gt;</span>m_sessionCookies);
+      m_exceptionsModel<span class="operator">-</span><span class="operator">&gt;</span>beginResetModel();
+      m_exceptionsModel<span class="operator">-</span><span class="operator">&gt;</span>endResetModel();
+  }
+
+</pre>
+</div>
+<!-- @@@webenginewidgets/demobrowser/cookiejar.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

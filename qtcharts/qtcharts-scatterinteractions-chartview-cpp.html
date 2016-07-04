@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>chartview.cpp Example File | Qt Charts 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtcharts-index.html">Qt Charts</a></td><td ><a href="qtcharts-scatterinteractions-example.html">Scatter Interactions Example</a></td><td >chartview.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">chartview.cpp Example File</h1>
+<span class="subtitle">scatterinteractions/chartview.cpp</span>
+<!-- $$$scatterinteractions/chartview.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Charts module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;chartview.h&quot;</span>
+  <span class="preprocessor">#include &lt;QtCore/QtMath&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QDebug&gt;</span>
+
+  QT_CHARTS_USE_NAMESPACE
+
+  ChartView<span class="operator">::</span>ChartView(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="qchartview.html">QChartView</a></span>(<span class="keyword">new</span> <span class="type"><a href="qchart.html">QChart</a></span>()<span class="operator">,</span> parent)<span class="operator">,</span>
+        m_scatter(<span class="number">0</span>)<span class="operator">,</span>
+        m_scatter2(<span class="number">0</span>)
+  {
+      setRenderHint(<span class="type"><a href="../qtgui/qpainter.html">QPainter</a></span><span class="operator">::</span>Antialiasing);
+
+      chart()<span class="operator">-</span><span class="operator">&gt;</span>setTitle(<span class="string">&quot;Click to interact with scatter points&quot;</span>);
+
+      m_scatter <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qscatterseries.html">QScatterSeries</a></span>();
+      m_scatter<span class="operator">-</span><span class="operator">&gt;</span>setName(<span class="string">&quot;scatter1&quot;</span>);
+      <span class="keyword">for</span> (<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> x(<span class="number">0.5</span>); x <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">4.0</span>; x <span class="operator">+</span><span class="operator">=</span> <span class="number">0.5</span>) {
+          <span class="keyword">for</span> (<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> y(<span class="number">0.5</span>); y <span class="operator">&lt;</span><span class="operator">=</span> <span class="number">4.0</span>; y <span class="operator">+</span><span class="operator">=</span> <span class="number">0.5</span>) {
+              <span class="operator">*</span>m_scatter <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>(x<span class="operator">,</span> y);
+          }
+      }
+      m_scatter2 <span class="operator">=</span> <span class="keyword">new</span> <span class="type"><a href="qscatterseries.html">QScatterSeries</a></span>();
+      m_scatter2<span class="operator">-</span><span class="operator">&gt;</span>setName(<span class="string">&quot;scatter2&quot;</span>);
+
+      chart()<span class="operator">-</span><span class="operator">&gt;</span>addSeries(m_scatter2);
+      chart()<span class="operator">-</span><span class="operator">&gt;</span>addSeries(m_scatter);
+      chart()<span class="operator">-</span><span class="operator">&gt;</span>createDefaultAxes();
+      chart()<span class="operator">-</span><span class="operator">&gt;</span>axisX()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="number">0</span><span class="operator">,</span> <span class="number">4.5</span>);
+      chart()<span class="operator">-</span><span class="operator">&gt;</span>axisY()<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="number">0</span><span class="operator">,</span> <span class="number">4.5</span>);
+
+      connect(m_scatter<span class="operator">,</span> SIGNAL(clicked(<span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>))<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span> SLOT(handleClickedPoint(<span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>)));
+  }
+
+  ChartView<span class="operator">::</span><span class="operator">~</span>ChartView()
+  {
+  }
+
+  <span class="type">void</span> ChartView<span class="operator">::</span>handleClickedPoint(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> <span class="operator">&amp;</span>point)
+  {
+      <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> clickedPoint <span class="operator">=</span> point;
+      <span class="comment">// Find the closest point from series 1</span>
+      <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> closest(INT_MAX<span class="operator">,</span> INT_MAX);
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> distance(INT_MAX);
+      foreach (<span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> currentPoint<span class="operator">,</span> m_scatter<span class="operator">-</span><span class="operator">&gt;</span>points()) {
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> currentDistance <span class="operator">=</span> <a href="../qtcore/qtmath.html#qSqrt">qSqrt</a>((currentPoint<span class="operator">.</span>x() <span class="operator">-</span> clickedPoint<span class="operator">.</span>x())
+                                        <span class="operator">*</span> (currentPoint<span class="operator">.</span>x() <span class="operator">-</span> clickedPoint<span class="operator">.</span>x())
+                                        <span class="operator">+</span> (currentPoint<span class="operator">.</span>y() <span class="operator">-</span> clickedPoint<span class="operator">.</span>y())
+                                        <span class="operator">*</span> (currentPoint<span class="operator">.</span>y() <span class="operator">-</span> clickedPoint<span class="operator">.</span>y()));
+          <span class="keyword">if</span> (currentDistance <span class="operator">&lt;</span> distance) {
+              distance <span class="operator">=</span> currentDistance;
+              closest <span class="operator">=</span> currentPoint;
+          }
+      }
+
+      <span class="comment">// Remove the closes point from series 1 and append it to series 2</span>
+      m_scatter<span class="operator">-</span><span class="operator">&gt;</span>remove(closest);
+      m_scatter2<span class="operator">-</span><span class="operator">&gt;</span>append(closest);
+  }
+
+</pre>
+</div>
+<!-- @@@scatterinteractions/chartview.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

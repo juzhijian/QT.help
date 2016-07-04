@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>axesinputhandler.cpp Example File | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td ><a href="qtdatavisualization-draggableaxes-example.html">Axis Range Dragging With Labels Example</a></td><td >axesinputhandler.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">axesinputhandler.cpp Example File</h1>
+<span class="subtitle">draggableaxes/axesinputhandler.cpp</span>
+<!-- $$$draggableaxes/axesinputhandler.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Data Visualization module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;axesinputhandler.h&quot;</span>
+  <span class="preprocessor">#include &lt;QtCore/qmath.h&gt;</span>
+
+  AxesInputHandler<span class="operator">::</span>AxesInputHandler(QAbstract3DGraph <span class="operator">*</span>graph<span class="operator">,</span> <span class="type"><a href="../qtcore/qobject.html">QObject</a></span> <span class="operator">*</span>parent) :
+      <span class="type"><a href="q3dinputhandler.html">Q3DInputHandler</a></span>(parent)<span class="operator">,</span>
+      m_mousePressed(<span class="keyword">false</span>)<span class="operator">,</span>
+      m_state(StateNormal)<span class="operator">,</span>
+      m_axisX(<span class="number">0</span>)<span class="operator">,</span>
+      m_axisZ(<span class="number">0</span>)<span class="operator">,</span>
+      m_axisY(<span class="number">0</span>)<span class="operator">,</span>
+      m_speedModifier(<span class="number">15.0f</span>)
+  {
+      <span class="comment">// Connect to the item selection signal from graph</span>
+      connect(graph<span class="operator">,</span> <span class="operator">&amp;</span>QAbstract3DGraph<span class="operator">::</span>selectedElementChanged<span class="operator">,</span> <span class="keyword">this</span><span class="operator">,</span>
+              <span class="operator">&amp;</span>AxesInputHandler<span class="operator">::</span>handleElementSelected);
+  }
+
+  <span class="type">void</span> AxesInputHandler<span class="operator">::</span>mousePressEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>event<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <span class="operator">&amp;</span>mousePos)
+  {
+      <span class="type"><a href="q3dinputhandler.html">Q3DInputHandler</a></span><span class="operator">::</span>mousePressEvent(event<span class="operator">,</span> mousePos);
+      <span class="keyword">if</span> (<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>LeftButton <span class="operator">=</span><span class="operator">=</span> event<span class="operator">-</span><span class="operator">&gt;</span>button())
+          m_mousePressed <span class="operator">=</span> <span class="keyword">true</span>;
+  }
+
+  <span class="type">void</span> AxesInputHandler<span class="operator">::</span>mouseMoveEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>event<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <span class="operator">&amp;</span>mousePos)
+  {
+      <span class="comment">// Check if we're trying to drag axis label</span>
+      <span class="keyword">if</span> (m_mousePressed <span class="operator">&amp;</span><span class="operator">&amp;</span> m_state <span class="operator">!</span><span class="operator">=</span> StateNormal) {
+          setPreviousInputPos(inputPosition());
+          setInputPosition(mousePos);
+          handleAxisDragging();
+      } <span class="keyword">else</span> {
+          <span class="type"><a href="q3dinputhandler.html">Q3DInputHandler</a></span><span class="operator">::</span>mouseMoveEvent(event<span class="operator">,</span> mousePos);
+      }
+  }
+
+  <span class="type">void</span> AxesInputHandler<span class="operator">::</span>mouseReleaseEvent(<span class="type"><a href="../qtgui/qmouseevent.html">QMouseEvent</a></span> <span class="operator">*</span>event<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> <span class="operator">&amp;</span>mousePos)
+  {
+      <span class="type"><a href="q3dinputhandler.html">Q3DInputHandler</a></span><span class="operator">::</span>mouseReleaseEvent(event<span class="operator">,</span> mousePos);
+      m_mousePressed <span class="operator">=</span> <span class="keyword">false</span>;
+      m_state <span class="operator">=</span> StateNormal;
+  }
+
+  <span class="type">void</span> AxesInputHandler<span class="operator">::</span>handleElementSelected(QAbstract3DGraph<span class="operator">::</span>ElementType type)
+  {
+      <span class="keyword">switch</span> (type) {
+      <span class="keyword">case</span> QAbstract3DGraph<span class="operator">::</span>ElementAxisXLabel:
+          m_state <span class="operator">=</span> StateDraggingX;
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> QAbstract3DGraph<span class="operator">::</span>ElementAxisYLabel:
+          m_state <span class="operator">=</span> StateDraggingY;
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> QAbstract3DGraph<span class="operator">::</span>ElementAxisZLabel:
+          m_state <span class="operator">=</span> StateDraggingZ;
+          <span class="keyword">break</span>;
+      <span class="keyword">default</span>:
+          m_state <span class="operator">=</span> StateNormal;
+          <span class="keyword">break</span>;
+      }
+  }
+
+  <span class="type">void</span> AxesInputHandler<span class="operator">::</span>handleAxisDragging()
+  {
+      <span class="type">float</span> distance <span class="operator">=</span> <span class="number">0.0f</span>;
+
+      <span class="comment">// Get scene orientation from active camera</span>
+      <span class="type">float</span> xRotation <span class="operator">=</span> scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">-</span><span class="operator">&gt;</span>xRotation();
+      <span class="type">float</span> yRotation <span class="operator">=</span> scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">-</span><span class="operator">&gt;</span>yRotation();
+
+      <span class="comment">// Calculate directional drag multipliers based on rotation</span>
+      <span class="type">float</span> xMulX <span class="operator">=</span> <a href="../qtcore/qtmath.html#qCos">qCos</a>(<a href="../qtcore/qtmath.html#qDegreesToRadians-1">qDegreesToRadians</a>(xRotation));
+      <span class="type">float</span> xMulY <span class="operator">=</span> <a href="../qtcore/qtmath.html#qSin">qSin</a>(<a href="../qtcore/qtmath.html#qDegreesToRadians-1">qDegreesToRadians</a>(xRotation));
+      <span class="type">float</span> zMulX <span class="operator">=</span> <a href="../qtcore/qtmath.html#qSin">qSin</a>(<a href="../qtcore/qtmath.html#qDegreesToRadians-1">qDegreesToRadians</a>(xRotation));
+      <span class="type">float</span> zMulY <span class="operator">=</span> <a href="../qtcore/qtmath.html#qCos">qCos</a>(<a href="../qtcore/qtmath.html#qDegreesToRadians-1">qDegreesToRadians</a>(xRotation));
+
+      <span class="comment">// Get the drag amount</span>
+      <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> move <span class="operator">=</span> inputPosition() <span class="operator">-</span> previousInputPos();
+
+      <span class="comment">// Flip the effect of y movement if we're viewing from below</span>
+      <span class="type">float</span> yMove <span class="operator">=</span> (yRotation <span class="operator">&lt;</span> <span class="number">0</span>) <span class="operator">?</span> <span class="operator">-</span>move<span class="operator">.</span>y() : move<span class="operator">.</span>y();
+
+      <span class="comment">// Adjust axes</span>
+      <span class="keyword">switch</span> (m_state) {
+      <span class="keyword">case</span> StateDraggingX:
+          distance <span class="operator">=</span> (move<span class="operator">.</span>x() <span class="operator">*</span> xMulX <span class="operator">-</span> yMove <span class="operator">*</span> xMulY) <span class="operator">/</span> m_speedModifier;
+          m_axisX<span class="operator">-</span><span class="operator">&gt;</span>setRange(m_axisX<span class="operator">-</span><span class="operator">&gt;</span>min() <span class="operator">-</span> distance<span class="operator">,</span> m_axisX<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">-</span> distance);
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> StateDraggingZ:
+          distance <span class="operator">=</span> (move<span class="operator">.</span>x() <span class="operator">*</span> zMulX <span class="operator">+</span> yMove <span class="operator">*</span> zMulY) <span class="operator">/</span> m_speedModifier;
+          m_axisZ<span class="operator">-</span><span class="operator">&gt;</span>setRange(m_axisZ<span class="operator">-</span><span class="operator">&gt;</span>min() <span class="operator">+</span> distance<span class="operator">,</span> m_axisZ<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">+</span> distance);
+          <span class="keyword">break</span>;
+      <span class="keyword">case</span> StateDraggingY:
+          distance <span class="operator">=</span> move<span class="operator">.</span>y() <span class="operator">/</span> m_speedModifier; <span class="comment">// No need to use adjusted y move here</span>
+          m_axisY<span class="operator">-</span><span class="operator">&gt;</span>setRange(m_axisY<span class="operator">-</span><span class="operator">&gt;</span>min() <span class="operator">+</span> distance<span class="operator">,</span> m_axisY<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">+</span> distance);
+          <span class="keyword">break</span>;
+      <span class="keyword">default</span>:
+          <span class="keyword">break</span>;
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@draggableaxes/axesinputhandler.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

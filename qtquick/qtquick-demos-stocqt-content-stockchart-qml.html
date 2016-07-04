@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>StockChart.qml Example File | Qt Quick 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td ><a href="qtquick-demos-stocqt-example.html">Qt Quick Demo - StocQt</a></td><td >StockChart.qml Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">StockChart.qml Example File</h1>
+<span class="subtitle">demos/stocqt/content/StockChart.qml</span>
+<!-- $$$demos/stocqt/content/StockChart.qml-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="qml">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  import QtQuick 2.0
+  import &quot;.&quot;
+
+  <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">id</span>: <span class="name">chart</span>
+      <span class="name">width</span>: <span class="number">320</span>
+      <span class="name">height</span>: <span class="number">200</span>
+
+      property <span class="type">var</span> <span class="name">stockModel</span>: <span class="number">null</span>
+      property <span class="type">var</span> <span class="name">startDate</span>: new <span class="name">Date</span>()
+      property <span class="type">var</span> <span class="name">endDate</span>: new <span class="name">Date</span>()
+      property <span class="type">string</span> <span class="name">activeChart</span>: <span class="string">&quot;year&quot;</span>
+      property <span class="type">var</span> <span class="name">settings</span>
+      property <span class="type">int</span> <span class="name">gridSize</span>: <span class="number">4</span>
+      property <span class="type">real</span> <span class="name">gridStep</span>: <span class="name">gridSize</span> ? (<span class="name">width</span> <span class="operator">-</span> <span class="name">canvas</span>.<span class="name">tickMargin</span>) <span class="operator">/</span> <span class="name">gridSize</span> : <span class="name">canvas</span>.<span class="name">xGridStep</span>
+
+      <span class="keyword">function</span> <span class="name">update</span>() {
+          <span class="name">endDate</span> <span class="operator">=</span> new <span class="name">Date</span>();
+          <span class="keyword">if</span> (<span class="name">chart</span>.<span class="name">activeChart</span> <span class="operator">===</span> <span class="string">&quot;year&quot;</span>) {
+              <span class="name">chart</span>.<span class="name">startDate</span> <span class="operator">=</span> new <span class="name">Date</span>(<span class="name">chart</span>.<span class="name">endDate</span>.<span class="name">getFullYear</span>() <span class="operator">-</span> <span class="number">1</span>,
+                                         <span class="name">chart</span>.<span class="name">endDate</span>.<span class="name">getMonth</span>(),
+                                         <span class="name">chart</span>.<span class="name">endDate</span>.<span class="name">getDate</span>());
+              <span class="name">chart</span>.<span class="name">gridSize</span> <span class="operator">=</span> <span class="number">12</span>;
+          }
+          <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">chart</span>.<span class="name">activeChart</span> <span class="operator">===</span> <span class="string">&quot;month&quot;</span>) {
+              <span class="name">chart</span>.<span class="name">startDate</span> <span class="operator">=</span> new <span class="name">Date</span>(<span class="name">chart</span>.<span class="name">endDate</span>.<span class="name">getFullYear</span>(),
+                                         <span class="name">chart</span>.<span class="name">endDate</span>.<span class="name">getMonth</span>() <span class="operator">-</span> <span class="number">1</span>,
+                                         <span class="name">chart</span>.<span class="name">endDate</span>.<span class="name">getDate</span>());
+              <span class="name">gridSize</span> <span class="operator">=</span> <span class="number">0</span>;
+          }
+          <span class="keyword">else</span> <span class="keyword">if</span> (<span class="name">chart</span>.<span class="name">activeChart</span> <span class="operator">===</span> <span class="string">&quot;week&quot;</span>) {
+              <span class="name">chart</span>.<span class="name">startDate</span> <span class="operator">=</span> new <span class="name">Date</span>(<span class="name">chart</span>.<span class="name">endDate</span>.<span class="name">getFullYear</span>(),
+                                         <span class="name">chart</span>.<span class="name">endDate</span>.<span class="name">getMonth</span>(),
+                                         <span class="name">chart</span>.<span class="name">endDate</span>.<span class="name">getDate</span>() <span class="operator">-</span> <span class="number">7</span>);
+              <span class="name">gridSize</span> <span class="operator">=</span> <span class="number">0</span>;
+          }
+          <span class="keyword">else</span> {
+              <span class="name">chart</span>.<span class="name">startDate</span> <span class="operator">=</span> new <span class="name">Date</span>(<span class="number">2005</span>, <span class="number">3</span>, <span class="number">25</span>);
+              <span class="name">gridSize</span> <span class="operator">=</span> <span class="number">4</span>;
+          }
+
+          <span class="name">canvas</span>.<span class="name">requestPaint</span>();
+      }
+
+      <span class="type"><a href="qml-qtquick-row.html">Row</a></span> {
+          <span class="name">id</span>: <span class="name">activeChartRow</span>
+          <span class="name">anchors</span>.left: <span class="name">chart</span>.<span class="name">left</span>
+          <span class="name">anchors</span>.right: <span class="name">chart</span>.<span class="name">right</span>
+          <span class="name">anchors</span>.top: <span class="name">chart</span>.<span class="name">top</span>
+          <span class="name">anchors</span>.topMargin: <span class="number">4</span>
+          <span class="name">spacing</span>: <span class="number">52</span>
+          <span class="name">onWidthChanged</span>: {
+              var <span class="name">buttonsLen</span> = <span class="name">maxButton</span>.<span class="name">width</span> <span class="operator">+</span> <span class="name">yearButton</span>.<span class="name">width</span> <span class="operator">+</span> <span class="name">monthButton</span>.<span class="name">width</span> <span class="operator">+</span> <span class="name">weekButton</span>.<span class="name">width</span>;
+              var <span class="name">space</span> = (<span class="name">width</span> <span class="operator">-</span> <span class="name">buttonsLen</span>) <span class="operator">/</span> <span class="number">3</span>;
+              <span class="name">spacing</span> <span class="operator">=</span> <span class="name">Math</span>.<span class="name">max</span>(<span class="name">space</span>, <span class="number">10</span>);
+          }
+
+          <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls-button.html">Button</a></span> {
+              <span class="name">id</span>: <span class="name">maxButton</span>
+              <span class="name">text</span>: <span class="string">&quot;Max&quot;</span>
+              <span class="name">buttonEnabled</span>: <span class="name">chart</span>.<span class="name">activeChart</span> <span class="operator">===</span> <span class="string">&quot;max&quot;</span>
+              <span class="name">onClicked</span>: {
+                  <span class="name">chart</span>.<span class="name">activeChart</span> <span class="operator">=</span> <span class="string">&quot;max&quot;</span>;
+                  <span class="name">chart</span>.<span class="name">update</span>();
+              }
+          }
+          <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls-button.html">Button</a></span> {
+              <span class="name">id</span>: <span class="name">yearButton</span>
+              <span class="name">text</span>: <span class="string">&quot;Year&quot;</span>
+              <span class="name">buttonEnabled</span>: <span class="name">chart</span>.<span class="name">activeChart</span> <span class="operator">===</span> <span class="string">&quot;year&quot;</span>
+              <span class="name">onClicked</span>: {
+                  <span class="name">chart</span>.<span class="name">activeChart</span> <span class="operator">=</span> <span class="string">&quot;year&quot;</span>;
+                  <span class="name">chart</span>.<span class="name">update</span>();
+              }
+          }
+          <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls-button.html">Button</a></span> {
+              <span class="name">id</span>: <span class="name">monthButton</span>
+              <span class="name">text</span>: <span class="string">&quot;Month&quot;</span>
+              <span class="name">buttonEnabled</span>: <span class="name">chart</span>.<span class="name">activeChart</span> <span class="operator">===</span> <span class="string">&quot;month&quot;</span>
+              <span class="name">onClicked</span>: {
+                  <span class="name">chart</span>.<span class="name">activeChart</span> <span class="operator">=</span> <span class="string">&quot;month&quot;</span>;
+                  <span class="name">chart</span>.<span class="name">update</span>();
+              }
+          }
+          <span class="type"><a href="../qtquickcontrols/qml-qtquick-controls-button.html">Button</a></span> {
+              <span class="name">id</span>: <span class="name">weekButton</span>
+              <span class="name">text</span>: <span class="string">&quot;Week&quot;</span>
+              <span class="name">buttonEnabled</span>: <span class="name">chart</span>.<span class="name">activeChart</span> <span class="operator">===</span> <span class="string">&quot;week&quot;</span>
+              <span class="name">onClicked</span>: {
+                  <span class="name">chart</span>.<span class="name">activeChart</span> <span class="operator">=</span> <span class="string">&quot;week&quot;</span>;
+                  <span class="name">chart</span>.<span class="name">update</span>();
+              }
+          }
+      }
+
+      <span class="type"><a href="qml-qtquick-text.html">Text</a></span> {
+          <span class="name">id</span>: <span class="name">fromDate</span>
+          <span class="name">color</span>: <span class="string">&quot;#000000&quot;</span>
+          <span class="name">font</span>.family: <span class="name">Settings</span>.<span class="name">fontFamily</span>
+          <span class="name">font</span>.pointSize: <span class="number">8</span>
+          <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">text</span>: <span class="string">&quot;| &quot;</span> <span class="operator">+</span> <span class="name">startDate</span>.<span class="name">toDateString</span>()
+      }
+
+      <span class="type"><a href="qml-qtquick-text.html">Text</a></span> {
+          <span class="name">id</span>: <span class="name">toDate</span>
+          <span class="name">color</span>: <span class="string">&quot;#000000&quot;</span>
+          <span class="name">font</span>.family: <span class="name">Settings</span>.<span class="name">fontFamily</span>
+          <span class="name">font</span>.pointSize: <span class="number">8</span>
+          <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+          <span class="name">anchors</span>.rightMargin: <span class="name">canvas</span>.<span class="name">tickMargin</span>
+          <span class="name">anchors</span>.bottom: <span class="name">parent</span>.<span class="name">bottom</span>
+          <span class="name">text</span>: <span class="name">endDate</span>.<span class="name">toDateString</span>() <span class="operator">+</span> <span class="string">&quot; |&quot;</span>
+      }
+
+      <span class="type"><a href="qml-qtquick-canvas.html">Canvas</a></span> {
+          <span class="name">id</span>: <span class="name">canvas</span>
+
+          <span class="comment">// Uncomment below lines to use OpenGL hardware accelerated rendering.</span>
+          <span class="comment">// See Canvas documentation for available options.</span>
+          <span class="comment">// renderTarget: Canvas.FramebufferObject</span>
+          <span class="comment">// renderStrategy: Canvas.Threaded</span>
+
+          <span class="name">anchors</span>.top: <span class="name">activeChartRow</span>.<span class="name">bottom</span>
+          <span class="name">anchors</span>.left: <span class="name">parent</span>.<span class="name">left</span>
+          <span class="name">anchors</span>.right: <span class="name">parent</span>.<span class="name">right</span>
+          <span class="name">anchors</span>.bottom: <span class="name">fromDate</span>.<span class="name">top</span>
+
+          property <span class="type">int</span> <span class="name">pixelSkip</span>: <span class="number">1</span>
+          property <span class="type">int</span> <span class="name">numPoints</span>: <span class="number">1</span>
+          property <span class="type">int</span> <span class="name">tickMargin</span>: <span class="number">34</span>
+
+          property <span class="type">real</span> <span class="name">xGridStep</span>: (<span class="name">width</span> <span class="operator">-</span> <span class="name">tickMargin</span>) <span class="operator">/</span> <span class="name">numPoints</span>
+          property <span class="type">real</span> <span class="name">yGridOffset</span>: <span class="name">height</span> <span class="operator">/</span> <span class="number">26</span>
+          property <span class="type">real</span> <span class="name">yGridStep</span>: <span class="name">height</span> <span class="operator">/</span> <span class="number">12</span>
+
+          <span class="keyword">function</span> <span class="name">drawBackground</span>(<span class="name">ctx</span>) {
+              <span class="name">ctx</span>.<span class="name">save</span>();
+              <span class="name">ctx</span>.<span class="name">fillStyle</span> <span class="operator">=</span> <span class="string">&quot;#ffffff&quot;</span>;
+              <span class="name">ctx</span>.<span class="name">fillRect</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="name">canvas</span>.<span class="name">width</span>, <span class="name">canvas</span>.<span class="name">height</span>);
+              <span class="name">ctx</span>.<span class="name">strokeStyle</span> <span class="operator">=</span> <span class="string">&quot;#d7d7d7&quot;</span>;
+              <span class="name">ctx</span>.<span class="name">beginPath</span>();
+              <span class="comment">// Horizontal grid lines</span>
+              <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="number">12</span>; i++) {
+                  <span class="name">ctx</span>.<span class="name">moveTo</span>(<span class="number">0</span>, <span class="name">canvas</span>.<span class="name">yGridOffset</span> <span class="operator">+</span> <span class="name">i</span> <span class="operator">*</span> <span class="name">canvas</span>.<span class="name">yGridStep</span>);
+                  <span class="name">ctx</span>.<span class="name">lineTo</span>(<span class="name">canvas</span>.<span class="name">width</span>, <span class="name">canvas</span>.<span class="name">yGridOffset</span> <span class="operator">+</span> <span class="name">i</span> <span class="operator">*</span> <span class="name">canvas</span>.<span class="name">yGridStep</span>);
+              }
+
+              <span class="comment">// Vertical grid lines</span>
+              var <span class="name">height</span> = <span class="number">35</span> <span class="operator">*</span> <span class="name">canvas</span>.<span class="name">height</span> <span class="operator">/</span> <span class="number">36</span>;
+              var <span class="name">yOffset</span> = <span class="name">canvas</span>.<span class="name">height</span> <span class="operator">-</span> <span class="name">height</span>;
+              var <span class="name">xOffset</span> = <span class="number">0</span>;
+              <span class="keyword">for</span> (<span class="name">i</span> <span class="operator">=</span> <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">chart</span>.<span class="name">gridSize</span>; i++) {
+                  <span class="name">ctx</span>.<span class="name">moveTo</span>(<span class="name">xOffset</span> <span class="operator">+</span> <span class="name">i</span> <span class="operator">*</span> <span class="name">chart</span>.<span class="name">gridStep</span>, <span class="name">yOffset</span>);
+                  <span class="name">ctx</span>.<span class="name">lineTo</span>(<span class="name">xOffset</span> <span class="operator">+</span> <span class="name">i</span> <span class="operator">*</span> <span class="name">chart</span>.<span class="name">gridStep</span>, <span class="name">height</span>);
+              }
+              <span class="name">ctx</span>.<span class="name">stroke</span>();
+
+              <span class="comment">// Right ticks</span>
+              <span class="name">ctx</span>.<span class="name">strokeStyle</span> <span class="operator">=</span> <span class="string">&quot;#666666&quot;</span>;
+              <span class="name">ctx</span>.<span class="name">beginPath</span>();
+              var <span class="name">xStart</span> = <span class="name">canvas</span>.<span class="name">width</span> <span class="operator">-</span> <span class="name">tickMargin</span>;
+              <span class="name">ctx</span>.<span class="name">moveTo</span>(<span class="name">xStart</span>, <span class="number">0</span>);
+              <span class="name">ctx</span>.<span class="name">lineTo</span>(<span class="name">xStart</span>, <span class="name">canvas</span>.<span class="name">height</span>);
+              <span class="keyword">for</span> (<span class="name">i</span> <span class="operator">=</span> <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="number">12</span>; i++) {
+                  <span class="name">ctx</span>.<span class="name">moveTo</span>(<span class="name">xStart</span>, <span class="name">canvas</span>.<span class="name">yGridOffset</span> <span class="operator">+</span> <span class="name">i</span> <span class="operator">*</span> <span class="name">canvas</span>.<span class="name">yGridStep</span>);
+                  <span class="name">ctx</span>.<span class="name">lineTo</span>(<span class="name">canvas</span>.<span class="name">width</span>, <span class="name">canvas</span>.<span class="name">yGridOffset</span> <span class="operator">+</span> <span class="name">i</span> <span class="operator">*</span> <span class="name">canvas</span>.<span class="name">yGridStep</span>);
+              }
+              <span class="name">ctx</span>.<span class="name">moveTo</span>(<span class="number">0</span>, <span class="name">canvas</span>.<span class="name">yGridOffset</span> <span class="operator">+</span> <span class="number">9</span> <span class="operator">*</span> <span class="name">canvas</span>.<span class="name">yGridStep</span>);
+              <span class="name">ctx</span>.<span class="name">lineTo</span>(<span class="name">canvas</span>.<span class="name">width</span>, <span class="name">canvas</span>.<span class="name">yGridOffset</span> <span class="operator">+</span> <span class="number">9</span> <span class="operator">*</span> <span class="name">canvas</span>.<span class="name">yGridStep</span>);
+              <span class="name">ctx</span>.<span class="name">closePath</span>();
+              <span class="name">ctx</span>.<span class="name">stroke</span>();
+
+              <span class="name">ctx</span>.<span class="name">restore</span>();
+          }
+
+          <span class="comment">// Returns a shortened, readable version of the potentially</span>
+          <span class="comment">// large volume number.</span>
+          <span class="keyword">function</span> <span class="name">volumeToString</span>(<span class="name">value</span>) {
+              <span class="keyword">if</span> (<span class="name">value</span> <span class="operator">&lt;</span> <span class="number">1000</span>)
+                  <span class="keyword">return</span> <span class="name">value</span>;
+              var <span class="name">exponent</span> = <span class="name">parseInt</span>(<span class="name">Math</span>.<span class="name">log</span>(<span class="name">value</span>) <span class="operator">/</span> <span class="name">Math</span>.<span class="name">log</span>(<span class="number">1000</span>));
+              var <span class="name">shortVal</span> = <span class="name">parseFloat</span>(<span class="name">parseFloat</span>(<span class="name">value</span>) <span class="operator">/</span> <span class="name">Math</span>.<span class="name">pow</span>(<span class="number">1000</span>, <span class="name">exponent</span>)).<span class="name">toFixed</span>(<span class="number">1</span>);
+
+              <span class="comment">// Drop the decimal point on 3-digit values to make it fit</span>
+              <span class="keyword">if</span> (<span class="name">shortVal</span> <span class="operator">&gt;=</span> <span class="number">100.0</span>) {
+                  <span class="name">shortVal</span> <span class="operator">=</span> <span class="name">parseFloat</span>(<span class="name">shortVal</span>).<span class="name">toFixed</span>(<span class="number">0</span>);
+              }
+              <span class="keyword">return</span> <span class="name">shortVal</span> <span class="operator">+</span> <span class="string">&quot;KMBTG&quot;</span>.<span class="name">charAt</span>(<span class="name">exponent</span> <span class="operator">-</span> <span class="number">1</span>);
+          }
+
+          <span class="keyword">function</span> <span class="name">drawScales</span>(<span class="name">ctx</span>, high, low, vol)
+          {
+              <span class="name">ctx</span>.<span class="name">save</span>();
+              <span class="name">ctx</span>.<span class="name">strokeStyle</span> <span class="operator">=</span> <span class="string">&quot;#888888&quot;</span>;
+              <span class="name">ctx</span>.<span class="name">font</span> <span class="operator">=</span> <span class="string">&quot;10px Open Sans&quot;</span>
+              <span class="name">ctx</span>.<span class="name">beginPath</span>();
+
+              <span class="comment">// prices on y-axis</span>
+              var <span class="name">x</span> = <span class="name">canvas</span>.<span class="name">width</span> <span class="operator">-</span> <span class="name">tickMargin</span> <span class="operator">+</span> <span class="number">3</span>;
+              var <span class="name">priceStep</span> = (<span class="name">high</span> <span class="operator">-</span> <span class="name">low</span>) <span class="operator">/</span> <span class="number">9.0</span>;
+              <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="number">10</span>; <span class="name">i</span> <span class="operator">+=</span> <span class="number">2</span>) {
+                  var <span class="name">price</span> = <span class="name">parseFloat</span>(<span class="name">high</span> <span class="operator">-</span> <span class="name">i</span> <span class="operator">*</span> <span class="name">priceStep</span>).<span class="name">toFixed</span>(<span class="number">1</span>);
+                  <span class="name">ctx</span>.<span class="name">text</span>(<span class="name">price</span>, <span class="name">x</span>, <span class="name">canvas</span>.<span class="name">yGridOffset</span> <span class="operator">+</span> <span class="name">i</span> <span class="operator">*</span> <span class="name">yGridStep</span> <span class="operator">-</span> <span class="number">2</span>);
+              }
+
+              <span class="comment">// volume scale</span>
+              <span class="keyword">for</span> (<span class="name">i</span> <span class="operator">=</span> <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="number">3</span>; i++) {
+                  var <span class="name">volume</span> = <span class="name">volumeToString</span>(<span class="name">vol</span> <span class="operator">-</span> (<span class="name">i</span> <span class="operator">*</span> (<span class="name">vol</span><span class="operator">/</span><span class="number">3</span>)));
+                  <span class="name">ctx</span>.<span class="name">text</span>(<span class="name">volume</span>, <span class="name">x</span>, <span class="name">canvas</span>.<span class="name">yGridOffset</span> <span class="operator">+</span> (<span class="name">i</span> <span class="operator">+</span> <span class="number">9</span>) <span class="operator">*</span> <span class="name">yGridStep</span> <span class="operator">+</span> <span class="number">10</span>);
+              }
+
+              <span class="name">ctx</span>.<span class="name">closePath</span>();
+              <span class="name">ctx</span>.<span class="name">stroke</span>();
+              <span class="name">ctx</span>.<span class="name">restore</span>();
+          }
+
+          <span class="keyword">function</span> <span class="name">drawPrice</span>(<span class="name">ctx</span>, from, to, color, price, points, highest, lowest)
+          {
+              <span class="name">ctx</span>.<span class="name">save</span>();
+              <span class="name">ctx</span>.<span class="name">globalAlpha</span> <span class="operator">=</span> <span class="number">0.7</span>;
+              <span class="name">ctx</span>.<span class="name">strokeStyle</span> <span class="operator">=</span> <span class="name">color</span>;
+              <span class="name">ctx</span>.<span class="name">lineWidth</span> <span class="operator">=</span> <span class="number">3</span>;
+              <span class="name">ctx</span>.<span class="name">beginPath</span>();
+
+              var <span class="name">end</span> = <span class="name">points</span>.<span class="name">length</span>;
+
+              var <span class="name">range</span> = <span class="name">highest</span> <span class="operator">-</span> <span class="name">lowest</span>;
+              <span class="keyword">if</span> (<span class="name">range</span> <span class="operator">==</span> <span class="number">0</span>) {
+                  <span class="name">range</span> <span class="operator">=</span> <span class="number">1</span>;
+              }
+
+              <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">end</span>; <span class="name">i</span> <span class="operator">+=</span> <span class="name">pixelSkip</span>) {
+                  var <span class="name">x</span> = <span class="name">points</span>[<span class="name">i</span>].<span class="name">x</span>;
+                  var <span class="name">y</span> = <span class="name">points</span>[<span class="name">i</span>][<span class="name">price</span>];
+                  var <span class="name">h</span> = <span class="number">9</span> <span class="operator">*</span> <span class="name">yGridStep</span>;
+
+                  <span class="name">y</span> <span class="operator">=</span> <span class="name">h</span> <span class="operator">*</span> (<span class="name">lowest</span> <span class="operator">-</span> <span class="name">y</span>)<span class="operator">/</span><span class="name">range</span> <span class="operator">+</span> <span class="name">h</span> <span class="operator">+</span> <span class="name">yGridOffset</span>;
+
+                  <span class="keyword">if</span> (<span class="name">i</span> <span class="operator">==</span> <span class="number">0</span>) {
+                      <span class="name">ctx</span>.<span class="name">moveTo</span>(<span class="name">x</span>, <span class="name">y</span>);
+                  } <span class="keyword">else</span> {
+                      <span class="name">ctx</span>.<span class="name">lineTo</span>(<span class="name">x</span>, <span class="name">y</span>);
+                  }
+              }
+              <span class="name">ctx</span>.<span class="name">stroke</span>();
+              <span class="name">ctx</span>.<span class="name">restore</span>();
+          }
+
+          <span class="keyword">function</span> <span class="name">drawVolume</span>(<span class="name">ctx</span>, from, to, color, price, points, highest)
+          {
+              <span class="name">ctx</span>.<span class="name">save</span>();
+              <span class="name">ctx</span>.<span class="name">fillStyle</span> <span class="operator">=</span> <span class="name">color</span>;
+              <span class="name">ctx</span>.<span class="name">globalAlpha</span> <span class="operator">=</span> <span class="number">0.8</span>;
+              <span class="name">ctx</span>.<span class="name">lineWidth</span> <span class="operator">=</span> <span class="number">0</span>;
+              <span class="name">ctx</span>.<span class="name">beginPath</span>();
+
+              var <span class="name">end</span> = <span class="name">points</span>.<span class="name">length</span>;
+              var <span class="name">margin</span> = <span class="number">0</span>;
+
+              <span class="keyword">if</span> (<span class="name">chart</span>.<span class="name">activeChart</span> <span class="operator">===</span> <span class="string">&quot;month&quot;</span> <span class="operator">||</span> <span class="name">chart</span>.<span class="name">activeChart</span> <span class="operator">===</span> <span class="string">&quot;week&quot;</span>) {
+                  <span class="name">margin</span> <span class="operator">=</span> <span class="number">8</span>;
+                  <span class="name">ctx</span>.<span class="name">shadowOffsetX</span> <span class="operator">=</span> <span class="number">4</span>;
+                  <span class="name">ctx</span>.<span class="name">shadowBlur</span> <span class="operator">=</span> <span class="number">3.5</span>;
+                  <span class="name">ctx</span>.<span class="name">shadowColor</span> <span class="operator">=</span> <span class="name">Qt</span>.<span class="name">darker</span>(<span class="name">color</span>);
+              }
+
+              <span class="comment">// To match the volume graph with price grid, skip drawing the initial</span>
+              <span class="comment">// volume of the first day on chart.</span>
+              <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="number">1</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">end</span>; <span class="name">i</span> <span class="operator">+=</span> <span class="name">pixelSkip</span>) {
+                  var <span class="name">x</span> = <span class="name">points</span>[<span class="name">i</span> <span class="operator">-</span> <span class="number">1</span>].<span class="name">x</span>;
+                  var <span class="name">y</span> = <span class="name">points</span>[<span class="name">i</span>][<span class="name">price</span>];
+                  <span class="name">y</span> <span class="operator">=</span> <span class="name">canvas</span>.<span class="name">height</span> <span class="operator">*</span> (<span class="name">y</span> <span class="operator">/</span> <span class="name">highest</span>);
+                  <span class="name">y</span> <span class="operator">=</span> <span class="number">3</span> <span class="operator">*</span> <span class="name">y</span> <span class="operator">/</span> <span class="number">12</span>;
+                  <span class="name">ctx</span>.<span class="name">fillRect</span>(<span class="name">x</span>, <span class="name">canvas</span>.<span class="name">height</span> <span class="operator">-</span> <span class="name">y</span> <span class="operator">+</span> <span class="name">yGridOffset</span>,
+                               <span class="name">canvas</span>.<span class="name">xGridStep</span> <span class="operator">-</span> <span class="name">margin</span>, <span class="name">y</span>);
+              }
+
+              <span class="name">ctx</span>.<span class="name">stroke</span>();
+              <span class="name">ctx</span>.<span class="name">restore</span>();
+          }
+
+          <span class="keyword">function</span> <span class="name">drawError</span>(<span class="name">ctx</span>, msg)
+          {
+              <span class="name">ctx</span>.<span class="name">save</span>();
+              <span class="name">ctx</span>.<span class="name">strokeStyle</span> <span class="operator">=</span> <span class="string">&quot;#888888&quot;</span>;
+              <span class="name">ctx</span>.<span class="name">font</span> <span class="operator">=</span> <span class="string">&quot;24px Open Sans&quot;</span>
+              <span class="name">ctx</span>.<span class="name">textAlign</span> <span class="operator">=</span> <span class="string">&quot;center&quot;</span>
+              <span class="name">ctx</span>.<span class="name">shadowOffsetX</span> <span class="operator">=</span> <span class="number">4</span>;
+              <span class="name">ctx</span>.<span class="name">shadowOffsetY</span> <span class="operator">=</span> <span class="number">4</span>;
+              <span class="name">ctx</span>.<span class="name">shadowBlur</span> <span class="operator">=</span> <span class="number">1.5</span>;
+              <span class="name">ctx</span>.<span class="name">shadowColor</span> <span class="operator">=</span> <span class="string">&quot;#aaaaaa&quot;</span>;
+              <span class="name">ctx</span>.<span class="name">beginPath</span>();
+
+              <span class="name">ctx</span>.<span class="name">fillText</span>(<span class="name">msg</span>, (<span class="name">canvas</span>.<span class="name">width</span> <span class="operator">-</span> <span class="name">tickMargin</span>) <span class="operator">/</span> <span class="number">2</span>,
+                                (<span class="name">canvas</span>.<span class="name">height</span> <span class="operator">-</span> <span class="name">yGridOffset</span> <span class="operator">-</span> <span class="name">yGridStep</span>) <span class="operator">/</span> <span class="number">2</span>);
+
+              <span class="name">ctx</span>.<span class="name">closePath</span>();
+              <span class="name">ctx</span>.<span class="name">stroke</span>();
+              <span class="name">ctx</span>.<span class="name">restore</span>();
+          }
+
+          <span class="name">onPaint</span>: {
+              <span class="name">numPoints</span> <span class="operator">=</span> <span class="name">stockModel</span>.<span class="name">indexOf</span>(<span class="name">chart</span>.<span class="name">startDate</span>);
+
+              <span class="keyword">if</span> (<span class="name">chart</span>.<span class="name">gridSize</span> <span class="operator">==</span> <span class="number">0</span>)
+                  <span class="name">chart</span>.<span class="name">gridSize</span> <span class="operator">=</span> <span class="name">numPoints</span>
+
+              var <span class="name">ctx</span> = <span class="name">canvas</span>.<span class="name">getContext</span>(<span class="string">&quot;2d&quot;</span>);
+              <span class="name">ctx</span>.<span class="name">globalCompositeOperation</span> <span class="operator">=</span> <span class="string">&quot;source-over&quot;</span>;
+              <span class="name">ctx</span>.<span class="name">lineWidth</span> <span class="operator">=</span> <span class="number">1</span>;
+
+              <span class="name">drawBackground</span>(<span class="name">ctx</span>);
+
+              <span class="keyword">if</span> (!<span class="name">stockModel</span>.<span class="name">ready</span>) {
+                  <span class="name">drawError</span>(<span class="name">ctx</span>, <span class="string">&quot;No data available.&quot;</span>);
+                  <span class="keyword">return</span>;
+              }
+
+              var <span class="name">highestPrice</span> = <span class="number">0</span>;
+              var <span class="name">highestVolume</span> = <span class="number">0</span>;
+              var <span class="name">lowestPrice</span> = -<span class="number">1</span>;
+              var <span class="name">points</span> = [];
+              <span class="keyword">for</span> (<span class="keyword">var</span> <span class="name">i</span> = <span class="name">numPoints</span>, <span class="name">j</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&gt;=</span> <span class="number">0</span> ; <span class="name">i</span> <span class="operator">-=</span> <span class="name">pixelSkip</span>, <span class="name">j</span> <span class="operator">+=</span> <span class="name">pixelSkip</span>) {
+                  var <span class="name">price</span> = <span class="name">stockModel</span>.<span class="name">get</span>(<span class="name">i</span>);
+                  <span class="keyword">if</span> (<span class="name">parseFloat</span>(<span class="name">highestPrice</span>) <span class="operator">&lt;</span> <span class="name">parseFloat</span>(<span class="name">price</span>.<span class="name">high</span>))
+                      <span class="name">highestPrice</span> <span class="operator">=</span> <span class="name">price</span>.<span class="name">high</span>;
+                  <span class="keyword">if</span> (<span class="name">parseInt</span>(<span class="name">highestVolume</span>, <span class="number">10</span>) <span class="operator">&lt;</span> <span class="name">parseInt</span>(<span class="name">price</span>.<span class="name">volume</span>, <span class="number">10</span>))
+                      <span class="name">highestVolume</span> <span class="operator">=</span> <span class="name">price</span>.<span class="name">volume</span>;
+                  <span class="keyword">if</span> (<span class="name">lowestPrice</span> <span class="operator">&lt;</span> <span class="number">0</span> <span class="operator">||</span> <span class="name">parseFloat</span>(<span class="name">lowestPrice</span>) <span class="operator">&gt;</span> <span class="name">parseFloat</span>(<span class="name">price</span>.<span class="name">low</span>))
+                      <span class="name">lowestPrice</span> <span class="operator">=</span> <span class="name">price</span>.<span class="name">low</span>;
+                  <span class="name">points</span>.<span class="name">push</span>({
+                                  x: <span class="name">j</span> <span class="operator">*</span> <span class="name">xGridStep</span>,
+                                  open: <span class="name">price</span>.<span class="name">open</span>,
+                                  close: <span class="name">price</span>.<span class="name">close</span>,
+                                  high: <span class="name">price</span>.<span class="name">high</span>,
+                                  low: <span class="name">price</span>.<span class="name">low</span>,
+                                  volume: <span class="name">price</span>.<span class="name">volume</span>
+                              });
+              }
+
+              <span class="keyword">if</span> (<span class="name">settings</span>.<span class="name">drawHighPrice</span>)
+                  <span class="name">drawPrice</span>(<span class="name">ctx</span>, <span class="number">0</span>, <span class="name">numPoints</span>, <span class="name">settings</span>.<span class="name">highColor</span>, <span class="string">&quot;high&quot;</span>, <span class="name">points</span>, <span class="name">highestPrice</span>, <span class="name">lowestPrice</span>);
+              <span class="keyword">if</span> (<span class="name">settings</span>.<span class="name">drawLowPrice</span>)
+                  <span class="name">drawPrice</span>(<span class="name">ctx</span>, <span class="number">0</span>, <span class="name">numPoints</span>, <span class="name">settings</span>.<span class="name">lowColor</span>, <span class="string">&quot;low&quot;</span>, <span class="name">points</span>, <span class="name">highestPrice</span>, <span class="name">lowestPrice</span>);
+              <span class="keyword">if</span> (<span class="name">settings</span>.<span class="name">drawOpenPrice</span>)
+                  <span class="name">drawPrice</span>(<span class="name">ctx</span>, <span class="number">0</span>, <span class="name">numPoints</span>,<span class="name">settings</span>.<span class="name">openColor</span>, <span class="string">&quot;open&quot;</span>, <span class="name">points</span>, <span class="name">highestPrice</span>, <span class="name">lowestPrice</span>);
+              <span class="keyword">if</span> (<span class="name">settings</span>.<span class="name">drawClosePrice</span>)
+                  <span class="name">drawPrice</span>(<span class="name">ctx</span>, <span class="number">0</span>, <span class="name">numPoints</span>, <span class="name">settings</span>.<span class="name">closeColor</span>, <span class="string">&quot;close&quot;</span>, <span class="name">points</span>, <span class="name">highestPrice</span>, <span class="name">lowestPrice</span>);
+
+              <span class="name">drawVolume</span>(<span class="name">ctx</span>, <span class="number">0</span>, <span class="name">numPoints</span>, <span class="name">settings</span>.<span class="name">volumeColor</span>, <span class="string">&quot;volume&quot;</span>, <span class="name">points</span>, <span class="name">highestVolume</span>);
+              <span class="name">drawScales</span>(<span class="name">ctx</span>, <span class="name">highestPrice</span>, <span class="name">lowestPrice</span>, <span class="name">highestVolume</span>);
+          }
+      }
+  }
+
+</pre>
+</div>
+<!-- @@@demos/stocqt/content/StockChart.qml -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

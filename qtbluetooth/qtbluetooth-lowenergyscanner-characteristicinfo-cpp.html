@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>characteristicinfo.cpp Example File | Qt Bluetooth 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtbluetooth-index.html">Qt Bluetooth</a></td><td ><a href="qtbluetooth-lowenergyscanner-example.html">Bluetooth Low Energy Scanner Example</a></td><td >characteristicinfo.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">characteristicinfo.cpp Example File</h1>
+<span class="subtitle">lowenergyscanner/characteristicinfo.cpp</span>
+<!-- $$$lowenergyscanner/characteristicinfo.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/***************************************************************************
+  **
+  ** Copyright (C) 2013 BlackBerry Limited. All rights reserved.
+  ** Copyright (C) 2015 The Qt Company Ltd.
+  ** Contact: http://www.qt.io/licensing/
+  **
+  ** This file is part of the QtBluetooth module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** You may use this file under the terms of the BSD license as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;characteristicinfo.h&quot;</span>
+  <span class="preprocessor">#include &quot;qbluetoothuuid.h&quot;</span>
+  <span class="preprocessor">#include &lt;QByteArray&gt;</span>
+
+  CharacteristicInfo<span class="operator">::</span>CharacteristicInfo()
+  {
+  }
+
+  CharacteristicInfo<span class="operator">::</span>CharacteristicInfo(<span class="keyword">const</span> <span class="type"><a href="qlowenergycharacteristic.html">QLowEnergyCharacteristic</a></span> <span class="operator">&amp;</span>characteristic):
+      m_characteristic(characteristic)
+  {
+  }
+
+  <span class="type">void</span> CharacteristicInfo<span class="operator">::</span>setCharacteristic(<span class="keyword">const</span> <span class="type"><a href="qlowenergycharacteristic.html">QLowEnergyCharacteristic</a></span> <span class="operator">&amp;</span>characteristic)
+  {
+      m_characteristic <span class="operator">=</span> characteristic;
+      <span class="keyword">emit</span> characteristicChanged();
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> CharacteristicInfo<span class="operator">::</span>getName() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> name <span class="operator">=</span> m_characteristic<span class="operator">.</span>name();
+      <span class="keyword">if</span> (<span class="operator">!</span>name<span class="operator">.</span>isEmpty())
+          <span class="keyword">return</span> name;
+
+      <span class="comment">// find descriptor with CharacteristicUserDescription</span>
+      foreach (<span class="keyword">const</span> <span class="type"><a href="qlowenergydescriptor.html">QLowEnergyDescriptor</a></span> <span class="operator">&amp;</span>descriptor<span class="operator">,</span> m_characteristic<span class="operator">.</span>descriptors()) {
+          <span class="keyword">if</span> (descriptor<span class="operator">.</span>type() <span class="operator">=</span><span class="operator">=</span> <span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span><span class="operator">::</span>CharacteristicUserDescription) {
+              name <span class="operator">=</span> descriptor<span class="operator">.</span>value();
+              <span class="keyword">break</span>;
+          }
+      }
+
+      <span class="keyword">if</span> (name<span class="operator">.</span>isEmpty())
+          name <span class="operator">=</span> <span class="string">&quot;Unknown&quot;</span>;
+
+      <span class="keyword">return</span> name;
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> CharacteristicInfo<span class="operator">::</span>getUuid() <span class="keyword">const</span>
+  {
+      <span class="keyword">const</span> <span class="type"><a href="qbluetoothuuid.html">QBluetoothUuid</a></span> uuid <span class="operator">=</span> m_characteristic<span class="operator">.</span>uuid();
+      bool success <span class="operator">=</span> <span class="keyword">false</span>;
+      <span class="type"><a href="../qtcore/qtglobal.html#quint16-typedef">quint16</a></span> result16 <span class="operator">=</span> uuid<span class="operator">.</span>toUInt16(<span class="operator">&amp;</span>success);
+      <span class="keyword">if</span> (success)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;0x&quot;</span>) <span class="operator">+</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(result16<span class="operator">,</span> <span class="number">16</span>);
+
+      <span class="type"><a href="../qtcore/qtglobal.html#quint32-typedef">quint32</a></span> result32 <span class="operator">=</span> uuid<span class="operator">.</span>toUInt32(<span class="operator">&amp;</span>success);
+      <span class="keyword">if</span> (success)
+          <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;0x&quot;</span>) <span class="operator">+</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(result32<span class="operator">,</span> <span class="number">16</span>);
+
+      <span class="keyword">return</span> uuid<span class="operator">.</span>toString()<span class="operator">.</span>remove(QLatin1Char(<span class="char">'{'</span>))<span class="operator">.</span>remove(QLatin1Char(<span class="char">'}'</span>));
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> CharacteristicInfo<span class="operator">::</span>getValue() <span class="keyword">const</span>
+  {
+      <span class="comment">// Show raw string first and hex value below</span>
+      <span class="type"><a href="../qtcore/qbytearray.html">QByteArray</a></span> a <span class="operator">=</span> m_characteristic<span class="operator">.</span>value();
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> result;
+      <span class="keyword">if</span> (a<span class="operator">.</span>isEmpty()) {
+          result <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;&lt;none&gt;&quot;</span>);
+          <span class="keyword">return</span> result;
+      }
+
+      result <span class="operator">=</span> a;
+      result <span class="operator">+</span><span class="operator">=</span> QLatin1Char(<span class="char">'\n'</span>);
+      result <span class="operator">+</span><span class="operator">=</span> a<span class="operator">.</span>toHex();
+
+      <span class="keyword">return</span> result;
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> CharacteristicInfo<span class="operator">::</span>getHandle() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;0x&quot;</span>) <span class="operator">+</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">::</span>number(m_characteristic<span class="operator">.</span>handle()<span class="operator">,</span> <span class="number">16</span>);
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> CharacteristicInfo<span class="operator">::</span>getPermission() <span class="keyword">const</span>
+  {
+      <span class="type"><a href="../qtcore/qstring.html">QString</a></span> properties <span class="operator">=</span> <span class="string">&quot;( &quot;</span>;
+      <span class="type">int</span> permission <span class="operator">=</span> m_characteristic<span class="operator">.</span>properties();
+      <span class="keyword">if</span> (permission <span class="operator">&amp;</span> <span class="type"><a href="qlowenergycharacteristic.html">QLowEnergyCharacteristic</a></span><span class="operator">::</span>Read)
+          properties <span class="operator">+</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot; Read&quot;</span>);
+      <span class="keyword">if</span> (permission <span class="operator">&amp;</span> <span class="type"><a href="qlowenergycharacteristic.html">QLowEnergyCharacteristic</a></span><span class="operator">::</span>Write)
+          properties <span class="operator">+</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot; Write&quot;</span>);
+      <span class="keyword">if</span> (permission <span class="operator">&amp;</span> <span class="type"><a href="qlowenergycharacteristic.html">QLowEnergyCharacteristic</a></span><span class="operator">::</span>Notify)
+          properties <span class="operator">+</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot; Notify&quot;</span>);
+      <span class="keyword">if</span> (permission <span class="operator">&amp;</span> <span class="type"><a href="qlowenergycharacteristic.html">QLowEnergyCharacteristic</a></span><span class="operator">::</span>Indicate)
+          properties <span class="operator">+</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot; Indicate&quot;</span>);
+      <span class="keyword">if</span> (permission <span class="operator">&amp;</span> <span class="type"><a href="qlowenergycharacteristic.html">QLowEnergyCharacteristic</a></span><span class="operator">::</span>ExtendedProperty)
+          properties <span class="operator">+</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot; ExtendedProperty&quot;</span>);
+      <span class="keyword">if</span> (permission <span class="operator">&amp;</span> <span class="type"><a href="qlowenergycharacteristic.html">QLowEnergyCharacteristic</a></span><span class="operator">::</span>Broadcasting)
+          properties <span class="operator">+</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot; Broadcast&quot;</span>);
+      <span class="keyword">if</span> (permission <span class="operator">&amp;</span> <span class="type"><a href="qlowenergycharacteristic.html">QLowEnergyCharacteristic</a></span><span class="operator">::</span>WriteNoResponse)
+          properties <span class="operator">+</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot; WriteNoResp&quot;</span>);
+      <span class="keyword">if</span> (permission <span class="operator">&amp;</span> <span class="type"><a href="qlowenergycharacteristic.html">QLowEnergyCharacteristic</a></span><span class="operator">::</span>WriteSigned)
+          properties <span class="operator">+</span><span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot; WriteSigned&quot;</span>);
+      properties <span class="operator">+</span><span class="operator">=</span> <span class="string">&quot; )&quot;</span>;
+      <span class="keyword">return</span> properties;
+  }
+
+  <span class="type"><a href="qlowenergycharacteristic.html">QLowEnergyCharacteristic</a></span> CharacteristicInfo<span class="operator">::</span>getCharacteristic() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> m_characteristic;
+  }
+
+</pre>
+</div>
+<!-- @@@lowenergyscanner/characteristicinfo.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

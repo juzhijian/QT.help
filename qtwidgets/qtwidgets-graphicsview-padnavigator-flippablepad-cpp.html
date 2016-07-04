@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>flippablepad.cpp Example File | Qt Widgets 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtwidgets-index.html">Qt Widgets</a></td><td ><a href="qtwidgets-graphicsview-padnavigator-example.html">Pad Navigator Example</a></td><td >flippablepad.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">flippablepad.cpp Example File</h1>
+<span class="subtitle">graphicsview/padnavigator/flippablepad.cpp</span>
+<!-- $$$graphicsview/padnavigator/flippablepad.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;flippablepad.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QDirIterator&gt;</span>
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> boundsFromSize(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> <span class="operator">&amp;</span>size)
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span>((<span class="operator">-</span>size<span class="operator">.</span>width() <span class="operator">/</span> <span class="number">2.0</span>) <span class="operator">*</span> <span class="number">150</span><span class="operator">,</span> (<span class="operator">-</span>size<span class="operator">.</span>height() <span class="operator">/</span> <span class="number">2.0</span>) <span class="operator">*</span> <span class="number">150</span><span class="operator">,</span>
+                    size<span class="operator">.</span>width() <span class="operator">*</span> <span class="number">150</span><span class="operator">,</span> size<span class="operator">.</span>height() <span class="operator">*</span> <span class="number">150</span>);
+  }
+
+  <span class="keyword">static</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span> posForLocation(<span class="type">int</span> column<span class="operator">,</span> <span class="type">int</span> row<span class="operator">,</span> <span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> <span class="operator">&amp;</span>size)
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>(column <span class="operator">*</span> <span class="number">150</span><span class="operator">,</span> row <span class="operator">*</span> <span class="number">150</span>)
+          <span class="operator">-</span> <span class="type"><a href="../qtcore/qpointf.html">QPointF</a></span>((size<span class="operator">.</span>width() <span class="operator">-</span> <span class="number">1</span>) <span class="operator">*</span> <span class="number">75</span><span class="operator">,</span> (size<span class="operator">.</span>height() <span class="operator">-</span> <span class="number">1</span>) <span class="operator">*</span> <span class="number">75</span>);
+  }
+
+  FlippablePad<span class="operator">::</span>FlippablePad(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> <span class="operator">&amp;</span>size<span class="operator">,</span> <span class="type"><a href="qgraphicsitem.html">QGraphicsItem</a></span> <span class="operator">*</span>parent)
+      : RoundRectItem(boundsFromSize(size)<span class="operator">,</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span>(<span class="number">226</span><span class="operator">,</span> <span class="number">255</span><span class="operator">,</span> <span class="number">92</span><span class="operator">,</span> <span class="number">64</span>)<span class="operator">,</span> parent)
+  {
+      <span class="type">int</span> numIcons <span class="operator">=</span> size<span class="operator">.</span>width() <span class="operator">*</span> size<span class="operator">.</span>height();
+      <span class="type"><a href="../qtcore/qlist.html">QList</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtgui/qpixmap.html">QPixmap</a></span><span class="operator">&gt;</span> pixmaps;
+      <span class="type"><a href="../qtcore/qdiriterator.html">QDirIterator</a></span> it(<span class="string">&quot;:/images&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;*.png&quot;</span>);
+      <span class="keyword">while</span> (it<span class="operator">.</span>hasNext() <span class="operator">&amp;</span><span class="operator">&amp;</span> pixmaps<span class="operator">.</span>size() <span class="operator">&lt;</span> numIcons)
+          pixmaps <span class="operator">&lt;</span><span class="operator">&lt;</span> it<span class="operator">.</span>next();
+
+      <span class="keyword">const</span> <span class="type"><a href="../qtcore/qrectf.html">QRectF</a></span> iconRect(<span class="operator">-</span><span class="number">54</span><span class="operator">,</span> <span class="operator">-</span><span class="number">54</span><span class="operator">,</span> <span class="number">108</span><span class="operator">,</span> <span class="number">108</span>);
+      <span class="keyword">const</span> <span class="type"><a href="../qtgui/qcolor.html">QColor</a></span> iconColor(<span class="number">214</span><span class="operator">,</span> <span class="number">240</span><span class="operator">,</span> <span class="number">110</span><span class="operator">,</span> <span class="number">128</span>);
+      iconGrid<span class="operator">.</span>resize(size<span class="operator">.</span>height());
+      <span class="type">int</span> n <span class="operator">=</span> <span class="number">0</span>;
+
+      <span class="keyword">for</span> (<span class="type">int</span> y <span class="operator">=</span> <span class="number">0</span>; y <span class="operator">&lt;</span> size<span class="operator">.</span>height(); <span class="operator">+</span><span class="operator">+</span>y) {
+          iconGrid<span class="operator">[</span>y<span class="operator">]</span><span class="operator">.</span>resize(size<span class="operator">.</span>width());
+          <span class="keyword">for</span> (<span class="type">int</span> x <span class="operator">=</span> <span class="number">0</span>; x <span class="operator">&lt;</span> size<span class="operator">.</span>width(); <span class="operator">+</span><span class="operator">+</span>x) {
+              RoundRectItem <span class="operator">*</span>rect <span class="operator">=</span> <span class="keyword">new</span> RoundRectItem(iconRect<span class="operator">,</span> iconColor<span class="operator">,</span> <span class="keyword">this</span>);
+              rect<span class="operator">-</span><span class="operator">&gt;</span>setZValue(<span class="number">1</span>);
+              rect<span class="operator">-</span><span class="operator">&gt;</span>setPos(posForLocation(x<span class="operator">,</span> y<span class="operator">,</span> size));
+              rect<span class="operator">-</span><span class="operator">&gt;</span>setPixmap(pixmaps<span class="operator">.</span>at(n<span class="operator">+</span><span class="operator">+</span> <span class="operator">%</span> pixmaps<span class="operator">.</span>size()));
+              iconGrid<span class="operator">[</span>y<span class="operator">]</span><span class="operator">[</span>x<span class="operator">]</span> <span class="operator">=</span> rect;
+          }
+      }
+  }
+
+  RoundRectItem <span class="operator">*</span>FlippablePad<span class="operator">::</span>iconAt(<span class="type">int</span> column<span class="operator">,</span> <span class="type">int</span> row) <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> iconGrid<span class="operator">[</span>row<span class="operator">]</span><span class="operator">[</span>column<span class="operator">]</span>;
+  }
+
+</pre>
+</div>
+<!-- @@@graphicsview/padnavigator/flippablepad.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

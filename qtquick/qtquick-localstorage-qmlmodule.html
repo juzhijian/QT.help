@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- plugin.cpp -->
+  <title>Qt Quick Local Storage QML Types | Qt Quick 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtquick-index.html">Qt Quick</a></td><td >Qt Quick Local Storage QML Types</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#methods">Methods</a></li>
+<li class="level1"><a href="#detailed-description">Detailed Description</a></li>
+<li class="level1"><a href="#method-documentation">Method Documentation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Qt Quick Local Storage QML Types</h1>
+<span class="subtitle"></span>
+<!-- $$$QtQuick.LocalStorage-description -->
+<div class="descr"> <a name="details"></a>
+</p>
+<p>This is a singleton type for reading and writing to SQLite databases.</p>
+<a name="methods"></a>
+<h2 id="methods">Methods</h2>
+<ul>
+<li>object <b><a href="qtquick-localstorage-qmlmodule.html#opendatabasesync">openDatabaseSync</a></b>(string name, string version, string description, int estimated_size, jsobject callback(db))</li>
+</ul>
+<a name="detailed-description"></a>
+<h2 id="detailed-description">Detailed Description</h2>
+<p>To use the types in this module, import the module and call the relevant functions using the <code>LocalStorage</code> type:</p>
+<pre class="cpp">
+
+  import <span class="type"><a href="qtquick-module.html">QtQuick</a></span><span class="operator">.</span>LocalStorage <span class="number">2.0</span>
+  import <span class="type"><a href="qtquick-module.html">QtQuick</a></span> <span class="number">2.0</span>
+
+  Item {
+      Component<span class="operator">.</span>onCompleted: {
+          var db <span class="operator">=</span> LocalStorage<span class="operator">.</span>openDatabaseSync(<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>)
+      }
+  }
+
+</pre>
+<p>These databases are user-specific and QML-specific, but accessible to all QML applications. They are stored in the <code>Databases</code> subdirectory of <a href="../qtqml/qqmlengine.html#offlineStoragePath-prop">QQmlEngine::offlineStoragePath</a>(), currently as SQLite databases.</p>
+<p>Database connections are automatically closed during Javascript garbage collection.</p>
+<p>The API can be used from JavaScript functions in your QML:</p>
+<pre class="qml">
+
+  import QtQuick 2.0
+  import QtQuick.LocalStorage 2.0
+
+  <span class="type"><a href="qml-qtquick-rectangle.html">Rectangle</a></span> {
+      <span class="name">width</span>: <span class="number">200</span>
+      <span class="name">height</span>: <span class="number">100</span>
+
+      <span class="type"><a href="qml-qtquick-text.html">Text</a></span> {
+          <span class="name">text</span>: <span class="string">&quot;?&quot;</span>
+          <span class="name">anchors</span>.horizontalCenter: <span class="name">parent</span>.<span class="name">horizontalCenter</span>
+
+          <span class="keyword">function</span> <span class="name">findGreetings</span>() {
+              var <span class="name">db</span> = <span class="name">LocalStorage</span>.<span class="name">openDatabaseSync</span>(<span class="string">&quot;QQmlExampleDB&quot;</span>, <span class="string">&quot;1.0&quot;</span>, <span class="string">&quot;The Example QML SQL!&quot;</span>, <span class="number">1000000</span>);
+
+              <span class="name">db</span>.<span class="name">transaction</span>(
+                  <span class="keyword">function</span>(<span class="name">tx</span>) {
+                      <span class="comment">// Create the database if it doesn't already exist</span>
+                      <span class="name">tx</span>.<span class="name">executeSql</span>(<span class="string">'CREATE TABLE IF NOT EXISTS Greeting(salutation TEXT, salutee TEXT)'</span>);
+
+                      <span class="comment">// Add (another) greeting row</span>
+                      <span class="name">tx</span>.<span class="name">executeSql</span>(<span class="string">'INSERT INTO Greeting VALUES(?, ?)'</span>, [ <span class="string">'hello'</span>, <span class="string">'world'</span> ]);
+
+                      <span class="comment">// Show all added greetings</span>
+                      var <span class="name">rs</span> = <span class="name">tx</span>.<span class="name">executeSql</span>(<span class="string">'SELECT * FROM Greeting'</span>);
+
+                      var <span class="name">r</span> = <span class="string">&quot;&quot;</span>
+                      <span class="keyword">for</span>(<span class="keyword">var</span> <span class="name">i</span> = <span class="number">0</span>; <span class="name">i</span> <span class="operator">&lt;</span> <span class="name">rs</span>.<span class="name">rows</span>.<span class="name">length</span>; i++) {
+                          <span class="name">r</span> <span class="operator">+=</span> <span class="name">rs</span>.<span class="name">rows</span>.<span class="name">item</span>(<span class="name">i</span>).<span class="name">salutation</span> <span class="operator">+</span> <span class="string">&quot;, &quot;</span> <span class="operator">+</span> <span class="name">rs</span>.<span class="name">rows</span>.<span class="name">item</span>(<span class="name">i</span>).<span class="name">salutee</span> <span class="operator">+</span> <span class="string">&quot;\n&quot;</span>
+                      }
+                      <span class="name">text</span> <span class="operator">=</span> <span class="name">r</span>
+                  }
+              )
+          }
+
+          <span class="name">Component</span>.onCompleted: <span class="name">findGreetings</span>()
+      }
+  }
+
+</pre>
+<p>The API conforms to the Synchronous API of the HTML5 Web Database API, <a href="http://www.w3.org/TR/2009/WD-webdatabase-20091029/">W3C Working Draft 29 October 2009</a>.</p>
+<p>The <a href="qtquick-localstorage-example.html">SQL Local Storage example</a> demonstrates the basics of using the Offline Storage API.</p>
+<a name="open-or-create-a-databasedata"></a>
+<h4 >Open or create a databaseData</h4>
+<pre class="cpp">
+
+  import <span class="type"><a href="qtquick-module.html">QtQuick</a></span><span class="operator">.</span>LocalStorage <span class="number">2.0</span> as Sql
+
+  db <span class="operator">=</span> Sql<span class="operator">.</span>openDatabaseSync(identifier<span class="operator">,</span> version<span class="operator">,</span> description<span class="operator">,</span> estimated_size<span class="operator">,</span> callback(db))
+
+</pre>
+<p>The above code returns the database identified by <i>identifier</i>. If the database does not already exist, it is created, and the function <i>callback</i> is called with the database as a parameter. <i>description</i> and <i>estimated_size</i> are written to the INI file (described below), but are otherwise currently unused.</p>
+<p>May throw exception with code property SQLException.DATABASE_ERR, or SQLException.VERSION_ERR.</p>
+<p>When a database is first created, an INI file is also created specifying its characteristics:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th ><b>Key</b></th><th ><b>Value</b></th></tr></thead>
+<tr valign="top" class="odd"><td >Name</td><td >The name of the database passed to <code>openDatabase()</code></td></tr>
+<tr valign="top" class="even"><td >Version</td><td >The version of the database passed to <code>openDatabase()</code></td></tr>
+<tr valign="top" class="odd"><td >Description</td><td >The description of the database passed to <code>openDatabase()</code></td></tr>
+<tr valign="top" class="even"><td >EstimatedSize</td><td >The estimated size (in bytes) of the database passed to <code>openDatabase()</code></td></tr>
+<tr valign="top" class="odd"><td >Driver</td><td >Currently &quot;QSQLITE&quot;</td></tr>
+</table></div>
+<p>This data can be used by application tools.</p>
+<a name="db-changeversion-from-to-callback-tx"></a>
+<h4 >db.changeVersion(from, to, callback(tx))</h4>
+<p>This method allows you to perform a <i>Scheme Upgrade</i>.</p>
+<p>If the current version of <i>db</i> is not <i>from</i>, then an exception is thrown.</p>
+<p>Otherwise, a database transaction is created and passed to <i>callback</i>. In this function, you can call <i>executeSql</i> on <i>tx</i> to upgrade the database.</p>
+<p>May throw exception with code property SQLException.DATABASE_ERR or SQLException.UNKNOWN_ERR.</p>
+<a name="db-transaction-callback-tx"></a>
+<h4 >db.transaction(callback(tx))</h4>
+<p>This method creates a read/write transaction and passed to <i>callback</i>. In this function, you can call <i>executeSql</i> on <i>tx</i> to read and modify the database.</p>
+<p>If the callback throws exceptions, the transaction is rolled back.</p>
+<a name="db-readtransaction-callback-tx"></a>
+<h4 >db.readTransaction(callback(tx))</h4>
+<p>This method creates a read-only transaction and passed to <i>callback</i>. In this function, you can call <i>executeSql</i> on <i>tx</i> to read the database (with SELECT statements).</p>
+<a name="results-tx-executesql-statement-values"></a>
+<h4 >results = tx.executeSql(statement, values)</h4>
+<p>This method executes a SQL <i>statement</i>, binding the list of <i>values</i> to SQL positional parameters (&quot;?&quot;).</p>
+<p>It returns a results object, with the following properties:</p>
+<div class="table"><table class="generic">
+ <thead><tr class="qt-style"><th ><b>Type</b></th><th ><b>Property</b></th><th ><b>Value</b></th><th ><b>Applicability</b></th></tr></thead>
+<tr valign="top" class="odd"><td >int</td><td >rows.length</td><td >The number of rows in the result</td><td >SELECT</td></tr>
+<tr valign="top" class="even"><td >var</td><td >rows.item(i)</td><td >Function that returns row <i>i</i> of the result</td><td >SELECT</td></tr>
+<tr valign="top" class="odd"><td >int</td><td >rowsAffected</td><td >The number of rows affected by a modification</td><td >UPDATE, DELETE</td></tr>
+<tr valign="top" class="even"><td >string</td><td >insertId</td><td >The id of the row inserted</td><td >INSERT</td></tr>
+</table></div>
+<p>May throw exception with code property SQLException.DATABASE_ERR, SQLException.SYNTAX_ERR, or SQLException.UNKNOWN_ERR.</p>
+<a name="method-documentation"></a>
+<h2 id="method-documentation">Method Documentation</h2>
+<a name="opendatabasesync"></a><pre class="cpp">
+
+  object openDatabaseSync(string name<span class="operator">,</span> string version<span class="operator">,</span> string description<span class="operator">,</span> <span class="type">int</span> estimated_size<span class="operator">,</span> jsobject callback(db))
+
+</pre>
+<p>Opens or creates a local storage sql database by the given parameters.</p>
+<ul>
+<li><code>name</code> is the database name</li>
+<li><code>version</code> is the database version</li>
+<li><code>description</code> is the database display name</li>
+<li><code>estimated_size</code> is the database's estimated size, in bytes</li>
+<li><code>callback</code> is an optional parameter, which is invoked if the database has not yet been created.</li>
+</ul>
+<p>Returns the created database object.</p>
+</div>
+<!-- @@@QtQuick.LocalStorage -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>tictactoe.cpp Example File | Qt Designer Manual</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdesigner-manual.html">Qt Designer Manual</a></td><td ><a href="qtdesigner-taskmenuextension-example.html">Task Menu Extension Example</a></td><td >tictactoe.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">tictactoe.cpp Example File</h1>
+<span class="subtitle">taskmenuextension/tictactoe.cpp</span>
+<!-- $$$taskmenuextension/tictactoe.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;tictactoe.h&quot;</span>
+
+  <span class="preprocessor">#include &lt;QMouseEvent&gt;</span>
+  <span class="preprocessor">#include &lt;QPainter&gt;</span>
+
+  TicTacToe<span class="operator">::</span>TicTacToe(<span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span> <span class="operator">*</span>parent)
+      : <span class="type"><a href="../qtwidgets/qwidget.html">QWidget</a></span>(parent)
+      <span class="operator">,</span> turnNumber(<span class="number">0</span>)
+  {
+  }
+
+  <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> TicTacToe<span class="operator">::</span>minimumSizeHint() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">200</span><span class="operator">,</span> <span class="number">200</span>);
+  }
+
+  <span class="type"><a href="../qtcore/qsize.html">QSize</a></span> TicTacToe<span class="operator">::</span>sizeHint() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qsize.html">QSize</a></span>(<span class="number">200</span><span class="operator">,</span> <span class="number">200</span>);
+  }
+
+  <span class="type">void</span> TicTacToe<span class="operator">::</span>setState(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>newState)
+  {
+      turnNumber <span class="operator">=</span> <span class="number">0</span>;
+      myState <span class="operator">=</span> <span class="string">&quot;---------&quot;</span>;
+      <span class="type">int</span> position <span class="operator">=</span> <span class="number">0</span>;
+      <span class="keyword">while</span> (position <span class="operator">&lt;</span> <span class="number">9</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> position <span class="operator">&lt;</span> newState<span class="operator">.</span>length()) {
+          <span class="type"><a href="../qtcore/qchar.html">QChar</a></span> mark <span class="operator">=</span> newState<span class="operator">.</span>at(position);
+          <span class="keyword">if</span> (mark <span class="operator">=</span><span class="operator">=</span> Cross <span class="operator">|</span><span class="operator">|</span> mark <span class="operator">=</span><span class="operator">=</span> Nought) {
+              <span class="operator">+</span><span class="operator">+</span>turnNumber;
+              myState<span class="operator">.</span>replace(position<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> mark);
+          }
+          position<span class="operator">+</span><span class="operator">+</span>;
+      }
+      update();
+  }
+
+  <span class="type"><a href="../qtcore/qstring.html">QString</a></span> TicTacToe<span class="operator">::</span>state() <span class="keyword">const</span>
+  {
+      <span class="keyword">return</span> myState;
+  }
+
+  <span class="type">void</span> TicTacToe<span class="operator">::</span>clearBoard()
+  {
+      myState <span class="operator">=</span> <span class="string">&quot;---------&quot;</span>;
+      turnNumber <span class="operator">=</span> <span class="number">0</span>;
+      update();
+  }
+
+  <span class="type">void</span> TicTacToe<span class="operator">::</span>mousePressEvent(<span class="type">QMouseEvent</span> <span class="operator">*</span>event)
+  {
+      <span class="keyword">if</span> (turnNumber <span class="operator">=</span><span class="operator">=</span> <span class="number">9</span>) {
+          clearBoard();
+          update();
+      } <span class="keyword">else</span> {
+          <span class="keyword">for</span> (<span class="type">int</span> position <span class="operator">=</span> <span class="number">0</span>; position <span class="operator">&lt;</span> <span class="number">9</span>; <span class="operator">+</span><span class="operator">+</span>position) {
+              <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> cell <span class="operator">=</span> cellRect(position <span class="operator">/</span> <span class="number">3</span><span class="operator">,</span> position <span class="operator">%</span> <span class="number">3</span>);
+              <span class="keyword">if</span> (cell<span class="operator">.</span>contains(event<span class="operator">-</span><span class="operator">&gt;</span>pos())) {
+                  <span class="keyword">if</span> (myState<span class="operator">.</span>at(position) <span class="operator">=</span><span class="operator">=</span> Empty) {
+                      <span class="keyword">if</span> (turnNumber <span class="operator">%</span> <span class="number">2</span> <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+                          myState<span class="operator">.</span>replace(position<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> Cross);
+                      <span class="keyword">else</span>
+                          myState<span class="operator">.</span>replace(position<span class="operator">,</span> <span class="number">1</span><span class="operator">,</span> Nought);
+                      <span class="operator">+</span><span class="operator">+</span>turnNumber;
+                      update();
+                  }
+              }
+          }
+      }
+  }
+
+  <span class="type">void</span> TicTacToe<span class="operator">::</span>paintEvent(<span class="type">QPaintEvent</span> <span class="operator">*</span> <span class="comment">/* event */</span>)
+  {
+      <span class="type">QPainter</span> painter(<span class="keyword">this</span>);
+      painter<span class="operator">.</span>setRenderHint(<span class="type">QPainter</span><span class="operator">::</span>Antialiasing);
+
+      painter<span class="operator">.</span>setPen(<span class="type">QPen</span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>darkGreen<span class="operator">,</span> <span class="number">1</span>));
+      painter<span class="operator">.</span>drawLine(cellWidth()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> cellWidth()<span class="operator">,</span> height());
+      painter<span class="operator">.</span>drawLine(<span class="number">2</span> <span class="operator">*</span> cellWidth()<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">2</span> <span class="operator">*</span> cellWidth()<span class="operator">,</span> height());
+      painter<span class="operator">.</span>drawLine(<span class="number">0</span><span class="operator">,</span> cellHeight()<span class="operator">,</span> width()<span class="operator">,</span> cellHeight());
+      painter<span class="operator">.</span>drawLine(<span class="number">0</span><span class="operator">,</span> <span class="number">2</span> <span class="operator">*</span> cellHeight()<span class="operator">,</span> width()<span class="operator">,</span> <span class="number">2</span> <span class="operator">*</span> cellHeight());
+
+      painter<span class="operator">.</span>setPen(<span class="type">QPen</span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>darkBlue<span class="operator">,</span> <span class="number">2</span>));
+
+      <span class="keyword">for</span> (<span class="type">int</span> position <span class="operator">=</span> <span class="number">0</span>; position <span class="operator">&lt;</span> <span class="number">9</span>; <span class="operator">+</span><span class="operator">+</span>position) {
+          <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> cell <span class="operator">=</span> cellRect(position <span class="operator">/</span> <span class="number">3</span><span class="operator">,</span> position <span class="operator">%</span> <span class="number">3</span>);
+
+          <span class="keyword">if</span> (myState<span class="operator">.</span>at(position) <span class="operator">=</span><span class="operator">=</span> Cross) {
+              painter<span class="operator">.</span>drawLine(cell<span class="operator">.</span>topLeft()<span class="operator">,</span> cell<span class="operator">.</span>bottomRight());
+              painter<span class="operator">.</span>drawLine(cell<span class="operator">.</span>topRight()<span class="operator">,</span> cell<span class="operator">.</span>bottomLeft());
+          } <span class="keyword">else</span> <span class="keyword">if</span> (myState<span class="operator">.</span>at(position) <span class="operator">=</span><span class="operator">=</span> Nought) {
+              painter<span class="operator">.</span>drawEllipse(cell);
+          }
+      }
+
+      painter<span class="operator">.</span>setPen(<span class="type">QPen</span>(<span class="type"><a href="../qtcore/qt.html">Qt</a></span><span class="operator">::</span>yellow<span class="operator">,</span> <span class="number">3</span>));
+
+      <span class="keyword">for</span> (<span class="type">int</span> position <span class="operator">=</span> <span class="number">0</span>; position <span class="operator">&lt;</span> <span class="number">9</span>; position <span class="operator">=</span> position <span class="operator">+</span> <span class="number">3</span>) {
+          <span class="keyword">if</span> (myState<span class="operator">.</span>at(position) <span class="operator">!</span><span class="operator">=</span> Empty
+                  <span class="operator">&amp;</span><span class="operator">&amp;</span> myState<span class="operator">.</span>at(position <span class="operator">+</span> <span class="number">1</span>) <span class="operator">=</span><span class="operator">=</span> myState<span class="operator">.</span>at(position)
+                  <span class="operator">&amp;</span><span class="operator">&amp;</span> myState<span class="operator">.</span>at(position <span class="operator">+</span> <span class="number">2</span>) <span class="operator">=</span><span class="operator">=</span> myState<span class="operator">.</span>at(position)) {
+              <span class="type">int</span> y <span class="operator">=</span> cellRect((position <span class="operator">/</span> <span class="number">3</span>)<span class="operator">,</span> <span class="number">0</span>)<span class="operator">.</span>center()<span class="operator">.</span>y();
+              painter<span class="operator">.</span>drawLine(<span class="number">0</span><span class="operator">,</span> y<span class="operator">,</span> width()<span class="operator">,</span> y);
+              turnNumber <span class="operator">=</span> <span class="number">9</span>;
+          }
+      }
+
+      <span class="keyword">for</span> (<span class="type">int</span> position <span class="operator">=</span> <span class="number">0</span>; position <span class="operator">&lt;</span> <span class="number">3</span>; <span class="operator">+</span><span class="operator">+</span>position) {
+          <span class="keyword">if</span> (myState<span class="operator">.</span>at(position) <span class="operator">!</span><span class="operator">=</span> Empty
+                  <span class="operator">&amp;</span><span class="operator">&amp;</span> myState<span class="operator">.</span>at(position <span class="operator">+</span> <span class="number">3</span>) <span class="operator">=</span><span class="operator">=</span> myState<span class="operator">.</span>at(position)
+                  <span class="operator">&amp;</span><span class="operator">&amp;</span> myState<span class="operator">.</span>at(position <span class="operator">+</span> <span class="number">6</span>) <span class="operator">=</span><span class="operator">=</span> myState<span class="operator">.</span>at(position)) {
+              <span class="type">int</span> x <span class="operator">=</span> cellRect(<span class="number">0</span><span class="operator">,</span> position)<span class="operator">.</span>center()<span class="operator">.</span>x();
+              painter<span class="operator">.</span>drawLine(x<span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> x<span class="operator">,</span> height());
+              turnNumber <span class="operator">=</span> <span class="number">9</span>;
+          }
+      }
+      <span class="keyword">if</span> (myState<span class="operator">.</span>at(<span class="number">0</span>) <span class="operator">!</span><span class="operator">=</span> Empty <span class="operator">&amp;</span><span class="operator">&amp;</span> myState<span class="operator">.</span>at(<span class="number">4</span>) <span class="operator">=</span><span class="operator">=</span> myState<span class="operator">.</span>at(<span class="number">0</span>)
+              <span class="operator">&amp;</span><span class="operator">&amp;</span> myState<span class="operator">.</span>at(<span class="number">8</span>) <span class="operator">=</span><span class="operator">=</span> myState<span class="operator">.</span>at(<span class="number">0</span>)) {
+          painter<span class="operator">.</span>drawLine(<span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> width()<span class="operator">,</span> height());
+          turnNumber <span class="operator">=</span> <span class="number">9</span>;
+      }
+      <span class="keyword">if</span> (myState<span class="operator">.</span>at(<span class="number">2</span>) <span class="operator">!</span><span class="operator">=</span> Empty <span class="operator">&amp;</span><span class="operator">&amp;</span> myState<span class="operator">.</span>at(<span class="number">4</span>) <span class="operator">=</span><span class="operator">=</span> myState<span class="operator">.</span>at(<span class="number">2</span>)
+              <span class="operator">&amp;</span><span class="operator">&amp;</span> myState<span class="operator">.</span>at(<span class="number">6</span>) <span class="operator">=</span><span class="operator">=</span> myState<span class="operator">.</span>at(<span class="number">2</span>)) {
+          painter<span class="operator">.</span>drawLine(<span class="number">0</span><span class="operator">,</span> height()<span class="operator">,</span> width()<span class="operator">,</span> <span class="number">0</span>);
+          turnNumber <span class="operator">=</span> <span class="number">9</span>;
+      }
+  }
+
+  <span class="type"><a href="../qtcore/qrect.html">QRect</a></span> TicTacToe<span class="operator">::</span>cellRect(<span class="type">int</span> row<span class="operator">,</span> <span class="type">int</span> column) <span class="keyword">const</span>
+  {
+      <span class="keyword">const</span> <span class="type">int</span> HMargin <span class="operator">=</span> width() <span class="operator">/</span> <span class="number">30</span>;
+      <span class="keyword">const</span> <span class="type">int</span> VMargin <span class="operator">=</span> height() <span class="operator">/</span> <span class="number">30</span>;
+      <span class="keyword">return</span> <span class="type"><a href="../qtcore/qrect.html">QRect</a></span>(column <span class="operator">*</span> cellWidth() <span class="operator">+</span> HMargin<span class="operator">,</span>
+                   row <span class="operator">*</span> cellHeight() <span class="operator">+</span> VMargin<span class="operator">,</span>
+                   cellWidth() <span class="operator">-</span> <span class="number">2</span> <span class="operator">*</span> HMargin<span class="operator">,</span>
+                   cellHeight() <span class="operator">-</span> <span class="number">2</span> <span class="operator">*</span> VMargin);
+  }
+
+</pre>
+</div>
+<!-- @@@taskmenuextension/tictactoe.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

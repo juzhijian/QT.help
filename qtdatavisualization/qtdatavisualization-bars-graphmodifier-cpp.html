@@ -1,0 +1,456 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>graphmodifier.cpp Example File | Qt Data Visualization 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtdatavisualization-index.html">Qt Data Visualization</a></td><td ><a href="qtdatavisualization-bars-example.html">Bars Example</a></td><td >graphmodifier.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">graphmodifier.cpp Example File</h1>
+<span class="subtitle">bars/graphmodifier.cpp</span>
+<!-- $$$bars/graphmodifier.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the Qt Data Visualization module of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:GPL$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** GNU General Public License Usage
+  ** Alternatively, this file may be used under the terms of the GNU
+  ** General Public License version 3 or (at your option) any later version
+  ** approved by the KDE Free Qt Foundation. The licenses are as published by
+  ** the Free Software Foundation and appearing in the file LICENSE.GPL3
+  ** included in the packaging of this file. Please review the following
+  ** information to ensure the GNU General Public License requirements will
+  ** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &quot;graphmodifier.h&quot;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/qcategory3daxis.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/qvalue3daxis.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/qbardataproxy.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/q3dscene.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/q3dcamera.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/qbar3dseries.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtDataVisualization/q3dtheme.h&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/QTime&gt;</span>
+  <span class="preprocessor">#include &lt;QtWidgets/QComboBox&gt;</span>
+  <span class="preprocessor">#include &lt;QtCore/qmath.h&gt;</span>
+
+  <span class="keyword">using</span> <span class="keyword">namespace</span> <span class="type"><a href="qtdatavisualization-qmlmodule.html">QtDataVisualization</a></span>;
+
+  <span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> celsiusString <span class="operator">=</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="type"><a href="../qtcore/qchar.html">QChar</a></span>(<span class="number">0xB0</span>)) <span class="operator">+</span> <span class="string">&quot;C&quot;</span>;
+
+  GraphModifier<span class="operator">::</span>GraphModifier(<span class="type"><a href="q3dbars.html">Q3DBars</a></span> <span class="operator">*</span>bargraph)
+      : m_graph(bargraph)<span class="operator">,</span>
+        m_xRotation(<span class="number">0.0f</span>)<span class="operator">,</span>
+        m_yRotation(<span class="number">0.0f</span>)<span class="operator">,</span>
+        m_fontSize(<span class="number">30</span>)<span class="operator">,</span>
+        m_segments(<span class="number">4</span>)<span class="operator">,</span>
+        m_subSegments(<span class="number">3</span>)<span class="operator">,</span>
+        m_minval(<span class="operator">-</span><span class="number">20.0f</span>)<span class="operator">,</span>
+        m_maxval(<span class="number">20.0f</span>)<span class="operator">,</span>
+        m_temperatureAxis(<span class="keyword">new</span> QValue3DAxis)<span class="operator">,</span>
+        m_yearAxis(<span class="keyword">new</span> QCategory3DAxis)<span class="operator">,</span>
+        m_monthAxis(<span class="keyword">new</span> QCategory3DAxis)<span class="operator">,</span>
+        m_primarySeries(<span class="keyword">new</span> QBar3DSeries)<span class="operator">,</span>
+        m_secondarySeries(<span class="keyword">new</span> QBar3DSeries)<span class="operator">,</span>
+        m_barMesh(QAbstract3DSeries<span class="operator">::</span>MeshBevelBar)<span class="operator">,</span>
+        m_smooth(<span class="keyword">false</span>)
+  {
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setShadowQuality(QAbstract3DGraph<span class="operator">::</span>ShadowQualitySoftMedium);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setBackgroundEnabled(<span class="keyword">false</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setFont(<span class="type"><a href="../qtgui/qfont.html">QFont</a></span>(<span class="string">&quot;Times New Roman&quot;</span><span class="operator">,</span> m_fontSize));
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setLabelBackgroundEnabled(<span class="keyword">true</span>);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setMultiSeriesUniform(<span class="keyword">true</span>);
+
+      m_months <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;January&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;February&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;March&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;April&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;May&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;June&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;July&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;August&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;September&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;October&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;November&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;December&quot;</span>;
+      m_years <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;2006&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;2007&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;2008&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;2009&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;2010&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;2011&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;2012&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;2013&quot;</span>;
+
+      m_temperatureAxis<span class="operator">-</span><span class="operator">&gt;</span>setTitle(<span class="string">&quot;Average temperature&quot;</span>);
+      m_temperatureAxis<span class="operator">-</span><span class="operator">&gt;</span>setSegmentCount(m_segments);
+      m_temperatureAxis<span class="operator">-</span><span class="operator">&gt;</span>setSubSegmentCount(m_subSegments);
+      m_temperatureAxis<span class="operator">-</span><span class="operator">&gt;</span>setRange(m_minval<span class="operator">,</span> m_maxval);
+      m_temperatureAxis<span class="operator">-</span><span class="operator">&gt;</span>setLabelFormat(<span class="type"><a href="../qtcore/qstring.html">QString</a></span>(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;%.1f &quot;</span>) <span class="operator">+</span> celsiusString));
+      m_temperatureAxis<span class="operator">-</span><span class="operator">&gt;</span>setLabelAutoRotation(<span class="number">30.0f</span>);
+      m_temperatureAxis<span class="operator">-</span><span class="operator">&gt;</span>setTitleVisible(<span class="keyword">true</span>);
+
+      m_yearAxis<span class="operator">-</span><span class="operator">&gt;</span>setTitle(<span class="string">&quot;Year&quot;</span>);
+      m_yearAxis<span class="operator">-</span><span class="operator">&gt;</span>setLabelAutoRotation(<span class="number">30.0f</span>);
+      m_yearAxis<span class="operator">-</span><span class="operator">&gt;</span>setTitleVisible(<span class="keyword">true</span>);
+      m_monthAxis<span class="operator">-</span><span class="operator">&gt;</span>setTitle(<span class="string">&quot;Month&quot;</span>);
+      m_monthAxis<span class="operator">-</span><span class="operator">&gt;</span>setLabelAutoRotation(<span class="number">30.0f</span>);
+      m_monthAxis<span class="operator">-</span><span class="operator">&gt;</span>setTitleVisible(<span class="keyword">true</span>);
+
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setValueAxis(m_temperatureAxis);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setRowAxis(m_yearAxis);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setColumnAxis(m_monthAxis);
+
+      m_primarySeries<span class="operator">-</span><span class="operator">&gt;</span>setItemLabelFormat(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Oulu - @colLabel @rowLabel: @valueLabel&quot;</span>));
+      m_primarySeries<span class="operator">-</span><span class="operator">&gt;</span>setMesh(QAbstract3DSeries<span class="operator">::</span>MeshBevelBar);
+      m_primarySeries<span class="operator">-</span><span class="operator">&gt;</span>setMeshSmooth(<span class="keyword">false</span>);
+
+      m_secondarySeries<span class="operator">-</span><span class="operator">&gt;</span>setItemLabelFormat(<span class="type"><a href="../qtcore/qstring.html#QStringLiteral">QStringLiteral</a></span>(<span class="string">&quot;Helsinki - @colLabel @rowLabel: @valueLabel&quot;</span>));
+      m_secondarySeries<span class="operator">-</span><span class="operator">&gt;</span>setMesh(QAbstract3DSeries<span class="operator">::</span>MeshBevelBar);
+      m_secondarySeries<span class="operator">-</span><span class="operator">&gt;</span>setMeshSmooth(<span class="keyword">false</span>);
+      m_secondarySeries<span class="operator">-</span><span class="operator">&gt;</span>setVisible(<span class="keyword">false</span>);
+
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>addSeries(m_primarySeries);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>addSeries(m_secondarySeries);
+
+      changePresetCamera();
+
+      resetTemperatureData();
+
+      <span class="comment">// Set up property animations for zooming to the selected bar</span>
+      <span class="type"><a href="q3dcamera.html">Q3DCamera</a></span> <span class="operator">*</span>camera <span class="operator">=</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera();
+      m_defaultAngleX <span class="operator">=</span> camera<span class="operator">-</span><span class="operator">&gt;</span>xRotation();
+      m_defaultAngleY <span class="operator">=</span> camera<span class="operator">-</span><span class="operator">&gt;</span>yRotation();
+      m_defaultZoom <span class="operator">=</span> camera<span class="operator">-</span><span class="operator">&gt;</span>zoomLevel();
+      m_defaultTarget <span class="operator">=</span> camera<span class="operator">-</span><span class="operator">&gt;</span>target();
+
+      m_animationCameraX<span class="operator">.</span>setTargetObject(camera);
+      m_animationCameraY<span class="operator">.</span>setTargetObject(camera);
+      m_animationCameraZoom<span class="operator">.</span>setTargetObject(camera);
+      m_animationCameraTarget<span class="operator">.</span>setTargetObject(camera);
+
+      m_animationCameraX<span class="operator">.</span>setPropertyName(<span class="string">&quot;xRotation&quot;</span>);
+      m_animationCameraY<span class="operator">.</span>setPropertyName(<span class="string">&quot;yRotation&quot;</span>);
+      m_animationCameraZoom<span class="operator">.</span>setPropertyName(<span class="string">&quot;zoomLevel&quot;</span>);
+      m_animationCameraTarget<span class="operator">.</span>setPropertyName(<span class="string">&quot;target&quot;</span>);
+
+      <span class="type">int</span> duration <span class="operator">=</span> <span class="number">1700</span>;
+      m_animationCameraX<span class="operator">.</span>setDuration(duration);
+      m_animationCameraY<span class="operator">.</span>setDuration(duration);
+      m_animationCameraZoom<span class="operator">.</span>setDuration(duration);
+      m_animationCameraTarget<span class="operator">.</span>setDuration(duration);
+
+      <span class="comment">// The zoom always first zooms out above the graph and then zooms in</span>
+      <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> zoomOutFraction <span class="operator">=</span> <span class="number">0.3</span>;
+      m_animationCameraX<span class="operator">.</span>setKeyValueAt(zoomOutFraction<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="number">0.0f</span>));
+      m_animationCameraY<span class="operator">.</span>setKeyValueAt(zoomOutFraction<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="number">90.0f</span>));
+      m_animationCameraZoom<span class="operator">.</span>setKeyValueAt(zoomOutFraction<span class="operator">,</span> <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="number">50.0f</span>));
+      m_animationCameraTarget<span class="operator">.</span>setKeyValueAt(zoomOutFraction<span class="operator">,</span>
+                                            <span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(QVector3D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span>)));
+  }
+
+  GraphModifier<span class="operator">::</span><span class="operator">~</span>GraphModifier()
+  {
+      <span class="keyword">delete</span> m_graph;
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>resetTemperatureData()
+  {
+      <span class="comment">// Set up data</span>
+      <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">float</span> tempOulu<span class="operator">[</span><span class="number">8</span><span class="operator">]</span><span class="operator">[</span><span class="number">12</span><span class="operator">]</span> <span class="operator">=</span> {
+          {<span class="operator">-</span><span class="number">6.7f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">11.7f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">9.7f</span><span class="operator">,</span> <span class="number">3.3f</span><span class="operator">,</span> <span class="number">9.2f</span><span class="operator">,</span> <span class="number">14.0f</span><span class="operator">,</span> <span class="number">16.3f</span><span class="operator">,</span> <span class="number">17.8f</span><span class="operator">,</span> <span class="number">10.2f</span><span class="operator">,</span> <span class="number">2.1f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">2.6f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">0.3f</span>}<span class="operator">,</span>    <span class="comment">// 2006</span>
+          {<span class="operator">-</span><span class="number">6.8f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">13.3f</span><span class="operator">,</span> <span class="number">0.2f</span><span class="operator">,</span> <span class="number">1.5f</span><span class="operator">,</span> <span class="number">7.9f</span><span class="operator">,</span> <span class="number">13.4f</span><span class="operator">,</span> <span class="number">16.1f</span><span class="operator">,</span> <span class="number">15.5f</span><span class="operator">,</span> <span class="number">8.2f</span><span class="operator">,</span> <span class="number">5.4f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">2.6f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">0.8f</span>}<span class="operator">,</span>      <span class="comment">// 2007</span>
+          {<span class="operator">-</span><span class="number">4.2f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">4.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">4.6f</span><span class="operator">,</span> <span class="number">1.9f</span><span class="operator">,</span> <span class="number">7.3f</span><span class="operator">,</span> <span class="number">12.5f</span><span class="operator">,</span> <span class="number">15.0f</span><span class="operator">,</span> <span class="number">12.8f</span><span class="operator">,</span> <span class="number">7.6f</span><span class="operator">,</span> <span class="number">5.1f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">0.9f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.3f</span>}<span class="operator">,</span>      <span class="comment">// 2008</span>
+          {<span class="operator">-</span><span class="number">7.8f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">8.8f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">4.2f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="number">9.3f</span><span class="operator">,</span> <span class="number">13.2f</span><span class="operator">,</span> <span class="number">15.8f</span><span class="operator">,</span> <span class="number">15.5f</span><span class="operator">,</span> <span class="number">11.2f</span><span class="operator">,</span> <span class="number">0.6f</span><span class="operator">,</span> <span class="number">0.7f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">8.4f</span>}<span class="operator">,</span>      <span class="comment">// 2009</span>
+          {<span class="operator">-</span><span class="number">14.4f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">12.1f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">7.0f</span><span class="operator">,</span> <span class="number">2.3f</span><span class="operator">,</span> <span class="number">11.0f</span><span class="operator">,</span> <span class="number">12.6f</span><span class="operator">,</span> <span class="number">18.8f</span><span class="operator">,</span> <span class="number">13.8f</span><span class="operator">,</span> <span class="number">9.4f</span><span class="operator">,</span> <span class="number">3.9f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">5.6f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">13.0f</span>}<span class="operator">,</span>  <span class="comment">// 2010</span>
+          {<span class="operator">-</span><span class="number">9.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">15.2f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">3.8f</span><span class="operator">,</span> <span class="number">2.6f</span><span class="operator">,</span> <span class="number">8.3f</span><span class="operator">,</span> <span class="number">15.9f</span><span class="operator">,</span> <span class="number">18.6f</span><span class="operator">,</span> <span class="number">14.9f</span><span class="operator">,</span> <span class="number">11.1f</span><span class="operator">,</span> <span class="number">5.3f</span><span class="operator">,</span> <span class="number">1.8f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">0.2f</span>}<span class="operator">,</span>     <span class="comment">// 2011</span>
+          {<span class="operator">-</span><span class="number">8.7f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">11.3f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">2.3f</span><span class="operator">,</span> <span class="number">0.4f</span><span class="operator">,</span> <span class="number">7.5f</span><span class="operator">,</span> <span class="number">12.2f</span><span class="operator">,</span> <span class="number">16.4f</span><span class="operator">,</span> <span class="number">14.1f</span><span class="operator">,</span> <span class="number">9.2f</span><span class="operator">,</span> <span class="number">3.1f</span><span class="operator">,</span> <span class="number">0.3f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">12.1f</span>}<span class="operator">,</span>     <span class="comment">// 2012</span>
+          {<span class="operator">-</span><span class="number">7.9f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">5.3f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">9.1f</span><span class="operator">,</span> <span class="number">0.8f</span><span class="operator">,</span> <span class="number">11.6f</span><span class="operator">,</span> <span class="number">16.6f</span><span class="operator">,</span> <span class="number">15.9f</span><span class="operator">,</span> <span class="number">15.5f</span><span class="operator">,</span> <span class="number">11.2f</span><span class="operator">,</span> <span class="number">4.0f</span><span class="operator">,</span> <span class="number">0.1f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.9f</span>}      <span class="comment">// 2013</span>
+      };
+
+      <span class="keyword">static</span> <span class="keyword">const</span> <span class="type">float</span> tempHelsinki<span class="operator">[</span><span class="number">8</span><span class="operator">]</span><span class="operator">[</span><span class="number">12</span><span class="operator">]</span> <span class="operator">=</span> {
+          {<span class="operator">-</span><span class="number">3.7f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">7.8f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">5.4f</span><span class="operator">,</span> <span class="number">3.4f</span><span class="operator">,</span> <span class="number">10.7f</span><span class="operator">,</span> <span class="number">15.4f</span><span class="operator">,</span> <span class="number">18.6f</span><span class="operator">,</span> <span class="number">18.7f</span><span class="operator">,</span> <span class="number">14.3f</span><span class="operator">,</span> <span class="number">8.5f</span><span class="operator">,</span> <span class="number">2.9f</span><span class="operator">,</span> <span class="number">4.1f</span>}<span class="operator">,</span>      <span class="comment">// 2006</span>
+          {<span class="operator">-</span><span class="number">1.2f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">7.5f</span><span class="operator">,</span> <span class="number">3.1f</span><span class="operator">,</span> <span class="number">5.5f</span><span class="operator">,</span> <span class="number">10.3f</span><span class="operator">,</span> <span class="number">15.9f</span><span class="operator">,</span> <span class="number">17.4f</span><span class="operator">,</span> <span class="number">17.9f</span><span class="operator">,</span> <span class="number">11.2f</span><span class="operator">,</span> <span class="number">7.3f</span><span class="operator">,</span> <span class="number">1.1f</span><span class="operator">,</span> <span class="number">0.5f</span>}<span class="operator">,</span>       <span class="comment">// 2007</span>
+          {<span class="operator">-</span><span class="number">0.6f</span><span class="operator">,</span> <span class="number">1.2f</span><span class="operator">,</span> <span class="number">0.2f</span><span class="operator">,</span> <span class="number">6.3f</span><span class="operator">,</span> <span class="number">10.2f</span><span class="operator">,</span> <span class="number">13.8f</span><span class="operator">,</span> <span class="number">18.1f</span><span class="operator">,</span> <span class="number">15.1f</span><span class="operator">,</span> <span class="number">10.1f</span><span class="operator">,</span> <span class="number">9.4f</span><span class="operator">,</span> <span class="number">2.5f</span><span class="operator">,</span> <span class="number">0.4f</span>}<span class="operator">,</span>        <span class="comment">// 2008</span>
+          {<span class="operator">-</span><span class="number">2.9f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">3.5f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">0.9f</span><span class="operator">,</span> <span class="number">4.7f</span><span class="operator">,</span> <span class="number">10.9f</span><span class="operator">,</span> <span class="number">14.0f</span><span class="operator">,</span> <span class="number">17.4f</span><span class="operator">,</span> <span class="number">16.8f</span><span class="operator">,</span> <span class="number">13.2f</span><span class="operator">,</span> <span class="number">4.1f</span><span class="operator">,</span> <span class="number">2.6f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">2.3f</span>}<span class="operator">,</span>     <span class="comment">// 2009</span>
+          {<span class="operator">-</span><span class="number">10.2f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">8.0f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.9f</span><span class="operator">,</span> <span class="number">6.6f</span><span class="operator">,</span> <span class="number">11.3f</span><span class="operator">,</span> <span class="number">14.5f</span><span class="operator">,</span> <span class="number">21.0f</span><span class="operator">,</span> <span class="number">18.8f</span><span class="operator">,</span> <span class="number">12.6f</span><span class="operator">,</span> <span class="number">6.1f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">0.5f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">7.3f</span>}<span class="operator">,</span>   <span class="comment">// 2010</span>
+          {<span class="operator">-</span><span class="number">4.4f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">9.1f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">2.0f</span><span class="operator">,</span> <span class="number">5.5f</span><span class="operator">,</span> <span class="number">9.9f</span><span class="operator">,</span> <span class="number">15.6f</span><span class="operator">,</span> <span class="number">20.8f</span><span class="operator">,</span> <span class="number">17.8f</span><span class="operator">,</span> <span class="number">13.4f</span><span class="operator">,</span> <span class="number">8.9f</span><span class="operator">,</span> <span class="number">3.6f</span><span class="operator">,</span> <span class="number">1.5f</span>}<span class="operator">,</span>       <span class="comment">// 2011</span>
+          {<span class="operator">-</span><span class="number">3.5f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">3.2f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">0.7f</span><span class="operator">,</span> <span class="number">4.0f</span><span class="operator">,</span> <span class="number">11.1f</span><span class="operator">,</span> <span class="number">13.4f</span><span class="operator">,</span> <span class="number">17.3f</span><span class="operator">,</span> <span class="number">15.8f</span><span class="operator">,</span> <span class="number">13.1f</span><span class="operator">,</span> <span class="number">6.4f</span><span class="operator">,</span> <span class="number">4.1f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">5.1f</span>}<span class="operator">,</span>     <span class="comment">// 2012</span>
+          {<span class="operator">-</span><span class="number">4.8f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">1.8f</span><span class="operator">,</span> <span class="operator">-</span><span class="number">5.0f</span><span class="operator">,</span> <span class="number">2.9f</span><span class="operator">,</span> <span class="number">12.8f</span><span class="operator">,</span> <span class="number">17.2f</span><span class="operator">,</span> <span class="number">18.0f</span><span class="operator">,</span> <span class="number">17.1f</span><span class="operator">,</span> <span class="number">12.5f</span><span class="operator">,</span> <span class="number">7.5f</span><span class="operator">,</span> <span class="number">4.5f</span><span class="operator">,</span> <span class="number">2.3f</span>}       <span class="comment">// 2013</span>
+      };
+
+      <span class="comment">// Create data arrays</span>
+      <span class="type">QBarDataArray</span> <span class="operator">*</span>dataSet <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QBarDataArray</span>;
+      <span class="type">QBarDataArray</span> <span class="operator">*</span>dataSet2 <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QBarDataArray</span>;
+      <span class="type">QBarDataRow</span> <span class="operator">*</span>dataRow;
+      <span class="type">QBarDataRow</span> <span class="operator">*</span>dataRow2;
+
+      dataSet<span class="operator">-</span><span class="operator">&gt;</span>reserve(m_years<span class="operator">.</span>size());
+      <span class="keyword">for</span> (<span class="type">int</span> year <span class="operator">=</span> <span class="number">0</span>; year <span class="operator">&lt;</span> m_years<span class="operator">.</span>size(); year<span class="operator">+</span><span class="operator">+</span>) {
+          <span class="comment">// Create a data row</span>
+          dataRow <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QBarDataRow</span>(m_months<span class="operator">.</span>size());
+          dataRow2 <span class="operator">=</span> <span class="keyword">new</span> <span class="type">QBarDataRow</span>(m_months<span class="operator">.</span>size());
+          <span class="keyword">for</span> (<span class="type">int</span> month <span class="operator">=</span> <span class="number">0</span>; month <span class="operator">&lt;</span> m_months<span class="operator">.</span>size(); month<span class="operator">+</span><span class="operator">+</span>) {
+              <span class="comment">// Add data to the row</span>
+              (<span class="operator">*</span>dataRow)<span class="operator">[</span>month<span class="operator">]</span><span class="operator">.</span>setValue(tempOulu<span class="operator">[</span>year<span class="operator">]</span><span class="operator">[</span>month<span class="operator">]</span>);
+              (<span class="operator">*</span>dataRow2)<span class="operator">[</span>month<span class="operator">]</span><span class="operator">.</span>setValue(tempHelsinki<span class="operator">[</span>year<span class="operator">]</span><span class="operator">[</span>month<span class="operator">]</span>);
+          }
+          <span class="comment">// Add the row to the set</span>
+          dataSet<span class="operator">-</span><span class="operator">&gt;</span>append(dataRow);
+          dataSet2<span class="operator">-</span><span class="operator">&gt;</span>append(dataRow2);
+      }
+
+      <span class="comment">// Add data to the data proxy (the data proxy assumes ownership of it)</span>
+      m_primarySeries<span class="operator">-</span><span class="operator">&gt;</span>dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>resetArray(dataSet<span class="operator">,</span> m_years<span class="operator">,</span> m_months);
+      m_secondarySeries<span class="operator">-</span><span class="operator">&gt;</span>dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>resetArray(dataSet2<span class="operator">,</span> m_years<span class="operator">,</span> m_months);
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>changeRange(<span class="type">int</span> range)
+  {
+      <span class="keyword">if</span> (range <span class="operator">&gt;</span><span class="operator">=</span> m_years<span class="operator">.</span>count())
+          m_yearAxis<span class="operator">-</span><span class="operator">&gt;</span>setRange(<span class="number">0</span><span class="operator">,</span> m_years<span class="operator">.</span>count() <span class="operator">-</span> <span class="number">1</span>);
+      <span class="keyword">else</span>
+          m_yearAxis<span class="operator">-</span><span class="operator">&gt;</span>setRange(range<span class="operator">,</span> range);
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>changeStyle(<span class="type">int</span> style)
+  {
+      <span class="type">QComboBox</span> <span class="operator">*</span>comboBox <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type">QComboBox</span> <span class="operator">*</span><span class="operator">&gt;</span>(sender());
+      <span class="keyword">if</span> (comboBox) {
+          m_barMesh <span class="operator">=</span> QAbstract3DSeries<span class="operator">::</span>Mesh(comboBox<span class="operator">-</span><span class="operator">&gt;</span>itemData(style)<span class="operator">.</span>toInt());
+          m_primarySeries<span class="operator">-</span><span class="operator">&gt;</span>setMesh(m_barMesh);
+          m_secondarySeries<span class="operator">-</span><span class="operator">&gt;</span>setMesh(m_barMesh);
+      }
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>changePresetCamera()
+  {
+      m_animationCameraX<span class="operator">.</span>stop();
+      m_animationCameraY<span class="operator">.</span>stop();
+      m_animationCameraZoom<span class="operator">.</span>stop();
+      m_animationCameraTarget<span class="operator">.</span>stop();
+
+      <span class="comment">// Restore camera target in case animation has changed it</span>
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">-</span><span class="operator">&gt;</span>setTarget(QVector3D(<span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span><span class="operator">,</span> <span class="number">0.0f</span>));
+
+      <span class="keyword">static</span> <span class="type">int</span> preset <span class="operator">=</span> <span class="type"><a href="q3dcamera.html">Q3DCamera</a></span><span class="operator">::</span>CameraPresetFront;
+
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">-</span><span class="operator">&gt;</span>setCameraPreset((<span class="type"><a href="q3dcamera.html">Q3DCamera</a></span><span class="operator">::</span>CameraPreset)preset);
+
+      <span class="keyword">if</span> (<span class="operator">+</span><span class="operator">+</span>preset <span class="operator">&gt;</span> <span class="type"><a href="q3dcamera.html">Q3DCamera</a></span><span class="operator">::</span>CameraPresetDirectlyBelow)
+          preset <span class="operator">=</span> <span class="type"><a href="q3dcamera.html">Q3DCamera</a></span><span class="operator">::</span>CameraPresetFrontLow;
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>changeTheme(<span class="type">int</span> theme)
+  {
+      <span class="type"><a href="q3dtheme.html">Q3DTheme</a></span> <span class="operator">*</span>currentTheme <span class="operator">=</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme();
+      currentTheme<span class="operator">-</span><span class="operator">&gt;</span>setType(<span class="type"><a href="q3dtheme.html">Q3DTheme</a></span><span class="operator">::</span>Theme(theme));
+      <span class="keyword">emit</span> backgroundEnabledChanged(currentTheme<span class="operator">-</span><span class="operator">&gt;</span>isBackgroundEnabled());
+      <span class="keyword">emit</span> gridEnabledChanged(currentTheme<span class="operator">-</span><span class="operator">&gt;</span>isGridEnabled());
+      <span class="keyword">emit</span> fontChanged(currentTheme<span class="operator">-</span><span class="operator">&gt;</span>font());
+      <span class="keyword">emit</span> fontSizeChanged(currentTheme<span class="operator">-</span><span class="operator">&gt;</span>font()<span class="operator">.</span>pointSize());
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>changeLabelBackground()
+  {
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setLabelBackgroundEnabled(<span class="operator">!</span>m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>isLabelBackgroundEnabled());
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>changeSelectionMode(<span class="type">int</span> selectionMode)
+  {
+      <span class="type">QComboBox</span> <span class="operator">*</span>comboBox <span class="operator">=</span> qobject_cast<span class="operator">&lt;</span><span class="type">QComboBox</span> <span class="operator">*</span><span class="operator">&gt;</span>(sender());
+      <span class="keyword">if</span> (comboBox) {
+          <span class="type">int</span> flags <span class="operator">=</span> comboBox<span class="operator">-</span><span class="operator">&gt;</span>itemData(selectionMode)<span class="operator">.</span>toInt();
+          m_graph<span class="operator">-</span><span class="operator">&gt;</span>setSelectionMode(QAbstract3DGraph<span class="operator">::</span>SelectionFlags(flags));
+      }
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>changeFont(<span class="keyword">const</span> <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> <span class="operator">&amp;</span>font)
+  {
+      <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> newFont <span class="operator">=</span> font;
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setFont(newFont);
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>changeFontSize(<span class="type">int</span> fontsize)
+  {
+      m_fontSize <span class="operator">=</span> fontsize;
+      <span class="type"><a href="../qtgui/qfont.html">QFont</a></span> font <span class="operator">=</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>font();
+      font<span class="operator">.</span>setPointSize(m_fontSize);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setFont(font);
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>shadowQualityUpdatedByVisual(QAbstract3DGraph<span class="operator">::</span>ShadowQuality sq)
+  {
+      <span class="type">int</span> quality <span class="operator">=</span> <span class="type">int</span>(sq);
+      <span class="comment">// Updates the UI component to show correct shadow quality</span>
+      <span class="keyword">emit</span> shadowQualityChanged(quality);
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>changeLabelRotation(<span class="type">int</span> rotation)
+  {
+      m_temperatureAxis<span class="operator">-</span><span class="operator">&gt;</span>setLabelAutoRotation(<span class="type">float</span>(rotation));
+      m_monthAxis<span class="operator">-</span><span class="operator">&gt;</span>setLabelAutoRotation(<span class="type">float</span>(rotation));
+      m_yearAxis<span class="operator">-</span><span class="operator">&gt;</span>setLabelAutoRotation(<span class="type">float</span>(rotation));
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>setAxisTitleVisibility(bool enabled)
+  {
+      m_temperatureAxis<span class="operator">-</span><span class="operator">&gt;</span>setTitleVisible(enabled);
+      m_monthAxis<span class="operator">-</span><span class="operator">&gt;</span>setTitleVisible(enabled);
+      m_yearAxis<span class="operator">-</span><span class="operator">&gt;</span>setTitleVisible(enabled);
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>setAxisTitleFixed(bool enabled)
+  {
+      m_temperatureAxis<span class="operator">-</span><span class="operator">&gt;</span>setTitleFixed(enabled);
+      m_monthAxis<span class="operator">-</span><span class="operator">&gt;</span>setTitleFixed(enabled);
+      m_yearAxis<span class="operator">-</span><span class="operator">&gt;</span>setTitleFixed(enabled);
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>zoomToSelectedBar()
+  {
+      m_animationCameraX<span class="operator">.</span>stop();
+      m_animationCameraY<span class="operator">.</span>stop();
+      m_animationCameraZoom<span class="operator">.</span>stop();
+      m_animationCameraTarget<span class="operator">.</span>stop();
+
+      <span class="type"><a href="q3dcamera.html">Q3DCamera</a></span> <span class="operator">*</span>camera <span class="operator">=</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera();
+      <span class="type">float</span> currentX <span class="operator">=</span> camera<span class="operator">-</span><span class="operator">&gt;</span>xRotation();
+      <span class="type">float</span> currentY <span class="operator">=</span> camera<span class="operator">-</span><span class="operator">&gt;</span>yRotation();
+      <span class="type">float</span> currentZoom <span class="operator">=</span> camera<span class="operator">-</span><span class="operator">&gt;</span>zoomLevel();
+      QVector3D currentTarget <span class="operator">=</span> camera<span class="operator">-</span><span class="operator">&gt;</span>target();
+
+      m_animationCameraX<span class="operator">.</span>setStartValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(currentX));
+      m_animationCameraY<span class="operator">.</span>setStartValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(currentY));
+      m_animationCameraZoom<span class="operator">.</span>setStartValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(currentZoom));
+      m_animationCameraTarget<span class="operator">.</span>setStartValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(currentTarget));
+
+      <span class="type"><a href="../qtcore/qpoint.html">QPoint</a></span> selectedBar <span class="operator">=</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>selectedSeries()
+              <span class="operator">?</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>selectedSeries()<span class="operator">-</span><span class="operator">&gt;</span>selectedBar()
+              : QBar3DSeries<span class="operator">::</span>invalidSelectionPosition();
+
+      <span class="keyword">if</span> (selectedBar <span class="operator">!</span><span class="operator">=</span> QBar3DSeries<span class="operator">::</span>invalidSelectionPosition()) {
+          <span class="comment">// Normalize selected bar position within axis range to determine target coordinates</span>
+          QVector3D endTarget;
+          <span class="type">float</span> xMin <span class="operator">=</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>columnAxis()<span class="operator">-</span><span class="operator">&gt;</span>min();
+          <span class="type">float</span> xRange <span class="operator">=</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>columnAxis()<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">-</span> xMin;
+          <span class="type">float</span> zMin <span class="operator">=</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>rowAxis()<span class="operator">-</span><span class="operator">&gt;</span>min();
+          <span class="type">float</span> zRange <span class="operator">=</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>rowAxis()<span class="operator">-</span><span class="operator">&gt;</span>max() <span class="operator">-</span> zMin;
+          endTarget<span class="operator">.</span>setX((selectedBar<span class="operator">.</span>y() <span class="operator">-</span> xMin) <span class="operator">/</span> xRange <span class="operator">*</span> <span class="number">2.0f</span> <span class="operator">-</span> <span class="number">1.0f</span>);
+          endTarget<span class="operator">.</span>setZ((selectedBar<span class="operator">.</span>x() <span class="operator">-</span> zMin) <span class="operator">/</span> zRange <span class="operator">*</span> <span class="number">2.0f</span> <span class="operator">-</span> <span class="number">1.0f</span>);
+
+          <span class="comment">// Rotate the camera so that it always points approximately to the graph center</span>
+          <span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span> endAngleX <span class="operator">=</span> <a href="../qtcore/qtmath.html#qAtan">qAtan</a>(<span class="type"><a href="../qtcore/qtglobal.html#qreal-typedef">qreal</a></span>(endTarget<span class="operator">.</span>z() <span class="operator">/</span> endTarget<span class="operator">.</span>x())) <span class="operator">/</span> M_PI <span class="operator">*</span> <span class="operator">-</span><span class="number">180.0</span> <span class="operator">+</span> <span class="number">90.0</span>;
+          <span class="keyword">if</span> (endTarget<span class="operator">.</span>x() <span class="operator">&gt;</span> <span class="number">0.0f</span>)
+              endAngleX <span class="operator">-</span><span class="operator">=</span> <span class="number">180.0f</span>;
+          <span class="type">float</span> barValue <span class="operator">=</span> m_graph<span class="operator">-</span><span class="operator">&gt;</span>selectedSeries()<span class="operator">-</span><span class="operator">&gt;</span>dataProxy()<span class="operator">-</span><span class="operator">&gt;</span>itemAt(selectedBar<span class="operator">.</span>x()<span class="operator">,</span>
+                                                                          selectedBar<span class="operator">.</span>y())<span class="operator">-</span><span class="operator">&gt;</span>value();
+          <span class="type">float</span> endAngleY <span class="operator">=</span> barValue <span class="operator">&gt;</span><span class="operator">=</span> <span class="number">0.0f</span> <span class="operator">?</span> <span class="number">30.0f</span> : <span class="operator">-</span><span class="number">30.0f</span>;
+          <span class="keyword">if</span> (m_graph<span class="operator">-</span><span class="operator">&gt;</span>valueAxis()<span class="operator">-</span><span class="operator">&gt;</span>reversed())
+              endAngleY <span class="operator">*</span><span class="operator">=</span> <span class="operator">-</span><span class="number">1.0f</span>;
+
+          m_animationCameraX<span class="operator">.</span>setEndValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="type">float</span>(endAngleX)));
+          m_animationCameraY<span class="operator">.</span>setEndValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(endAngleY));
+          m_animationCameraZoom<span class="operator">.</span>setEndValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(<span class="number">250</span>));
+          m_animationCameraTarget<span class="operator">.</span>setEndValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(endTarget));
+      } <span class="keyword">else</span> {
+          <span class="comment">// No selected bar, so return to the default view</span>
+          m_animationCameraX<span class="operator">.</span>setEndValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(m_defaultAngleX));
+          m_animationCameraY<span class="operator">.</span>setEndValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(m_defaultAngleY));
+          m_animationCameraZoom<span class="operator">.</span>setEndValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(m_defaultZoom));
+          m_animationCameraTarget<span class="operator">.</span>setEndValue(<span class="type"><a href="../qtcore/qvariant.html">QVariant</a></span><span class="operator">::</span>fromValue(m_defaultTarget));
+      }
+
+      m_animationCameraX<span class="operator">.</span>start();
+      m_animationCameraY<span class="operator">.</span>start();
+      m_animationCameraZoom<span class="operator">.</span>start();
+      m_animationCameraTarget<span class="operator">.</span>start();
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>changeShadowQuality(<span class="type">int</span> quality)
+  {
+      QAbstract3DGraph<span class="operator">::</span>ShadowQuality sq <span class="operator">=</span> QAbstract3DGraph<span class="operator">::</span>ShadowQuality(quality);
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setShadowQuality(sq);
+      <span class="keyword">emit</span> shadowQualityChanged(quality);
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>rotateX(<span class="type">int</span> rotation)
+  {
+      m_xRotation <span class="operator">=</span> rotation;
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">-</span><span class="operator">&gt;</span>setCameraPosition(m_xRotation<span class="operator">,</span> m_yRotation);
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>rotateY(<span class="type">int</span> rotation)
+  {
+      m_yRotation <span class="operator">=</span> rotation;
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>scene()<span class="operator">-</span><span class="operator">&gt;</span>activeCamera()<span class="operator">-</span><span class="operator">&gt;</span>setCameraPosition(m_xRotation<span class="operator">,</span> m_yRotation);
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>setBackgroundEnabled(<span class="type">int</span> enabled)
+  {
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setBackgroundEnabled(bool(enabled));
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>setGridEnabled(<span class="type">int</span> enabled)
+  {
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>activeTheme()<span class="operator">-</span><span class="operator">&gt;</span>setGridEnabled(bool(enabled));
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>setSmoothBars(<span class="type">int</span> smooth)
+  {
+      m_smooth <span class="operator">=</span> bool(smooth);
+      m_primarySeries<span class="operator">-</span><span class="operator">&gt;</span>setMeshSmooth(m_smooth);
+      m_secondarySeries<span class="operator">-</span><span class="operator">&gt;</span>setMeshSmooth(m_smooth);
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>setSeriesVisibility(<span class="type">int</span> enabled)
+  {
+      m_secondarySeries<span class="operator">-</span><span class="operator">&gt;</span>setVisible(bool(enabled));
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>setReverseValueAxis(<span class="type">int</span> enabled)
+  {
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>valueAxis()<span class="operator">-</span><span class="operator">&gt;</span>setReversed(enabled);
+  }
+
+  <span class="type">void</span> GraphModifier<span class="operator">::</span>setReflection(bool enabled)
+  {
+      m_graph<span class="operator">-</span><span class="operator">&gt;</span>setReflection(enabled);
+  }
+
+</pre>
+</div>
+<!-- @@@bars/graphmodifier.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>

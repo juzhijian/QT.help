@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>main.cpp Example File | Qt Concurrent 5.7</title>
+  <link rel="stylesheet" type="text/css" href="style/offline-simple.css" />
+  <script type="text/javascript">
+    window.onload = function(){document.getElementsByTagName("link").item(0).setAttribute("href", "style/offline.css");};
+  </script>
+</head>
+<body>
+<div class="header" id="qtdocheader">
+  <div class="main">
+    <div class="main-rounded">
+      <div class="navigationbar">
+        <table><tr>
+<td ><a href="../qtdoc/supported-platforms-and-configurations.html#qt-5-7">Qt 5.7</a></td><td ><a href="qtconcurrent-index.html">Qt Concurrent</a></td><td ><a href="qtconcurrent-wordcount-example.html">QtConcurrent Word Count Example</a></td><td >main.cpp Example File</td></tr></table><table class="buildversion"><tr>
+<td id="buildversion" width="100%" align="right">Qt 5.7.0 Reference Documentation</td>
+        </tr></table>
+      </div>
+    </div>
+<div class="content">
+<div class="line">
+<div class="content mainContent">
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">main.cpp Example File</h1>
+<span class="subtitle">wordcount/main.cpp</span>
+<!-- $$$wordcount/main.cpp-description -->
+<div class="descr"> <a name="details"></a>
+<pre class="cpp">
+
+  <span class="comment">/****************************************************************************
+  **
+  ** Copyright (C) 2016 The Qt Company Ltd.
+  ** Contact: https://www.qt.io/licensing/
+  **
+  ** This file is part of the examples of the Qt Toolkit.
+  **
+  ** $QT_BEGIN_LICENSE:BSD$
+  ** Commercial License Usage
+  ** Licensees holding valid commercial Qt licenses may use this file in
+  ** accordance with the commercial license agreement provided with the
+  ** Software or, alternatively, in accordance with the terms contained in
+  ** a written agreement between you and The Qt Company. For licensing terms
+  ** and conditions see https://www.qt.io/terms-conditions. For further
+  ** information use the contact form at https://www.qt.io/contact-us.
+  **
+  ** BSD License Usage
+  ** Alternatively, you may use this file under the terms of the BSD license
+  ** as follows:
+  **
+  ** &quot;Redistribution and use in source and binary forms, with or without
+  ** modification, are permitted provided that the following conditions are
+  ** met:
+  **   * Redistributions of source code must retain the above copyright
+  **     notice, this list of conditions and the following disclaimer.
+  **   * Redistributions in binary form must reproduce the above copyright
+  **     notice, this list of conditions and the following disclaimer in
+  **     the documentation and/or other materials provided with the
+  **     distribution.
+  **   * Neither the name of The Qt Company Ltd nor the names of its
+  **     contributors may be used to endorse or promote products derived
+  **     from this software without specific prior written permission.
+  **
+  **
+  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;
+  **
+  ** $QT_END_LICENSE$
+  **
+  ****************************************************************************/</span>
+
+  <span class="preprocessor">#include &lt;QList&gt;</span>
+  <span class="preprocessor">#include &lt;QMap&gt;</span>
+  <span class="preprocessor">#include &lt;QTextStream&gt;</span>
+  <span class="preprocessor">#include &lt;QString&gt;</span>
+  <span class="preprocessor">#include &lt;QStringList&gt;</span>
+  <span class="preprocessor">#include &lt;QDir&gt;</span>
+  <span class="preprocessor">#include &lt;QTime&gt;</span>
+  <span class="preprocessor">#include &lt;QApplication&gt;</span>
+  <span class="preprocessor">#include &lt;QDebug&gt;</span>
+
+  <span class="preprocessor">#include &lt;qtconcurrentmap.h&gt;</span>
+
+  <span class="keyword">using</span> <span class="keyword">namespace</span> <span class="type"><a href="qtconcurrent-module.html">QtConcurrent</a></span>;
+
+  <span class="comment">/*
+      Utility function that recursivily searches for files.
+  */</span>
+  <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> findFiles(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>startDir<span class="operator">,</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> filters)
+  {
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> names;
+      <span class="type"><a href="../qtcore/qdir.html">QDir</a></span> dir(startDir);
+
+      foreach (<span class="type"><a href="../qtcore/qstring.html">QString</a></span> file<span class="operator">,</span> dir<span class="operator">.</span>entryList(filters<span class="operator">,</span> <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>Files))
+          names <span class="operator">+</span><span class="operator">=</span> startDir <span class="operator">+</span> <span class="char">'/'</span> <span class="operator">+</span> file;
+
+      foreach (<span class="type"><a href="../qtcore/qstring.html">QString</a></span> subdir<span class="operator">,</span> dir<span class="operator">.</span>entryList(<span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>AllDirs <span class="operator">|</span> <span class="type"><a href="../qtcore/qdir.html">QDir</a></span><span class="operator">::</span>NoDotAndDotDot))
+          names <span class="operator">+</span><span class="operator">=</span> findFiles(startDir <span class="operator">+</span> <span class="char">'/'</span> <span class="operator">+</span> subdir<span class="operator">,</span> filters);
+      <span class="keyword">return</span> names;
+  }
+
+  <span class="keyword">typedef</span> <span class="type"><a href="../qtcore/qmap.html">QMap</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">,</span> <span class="type">int</span><span class="operator">&gt;</span> WordCount;
+
+  <span class="comment">/*
+      Single threaded word counter function.
+  */</span>
+  WordCount singleThreadedWordCount(<span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> files)
+  {
+      WordCount wordCount;
+      foreach (<span class="type"><a href="../qtcore/qstring.html">QString</a></span> file<span class="operator">,</span> files) {
+          <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> f(file);
+          f<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly);
+          <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span> textStream(<span class="operator">&amp;</span>f);
+          <span class="keyword">while</span> (textStream<span class="operator">.</span>atEnd() <span class="operator">=</span><span class="operator">=</span> <span class="keyword">false</span>)
+              foreach (<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>word<span class="operator">,</span> textStream<span class="operator">.</span>readLine()<span class="operator">.</span>split(<span class="char">' '</span>))
+                  wordCount<span class="operator">[</span>word<span class="operator">]</span> <span class="operator">+</span><span class="operator">=</span> <span class="number">1</span>;
+
+      }
+      <span class="keyword">return</span> wordCount;
+  }
+
+  <span class="comment">// countWords counts the words in a single file. This function is</span>
+  <span class="comment">// called in parallel by several threads and must be thread</span>
+  <span class="comment">// safe.</span>
+  WordCount countWords(<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>file)
+  {
+      <span class="type"><a href="../qtcore/qfile.html">QFile</a></span> f(file);
+      f<span class="operator">.</span>open(<span class="type"><a href="../qtcore/qiodevice.html">QIODevice</a></span><span class="operator">::</span>ReadOnly);
+      <span class="type"><a href="../qtcore/qtextstream.html">QTextStream</a></span> textStream(<span class="operator">&amp;</span>f);
+      WordCount wordCount;
+
+      <span class="keyword">while</span> (textStream<span class="operator">.</span>atEnd() <span class="operator">=</span><span class="operator">=</span> <span class="keyword">false</span>)
+          foreach (<span class="keyword">const</span> <span class="type"><a href="../qtcore/qstring.html">QString</a></span> <span class="operator">&amp;</span>word<span class="operator">,</span> textStream<span class="operator">.</span>readLine()<span class="operator">.</span>split(<span class="char">' '</span>))
+              wordCount<span class="operator">[</span>word<span class="operator">]</span> <span class="operator">+</span><span class="operator">=</span> <span class="number">1</span>;
+
+      <span class="keyword">return</span> wordCount;
+  }
+
+  <span class="comment">// reduce adds the results from map to the final</span>
+  <span class="comment">// result. This functor will only be called by one thread</span>
+  <span class="comment">// at a time.</span>
+  <span class="type">void</span> reduce(WordCount <span class="operator">&amp;</span>result<span class="operator">,</span> <span class="keyword">const</span> WordCount <span class="operator">&amp;</span>w)
+  {
+      <span class="type"><a href="../qtcore/qmapiterator.html">QMapIterator</a></span><span class="operator">&lt;</span><span class="type"><a href="../qtcore/qstring.html">QString</a></span><span class="operator">,</span> <span class="type">int</span><span class="operator">&gt;</span> i(w);
+      <span class="keyword">while</span> (i<span class="operator">.</span>hasNext()) {
+          i<span class="operator">.</span>next();
+          result<span class="operator">[</span>i<span class="operator">.</span>key()<span class="operator">]</span> <span class="operator">+</span><span class="operator">=</span> i<span class="operator">.</span>value();
+      }
+  }
+
+  <span class="type">int</span> main(<span class="type">int</span> argc<span class="operator">,</span> <span class="type">char</span><span class="operator">*</span><span class="operator">*</span> argv)
+  {
+      <span class="type">QApplication</span> app(argc<span class="operator">,</span> argv);
+      <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;finding files...&quot;</span>;
+      <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span> files <span class="operator">=</span> findFiles(<span class="string">&quot;../../&quot;</span><span class="operator">,</span> <span class="type"><a href="../qtcore/qstringlist.html">QStringList</a></span>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;*.cpp&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;*.h&quot;</span>);
+      <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> files<span class="operator">.</span>count() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;files&quot;</span>;
+
+      <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;warmup&quot;</span>;
+      {
+          <span class="type"><a href="../qtcore/qtime.html">QTime</a></span> time;
+          time<span class="operator">.</span>start();
+          WordCount total <span class="operator">=</span> singleThreadedWordCount(files);
+      }
+
+      <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;warmup done&quot;</span>;
+
+      <span class="type">int</span> singleThreadTime <span class="operator">=</span> <span class="number">0</span>;
+      {
+          <span class="type"><a href="../qtcore/qtime.html">QTime</a></span> time;
+          time<span class="operator">.</span>start();
+          WordCount total <span class="operator">=</span> singleThreadedWordCount(files);
+          singleThreadTime <span class="operator">=</span> time<span class="operator">.</span>elapsed();
+          <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;single thread&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> singleThreadTime;
+      }
+
+      <span class="type">int</span> mapReduceTime <span class="operator">=</span> <span class="number">0</span>;
+      {
+          <span class="type"><a href="../qtcore/qtime.html">QTime</a></span> time;
+          time<span class="operator">.</span>start();
+          WordCount total <span class="operator">=</span> mappedReduced(files<span class="operator">,</span> countWords<span class="operator">,</span> reduce);
+          mapReduceTime <span class="operator">=</span> time<span class="operator">.</span>elapsed();
+          <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;MapReduce&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> mapReduceTime;
+      }
+      <a href="../qtcore/qtglobal.html#qDebug">qDebug</a>() <span class="operator">&lt;</span><span class="operator">&lt;</span> <span class="string">&quot;MapReduce speedup x&quot;</span> <span class="operator">&lt;</span><span class="operator">&lt;</span> ((<span class="type">double</span>)singleThreadTime <span class="operator">-</span> (<span class="type">double</span>)mapReduceTime) <span class="operator">/</span> (<span class="type">double</span>)mapReduceTime <span class="operator">+</span> <span class="number">1</span>;
+  }
+
+</pre>
+</div>
+<!-- @@@wordcount/main.cpp -->
+        </div>
+       </div>
+   </div>
+   </div>
+</div>
+<div class="footer">
+   <p>
+   <acronym title="Copyright">&copy;</acronym> 2016 The Qt Company Ltd.
+   Documentation contributions included herein are the copyrights of
+   their respective owners.<br>    The documentation provided herein is licensed under the terms of the    <a href="http://www.gnu.org/licenses/fdl.html">GNU Free Documentation    License version 1.3</a> as published by the Free Software Foundation.<br>    Qt and respective logos are trademarks of The Qt Company Ltd.     in Finland and/or other countries worldwide. All other trademarks are property
+   of their respective owners. </p>
+</div>
+</body>
+</html>
